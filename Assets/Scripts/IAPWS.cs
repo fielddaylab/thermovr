@@ -6437,7 +6437,6 @@ class IAPWS97(object):
     }
   }
 
-  @property
   void calculable(self)
   {
     //Check if class is calculable by its kwargs
@@ -7592,7 +7591,6 @@ class MEoS(_fase):
     }
   }
 
-  @property
   void calculable(self)
   {
     //Check if inputs are enough to define state
@@ -9766,7 +9764,6 @@ class MEoS(_fase):
     return sigma
   }
 
-  @classmethod
   void _Vapor_Pressure(cls, T)
   {
     /*
@@ -9802,7 +9799,6 @@ class MEoS(_fase):
     return Pv
   }
 
-  @classmethod
   void _Liquid_Density(cls, T)
   {
     /*
@@ -9843,7 +9839,6 @@ class MEoS(_fase):
     return rho
   }
 
-  @classmethod
   void _Vapor_Density(cls, T)
   {
     /*
@@ -9884,7 +9879,6 @@ class MEoS(_fase):
     return rho
   }
 
-  @classmethod
   void _dPdT_sat(cls, T)
   {
     /*
@@ -9958,8 +9952,7 @@ void mainClassDoc()
   return decorator
 }
 
-@mainClassDoc()
-class IAPWS95(MEoS):
+class IAPWS95(MEoS)
 {
   /*
   """Implementation of IAPWS Formulation 1995 for ordinary water substance,
@@ -10071,18 +10064,18 @@ class IAPWS95(MEoS):
   Formulations, http://www.iapws.org/relguide/Advise3.pdf
   """
   */
-  name = "water"
-  CASNumber = "7732-18-5"
-  formula = "H2O"
-  synonym = "R-718"
-  Tc = Tc
-  rhoc = rhoc
-  Pc = Pc
-  M = M
-  Tt = 273.16
-  Tb = 373.1243
-  f_acent = 0.3443
-  momentoDipolar = 1.855
+  public string name = "water";
+  public string CASNumber = "7732-18-5";
+  public string formula = "H2O";
+  public string synonym = "R-718";
+  public double Tc = Tc;
+  public double rhoc = rhoc;
+  public double Pc = Pc;
+  public double M = M;
+  public double Tt = 273.16;
+  public double Tb = 373.1243;
+  public double f_acent = 0.3443;
+  public double momentoDipolar = 1.855;
 
   Fi0 = {
    "ao_log": [1, 3.00632],
@@ -10173,7 +10166,6 @@ class IAPWS95(MEoS):
     return fex, fext, fextt
   }
 
-  @classmethod
   void _alfa_sat(cls, T)
   {
     /*
@@ -10210,7 +10202,6 @@ class IAPWS95(MEoS):
     return alfa
   }
 
-  @classmethod
   void _phi_sat(cls, T)
   {
     /*
@@ -10255,7 +10246,6 @@ class IAPWS95(MEoS):
     return phi
   }
 
-  @classmethod
   void _Liquid_Enthalpy(cls, T)
   {
     /*
@@ -10285,7 +10275,6 @@ class IAPWS95(MEoS):
     return h
   }
 
-  @classmethod
   void _Vapor_Enthalpy(cls, T)
   {
     /*
@@ -10315,7 +10304,6 @@ class IAPWS95(MEoS):
     return h
   }
 
-  @classmethod
   void _Liquid_Entropy(cls, T)
   {
     /*
@@ -10345,7 +10333,6 @@ class IAPWS95(MEoS):
     return s
   }
 
-  @classmethod
   void _Vapor_Entropy(cls, T)
   {
     /*
@@ -10445,7 +10432,6 @@ class IAPWS95_Tx(IAPWS95):
   }
 }
 
-@mainClassDoc()
 class D2O(MEoS):
 {
   /*
@@ -10548,4 +10534,3 @@ class D2O(MEoS):
     return s
   }
 }
-
