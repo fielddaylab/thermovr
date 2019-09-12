@@ -27,10 +27,10 @@ enum IF97SatState
   VAPOR
 }; // Saturated Liquid/Vapor state determination
 
-struct RegionIdealElement // Structure for the single indexed state equation coefficients
+public struct RegionIdealElement // Structure for the single indexed state equation coefficients
 {
-  int J; // The first index
-  double n; // The leading numerical constant
+  public int J; // The first index
+  public double n; // The leading numerical constant
   public RegionIdealElement(int _J, double _n)
   {
     J = _J;
@@ -38,11 +38,11 @@ struct RegionIdealElement // Structure for the single indexed state equation coe
   }
 }
 
-struct RegionResidualElement // Structure for the double indexed state equation coefficients
+public struct RegionResidualElement // Structure for the double indexed state equation coefficients
 {
-  int I; // The first index
-  int J; // The second index
-  double n; // The leading numerical constant
+  public int I; // The first index
+  public int J; // The second index
+  public double n; // The leading numerical constant
   public RegionResidualElement(int _I, int _J, double _n)
   {
     I = _I;
@@ -196,83 +196,83 @@ static class IF97
     {  1.97815050331519, -5.54349664571295,  -2.16866274479712,  -0.965458722086812, -0.503243546373828 },
   };
 
-  class BaseRegion
+  public class BaseRegion
   {
-    public BaseRegion(List<RegionResidualElement> resid, List<RegionIdealElement> ideal)
+    public BaseRegion(RegionResidualElement[] resid, RegionIdealElement[] ideal)
     {
       R = Rgas;
-      for(int i = 0; i < resid.Length(); ++i)
+      for(int i = 0; i < resid.Length; ++i)
       {
         nr.Add(resid[i].n);
         Ir.Add(resid[i].I);
         Jr.Add(resid[i].J);
       }
-      for(int i = 0; i < ideal.Length(); ++i)
+      for(int i = 0; i < ideal.Length; ++i)
       {
         n0.Add(ideal[i].n);
         J0.Add(ideal[i].J);
       }
-      for(int i = 0; i < Hresiddata.Length(); ++i)
+      for(int i = 0; i < Hresiddata.Length; ++i)
       {
         munr.Add(Hresiddata[i].n);
         muIr.Add(Hresiddata[i].I);
         muJr.Add(Hresiddata[i].J);
       }
-      for(int i = 0; i < Hidealdata.Length(); ++i)
+      for(int i = 0; i < Hidealdata.Length; ++i)
       {
         mun0.Add(Hidealdata[i].n);
         muJ0.Add(Hidealdata[i].J);
       }
-      for(int i = 0; i < Lresiddata.Length(); ++i)
+      for(int i = 0; i < Lresiddata.Length; ++i)
       {
         lamnr.Add(Lresiddata[i].n);
         lamIr.Add(Lresiddata[i].I);
         lamJr.Add(Lresiddata[i].J);
       }
-      for(int i = 0; i < Lidealdata.Length(); ++i)
+      for(int i = 0; i < Lidealdata.Length; ++i)
       {
         lamn0.Add(Lidealdata[i].n);
         lamJ0.Add(Lidealdata[i].J);
       }
     }
-    double rhomass(double T, double p)
+    public double rhomass(double T, double p)
     {
       return p_star/(R*T)/(p_fact/1000.0/R_fact)/(dgamma0_dPI(T,p) + dgammar_dPI(T,p));
     }
-    double hmass(double T, double p)
+    public double hmass(double T, double p)
     {
       return R*T_star*(dgamma0_dTAU(T, p) + dgammar_dTAU(T, p));
     }
-    double smass(double T, double p)
+    public double smass(double T, double p)
     {
-      const double tau = T_star/T;
+      double tau = T_star/T;
       return R*(tau*(dgamma0_dTAU(T, p) + dgammar_dTAU(T, p)) - (gammar(T, p) + gamma0(T, p)));
     }
-    double umass(double T, double p)
+    public double umass(double T, double p)
     {
-      const double tau = T_star/T;
-      const double PI = p/p_star;
+      double tau = T_star/T;
+      double PI = p/p_star;
       return R*T*(tau*(dgamma0_dTAU(T, p) + dgammar_dTAU(T, p)) - PI*(dgamma0_dPI(T, p) + dgammar_dPI(T, p)));
     }
-    double cpmass(double T, double p)
+    public double cpmass(double T, double p)
     {
-      const double tau = T_star/T;
+      double tau = T_star/T;
       return -R*tau*tau*(d2gammar_dTAU2(T, p) + d2gamma0_dTAU2(T, p));
     }
     public virtual double cvmass(double T, double p)
     {
-      const double tau = T_star/T;
-      const double PI = p/p_star;
-      return cpmass(T,p)-R*pow(1 + PI*dgammar_dPI(T,p) - tau*PI*d2gammar_dPIdTAU(T,p),2)/(1-PI*PI*d2gammar_dPI2(T, p));
+      double tau = T_star/T;
+      double PI = p/p_star;
+      return cpmass(T,p)-R*Math.Pow(1 + PI*dgammar_dPI(T,p) - tau*PI*d2gammar_dPIdTAU(T,p),2)/(1-PI*PI*d2gammar_dPI2(T, p));
     }
     public virtual double speed_sound(double T, double p)
     {
-      const double tau = T_star/T;
-      const double PI = p/p_star;
-      const double RHS = (1 + 2*PI*dgammar_dPI(T,p) + PI*PI*pow(dgammar_dPI(T,p),2))/((1-PI*PI*d2gammar_dPI2(T,p)) +pow(1 + PI*dgammar_dPI(T,p) - tau*PI*d2gammar_dPIdTAU(T,p), 2)/(tau*tau*(d2gamma0_dTAU2(T,p) + d2gammar_dTAU2(T,p))));
+      double tau = T_star/T;
+      double PI = p/p_star;
+      double RHS = (1 + 2*PI*dgammar_dPI(T,p) + PI*PI*Math.Pow(dgammar_dPI(T,p),2))/((1-PI*PI*d2gammar_dPI2(T,p)) +Math.Pow(1 + PI*dgammar_dPI(T,p) - tau*PI*d2gammar_dPIdTAU(T,p), 2)/(tau*tau*(d2gamma0_dTAU2(T,p) + d2gammar_dTAU2(T,p))));
       return Math.Sqrt(R*(1000/R_fact)*T*RHS);
     }
-    double visc(double T, double rho)
+    public double visc(double T, double rho)
     {
       /// This base region function is valid for all IF97 regions since it is a function
       /// of density, not pressure, and can be called from any region instance.
@@ -280,24 +280,24 @@ static class IF97
       const double mu2 = 1.0; // For Industrial Formulation (IF97), mu2 = 1.0
       return mu_star * mu0(T) * mu1(T,rho) * mu2;
     }
-    double tcond(double T, double p, double rho)
+    public double tcond(double T, double p, double rho)
     {
       /// This base region function is valid for all IF97 regions
       const double lambda_star = 0.001;  // Reference conductivity [W/m-K]
-      const double lambda_bar = lambda0(T)*lambda1(T,rho) + lambda2(T,p,rho);
+      double lambda_bar = lambda0(T)*lambda1(T,rho) + lambda2(T,p,rho);
       return lambda_star * lambda_bar;
     }
     public virtual double drhodp(double T, double p)
     {
       /// Only valid for regions 2 and 5.  Will be overridden in Regions 1 and 3.
       /// Derived from IAPWS Revised Advisory Note No. 3 (See Table 2, Section 4.1 & 4.3)
-      const double PI = p/p_star;
+      double PI = p/p_star;
       return (rhomass(T,p)/p) * ( (1.0 - PI*PI*d2gammar_dPI2(T,p)) / (1.0 + PI*dgammar_dPI(T,p)) );
     }
-    double delTr(double rho)
+    public double delTr(double rho)
     {
       /// This is the IF97 correlation for drhodp at the reducing temperature, Tr
-      const double rhobar = rho/Rhocrit;
+      double rhobar = rho/Rhocrit;
       double summer = 0;
       int j;
       //
@@ -308,15 +308,14 @@ static class IF97
       else                           j = 4;
       //
       for(int i=0; i < 6; i++)
-        summer += A[i][j]*pow(rhobar,i);
+        summer += A[i,j]*Math.Pow(rhobar,i);
       return 1.0/summer;
     }
 
-    /*
-    virtual double PIrterm(double);
-    virtual double TAUrterm(double);
-    virtual double TAU0term(double);
-    */
+    //must override!
+    public virtual double PIrterm(double p)  { return 0; }
+    public virtual double TAUrterm(double T) { return 0; }
+    public virtual double TAU0term(double T) { return 0; }
 
     public double output(IF97parameters key, double T, double p)
     {
@@ -343,9 +342,9 @@ static class IF97
     static List<double> nr;
     static List<int> J0;
     static List<double> n0;
-    static double T_star;
-    static double p_star;
-    static double R;
+    public static double T_star;
+    public static double p_star;
+    public static double R;
     /// For Viscosity Calculations
     static List<int> muJ0;
     static List<double> mun0;
@@ -359,157 +358,157 @@ static class IF97
     static List<int> lamJr;
     static List<double> lamnr;
 
-    double gammar(double T, double p)
+    public double gammar(double T, double p)
     {
-      const double _PI = PIrterm(p);
-      const double _TAU = TAUrterm(T);
+      double _PI = PIrterm(p);
+      double _TAU = TAUrterm(T);
       double summer = 0;
-      for(int i = 0; i < Jr.Length(); ++i)
+      for(int i = 0; i < Jr.Count; ++i)
       {
-        summer += nr[i]*pow(_PI, Ir[i])*pow(_TAU, Jr[i]);
+        summer += nr[i]*Math.Pow(_PI, Ir[i])*Math.Pow(_TAU, Jr[i]);
       }
       return summer;
     }
-    double dgammar_dPI(double T, double p)
+    public double dgammar_dPI(double T, double p)
     {
-      const double _PI = PIrterm(p);
-      const double _TAU = TAUrterm(T);
+      double _PI = PIrterm(p);
+      double _TAU = TAUrterm(T);
       double summer = 0;
-      for(int i = 0; i < Jr.Length(); ++i)
+      for(int i = 0; i < Jr.Count; ++i)
       {
-        summer += nr[i]*Ir[i]*pow(_PI, Ir[i]-1)*pow(_TAU, Jr[i]);
+        summer += nr[i]*Ir[i]*Math.Pow(_PI, Ir[i]-1)*Math.Pow(_TAU, Jr[i]);
       }
       return summer;
     }
-    double d2gammar_dPI2(double T, double p)
+    public double d2gammar_dPI2(double T, double p)
     {
-      const double _PI = PIrterm(p);
-      const double _TAU = TAUrterm(T);
+      double _PI = PIrterm(p);
+      double _TAU = TAUrterm(T);
       double summer = 0;
-      for(int i = 0; i < Jr.Length(); ++i)
+      for(int i = 0; i < Jr.Count; ++i)
       {
-        summer += nr[i]*Ir[i]*(Ir[i]-1)*pow(_PI, Ir[i]-2)*pow(_TAU, Jr[i]);
+        summer += nr[i]*Ir[i]*(Ir[i]-1)*Math.Pow(_PI, Ir[i]-2)*Math.Pow(_TAU, Jr[i]);
       }
       return summer;
     }
-    double dgammar_dTAU(double T, double p)
+    public double dgammar_dTAU(double T, double p)
     {
-      const double _PI = PIrterm(p);
-      const double _TAU = TAUrterm(T);
+      double _PI = PIrterm(p);
+      double _TAU = TAUrterm(T);
       double summer = 0;
-      for(int i = 0; i < Jr.Length(); ++i)
+      for(int i = 0; i < Jr.Count; ++i)
       {
-        summer += nr[i]*Jr[i]*pow(_PI, Ir[i])*pow(_TAU, Jr[i]-1);
+        summer += nr[i]*Jr[i]*Math.Pow(_PI, Ir[i])*Math.Pow(_TAU, Jr[i]-1);
       }
       return summer;
     }
-    double d2gammar_dPIdTAU(double T, double p)
+    public double d2gammar_dPIdTAU(double T, double p)
     {
-      const double _PI = PIrterm(p);
-      const double _TAU = TAUrterm(T);
+      double _PI = PIrterm(p);
+      double _TAU = TAUrterm(T);
       double summer = 0;
-      for(int i = 0; i < Jr.Length(); ++i)
+      for(int i = 0; i < Jr.Count; ++i)
       {
-        summer += nr[i]*Jr[i]*Ir[i]*pow(_PI, Ir[i]-1)*pow(_TAU, Jr[i]-1);
+        summer += nr[i]*Jr[i]*Ir[i]*Math.Pow(_PI, Ir[i]-1)*Math.Pow(_TAU, Jr[i]-1);
       }
       return summer;
     }
-    double d2gammar_dTAU2(double T, double p)
+    public double d2gammar_dTAU2(double T, double p)
     {
-      const double _PI = PIrterm(p);
-      const double _TAU = TAUrterm(T);
+      double _PI = PIrterm(p);
+      double _TAU = TAUrterm(T);
       double summer = 0;
-      for(int i = 0; i < Jr.Length(); ++i)
+      for(int i = 0; i < Jr.Count; ++i)
       {
-        summer += nr[i]*Jr[i]*(Jr[i]-1)*pow(_PI, Ir[i])*pow(_TAU, Jr[i]-2);
+        summer += nr[i]*Jr[i]*(Jr[i]-1)*Math.Pow(_PI, Ir[i])*Math.Pow(_TAU, Jr[i]-2);
       }
       return summer;
     }
-    double gamma0(double T, double p)
+    public double gamma0(double T, double p)
     {
-      if(J0.Length() == 0) { return 0; } // Region 1 has no term
-      const double PI = p/p_star;
-      const double _TAU = TAU0term(T);
-      double summer = log(PI);
-      for(int i = 0; i < n0.Length(); ++i)
+      if(J0.Count == 0) { return 0; } // Region 1 has no term
+      double PI = p/p_star;
+      double _TAU = TAU0term(T);
+      double summer = Math.Log(PI);
+      for(int i = 0; i < n0.Count; ++i)
       {
-        summer += n0[i]*pow(_TAU, J0[i]);
+        summer += n0[i]*Math.Pow(_TAU, J0[i]);
       }
       return summer;
     }
-    double dgamma0_dPI(double T, double p)
+    public double dgamma0_dPI(double T, double p)
     {
-      if(J0.Length() == 0) { return 0; } // Region 1 has no term
-      const double PI = p/p_star;
+      if(J0.Count == 0) { return 0; } // Region 1 has no term
+      double PI = p/p_star;
       return 1.0/PI;
     }
-    double d2gamma0_dPI2(double T, double p)
+    public double d2gamma0_dPI2(double T, double p)
     {
-      if(J0.Length() == 0) { return 0; } // Region 1 has no term
-      const double PI = p/p_star;
+      if(J0.Count == 0) { return 0; } // Region 1 has no term
+      double PI = p/p_star;
       return -1.0/(PI*PI);
     }
-    double dgamma0_dTAU(double T, double p)
+    public double dgamma0_dTAU(double T, double p)
     {
-      const double _TAU = TAU0term(T);
+      double _TAU = TAU0term(T);
       double summer = 0;
-      for(int i = 0; i < J0.Length(); ++i)
+      for(int i = 0; i < J0.Count; ++i)
       {
-        summer += n0[i]*J0[i]*pow(_TAU, J0[i]-1);
+        summer += n0[i]*J0[i]*Math.Pow(_TAU, J0[i]-1);
       }
       return summer;
     }
-    double d2gamma0_dTAU2(double T, double p)
+    public double d2gamma0_dTAU2(double T, double p)
     {
-      const double _TAU = TAU0term(T);
+      double _TAU = TAU0term(T);
       double summer = 0;
-      for(int i = 0; i < J0.Length(); ++i)
+      for(int i = 0; i < J0.Count; ++i)
       {
-        summer += n0[i]*J0[i]*(J0[i]-1)*pow(_TAU, J0[i]-2);
+        summer += n0[i]*J0[i]*(J0[i]-1)*Math.Pow(_TAU, J0[i]-2);
       }
       return summer;
     }
-    double mu0(double T)
+    public double mu0(double T)
     {
-      const double T_bar = T/Tcrit;
+      double T_bar = T/Tcrit;
       double summer = 0.0;
-      for(int i = 0; i < muJ0.Length(); ++i)
+      for(int i = 0; i < muJ0.Count; ++i)
       {
-        summer += mun0[i]/pow(T_bar, muJ0[i]);
+        summer += mun0[i]/Math.Pow(T_bar, muJ0[i]);
       }
       return 100.0*Math.Sqrt(T_bar)/summer;
     }
-    double mu1(double T, double rho)
+    public double mu1(double T, double rho)
     {
-      const double rho_bar = rho/Rhocrit;
+      double rho_bar = rho/Rhocrit;
       double summer = 0.0;
-      for(int i = 0; i < muJr.Length(); ++i)
+      for(int i = 0; i < muJr.Count; ++i)
       {
-        summer += rho_bar * pow(Trterm(T),muIr[i]) * munr[i]*pow(Rhorterm(rho),muJr[i]);
+        summer += rho_bar * Math.Pow(Trterm(T),muIr[i]) * munr[i]*Math.Pow(Rhorterm(rho),muJr[i]);
       }
       return exp(summer);
     }
-    double lambda0(double T)
+    public double lambda0(double T)
     {
-      const double T_bar = T/Tcrit;
+      double T_bar = T/Tcrit;
       double summer = 0.0;
-      for(int i = 0; i < lamJ0.Length(); ++i)
+      for(int i = 0; i < lamJ0.Count; ++i)
       {
-        summer += lamn0[i]/pow(T_bar, lamJ0[i]);
+        summer += lamn0[i]/Math.Pow(T_bar, lamJ0[i]);
       }
       return Math.Sqrt(T_bar)/summer;
     }
-    double lambda1(double T, double rho)
+    public double lambda1(double T, double rho)
     {
-      const double rho_bar = rho/Rhocrit;
+      double rho_bar = rho/Rhocrit;
       double summer = 0.0;
-      for(int i = 0; i < lamJr.Length(); ++i)
+      for(int i = 0; i < lamJr.Count; ++i)
       {
-        summer += rho_bar * pow(Trterm(T),lamIr[i]) * lamnr[i]*pow(Rhorterm(rho),lamJr[i]);
+        summer += rho_bar * Math.Pow(Trterm(T),lamIr[i]) * lamnr[i]*Math.Pow(Rhorterm(rho),lamJr[i]);
       }
       return exp(summer);
     }
-    double lambda2(double T, double p, double rho)
+    public virtual double lambda2(double T, double p, double rho)
     {
       double y;
       double Cpbar;
@@ -517,7 +516,7 @@ static class IF97
       double k;
       double Z;
       double delChi;
-      const double rhobar = rho/Rhocrit;
+      double rhobar = rho/Rhocrit;
       const double LAMBDA = 177.8514;
       const double qD   = 1.0/0.40;
       const double Tr   = 1.5*Tcrit;
@@ -533,20 +532,20 @@ static class IF97
       mubar = visc(T,rho)/1.0E-6;
       delChi = rhobar*(Pcrit/Rhocrit*drhodp(T,p) - delTr(rho)*Tr/T);
       if(delChi > 0)              /// At low (T,p), delChi can go negative, causing
-        y = qD*xi0*pow(delChi/GAMMA0,nu/gam);  ///   y to be imaginary from this nth-root equation.
-      else                     ///
-        y = 0.0;                 ///   Limit delChi to > 0, values.
-      if(y < 1.2E-7)              /// Z is not calculated if y < 1.2E-7 since the
-        Z = 0.0;                 ///   critical enhancement becomes insignificant.
+        y = qD*xi0*Math.Pow(delChi/GAMMA0,nu/gam);  ///   y to be imaginary from this nth-root equation.
+      else           ///
+        y = 0.0;     ///   Limit delChi to > 0, values.
+      if(y < 1.2E-7) /// Z is not calculated if y < 1.2E-7 since the
+        Z = 0.0;     ///   critical enhancement becomes insignificant.
       else
         Z = 2.0/PI/y*(((1.0-1.0/k)*atan(y)+y/k) - (1.0 - exp(-1.0/(1.0/y + y*y/(3.0*rhobar*rhobar)))));
       return LAMBDA*rhobar*Cpbar*T/(Tcrit*mubar)*Z;
     }
-    double Trterm(double T)
+    public double Trterm(double T)
     {
       return Tcrit/T - 1.0;
     }
-    double Rhorterm(double rho)
+    public double Rhorterm(double rho)
     {
       return rho/Rhocrit - 1.0;
     }
@@ -594,10 +593,11 @@ static class IF97
     new RegionResidualElement(32, -41, -9.3537087292458E-26),
   };
 
-  static List<RegionIdealElement> reg10data;
-  class Region1 : BaseRegion
+  static RegionIdealElement[] Region1idealdata = {}; //this data was not found in c++ source!
+
+  public class Region1 : BaseRegion
   {
-    Region1() : base(Region1residdata, reg10data)
+    public Region1() : base(Region1residdata, Region1idealdata)
     {
       T_star = 1386; p_star = 16.53*p_fact;
     }
@@ -605,27 +605,27 @@ static class IF97
     {
       // Evidently this formulation is special for some reason, and cannot be implemented using the base class formulation
       // see Table 3
-      const double tau = T_star/T;
-      const double RHS = pow(dgammar_dPI(T,p), 2)/(pow(dgammar_dPI(T,p)-tau*d2gammar_dPIdTAU(T,p), 2)/(tau*tau*d2gammar_dTAU2(T,p)) - d2gammar_dPI2(T, p));
+      double tau = T_star/T;
+      double RHS = Math.Pow(dgammar_dPI(T,p), 2)/(Math.Pow(dgammar_dPI(T,p)-tau*d2gammar_dPIdTAU(T,p), 2)/(tau*tau*d2gammar_dTAU2(T,p)) - d2gammar_dPI2(T, p));
       return Math.Sqrt(R*(1000/R_fact)*T*RHS);
     }
     public override double cvmass(double T, double p)
     {
       // Evidently this formulation is special for some reason, and cannot be implemented using the base class formulation
       // see Table 3
-      const double tau = T_star / T;
-      return R*(-tau*tau*d2gammar_dTAU2(T,p) + pow(dgammar_dPI(T, p) - tau*d2gammar_dPIdTAU(T, p), 2) / d2gammar_dPI2(T, p));
+      double tau = T_star / T;
+      return R*(-tau*tau*d2gammar_dTAU2(T,p) + Math.Pow(dgammar_dPI(T, p) - tau*d2gammar_dPIdTAU(T, p), 2) / d2gammar_dPI2(T, p));
     }
     public override double drhodp(double T, double p)
     {
       //double PI = p/p_star;
       /// This one is different as well...
       /// Derived from IAPWS Revised Advisory Note No. 3 (See Table 2, Section 4.1 & 4.2)
-      return -d2gammar_dPI2(T,p)/(pow(dgammar_dPI(T,p),2)*R*T)*(1000*R_fact/p_fact);
+      return -d2gammar_dPI2(T,p)/(Math.Pow(dgammar_dPI(T,p),2)*R*T)*(1000*R_fact/p_fact);
     }
-    double TAUrterm(double T) { return T_star/T - 1.222; }
-    double PIrterm(double p) { return p/p_star - 7.1; }
-    double TAU0term(double T) { return 0.0; }
+    public override double TAUrterm(double T) { return T_star/T - 1.222; }
+    public override double PIrterm(double p) { return p/p_star - 7.1; }
+    public override double TAU0term(double T) { return 0.0; }
   }
 
   /********************************************************************************/
@@ -690,24 +690,15 @@ static class IF97
     new RegionIdealElement(2, -0.28408632460772),
     new RegionIdealElement(3, 0.21268463753307e-1),
   };
-  class Region2 : BaseRegion
+  public class Region2 : BaseRegion
   {
-    Region2() : base(Region2residdata, Region2idealdata)
+    public Region2() : base(Region2residdata, Region2idealdata)
     {
       T_star = 540; p_star = 1*p_fact;
     }
-    double TAUrterm(double T)
-    {
-      return T_star/T - 0.5;
-    }
-    double PIrterm(double p)
-    {
-      return p/p_star;
-    }
-    double TAU0term(double T)
-    {
-      return T_star/T;
-    }
+    public override double TAUrterm(double T) { return T_star/T - 0.5; }
+    public override double PIrterm(double p) { return p/p_star; }
+    public override double TAU0term(double T) { return T_star/T; }
   }
 
   static double[] Region23data =
@@ -741,7 +732,7 @@ static class IF97
   /********************* Implementation for v(T,p) only.  *************************/
   /********************************************************************************/
 
-  class Region3Backwards
+  public class Region3Backwards
   {
     static RegionResidualElement[] Region3Adata =
     {
@@ -1702,7 +1693,7 @@ static class IF97
       new RegionResidualElement(8, -4, 3.9453604949707e+06),
     };
 
-    class Region3BackwardsRegion
+    public class Region3BackwardsRegion
     {
       double v_star;
       double p_star;
@@ -1720,7 +1711,7 @@ static class IF97
       List<int> J;
       List<double> n;
 
-      Region3BackwardsRegion(RegionResidualElement[] data, int N)
+      public Region3BackwardsRegion(RegionResidualElement[] data, int N)
       {
         this->N = N;
         for(int i = 0; i < N; ++i)
@@ -1732,14 +1723,14 @@ static class IF97
       }
       public virtual double v(double T, double p)
       {
-        const double pi = p/p_star;
-        const double theta = T/T_star;
+        double pi = p/p_star;
+        double theta = T/T_star;
         double summer = 0;
         for(int i = 0; i < N; ++i)
         {
-          summer += n[i]*pow(pow(pi-a, c), I[i])*pow(pow(theta-b, d), J[i]);
+          summer += n[i]*Math.Pow(Math.Pow(pi-a, c), I[i])*Math.Pow(Math.Pow(theta-b, d), J[i]);
         }
-        return pow(summer, e)*v_star;
+        return Math.Pow(summer, e)*v_star;
       }
 
       // This function piggybacks off of the Backwards structure already written
@@ -1748,90 +1739,90 @@ static class IF97
       // v(p,h) [Y=v, X=h] or v(p,s) [Y=v, X=s] in Region 3
       public virtual double Y(double p, double X)
       {
-        const double pi = p/p_star;
-        const double eta = X/X_star;
+        double pi = p/p_star;
+        double eta = X/X_star;
         double summer = 0;
         for(int i = 0; i < N; ++i)
         {
-          summer += n[i]*pow(pow(pi-a, c), I[i])*pow(pow(eta-b, d), J[i])*pow(f, J[i]);
+          summer += n[i]*Math.Pow(Math.Pow(pi-a, c), I[i])*Math.Pow(Math.Pow(eta-b, d), J[i])*Math.Pow(f, J[i]);
         }
-        return pow(summer, e)*Y_star;
+        return Math.Pow(summer, e)*Y_star;
       }
 
     }
 
-    class Region3a : Region3BackwardsRegion { Region3a() : base(Region3Adata, 30) { v_star = 0.0024; p_star = 100*p_fact; T_star = 760; a = 0.085; b = 0.817; c = 1; d = 1; e = 1; } }
-    class Region3b : Region3BackwardsRegion { Region3b() : base(Region3Bdata, 32) { v_star = 0.0041; p_star = 100*p_fact; T_star = 860; a = 0.280; b = 0.779; c = 1; d = 1; e = 1; } }
-    class Region3c : Region3BackwardsRegion { Region3c() : base(Region3Cdata, 35) { v_star = 0.0022; p_star = 40*p_fact; T_star = 690; a = 0.259; b = 0.903; c = 1; d = 1; e = 1; } }
-    class Region3d : Region3BackwardsRegion { Region3d() : base(Region3Ddata, 38) { v_star = 0.0029; p_star = 40*p_fact; T_star = 690; a = 0.559; b = 0.939; c = 1; d = 1; e = 4; } }
-    class Region3e : Region3BackwardsRegion { Region3e() : base(Region3Edata, 29) { v_star = 0.0032; p_star = 40*p_fact; T_star = 710; a = 0.587; b = 0.918; c = 1; d = 1; e = 1; } }
-    class Region3f : Region3BackwardsRegion { Region3f() : base(Region3Fdata, 42) { v_star = 0.0064; p_star = 40*p_fact; T_star = 730; a = 0.587; b = 0.891; c = 0.5; d = 1; e = 4; } }
-    class Region3g : Region3BackwardsRegion { Region3g() : base(Region3Gdata, 38) { v_star = 0.0027; p_star = 25*p_fact; T_star = 660; a = 0.872; b = 0.971; c = 1; d = 1; e = 4; } }
-    class Region3h : Region3BackwardsRegion { Region3h() : base(Region3Hdata, 29) { v_star = 0.0032; p_star = 25*p_fact; T_star = 660; a = 0.898; b = 0.983; c = 1; d = 1; e = 4; } }
-    class Region3i : Region3BackwardsRegion { Region3i() : base(Region3Idata, 42) { v_star = 0.0041; p_star = 25*p_fact; T_star = 660; a = 0.910; b = 0.984; c = 0.5; d = 1; e = 4; } }
-    class Region3j : Region3BackwardsRegion { Region3j() : base(Region3Jdata, 29) { v_star = 0.0054; p_star = 25*p_fact; T_star = 670; a = 0.875; b = 0.964; c = 0.5; d = 1; e = 4; } }
-    class Region3k : Region3BackwardsRegion { Region3k() : base(Region3Kdata, 34) { v_star = 0.0077; p_star = 25*p_fact; T_star = 680; a = 0.802; b = 0.935; c = 1; d = 1; e = 1; } }
-    class Region3l : Region3BackwardsRegion { Region3l() : base(Region3Ldata, 43) { v_star = 0.0026; p_star = 24*p_fact; T_star = 650; a = 0.908; b = 0.989; c = 1; d = 1; e = 4; } }
-    class Region3m : Region3BackwardsRegion { Region3m() : base(Region3Mdata, 40) { v_star = 0.0028; p_star = 23*p_fact; T_star = 650; a = 1.0; b = 0.997; c = 1; d = 0.25; e = 1; } }
-    class Region3n : Region3BackwardsRegion
+    public class Region3a : Region3BackwardsRegion { public Region3a() : base(Region3Adata, 30) { v_star = 0.0024; p_star = 100*p_fact; T_star = 760; a = 0.085; b = 0.817; c = 1; d = 1; e = 1; } }
+    public class Region3b : Region3BackwardsRegion { public Region3b() : base(Region3Bdata, 32) { v_star = 0.0041; p_star = 100*p_fact; T_star = 860; a = 0.280; b = 0.779; c = 1; d = 1; e = 1; } }
+    public class Region3c : Region3BackwardsRegion { public Region3c() : base(Region3Cdata, 35) { v_star = 0.0022; p_star = 40*p_fact; T_star = 690; a = 0.259; b = 0.903; c = 1; d = 1; e = 1; } }
+    public class Region3d : Region3BackwardsRegion { public Region3d() : base(Region3Ddata, 38) { v_star = 0.0029; p_star = 40*p_fact; T_star = 690; a = 0.559; b = 0.939; c = 1; d = 1; e = 4; } }
+    public class Region3e : Region3BackwardsRegion { public Region3e() : base(Region3Edata, 29) { v_star = 0.0032; p_star = 40*p_fact; T_star = 710; a = 0.587; b = 0.918; c = 1; d = 1; e = 1; } }
+    public class Region3f : Region3BackwardsRegion { public Region3f() : base(Region3Fdata, 42) { v_star = 0.0064; p_star = 40*p_fact; T_star = 730; a = 0.587; b = 0.891; c = 0.5; d = 1; e = 4; } }
+    public class Region3g : Region3BackwardsRegion { public Region3g() : base(Region3Gdata, 38) { v_star = 0.0027; p_star = 25*p_fact; T_star = 660; a = 0.872; b = 0.971; c = 1; d = 1; e = 4; } }
+    public class Region3h : Region3BackwardsRegion { public Region3h() : base(Region3Hdata, 29) { v_star = 0.0032; p_star = 25*p_fact; T_star = 660; a = 0.898; b = 0.983; c = 1; d = 1; e = 4; } }
+    public class Region3i : Region3BackwardsRegion { public Region3i() : base(Region3Idata, 42) { v_star = 0.0041; p_star = 25*p_fact; T_star = 660; a = 0.910; b = 0.984; c = 0.5; d = 1; e = 4; } }
+    public class Region3j : Region3BackwardsRegion { public Region3j() : base(Region3Jdata, 29) { v_star = 0.0054; p_star = 25*p_fact; T_star = 670; a = 0.875; b = 0.964; c = 0.5; d = 1; e = 4; } }
+    public class Region3k : Region3BackwardsRegion { public Region3k() : base(Region3Kdata, 34) { v_star = 0.0077; p_star = 25*p_fact; T_star = 680; a = 0.802; b = 0.935; c = 1; d = 1; e = 1; } }
+    public class Region3l : Region3BackwardsRegion { public Region3l() : base(Region3Ldata, 43) { v_star = 0.0026; p_star = 24*p_fact; T_star = 650; a = 0.908; b = 0.989; c = 1; d = 1; e = 4; } }
+    public class Region3m : Region3BackwardsRegion { public Region3m() : base(Region3Mdata, 40) { v_star = 0.0028; p_star = 23*p_fact; T_star = 650; a = 1.0; b = 0.997; c = 1; d = 0.25; e = 1; } }
+    public class Region3n : Region3BackwardsRegion
     {
-      Region3n() : base(Region3Ndata, 39)
+      public Region3n() : base(Region3Ndata, 39)
       {
         v_star = 0.0031; p_star = 23*p_fact; T_star = 650; a = 0.976; b = 0.997;
       }
       public override double v(double T, double p)
       {
-        const double pi = p/p_star;
-        const double theta = T/T_star;
+        double pi = p/p_star;
+        double theta = T/T_star;
         double summer = 0;
         for(int i = 0; i < N; ++i)
         {
-          summer += n[i]*pow(pi-a, I[i])*pow(theta-b, J[i]);
+          summer += n[i]*Math.Pow(pi-a, I[i])*Math.Pow(theta-b, J[i]);
         }
         return exp(summer)*v_star;
       }
     }
-    class Region3o : Region3BackwardsRegion { Region3o() : base(Region3Odata, 24) { v_star = 0.0034; p_star = 23*p_fact; T_star = 650; a = 0.974; b = 0.996; c = 0.5; d = 1; e = 1; } }
-    class Region3p : Region3BackwardsRegion { Region3p() : base(Region3Pdata, 27) { v_star = 0.0041; p_star = 23*p_fact; T_star = 650; a = 0.972; b = 0.997; c = 0.5; d = 1; e = 1; } }
-    class Region3q : Region3BackwardsRegion { Region3q() : base(Region3Qdata, 24) { v_star = 0.0022; p_star = 23*p_fact; T_star = 650; a = 0.848; b = 0.983; c = 1; d = 1; e = 4; } }
-    class Region3r : Region3BackwardsRegion { Region3r() : base(Region3Rdata, 27) { v_star = 0.0054; p_star = 23*p_fact; T_star = 650; a = 0.874; b = 0.982; c = 1; d = 1; e = 1; } }
-    class Region3s : Region3BackwardsRegion { Region3s() : base(Region3Sdata, 29) { v_star = 0.0022; p_star = 21*p_fact; T_star = 640; a = 0.886; b = 0.990; c = 1; d = 1; e = 4; } }
-    class Region3t : Region3BackwardsRegion { Region3t() : base(Region3Tdata, 33) { v_star = 0.0088; p_star = 20*p_fact; T_star = 650; a = 0.803; b = 1.02; c = 1; d = 1; e = 1; } }
-    class Region3u : Region3BackwardsRegion { Region3u() : base(Region3Udata, 38) { v_star = 0.0026; p_star = 23*p_fact; T_star = 650; a = 0.902; b = 0.988; c = 1; d = 1; e = 1; } }
-    class Region3v : Region3BackwardsRegion { Region3v() : base(Region3Vdata, 39) { v_star = 0.0031; p_star = 23*p_fact; T_star = 650; a = 0.960; b = 0.995; c = 1; d = 1; e = 1; } }
-    class Region3w : Region3BackwardsRegion { Region3w() : base(Region3Wdata, 35) { v_star = 0.0039; p_star = 23*p_fact; T_star = 650; a = 0.959; b = 0.995; c = 1; d = 1; e = 4; } }
-    class Region3x : Region3BackwardsRegion { Region3x() : base(Region3Xdata, 36) { v_star = 0.0049; p_star = 23*p_fact; T_star = 650; a = 0.910; b = 0.988; c = 1; d = 1; e = 1; } }
-    class Region3y : Region3BackwardsRegion { Region3y() : base(Region3Ydata, 20) { v_star = 0.0031; p_star = 22*p_fact; T_star = 650; a = 0.996; b = 0.994; c = 1; d = 1; e = 4; } }
-    class Region3z : Region3BackwardsRegion { Region3z() : base(Region3Zdata, 23) { v_star = 0.0038; p_star = 22*p_fact; T_star = 650; a = 0.993; b = 0.994; c = 1; d = 1; e = 4; } }
+    public class Region3o : Region3BackwardsRegion { public Region3o() : base(Region3Odata, 24) { v_star = 0.0034; p_star = 23*p_fact; T_star = 650; a = 0.974; b = 0.996; c = 0.5; d = 1; e = 1; } }
+    public class Region3p : Region3BackwardsRegion { public Region3p() : base(Region3Pdata, 27) { v_star = 0.0041; p_star = 23*p_fact; T_star = 650; a = 0.972; b = 0.997; c = 0.5; d = 1; e = 1; } }
+    public class Region3q : Region3BackwardsRegion { public Region3q() : base(Region3Qdata, 24) { v_star = 0.0022; p_star = 23*p_fact; T_star = 650; a = 0.848; b = 0.983; c = 1; d = 1; e = 4; } }
+    public class Region3r : Region3BackwardsRegion { public Region3r() : base(Region3Rdata, 27) { v_star = 0.0054; p_star = 23*p_fact; T_star = 650; a = 0.874; b = 0.982; c = 1; d = 1; e = 1; } }
+    public class Region3s : Region3BackwardsRegion { public Region3s() : base(Region3Sdata, 29) { v_star = 0.0022; p_star = 21*p_fact; T_star = 640; a = 0.886; b = 0.990; c = 1; d = 1; e = 4; } }
+    public class Region3t : Region3BackwardsRegion { public Region3t() : base(Region3Tdata, 33) { v_star = 0.0088; p_star = 20*p_fact; T_star = 650; a = 0.803; b = 1.02; c = 1; d = 1; e = 1; } }
+    public class Region3u : Region3BackwardsRegion { public Region3u() : base(Region3Udata, 38) { v_star = 0.0026; p_star = 23*p_fact; T_star = 650; a = 0.902; b = 0.988; c = 1; d = 1; e = 1; } }
+    public class Region3v : Region3BackwardsRegion { public Region3v() : base(Region3Vdata, 39) { v_star = 0.0031; p_star = 23*p_fact; T_star = 650; a = 0.960; b = 0.995; c = 1; d = 1; e = 1; } }
+    public class Region3w : Region3BackwardsRegion { public Region3w() : base(Region3Wdata, 35) { v_star = 0.0039; p_star = 23*p_fact; T_star = 650; a = 0.959; b = 0.995; c = 1; d = 1; e = 4; } }
+    public class Region3x : Region3BackwardsRegion { public Region3x() : base(Region3Xdata, 36) { v_star = 0.0049; p_star = 23*p_fact; T_star = 650; a = 0.910; b = 0.988; c = 1; d = 1; e = 1; } }
+    public class Region3y : Region3BackwardsRegion { public Region3y() : base(Region3Ydata, 20) { v_star = 0.0031; p_star = 22*p_fact; T_star = 650; a = 0.996; b = 0.994; c = 1; d = 1; e = 4; } }
+    public class Region3z : Region3BackwardsRegion { public Region3z() : base(Region3Zdata, 23) { v_star = 0.0038; p_star = 22*p_fact; T_star = 650; a = 0.993; b = 0.994; c = 1; d = 1; e = 4; } }
 
     static double Region3_v_TP(char region, double T, double p)
     {
-      Region3a R3a;
-      Region3b R3b;
-      Region3c R3c;
-      Region3d R3d;
-      Region3e R3e;
-      Region3f R3f;
-      Region3g R3g;
-      Region3h R3h;
-      Region3i R3i;
-      Region3j R3j;
-      Region3k R3k;
-      Region3l R3l;
-      Region3m R3m;
-      Region3n R3n;
-      Region3o R3o;
-      Region3p R3p;
-      Region3q R3q;
-      Region3r R3r;
-      Region3s R3s;
-      Region3t R3t;
-      Region3u R3u;
-      Region3v R3v;
-      Region3w R3w;
-      Region3x R3x;
-      Region3y R3y;
-      Region3z R3z;
+      Region3a R3a = new Region3a();
+      Region3b R3b = new Region3b();
+      Region3c R3c = new Region3c();
+      Region3d R3d = new Region3d();
+      Region3e R3e = new Region3e();
+      Region3f R3f = new Region3f();
+      Region3g R3g = new Region3g();
+      Region3h R3h = new Region3h();
+      Region3i R3i = new Region3i();
+      Region3j R3j = new Region3j();
+      Region3k R3k = new Region3k();
+      Region3l R3l = new Region3l();
+      Region3m R3m = new Region3m();
+      Region3n R3n = new Region3n();
+      Region3o R3o = new Region3o();
+      Region3p R3p = new Region3p();
+      Region3q R3q = new Region3q();
+      Region3r R3r = new Region3r();
+      Region3s R3s = new Region3s();
+      Region3t R3t = new Region3t();
+      Region3u R3u = new Region3u();
+      Region3v R3v = new Region3v();
+      Region3w R3w = new Region3w();
+      Region3x R3x = new Region3x();
+      Region3y R3y = new Region3y();
+      Region3z R3z = new Region3z();
 
       switch(region)
       {
@@ -1866,10 +1857,10 @@ static class IF97
       }
     }
 
-    struct DivisionElement
+    public struct DivisionElement
     {
-      int I;
-      double n;
+      public int I;
+      public double n;
       public DivisionElement(int _I, double _n)
       {
         I = _I;
@@ -1971,13 +1962,13 @@ static class IF97
       new DivisionElement(-2, 0.873371668682417e3),
     };
 
-    class Region3RegionDivision
+    public class Region3RegionDivision
     {
       int N;
       List<int> I;
       List<double> n;
 
-      Region3RegionDivision(DivisionElement[] data, int N)
+      public Region3RegionDivision(DivisionElement[] data, int N)
       {
         this->N = N;
         for(int i = 0; i < N; ++i)
@@ -1988,11 +1979,11 @@ static class IF97
       }
       public virtual double T_p(double p)
       {
-        const double pi = p/(1.0*p_fact);
+        double pi = p/(1.0*p_fact);
         double summer = 0;
         for(int i = 0; i < N; ++i)
         {
-          summer += n[i]*pow(pi, I[i]);
+          summer += n[i]*Math.Pow(pi, I[i]);
         }
         return summer*1.0;  // sum is multiplied by T* = 1.0 [K]
       }
@@ -2004,12 +1995,12 @@ static class IF97
       { }
       public override double T_p(double p)
       {
-        const double pi = p/(1.0*p_fact);
-        const double ln_pi = log(pi);
+        double pi = p/(1.0*p_fact);
+        double ln_pi = Math.Log(pi);
         double summer = 0;
         for(int i = 0; i < N; ++i)
         {
-          summer += n[i]*pow(ln_pi, I[i]);
+          summer += n[i]*Math.Pow(ln_pi, I[i]);
         }
         return summer*1.0;  // sum is multiplied by T* = 1.0 [K]
       }
@@ -2019,7 +2010,7 @@ static class IF97
     {
       double T_p(double p)
       {
-        const double pi = p/(1.0*p_fact);
+        double pi = p/(1.0*p_fact);
         return 3.727888004*(pi - 22.064) + 647.096;
       }
     }
@@ -2033,12 +2024,12 @@ static class IF97
       { }
       public override double T_p(double p)
       {
-        const double pi = p/(1.0*p_fact);
-        const double ln_pi = log(pi);
+        double pi = p/(1.0*p_fact);
+        double ln_pi = Math.Log(pi);
         double summer = 0;
         for(int i = 0; i < N; ++i)
         {
-          summer += n[i]*pow(ln_pi, I[i]);
+          summer += n[i]*Math.Pow(ln_pi, I[i]);
         }
         return summer*1.0;  // sum is multiplied by T* = 1.0 [K]
       }
@@ -2052,12 +2043,12 @@ static class IF97
       { }
       public override double T_p(double p)
       {
-        const double pi = p/(1.0*p_fact);
-        const double ln_pi = log(pi);
+        double pi = p/(1.0*p_fact);
+        double ln_pi = Math.Log(pi);
         double summer = 0;
         for(int i = 0; i < N; ++i)
         {
-          summer += n[i]*pow(ln_pi, I[i]);
+          summer += n[i]*Math.Pow(ln_pi, I[i]);
         }
         return summer*1.0;  // sum is multiplied by T* = 1.0 [K]
       }
@@ -2291,7 +2282,7 @@ static class IF97
     new RegionResidualElement(11, 26, -0.44923899061815e-4),
   };
 
-  class Region3
+  public class Region3
   {
     List<int> Ir;
     List<int> Jr;
@@ -2305,40 +2296,41 @@ static class IF97
     /// For Thermal Conductivity Calculations
     List<int> lamJ0;
     List<double> lamn0;
-    List<int> lamIr, lamJr;
+    List<int> lamIr;
+    List<int> lamJr;
     List<double> lamnr;
     double T_star;
     double p_star;
     double R;
-    Region3()
+    public Region3()
     {
       T_star = 1000;
       p_star = 1*p_fact;
 
-      for(int i = 0; i < Region3residdata.Length(); ++i)
+      for(int i = 0; i < Region3residdata.Length; ++i)
       {
         nr.Add(Region3residdata[i].n);
         Ir.Add(Region3residdata[i].I);
         Jr.Add(Region3residdata[i].J);
       }
-      for(int i = 0; i < Hresiddata.Length(); ++i)
+      for(int i = 0; i < Hresiddata.Length; ++i)
       {
         munr.Add(Hresiddata[i].n);
         muIr.Add(Hresiddata[i].I);
         muJr.Add(Hresiddata[i].J);
       }
-      for(int i = 0; i < Hidealdata.Length(); ++i)
+      for(int i = 0; i < Hidealdata.Length; ++i)
       {
         mun0.Add(Hidealdata[i].n);
         muJ0.Add(Hidealdata[i].J);
       }
-      for(int i = 0; i < Lresiddata.Length(); ++i)
+      for(int i = 0; i < Lresiddata.Length; ++i)
       {
         lamnr.Add(Lresiddata[i].n);
         lamIr.Add(Lresiddata[i].I);
         lamJr.Add(Lresiddata[i].J);
       }
-      for(int i = 0; i < Lidealdata.Length(); ++i)
+      for(int i = 0; i < Lidealdata.Length; ++i)
       {
         lamn0.Add(Lidealdata[i].n);
         lamJ0.Add(Lidealdata[i].J);
@@ -2347,12 +2339,12 @@ static class IF97
     }
     double phi(double T, double rho)
     {
-      const double delta = rho/Rhocrit;
-      const double tau = Tcrit/T;
-      double summer = nr[0]*log(delta);
+      double delta = rho/Rhocrit;
+      double tau = Tcrit/T;
+      double summer = nr[0]*Math.Log(delta);
       for(int i = 1; i < 40; ++i)
       {
-        summer += nr[i]*pow(delta, Ir[i])*pow(tau, Jr[i]);
+        summer += nr[i]*Math.Pow(delta, Ir[i])*Math.Pow(tau, Jr[i]);
       }
       return summer;
     }
@@ -2362,23 +2354,23 @@ static class IF97
     // ****************************************************************************
     double dphi_ddelta(double T, double rho)
     {
-      const double delta = rho/Rhocrit;
-      const double tau = Tcrit/T;
+      double delta = rho/Rhocrit;
+      double tau = Tcrit/T;
       double summer = nr[0]/delta;
       for(int i = 1; i < 40; ++i)
       {
-        summer += nr[i]*Ir[i]*pow(delta, Ir[i]-1)*pow(tau, Jr[i]);
+        summer += nr[i]*Ir[i]*Math.Pow(delta, Ir[i]-1)*Math.Pow(tau, Jr[i]);
       }
       return summer;
     }
     double d2phi_ddelta2(double T, double rho)
     {
-      const double delta = rho/Rhocrit;
-      const double tau = Tcrit/T;
+      double delta = rho/Rhocrit;
+      double tau = Tcrit/T;
       double summer = -nr[0]/(delta*delta);
       for(int i = 1; i < 40; ++i)
       {
-        summer += nr[i]*Ir[i]*(Ir[i]-1.0)*pow(delta, Ir[i]-2)*pow(tau, Jr[i]);
+        summer += nr[i]*Ir[i]*(Ir[i]-1.0)*Math.Pow(delta, Ir[i]-2)*Math.Pow(tau, Jr[i]);
       }
       return summer;
     }
@@ -2386,100 +2378,100 @@ static class IF97
 #endif
     double delta_dphi_ddelta(double T, double rho)
     {
-      const double delta = rho/Rhocrit;
-      const double tau = Tcrit/T;
+      double delta = rho/Rhocrit;
+      double tau = Tcrit/T;
       double summer = nr[0];
       for(int i = 1; i < 40; ++i)
       {
-        summer += nr[i]*Ir[i]*pow(delta, Ir[i])*pow(tau, Jr[i]);
+        summer += nr[i]*Ir[i]*Math.Pow(delta, Ir[i])*Math.Pow(tau, Jr[i]);
       }
       return summer;
     }
     double tau_dphi_dtau(double T, double rho)
     {
-      const double delta = rho/Rhocrit;
-      const double tau = Tcrit/T;
+      double delta = rho/Rhocrit;
+      double tau = Tcrit/T;
       double summer = 0;
       for(int i = 1; i < 40; ++i)
       {
-        summer += nr[i]*Jr[i]*pow(delta, Ir[i])*pow(tau, Jr[i]);
+        summer += nr[i]*Jr[i]*Math.Pow(delta, Ir[i])*Math.Pow(tau, Jr[i]);
       }
       return summer;
     }
     double delta2_d2phi_ddelta2(double T, double rho)
     {
-      const double delta = rho/Rhocrit;
-      const double tau = Tcrit/T;
+      double delta = rho/Rhocrit;
+      double tau = Tcrit/T;
       double summer = -nr[0];
       for(int i = 1; i < 40; ++i)
       {
-        summer += nr[i]*Ir[i]*(Ir[i]-1)*pow(delta, Ir[i])*pow(tau, Jr[i]);
+        summer += nr[i]*Ir[i]*(Ir[i]-1)*Math.Pow(delta, Ir[i])*Math.Pow(tau, Jr[i]);
       }
       return summer;
     }
     double tau2_d2phi_dtau2(double T, double rho)
     {
-      const double delta = rho/Rhocrit;
-      const double tau = Tcrit/T;
+      double delta = rho/Rhocrit;
+      double tau = Tcrit/T;
       double summer = 0;
       for(int i = 1; i < 40; ++i)
       {
-        summer += nr[i]*Jr[i]*(Jr[i]-1)*pow(delta, Ir[i])*pow(tau, Jr[i]);
+        summer += nr[i]*Jr[i]*(Jr[i]-1)*Math.Pow(delta, Ir[i])*Math.Pow(tau, Jr[i]);
       }
       return summer;
     }
     double deltatau_d2phi_ddelta_dtau(double T, double rho)
     {
-      const double delta = rho/Rhocrit;
-      const double tau = Tcrit/T;
+      double delta = rho/Rhocrit;
+      double tau = Tcrit/T;
       double summer = 0;
       for(int i = 1; i < 40; ++i)
       {
-        summer += nr[i]*Jr[i]*Ir[i]*pow(delta, Ir[i])*pow(tau, Jr[i]);
+        summer += nr[i]*Jr[i]*Ir[i]*Math.Pow(delta, Ir[i])*Math.Pow(tau, Jr[i]);
       }
       return summer;
     }
     double mu0(double T)
     {
-      const double T_bar = T/Tcrit;
+      double T_bar = T/Tcrit;
       double summer = 0.0;
-      for(int i = 0; i < muJ0.Length(); ++i)
+      for(int i = 0; i < muJ0.Count; ++i)
       {
-        summer += mun0[i]/pow(T_bar, muJ0[i]);
+        summer += mun0[i]/Math.Pow(T_bar, muJ0[i]);
       }
       return 100.0*Math.Sqrt(T_bar)/summer;
     }
     double mu1(double T, double rho)
     {
-      const double rho_bar = rho/Rhocrit;
+      double rho_bar = rho/Rhocrit;
       double summer = 0.0;
-      for(int i = 0; i < muJr.Length(); ++i)
+      for(int i = 0; i < muJr.Count; ++i)
       {
-        summer += rho_bar * pow(Trterm(T),muIr[i]) * munr[i]*pow(Rhorterm(rho),muJr[i]);
+        summer += rho_bar * Math.Pow(Trterm(T),muIr[i]) * munr[i]*Math.Pow(Rhorterm(rho),muJr[i]);
       }
       return exp(summer);
     }
     double lambda0(double T)
     {
-      const double T_bar = T/Tcrit;
+      double T_bar = T/Tcrit;
       double summer = 0.0;
-      for(int i = 0; i < lamJ0.Length(); ++i)
+      for(int i = 0; i < lamJ0.Count; ++i)
       {
-        summer += lamn0[i]/pow(T_bar, lamJ0[i]);
+        summer += lamn0[i]/Math.Pow(T_bar, lamJ0[i]);
       }
       return Math.Sqrt(T_bar)/summer;
     }
     double lambda1(double T, double rho)
     {
-      const double rho_bar = rho/Rhocrit;
+      double rho_bar = rho/Rhocrit;
       double summer = 0.0;
-      for(int i = 0; i < lamJr.Length(); ++i)
+      for(int i = 0; i < lamJr.Count; ++i)
       {
-        summer += rho_bar * pow(Trterm(T),lamIr[i]) * lamnr[i]*pow(Rhorterm(rho),lamJr[i]);
+        summer += rho_bar * Math.Pow(Trterm(T),lamIr[i]) * lamnr[i]*Math.Pow(Rhorterm(rho),lamJr[i]);
       }
       return exp(summer);
     }
-    double lambda2(double T, double p, double rho)
+    public double lambda2(double T, double p, double rho)
     {
       double y;
       double Cpbar;
@@ -2489,7 +2481,7 @@ static class IF97
       double zeta;
       double delChi;
       double Cpcalc;
-      const double rhobar = rho/Rhocrit;   /// Dimensionless
+      double rhobar = rho/Rhocrit;   /// Dimensionless
       const double LAMBDA = 177.8514;    /// Dimensionless
       const double qD   = 1.0/0.40;    /// 1/nm
       const double Tr   = 1.5*Tcrit;   /// Dimensionless
@@ -2507,7 +2499,7 @@ static class IF97
       zeta = Pcrit/Rhocrit*drhodp(T,rho);            ///
       if((zeta < 0) || (zeta > 1.0E13)) zeta = 1.0E13;
       delChi = rhobar*(zeta - delTr(rho)*Tr/T);
-      y = qD*xi0*pow(delChi/GAMMA0,nu/gam);
+      y = qD*xi0*Math.Pow(delChi/GAMMA0,nu/gam);
       if(y < 1.2E-7)
         Z = 0.0;
       else
@@ -2577,7 +2569,7 @@ static class IF97
     }
     double cpmass(double T, double rho)
     {
-      return R*(-tau2_d2phi_dtau2(T, rho) + pow(delta_dphi_ddelta(T, rho) - deltatau_d2phi_ddelta_dtau(T, rho), 2)/(2*delta_dphi_ddelta(T, rho) + delta2_d2phi_ddelta2(T, rho)));
+      return R*(-tau2_d2phi_dtau2(T, rho) + Math.Pow(delta_dphi_ddelta(T, rho) - deltatau_d2phi_ddelta_dtau(T, rho), 2)/(2*delta_dphi_ddelta(T, rho) + delta2_d2phi_ddelta2(T, rho)));
     }
     double cvmass(double T, double rho)
     {
@@ -2585,7 +2577,7 @@ static class IF97
     }
     double speed_sound(double T, double rho)
     {
-      const double RHS = 2*delta_dphi_ddelta(T, rho) + delta2_d2phi_ddelta2(T, rho)-pow(delta_dphi_ddelta(T,rho)-deltatau_d2phi_ddelta_dtau(T,rho),2)/tau2_d2phi_dtau2(T,rho);
+      double RHS = 2*delta_dphi_ddelta(T, rho) + delta2_d2phi_ddelta2(T, rho)-Math.Pow(delta_dphi_ddelta(T,rho)-deltatau_d2phi_ddelta_dtau(T,rho),2)/tau2_d2phi_dtau2(T,rho);
       return Math.Sqrt(R*(1000/R_fact)*T*RHS);
     }
     double visc(double T, double rho)
@@ -2599,7 +2591,7 @@ static class IF97
     {
       /// This base region function was not inherited in Region3
       const double lambda_star = 0.001;
-      const double lambda_bar = lambda0(T)*lambda1(T,rho) + lambda2(T,p,rho);
+      double lambda_bar = lambda0(T)*lambda1(T,rho) + lambda2(T,p,rho);
       return lambda_star * lambda_bar;
     }
     double drhodp(double T, double rho)
@@ -2614,7 +2606,7 @@ static class IF97
     double delTr(double rho)
     {
       /// This is the IF97 correlation for drhodp at the reducing temperature, Tr
-      const double rhobar = rho/Rhocrit;
+      double rhobar = rho/Rhocrit;
       double summer = 0;
       int j;
       //
@@ -2676,7 +2668,7 @@ static class IF97
       return subregion;  // in case no adjustment needs to be made
     } // SatSubRegionAdjust
 
-    double output(IF97parameters key, double T, double p, IF97SatState State)
+    public double output(IF97parameters key, double T, double p, IF97SatState State)
     {
       double rho;
       char region = Region3Backwards.BackwardsRegion3RegionDetermination(T, p);
@@ -2714,10 +2706,10 @@ static class IF97
   /********************************************************************************/
   /**************************     Region #4     *******************************/
   /********************************************************************************/
-  struct SaturationElement
+  public struct SaturationElement
   {
-    int i;
-    double n;
+    public int i;
+    public double n;
     public SaturationElement(int _i, double _n)
     {
       i = _i;
@@ -2738,18 +2730,18 @@ static class IF97
     new SaturationElement(10, 0.65017534844798e3),
   };
   /// This "region" is the saturation curve
-  class Region4
+  public class Region4
   {
     List<double> n;
     double p_star;
     double T_star;
 
-    Region4()
+    public Region4()
     {
       p_star = 1.0*p_fact;
       T_star = 1.0;
       n.reLength(1); n[0] = 0;
-      for(int i = 0; i < sat.Length(); ++i)
+      for(int i = 0; i < sat.Length; ++i)
       {
         n.Add(sat[i].n);
       }
@@ -2761,11 +2753,11 @@ static class IF97
       {
         throw new ArgumentOutOfRangeException("Temperature out of range");
       }
-      const double theta = T/T_star+n[9]/(T/T_star-n[10]);
-      const double A =    theta*theta + n[1]*theta + n[2];
+      double theta = T/T_star+n[9]/(T/T_star-n[10]);
+      const double A =      theta*theta + n[1]*theta + n[2];
       const double B = n[3]*theta*theta + n[4]*theta + n[5];
       const double C = n[6]*theta*theta + n[7]*theta + n[8];
-      return p_star*pow(2*C/(-B+Math.Sqrt(B*B-4*A*C)), 4);
+      return p_star*Math.Pow(2*C/(-B+Math.Sqrt(B*B-4*A*C)), 4);
     }
     double T_p(double p)
     {
@@ -2777,15 +2769,15 @@ static class IF97
 
       /* // Initial formulas
       const double beta = Math.Pow(beta, 0.25);
-      const double E =    beta*beta + n[3]*beta + n[6];
+      const double E =      beta*beta + n[3]*beta + n[6];
       const double F = n[1]*beta*beta + n[4]*beta + n[7];
       const double G = n[2]*beta*beta + n[5]*beta + n[8];
       */
 
-      const double beta2 = Math.Sqrt(p/p_star);
-      const double beta  = Math.Sqrt(beta2);
+      double beta2 = Math.Sqrt(p/p_star);
+      double beta  = Math.Sqrt(beta2);
       /* // First optimization
-      const double E =    beta2 + n[3]*beta + n[6];
+      const double E =      beta2 + n[3]*beta + n[6];
       const double F = n[1]*beta2 + n[4]*beta + n[7];
       const double G = n[2]*beta2 + n[5]*beta + n[8];
       */
@@ -2796,7 +2788,9 @@ static class IF97
       double *G = &EFG[2];
 
       // Each cycle can be vectorized
-      EFG[0] = 1.0; EFG[1] = n[1]; EFG[2] = n[2];
+      EFG[0] = 1.0;
+      EFG[1] = n[1];
+      EFG[2] = n[2];
       for(int i=0; i<3; ++i) { EFG[i] *= beta; }
       for(int i=0; i<3; ++i) { EFG[i] += n[i+3]; }
       for(int i=0; i<3; ++i) { EFG[i] *= beta; }
@@ -2808,8 +2802,8 @@ static class IF97
       //EFG[0] += n[6];    EFG[1] += n[7];     EFG[2] += n[8];
       */
 
-      const double D = 2*G/(-F-Math.Sqrt(F*F-4*E*G));
-      const double n10pD = n[10]+D;
+      double D = 2*G/(-F-Math.Sqrt(F*F-4*E*G));
+      double n10pD = n[10]+D;
       return T_star*0.5*(n10pD - Math.Sqrt(n10pD*n10pD - 4*(n[9] + n[10]*D)));
     }
     double sigma_t(double T)
@@ -2825,7 +2819,7 @@ static class IF97
       const double B = 235.8 / 1000;  // Published value in [mN/m]; Convert to SI [N/m] in all cases
       const double b = -0.625;
       const double mu = 1.256;
-      return B*pow(Tau,mu)*(1.0 + b*Tau);
+      return B*Math.Pow(Tau,mu)*(1.0 + b*Tau);
     }
   }
 
@@ -2851,28 +2845,16 @@ static class IF97
     new RegionIdealElement( 2, -0.32961626538917),
   };
 
-  class Region5 : BaseRegion
+  public class Region5 : BaseRegion
   {
-    Region5() : base(Region5residdata, Region5idealdata)
+    public Region5() : base(Region5residdata, Region5idealdata)
     {
       T_star = 1000; p_star = 1*p_fact;
     }
-    double lambda2(double T, double p, double rho)
-    {
-      return 0.0;  // No critical enhancement of thermal conductivity in Region 5
-    }
-    double TAUrterm(double T)
-    {
-      return T_star/T;
-    }
-    double PIrterm(double p)
-    {
-      return p/p_star;
-    }
-    double TAU0term(double T)
-    {
-      return T_star/T;
-    }
+    public override double lambda2(double T, double p, double rho) { return 0.0; }  // No critical enhancement of thermal conductivity in Region 5
+    public override double TAUrterm(double T) { return T_star/T; }
+    public override double PIrterm(double p) { return p/p_star; }
+    public override double TAU0term(double T) { return T_star/T; }
   }
 
   /********************************************************************************/
@@ -2882,11 +2864,11 @@ static class IF97
 
   static class Backwards
   {
-    struct BackwardRegionResidualElement
+    public struct BackwardRegionResidualElement
     {
-      double I; // The first index
-      double J; // The second index
-      double n; // The leading numerical constant
+      public double I; // The first index
+      public double J; // The second index
+      public double n; // The leading numerical constant
       public BackwardRegionResidualElement(double I, double J, double n)
       {
         I = _I;
@@ -3714,7 +3696,7 @@ static class IF97
       new BackwardRegionResidualElement(28, 36,  0.317247449371057E+11),
     };
 
-    class BackwardsRegion
+    public class BackwardsRegion
     {
       double p_star;
       double X_star;
@@ -3732,7 +3714,7 @@ static class IF97
       List<double> I, J;
       List<double> n;
 
-      BackwardsRegion(BackwardRegionResidualElement[] data, int N)
+      public BackwardsRegion(BackwardRegionResidualElement[] data, int N)
       {
         this->N = N;
         for(int i = 0; i < N; ++i)
@@ -3751,12 +3733,12 @@ static class IF97
       // process by evaluating v(T,p) using T(p,X) and the p value supplied.
       public virtual double T_pX(double p, double X)
       {
-        const double pi = p/p_star;
-        const double eta = X/X_star;
+        double pi = p/p_star;
+        double eta = X/X_star;
         double summer = 0;
         for(int i = 0; i < N; ++i)
         {
-          summer += n[i]*pow(pi+a, I[i])*pow(eta+b, J[i])*pow(f, J[i]);
+          summer += n[i]*Math.Pow(pi+a, I[i])*Math.Pow(eta+b, J[i])*Math.Pow(f, J[i]);
         }
         return summer*T_star;
       }
@@ -3766,17 +3748,17 @@ static class IF97
       // when the appropriate coefficients are provided for an h(s) instance of this class.
       public virtual double h_s(double s)
       {
-        const double sigma1 = s/s_star;
-        const double sigma2 = s/s2_star;
+        double sigma1 = s/s_star;
+        double sigma2 = s/s2_star;
         double summer = 0;
         for(int i = 0; i < N; ++i)
         {
-          summer += n[i]*pow(pow(sigma1,d)+a, I[i])*pow(sigma2+b, J[i]);
+          summer += n[i]*Math.Pow(Math.Pow(sigma1,d)+a, I[i])*Math.Pow(sigma2+b, J[i]);
         }
         // NOTE: c=1, e=0 : Straight summation
         //     c>1, e=0 : Power fit
         //     c=1, e=1 : Exp fit
-        return ( (1-e)*pow(summer,c) + e*exp(summer) )*h_star;
+        return ( (1-e)*Math.Pow(summer,c) + e*exp(summer) )*h_star;
       }
 
       // This function implements the backward formulas for p(h,s) as defined in the IAPWS
@@ -3784,26 +3766,26 @@ static class IF97
       // when the appropriate coefficients are provided for a p(h,s) instance of this class.
       public virtual double p_hs(double h, double s)
       {
-        const double eta = h/h_star;
-        const double sigma = s/s_star;
+        double eta = h/h_star;
+        double sigma = s/s_star;
         double summer = 0;
         for(int i = 0; i < N; ++i)
         {
-          summer += n[i]*pow(eta+a, I[i])*pow(sigma+b, J[i]);
+          summer += n[i]*Math.Pow(eta+a, I[i])*Math.Pow(sigma+b, J[i]);
         }
-        return pow(summer,c)*p_star;
+        return Math.Pow(summer,c)*p_star;
       }
 
 //     Add function for Tb23(h,s) Boundary Line.  There will only be one instance below.
 //     It may double as Tsat(h,s) in Region 4 as well.
       public virtual double t_hs(double h, double s)
       {
-        const double eta = h/h_star;
-        const double sigma = s/s_star;
+        double eta = h/h_star;
+        double sigma = s/s_star;
         double summer = 0;
         for(int i = 0; i < N; ++i)
         {
-          summer += n[i]*pow(eta+a, I[i])*pow(sigma+b, J[i]);
+          summer += n[i]*Math.Pow(eta+a, I[i])*Math.Pow(sigma+b, J[i]);
         }
         return summer*T_star;
       }
@@ -3811,35 +3793,35 @@ static class IF97
     }  // BackwardsRegion Class
 
     // Region 1 *******************************************************************************
-    class Region1H  : BackwardsRegion { Region1H()  : base(Coeff1H,  20) { p_star = 1*p_fact;   T_star = 1.0;         X_star = 2500.0*R_fact; a = 0;    b = 1.0;  f = 1; } }
-    class Region1S  : BackwardsRegion { Region1S()  : base(Coeff1S,  20) { p_star = 1*p_fact;   T_star = 1.0;         X_star = 1.0*R_fact;    a = 0;    b = 2.0;  f = 1; } }
-    class Region1HS : BackwardsRegion { Region1HS() : base(Coeff1HS, 19) { p_star = 100*p_fact; h_star = 3400*R_fact; s_star = 7.6*R_fact;    a = 0.05; b = 0.05; c = 1; } }
+    public class Region1H  : BackwardsRegion { public Region1H()  : base(Coeff1H,  20) { p_star = 1*p_fact;   T_star = 1.0;         X_star = 2500.0*R_fact; a = 0;    b = 1.0;  f = 1; } }
+    public class Region1S  : BackwardsRegion { public Region1S()  : base(Coeff1S,  20) { p_star = 1*p_fact;   T_star = 1.0;         X_star = 1.0*R_fact;    a = 0;    b = 2.0;  f = 1; } }
+    public class Region1HS : BackwardsRegion { public Region1HS() : base(Coeff1HS, 19) { p_star = 100*p_fact; h_star = 3400*R_fact; s_star = 7.6*R_fact;    a = 0.05; b = 0.05; c = 1; } }
     // Region 2 *******************************************************************************
-    class Region2aH  : BackwardsRegion { Region2aH()  : base(Coeff2aH,  34) { p_star = 1*p_fact;   T_star = 1.0;         X_star = 2000.0*R_fact; a = 0;    b = -2.1;  f = 1;  } }
-    class Region2bH  : BackwardsRegion { Region2bH()  : base(Coeff2bH,  38) { p_star = 1*p_fact;   T_star = 1.0;         X_star = 2000.0*R_fact; a = -2;   b = -2.6;  f = 1;  } }
-    class Region2cH  : BackwardsRegion { Region2cH()  : base(Coeff2cH,  23) { p_star = 1*p_fact;   T_star = 1.0;         X_star = 2000.0*R_fact; a = 25;   b = -1.8;  f = 1;  } }
-    class Region2aS  : BackwardsRegion { Region2aS()  : base(Coeff2aS,  46) { p_star = 1*p_fact;   T_star = 1.0;         X_star = 2.0*R_fact;    a = 0;    b = -2;    f = 1;  } }
-    class Region2bS  : BackwardsRegion { Region2bS()  : base(Coeff2bS,  44) { p_star = 1*p_fact;   T_star = 1.0;         X_star = 0.7853*R_fact; a = 0;    b = -10;   f = -1; } }
-    class Region2cS  : BackwardsRegion { Region2cS()  : base(Coeff2cS,  30) { p_star = 1*p_fact;   T_star = 1.0;         X_star = 2.9251*R_fact; a = 0;    b = -2;    f = -1; } }
-    class Region2aHS : BackwardsRegion { Region2aHS() : base(Coeff2aHS, 29) { p_star = 4*p_fact;   h_star = 4200*R_fact; s_star = 12*R_fact;     a = -0.5; b = -1.2;  c = 4;  } }
-    class Region2bHS : BackwardsRegion { Region2bHS() : base(Coeff2bHS, 33) { p_star = 100*p_fact; h_star = 4100*R_fact; s_star = 7.9*R_fact;    a = -0.6; b = -1.01; c = 4;  } }
-    class Region2cHS : BackwardsRegion { Region2cHS() : base(Coeff2cHS, 31) { p_star = 100*p_fact; h_star = 3500*R_fact; s_star = 5.9*R_fact;    a = -0.7; b = -1.1;  c = 4;  } }
+    public class Region2aH  : BackwardsRegion { public Region2aH()  : base(Coeff2aH,  34) { p_star = 1*p_fact;   T_star = 1.0;         X_star = 2000.0*R_fact; a = 0;    b = -2.1;  f = 1;  } }
+    public class Region2bH  : BackwardsRegion { public Region2bH()  : base(Coeff2bH,  38) { p_star = 1*p_fact;   T_star = 1.0;         X_star = 2000.0*R_fact; a = -2;   b = -2.6;  f = 1;  } }
+    public class Region2cH  : BackwardsRegion { public Region2cH()  : base(Coeff2cH,  23) { p_star = 1*p_fact;   T_star = 1.0;         X_star = 2000.0*R_fact; a = 25;   b = -1.8;  f = 1;  } }
+    public class Region2aS  : BackwardsRegion { public Region2aS()  : base(Coeff2aS,  46) { p_star = 1*p_fact;   T_star = 1.0;         X_star = 2.0*R_fact;    a = 0;    b = -2;    f = 1;  } }
+    public class Region2bS  : BackwardsRegion { public Region2bS()  : base(Coeff2bS,  44) { p_star = 1*p_fact;   T_star = 1.0;         X_star = 0.7853*R_fact; a = 0;    b = -10;   f = -1; } }
+    public class Region2cS  : BackwardsRegion { public Region2cS()  : base(Coeff2cS,  30) { p_star = 1*p_fact;   T_star = 1.0;         X_star = 2.9251*R_fact; a = 0;    b = -2;    f = -1; } }
+    public class Region2aHS : BackwardsRegion { public Region2aHS() : base(Coeff2aHS, 29) { p_star = 4*p_fact;   h_star = 4200*R_fact; s_star = 12*R_fact;     a = -0.5; b = -1.2;  c = 4;  } }
+    public class Region2bHS : BackwardsRegion { public Region2bHS() : base(Coeff2bHS, 33) { p_star = 100*p_fact; h_star = 4100*R_fact; s_star = 7.9*R_fact;    a = -0.6; b = -1.01; c = 4;  } }
+    public class Region2cHS : BackwardsRegion { public Region2cHS() : base(Coeff2cHS, 31) { p_star = 100*p_fact; h_star = 3500*R_fact; s_star = 5.9*R_fact;    a = -0.7; b = -1.1;  c = 4;  } }
     // Region 3 *******************************************************************************
-    class Region3aH  : BackwardsRegion { Region3aH()  : base(Coeff3aH,  31) { p_star = 100*p_fact;  T_star = 760.0;       X_star = 2300.0*R_fact; a = 0.240;  b = -0.615; f = 1;  } }
-    class Region3bH  : BackwardsRegion { Region3bH()  : base(Coeff3bH,  33) { p_star = 100*p_fact;  T_star = 860.0;       X_star = 2800.0*R_fact; a = 0.298;  b = -0.720; f = 1;  } }
-    class Region3aS  : BackwardsRegion { Region3aS()  : base(Coeff3aS,  33) { p_star = 100*p_fact;  T_star = 760.0;       X_star = 4.4*R_fact;    a = 0.240;  b = -0.703; f = 1;  } }
-    class Region3bS  : BackwardsRegion { Region3bS()  : base(Coeff3bS,  28) { p_star = 100*p_fact;  T_star = 860.0;       X_star = 5.3*R_fact;    a = 0.760;  b = -0.818; f = 1;  } }
-    class Region3aHS : BackwardsRegion { Region3aHS() : base(Coeff3aHS, 33) { p_star = 99*p_fact;   h_star = 2300*R_fact; s_star = 4.4*R_fact;    a = -1.01;  b = -0.750; c = 1;  } }
-    class Region3bHS : BackwardsRegion { Region3bHS() : base(Coeff3bHS, 35) { p_star = 16.6*p_fact; h_star = 2800*R_fact; s_star = 5.3*R_fact;    a = -0.681; b = -0.792; c = -1; } }
+    public class Region3aH  : BackwardsRegion { public Region3aH()  : base(Coeff3aH,  31) { p_star = 100*p_fact;  T_star = 760.0;       X_star = 2300.0*R_fact; a = 0.240;  b = -0.615; f = 1;  } }
+    public class Region3bH  : BackwardsRegion { public Region3bH()  : base(Coeff3bH,  33) { p_star = 100*p_fact;  T_star = 860.0;       X_star = 2800.0*R_fact; a = 0.298;  b = -0.720; f = 1;  } }
+    public class Region3aS  : BackwardsRegion { public Region3aS()  : base(Coeff3aS,  33) { p_star = 100*p_fact;  T_star = 760.0;       X_star = 4.4*R_fact;    a = 0.240;  b = -0.703; f = 1;  } }
+    public class Region3bS  : BackwardsRegion { public Region3bS()  : base(Coeff3bS,  28) { p_star = 100*p_fact;  T_star = 860.0;       X_star = 5.3*R_fact;    a = 0.760;  b = -0.818; f = 1;  } }
+    public class Region3aHS : BackwardsRegion { public Region3aHS() : base(Coeff3aHS, 33) { p_star = 99*p_fact;   h_star = 2300*R_fact; s_star = 4.4*R_fact;    a = -1.01;  b = -0.750; c = 1;  } }
+    public class Region3bHS : BackwardsRegion { public Region3bHS() : base(Coeff3bHS, 35) { p_star = 16.6*p_fact; h_star = 2800*R_fact; s_star = 5.3*R_fact;    a = -0.681; b = -0.792; c = -1; } }
     // Region 4 *******************************************************************************
-    class Region4HS : BackwardsRegion { Region4HS() : base(CoeffT4HS, 36) { h_star = 2800.0*R_fact; s_star = 9.2*R_fact; T_star = 550; a = -0.119; b = -1.07; } }
+    public class Region4HS : BackwardsRegion { public Region4HS() : base(CoeffT4HS, 36) { h_star = 2800.0*R_fact; s_star = 9.2*R_fact; T_star = 550; a = -0.119; b = -1.07; } }
     // h(s) Boundary Equations *******************************************************************************
-    class Boundary14HS    : BackwardsRegion { Boundary14HS()    : base(Coeffb14HS,   27) { h_star = 1700.0*R_fact; s_star = 3.8*R_fact;  s2_star = s_star;     a = -1.09;  b = 0.366E-4; c = 1; d = 1;  e = 0; } }
-    class Boundary3a4HS   : BackwardsRegion { Boundary3a4HS()   : base(Coeffb3a4HS,  19) { h_star = 1700.0*R_fact; s_star = 3.8*R_fact;  s2_star = s_star;     a = -1.09;  b = 0.366E-4; c = 1; d = 1;  e = 0; } }
-    class Boundary2ab4HS  : BackwardsRegion { Boundary2ab4HS()  : base(Coeffb2abHS,  30) { h_star = 2800.0*R_fact; s_star = 5.21*R_fact; s2_star = 9.2*R_fact; a = -0.513; b = -0.524;   c = 1; d = -1; e = 1; } }
-    class Boundary2c3b4HS : BackwardsRegion { Boundary2c3b4HS() : base(Coeffb2c3bHS, 16) { h_star = 2800.0*R_fact; s_star = 5.9*R_fact;  s2_star = s_star;     a = -1.02;  b = -0.726;   c = 4; d = 1;  e = 0; } }
-    class Boundary13HS    : BackwardsRegion { Boundary13HS()    : base(Coeffb13HS,    6) { h_star = 1700.0*R_fact; s_star = 3.8*R_fact;  s2_star = s_star;     a = -0.884; b = -0.864;   c = 1; d = 1;  e = 0; } }
-    class Boundary23HS    : BackwardsRegion { Boundary23HS()    : base(CoeffTb23HS,  25) { h_star = 3000.0*R_fact; s_star = 5.3*R_fact;  T_star = 900;         a = -0.727; b = -0.864; } }
+    public class Boundary14HS    : BackwardsRegion { public Boundary14HS()    : base(Coeffb14HS,   27) { h_star = 1700.0*R_fact; s_star = 3.8*R_fact;  s2_star = s_star;     a = -1.09;  b = 0.366E-4; c = 1; d = 1;  e = 0; } }
+    public class Boundary3a4HS   : BackwardsRegion { public Boundary3a4HS()   : base(Coeffb3a4HS,  19) { h_star = 1700.0*R_fact; s_star = 3.8*R_fact;  s2_star = s_star;     a = -1.09;  b = 0.366E-4; c = 1; d = 1;  e = 0; } }
+    public class Boundary2ab4HS  : BackwardsRegion { public Boundary2ab4HS()  : base(Coeffb2abHS,  30) { h_star = 2800.0*R_fact; s_star = 5.21*R_fact; s2_star = 9.2*R_fact; a = -0.513; b = -0.524;   c = 1; d = -1; e = 1; } }
+    public class Boundary2c3b4HS : BackwardsRegion { public Boundary2c3b4HS() : base(Coeffb2c3bHS, 16) { h_star = 2800.0*R_fact; s_star = 5.9*R_fact;  s2_star = s_star;     a = -1.02;  b = -0.726;   c = 4; d = 1;  e = 0; } }
+    public class Boundary13HS    : BackwardsRegion { public Boundary13HS()    : base(Coeffb13HS,    6) { h_star = 1700.0*R_fact; s_star = 3.8*R_fact;  s2_star = s_star;     a = -0.884; b = -0.864;   c = 1; d = 1;  e = 0; } }
+    public class Boundary23HS    : BackwardsRegion { public Boundary23HS()    : base(CoeffTb23HS,  25) { h_star = 3000.0*R_fact; s_star = 5.3*R_fact;  T_star = 900;         a = -0.727; b = -0.864; } }
 
     static double[] Region2b2cdata =
     {
@@ -3850,21 +3832,21 @@ static class IF97
        0.45257578905948E+1
     };
 
-    static double P2b2c_h(double h)
+    public static double P2b2c_h(double h)
     {
       // Only called for Region determination and debugging.  No range checking.
       const double p_star = 1*p_fact;
       const double h_star = 1*R_fact;
-      const double eta = h/h_star;
+      double eta = h/h_star;
       const double PI = Region2b2cdata[0] + Region2b2cdata[1]*eta + Region2b2cdata[2]*eta*eta;
       return PI*p_star;
     }
-    static double H2b2c_p(double p)
+    public static double H2b2c_p(double p)
     {
       // Only called for Region determination and debugging.  No range checking.
       const double p_star = 1*p_fact;
       const double h_star = 1*R_fact;
-      const double PI = p/p_star;
+      double PI = p/p_star;
       const double ETA = Region2b2cdata[3] + Math.Sqrt((PI - Region2b2cdata[4])/Region2b2cdata[2]);
       return ETA*h_star;
     }
@@ -3877,12 +3859,12 @@ static class IF97
        0.875131686009950E-4,
     };
 
-    static double H3ab_p(double p)
+    public static double H3ab_p(double p)
     {
       // Only called for Region determination and debugging.  No range checking.
       const double p_star = 1*p_fact;
       const double h_star = 1*R_fact;
-      const double PI = p/p_star;
+      double PI = p/p_star;
       double ETA = Region3abdata[0] + Region3abdata[1]*PI + Region3abdata[2]*PI*PI + Region3abdata[3]*PI*PI*PI;
       return ETA*h_star;
     }
@@ -3895,24 +3877,24 @@ static class IF97
        0.276349063799944E+2,
     };
 
-    static double H2ab_s(double s)
+    public static double H2ab_s(double s)
     {
       // Only called for Region determination and debugging.  No range checking.
       const double s_star = 1*R_fact;
       const double h_star = 1*R_fact;
-      const double sigma = s/s_star;
-      double ETA = Region2abdata[0] + Region2abdata[1]*sigma + Region2abdata[2]*pow(sigma,2) + Region2abdata[3]*pow(sigma,3);
+      double sigma = s/s_star;
+      double ETA = Region2abdata[0] + Region2abdata[1]*sigma + Region2abdata[2]*Math.Pow(sigma,2) + Region2abdata[3]*Math.Pow(sigma,3);
       return ETA*h_star;
     }
 
-    static double H13_s(double s)
+    public static double H13_s(double s)
     {
       // Only called for Region determination and debugging.  No range checking.
       Boundary13HS b13;
       return b13.h_s(s);
     }
 
-    static double Hsat_s(double s)
+    public static double Hsat_s(double s)
     {
       // Only called for Region determination and debugging.  Has range checking.
       Boundary14HS b14hs;
@@ -3997,23 +3979,24 @@ static class IF97
     switch (region)
     {
       case IF97REGIONS.REGION_1:
-        if(State == IF97SatState.VAPOR) return R2.output(outkey, T, p);  // On saturation curve and need the Vapor phase
-        else return R1.output(outkey, T, p);  // otherwise, use Liquid Region 1
-        break;
+        if(State == IF97SatState.VAPOR) return R2.output(outkey, T, p); // On saturation curve and need the Vapor phase
+        else return R1.output(outkey, T, p); // otherwise, use Liquid Region 1
+        //break; //"unreachable"
       case IF97REGIONS.REGION_2:
-        if(State == IF97SatState.LIQUID) return R1.output(outkey, T, p);  // On saturation curve and need the Liquid phase
-        else return R2.output(outkey, T, p);  // otherwise, use Vapor Region 2
-        break;
+        if(State == IF97SatState.LIQUID) return R1.output(outkey, T, p); // On saturation curve and need the Liquid phase
+        else return R2.output(outkey, T, p); // otherwise, use Vapor Region 2
+        //break; //"unreachable"
       case IF97REGIONS.REGION_3:
         return R3.output(outkey, T, p, State);
-        break;
+        //break; //"unreachable"
       case IF97REGIONS.REGION_4:
         if(State == IF97SatState.VAPOR) return R2.output(outkey, T, p);
         else if(State == IF97SatState.LIQUID) return R1.output(outkey, T, p);
         else throw new ArgumentOutOfRangeException("Cannot use Region 4 with T and p as inputs");
-        break;
+        //break; //"unreachable"
       case IF97REGIONS.REGION_5:
         return R5.output(outkey, T, p);
+        //break; //"unreachable"
     }
     throw new ArgumentOutOfRangeException("Unable to match region");
   }
@@ -4078,11 +4061,11 @@ static class IF97
 
     switch(region)
     {
-      case IF97REGIONS.REGION_1: return 1; break;
-      case IF97REGIONS.REGION_2: return 2; break;
-      case IF97REGIONS.REGION_3: return 3; break;
-      case IF97REGIONS.REGION_4: return 4; break;
-      default: return 0; break;
+      case IF97REGIONS.REGION_1: return 1; //break; //"unreachable"
+      case IF97REGIONS.REGION_2: return 2; //break; //"unreachable"
+      case IF97REGIONS.REGION_3: return 3; //break; //"unreachable"
+      case IF97REGIONS.REGION_4: return 4; //break; //"unreachable"
+      default: return 0; //break; //"unreachable"
     }
   }
 
@@ -4091,18 +4074,18 @@ static class IF97
     // Note that this routine returns only temperature (IF97_T).  All other values should be
     // calculated from this temperature and the known pressure using forward equations.
     // Setup Backward Regions for output
-    Backwards.Region1H B1H;
-    Backwards.Region1S B1S;
-    Backwards.Region2aH B2aH;
-    Backwards.Region2bH B2bH;
-    Backwards.Region2cH B2cH;
-    Backwards.Region2aS B2aS;
-    Backwards.Region2bS B2bS;
-    Backwards.Region2cS B2cS;
-    Backwards.Region3aH B3aH;
-    Backwards.Region3bH B3bH;
-    Backwards.Region3aS B3aS;
-    Backwards.Region3bS B3bS;
+    Backwards.Region1H B1H = new Backwards.Region1H();
+    Backwards.Region1S B1S = new Backwards.Region1S();
+    Backwards.Region2aH B2aH = new Backwards.Region2aH();
+    Backwards.Region2bH B2bH = new Backwards.Region2bH();
+    Backwards.Region2cH B2cH = new Backwards.Region2cH();
+    Backwards.Region2aS B2aS = new Backwards.Region2aS();
+    Backwards.Region2bS B2bS = new Backwards.Region2bS();
+    Backwards.Region2cS B2cS = new Backwards.Region2cS();
+    Backwards.Region3aH B3aH = new Backwards.Region3aH();
+    Backwards.Region3bH B3bH = new Backwards.Region3bH();
+    Backwards.Region3aS B3aS = new Backwards.Region3aS();
+    Backwards.Region3bS B3bS = new Backwards.Region3bS();
 
     // Make sure input and output keys are valid for Backward formulas
     if((inkey != IF97parameters.IF97_HMASS) && (inkey != IF97parameters.IF97_SMASS))
@@ -4117,7 +4100,7 @@ static class IF97
       case IF97REGIONS.REGION_1:
         if(inkey == IF97parameters.IF97_HMASS) return B1H.T_pX(p,X);
         else return B1S.T_pX(p,X);
-        break;
+        //break; //"unreachable"
       case IF97REGIONS.REGION_2:
         if(inkey == IF97parameters.IF97_HMASS)
         {
@@ -4131,7 +4114,7 @@ static class IF97
           else if(X >= S2bc) return B2bS.T_pX(p,X);
           else return B2cS.T_pX(p,X);
         }
-        break;
+        //break; //"unreachable"
       case IF97REGIONS.REGION_3:
         if(inkey == IF97parameters.IF97_HMASS)
         {
@@ -4143,10 +4126,10 @@ static class IF97
           if(X <= Scrit) return B3aS.T_pX(p,X);
           else return B3bS.T_pX(p,X);
         }
-        break;
+        //break; //"unreachable"
       case IF97REGIONS.REGION_4:
         return Tsat97(p);
-        break;
+        //break; //"unreachable"
       default: throw new ArgumentOutOfRangeException("Unable to match region");
     }
   } // Region Output backward
@@ -4158,16 +4141,16 @@ static class IF97
     //     However, the 2014 Supplementary Release for v(p,h) and v(p,s) are
     //     more direct and may be slightly faster, since only one algebraic
     //     equation is needed instead of two in Region 3.
-    Region1 R1;
-    Region2 R2;
-    const double T = RegionOutputBackward( p, X, inkey);
+    Region1 R1 = new Region1();
+    Region2 R2 = new Region2();
+    double T = RegionOutputBackward( p, X, inkey);
     if(RegionDetermination_pX(p, X, inkey) == IF97REGIONS.REGION_4)
     {    // If in saturation dome
-      const double Tsat = Tsat97(p);
-      const double Xliq = R1.output(inkey,Tsat,p);
-      const double Xvap = R2.output(inkey,Tsat,p);
-      const double vliq = 1.0/R1.output(IF97parameters.IF97_DMASS,Tsat,p);
-      const double vvap = 1.0/R2.output(IF97parameters.IF97_DMASS,Tsat,p);
+      double Tsat = Tsat97(p);
+      double Xliq = R1.output(inkey,Tsat,p);
+      double Xvap = R2.output(inkey,Tsat,p);
+      double vliq = 1.0/R1.output(IF97parameters.IF97_DMASS,Tsat,p);
+      double vvap = 1.0/R2.output(IF97parameters.IF97_DMASS,Tsat,p);
       return 1.0/(vliq + (X-Xliq)*(vvap-vliq)/(Xvap-Xliq)); // Return Mixture Density
     }
     else
@@ -4189,7 +4172,8 @@ static class IF97
       {
         case IF97parameters.IF97_HMASS:
         case IF97parameters.IF97_SMASS:
-          t = RegionOutputBackward( p, X, inkey); break;
+          t = RegionOutputBackward( p, X, inkey);
+          break;
         case IF97parameters.IF97_UMASS:
         case IF97parameters.IF97_DMASS:
         default:
@@ -4209,20 +4193,19 @@ static class IF97
           Xliq = RegionOutput( inkey, Tsat97(p), p, IF97SatState.LIQUID);
           Xvap = RegionOutput( inkey, Tsat97(p), p, IF97SatState.VAPOR);
           return Math.Min(1.0,Math.Max(0.0,(X-Xliq)/(Xvap-Xliq)));
-          break;
+          //break; //"unreachable"
         case IF97parameters.IF97_DMASS:
           Xliq = 1.0/RegionOutput( IF97parameters.IF97_DMASS, Tsat97(p), p, IF97SatState.LIQUID);
           Xvap = 1.0/RegionOutput( IF97parameters.IF97_DMASS, Tsat97(p), p, IF97SatState.VAPOR);
           X = 1.0/X;
           return Math.Min(1.0,Math.Max(0.0,(X-Xliq)/(Xvap-Xliq)));
-          break;
+          //break; //"unreachable"
         default:
           throw new ArgumentException("Quality cannot be determined for these inputs.");
       }
     }
     // If all else fails, which it shouldn't...
     throw new ArgumentException("Quality cannot be determined for these inputs.");
-    return -1;  // Should never occur, but eliminates warnings.
   }
 
   static double X_pQ(IF97parameters inkey, double p, double Q)
@@ -4241,20 +4224,17 @@ static class IF97
         Xliq = RegionOutput( inkey, Tsat97(p), p, IF97SatState.LIQUID);
         Xvap = RegionOutput( inkey, Tsat97(p), p, IF97SatState.VAPOR);
         return Q*Xvap + (1-Q)*Xliq;
-        break;
+        //break; //"unreachable"
       case IF97parameters.IF97_DMASS:
         Xliq = 1.0/RegionOutput( IF97parameters.IF97_DMASS, Tsat97(p), p, IF97SatState.LIQUID);
         Xvap = 1.0/RegionOutput( IF97parameters.IF97_DMASS, Tsat97(p), p, IF97SatState.VAPOR);
         return 1.0/(Q*Xvap + (1-Q)*Xliq);
-        break;
+        //break; //"unreachable"
       default:
         throw new ArgumentException("Mixture property undefined");
-        return -1;  // Should never occur but eliminates warnings.
-        break;
+        //break; //"unreachable"
     }
-    return -1;  // Should never occur but eliminates warnings.
   }
-
 
   static double[] HTmaxdata =
   {
@@ -4269,8 +4249,8 @@ static class IF97
     // This function covers the top and right domain boundaries of constant Pmax and Tmax
     const double s_star = 1*R_fact;
     const double h_star = 1*R_fact;
-    const double sigma = s/s_star;
-    if(s < STPmax)  // Use forward equation along Pmax using T(Pmax,s) as Temperature
+    double sigma = s/s_star;
+    if(s < STPmax) // Use forward equation along Pmax using T(Pmax,s) as Temperature
       return RegionOutput( IF97parameters.IF97_HMASS,RegionOutputBackward(Pmax,s,IF97parameters.IF97_SMASS),Pmax, IF97SatState.NONE);
     else
     {
@@ -4278,7 +4258,7 @@ static class IF97
       // This linear combination fit h(s)=a*ln(s)+b/s+c/s�+d is not perfect, but it's close
       // and can serve as a limit along that Tmax boundary. Coefficients in HTmaxdata above.
       // There is a better way to do this using Newton-Raphson on Tmax = T(p,s), but it is iterative and slow.
-      double ETA = HTmaxdata[0]*log(sigma) + HTmaxdata[1]/sigma + HTmaxdata[2]/pow(sigma,2) +HTmaxdata[3];
+      double ETA = HTmaxdata[0]*Math.Log(sigma) + HTmaxdata[1]/sigma + HTmaxdata[2]/Math.Pow(sigma,2) +HTmaxdata[3];
       return ETA*h_star;
     }
   }
@@ -4291,9 +4271,9 @@ static class IF97
 
   static IF97BACKREGIONS RegionDetermination_HS(double h, double s)
   {
-    Backwards.Boundary13HS b13;
-    Backwards.Boundary23HS b23hs;
-    Backwards.Region2cHS R2c;
+    Backwards.Boundary13HS b13 = new Backwards.Boundary13HS();
+    Backwards.Boundary23HS b23hs = new Backwards.Boundary23HS();
+    Backwards.Region2cHS R2c = new Backwards.Region2cHS();
 
     // Check Overall Boundaries
     if( (s < Smin) || (s > Smax) )
@@ -4360,16 +4340,16 @@ static class IF97
     // Note that this routine returns only temperature (IF97_T).  All other values should be
     // calculated from this temperature and the known pressure using forward equations.
     // Setup Backward Regions for output
-    Backwards.Region1HS B1HS;
-    Backwards.Region2aHS B2aHS;
-    Backwards.Region2bHS B2bHS;
-    Backwards.Region2cHS B2cHS;
-    Backwards.Region3aHS B3aHS;
-    Backwards.Region3bHS B3bHS;
-    Backwards.Region4HS B4HS;
+    Backwards.Region1HS B1HS = new Backwards.Region1HS();
+    Backwards.Region2aHS B2aHS = new Backwards.Region2aHS();
+    Backwards.Region2bHS B2bHS = new Backwards.Region2bHS();
+    Backwards.Region2cHS B2cHS = new Backwards.Region2cHS();
+    Backwards.Region3aHS B3aHS = new Backwards.Region3aHS();
+    Backwards.Region3bHS B3bHS = new Backwards.Region3bHS();
+    Backwards.Region4HS B4HS = new Backwards.Region4HS();
     //
-    double Pval;
-    double Tval;
+    double Pval = 0.0;
+    double Tval = 0.0;
 
     // Make sure output keys are valid for Backward_HS formulas
     if((outkey != IF97parameters.IF97_P) && (outkey != IF97parameters.IF97_T)) throw new ArgumentException("Backward HS Formulas output Temperature or Pressure only.");
@@ -4433,7 +4413,7 @@ static class IF97
   static double visc_TRho(double T, double rho)
   {
     // Since we have density, we don't need to determine the region for viscosity.
-    Region1 R1;  // All regions use base region equations for visc(T,rho).
+    Region1 R1 = new Region();  // All regions use base region equations for visc(T,rho).
     return R1.visc( T, rho );
   }
   /// Get the viscosity [Pa-s] as a function of T [K] and p [Pa]
@@ -4502,19 +4482,19 @@ static class IF97
   /// Get the saturation temperature [K] as a function of p [Pa]
   static double Tsat97(double p)
   {
-    Region4 R4;
+    Region4 R4 = new Region4();
     return R4.T_p(p);
   }
   /// Get the saturation pressure [Pa] as a function of T [K]
   static double psat97(double T)
   {
-    Region4 R4;
+    Region4 R4 = new Region4();
     return R4.p_T(T);
   }
   /// Get surface tension [N/m] as a function of T [K]
   static double sigma97(double T)
   {
-    Region4 R4;
+    Region4 R4 = new Region4();
     return R4.sigma_t(T);
   }
   // ******************************************************************************** //
@@ -4617,12 +4597,12 @@ static class IF97
 
 #if ENABLE_CATCH
 
-struct Region3BackwardsData
+public struct Region3BackwardsData
 {
-  char region;
-  double T;
-  double p;
-  double v;
+  public char region;
+  public double T;
+  public double p;
+  public double v;
   public Region3BackwardsData(char _region, double _T, double _p, double _v)
   {
     region = _region;
@@ -4692,7 +4672,7 @@ static Region3BackwardsData[] _Table5 =
 
 void print_IF97_Table5()
 {
-  for(int i = 0; i < _Table5.Length(); ++i)
+  for(int i = 0; i < _Table5.Length; ++i)
   {
     double v = IF97.Region3Backwards.Region3_v_TP(_Table5[i].region, _Table5[i].T, _Table5[i].p);
     if(Math.Abs(v - _Table5[i].v) > 1e-12)
@@ -4708,11 +4688,11 @@ void print_IF97_Table5()
   }
 }
 
-struct Table3Data
+public struct Table3Data
 {
-  IF97.Region3Backwards.DividingLineEnum region;
-  double p;
-  double T;
+  public IF97.Region3Backwards.DividingLineEnum region;
+  public double p;
+  public double T;
   public Table3Data(IF97.Region3Backwards.DividingLineEnum region, double p, double T)
   {
     region = _region;
@@ -4741,7 +4721,7 @@ static Table3Data[] _Table3 =
 
 void print_boundary_line_Table3()
 {
-  for(int i = 0; i < _Table3.Length(); ++i)
+  for(int i = 0; i < _Table3.Length; ++i)
   {
     double T = IF97.Region3Backwards.DividingLine(_Table3[i].region, _Table3[i].p);
     if(Math.Abs(T - _Table3[i].T) > 1e-7)
