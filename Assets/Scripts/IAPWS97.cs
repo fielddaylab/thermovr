@@ -486,7 +486,7 @@ static class IF97
       {
         summer += rho_bar * Math.Pow(Trterm(T),muIr[i]) * munr[i]*Math.Pow(Rhorterm(rho),muJr[i]);
       }
-      return exp(summer);
+      return Math.Exp(summer);
     }
     public double lambda0(double T)
     {
@@ -506,7 +506,7 @@ static class IF97
       {
         summer += rho_bar * Math.Pow(Trterm(T),lamIr[i]) * lamnr[i]*Math.Pow(Rhorterm(rho),lamJr[i]);
       }
-      return exp(summer);
+      return Math.Exp(summer);
     }
     public virtual double lambda2(double T, double p, double rho)
     {
@@ -538,7 +538,7 @@ static class IF97
       if(y < 1.2E-7) /// Z is not calculated if y < 1.2E-7 since the
         Z = 0.0;     ///   critical enhancement becomes insignificant.
       else
-        Z = 2.0/PI/y*(((1.0-1.0/k)*atan(y)+y/k) - (1.0 - exp(-1.0/(1.0/y + y*y/(3.0*rhobar*rhobar)))));
+        Z = 2.0/PI/y*(((1.0-1.0/k)*Math.Atan(y)+y/k) - (1.0 - Math.Exp(-1.0/(1.0/y + y*y/(3.0*rhobar*rhobar)))));
       return LAMBDA*rhobar*Cpbar*T/(Tcrit*mubar)*Z;
     }
     public double Trterm(double T)
@@ -1779,7 +1779,7 @@ static class IF97
         {
           summer += n[i]*Math.Pow(pi-a, I[i])*Math.Pow(theta-b, J[i]);
         }
-        return exp(summer)*v_star;
+        return Math.Exp(summer)*v_star;
       }
     }
     public class Region3o : Region3BackwardsRegion { public Region3o() : base(Region3Odata, 24) { v_star = 0.0034; p_star = 23*p_fact; T_star = 650; a = 0.974; b = 0.996; c = 0.5; d = 1; e = 1; } }
@@ -2008,7 +2008,7 @@ static class IF97
     class CDline : Region3RegionDivision { CDline() : base(CDdata, 4) { } }
     class EFline
     {
-      double T_p(double p)
+      public double T_p(double p)
       {
         double pi = p/(1.0*p_fact);
         return 3.727888004*(pi - 22.064) + 647.096;
@@ -2072,18 +2072,18 @@ static class IF97
 
     static double DividingLine(DividingLineEnum region, double p)
     {
-      ABline AB;
-      CDline CD;
-      EFline EF;
-      GHline GH;
-      IJline IJ;
-      JKline JK;
-      MNline MN;
-      OPline OP;
-      QUline QU;
-      RXline RX;
-      UVline UV;
-      WXline WX;
+      ABline AB = new ABline();
+      CDline CD = new CDline();
+      EFline EF = new EFline();
+      GHline GH = new GHline();
+      IJline IJ = new IJline();
+      JKline JK = new JKline();
+      MNline MN = new MNline();
+      OPline OP = new OPline();
+      QUline QU = new QUline();
+      RXline RX = new RXline();
+      UVline UV = new UVline();
+      WXline WX = new WXline();
 
       switch(region)
       {
@@ -2156,7 +2156,7 @@ static class IF97
       }
     }
 
-    static char BackwardsRegion3RegionDetermination(double T, double p)
+    public static char BackwardsRegion3RegionDetermination(double T, double p)
     {
       if(p > 100*p_fact)
       {
@@ -2449,7 +2449,7 @@ static class IF97
       {
         summer += rho_bar * Math.Pow(Trterm(T),muIr[i]) * munr[i]*Math.Pow(Rhorterm(rho),muJr[i]);
       }
-      return exp(summer);
+      return Math.Exp(summer);
     }
     double lambda0(double T)
     {
@@ -2469,7 +2469,7 @@ static class IF97
       {
         summer += rho_bar * Math.Pow(Trterm(T),lamIr[i]) * lamnr[i]*Math.Pow(Rhorterm(rho),lamJr[i]);
       }
-      return exp(summer);
+      return Math.Exp(summer);
     }
     public double lambda2(double T, double p, double rho)
     {
@@ -2489,7 +2489,7 @@ static class IF97
       const double nu   = 0.630;     /// Dimensionless
       const double gam  = 1.239;     /// Dimensionless
       const double GAMMA0 = 0.06;      /// Dimensionless
-      const double PI   = 2*acos(0.0);   /// Have to define this in C++
+      const double PI   = 2*Math.Acos(0.0);   /// Have to define this in C++
       const double Cpstar = 0.46151805*R_fact;  /// Note: Slightly lower than IF97 Rgas {J/kg-K}
       Cpcalc = cpmass(T,rho);                  /// J/kg-K
       Cpbar = Cpcalc/Cpstar;                   /// Unit-less
@@ -2503,7 +2503,7 @@ static class IF97
       if(y < 1.2E-7)
         Z = 0.0;
       else
-        Z = 2.0/(PI*y)*(((1.0-1.0/k)*atan(y)+y/k) - (1.0 - exp(-1.0/(1.0/y + y*y/(3.0*rhobar*rhobar)))));
+        Z = 2.0/(PI*y)*(((1.0-1.0/k)*Math.Atan(y)+y/k) - (1.0 - Math.Exp(-1.0/(1.0/y + y*y/(3.0*rhobar*rhobar)))));
       return LAMBDA*rhobar*Cpbar*T/(Tcrit*mubar)*Z;
     }
     double Trterm(double T)
@@ -2619,7 +2619,7 @@ static class IF97
       double pow_rhobar = 1.0;
       for(int i=0; i < 6; ++i)
       {
-        summer += A[i][j]*pow_rhobar;
+        summer += A[i,j]*pow_rhobar;
         pow_rhobar *= rhobar;
       }
       return 1.0/summer;
@@ -2740,7 +2740,8 @@ static class IF97
     {
       p_star = 1.0*p_fact;
       T_star = 1.0;
-      n.reLength(1); n[0] = 0;
+      n.resize(1);
+      n[0] = 0;
       for(int i = 0; i < sat.Length; ++i)
       {
         n.Add(sat[i].n);
@@ -2754,12 +2755,12 @@ static class IF97
         throw new ArgumentOutOfRangeException("Temperature out of range");
       }
       double theta = T/T_star+n[9]/(T/T_star-n[10]);
-      const double A =      theta*theta + n[1]*theta + n[2];
-      const double B = n[3]*theta*theta + n[4]*theta + n[5];
-      const double C = n[6]*theta*theta + n[7]*theta + n[8];
+      double A =      theta*theta + n[1]*theta + n[2];
+      double B = n[3]*theta*theta + n[4]*theta + n[5];
+      double C = n[6]*theta*theta + n[7]*theta + n[8];
       return p_star*Math.Pow(2*C/(-B+Math.Sqrt(B*B-4*A*C)), 4);
     }
-    double T_p(double p)
+    public double T_p(double p)
     {
       // Allow extrapolation down to Pmin = P(Tmin=273.15K) = 611.213 Pa
       if( ( p < Pmin ) || ( p > Pcrit ) )
@@ -2806,7 +2807,7 @@ static class IF97
       double n10pD = n[10]+D;
       return T_star*0.5*(n10pD - Math.Sqrt(n10pD*n10pD - 4*(n[9] + n[10]*D)));
     }
-    double sigma_t(double T)
+    public double sigma_t(double T)
     {
       // Surface Tension [mN/m] in two-phase region as a function of temperature [K]
       // Implemented from IAPWS R1-76(2014).
@@ -3758,7 +3759,7 @@ static class IF97
         // NOTE: c=1, e=0 : Straight summation
         //     c>1, e=0 : Power fit
         //     c=1, e=1 : Exp fit
-        return ( (1-e)*Math.Pow(summer,c) + e*exp(summer) )*h_star;
+        return ( (1-e)*Math.Pow(summer,c) + e*Math.Exp(summer) )*h_star;
       }
 
       // This function implements the backward formulas for p(h,s) as defined in the IAPWS
@@ -3838,7 +3839,7 @@ static class IF97
       const double p_star = 1*p_fact;
       const double h_star = 1*R_fact;
       double eta = h/h_star;
-      const double PI = Region2b2cdata[0] + Region2b2cdata[1]*eta + Region2b2cdata[2]*eta*eta;
+      double PI = Region2b2cdata[0] + Region2b2cdata[1]*eta + Region2b2cdata[2]*eta*eta;
       return PI*p_star;
     }
     public static double H2b2c_p(double p)
@@ -3847,7 +3848,7 @@ static class IF97
       const double p_star = 1*p_fact;
       const double h_star = 1*R_fact;
       double PI = p/p_star;
-      const double ETA = Region2b2cdata[3] + Math.Sqrt((PI - Region2b2cdata[4])/Region2b2cdata[2]);
+      double ETA = Region2b2cdata[3] + Math.Sqrt((PI - Region2b2cdata[4])/Region2b2cdata[2]);
       return ETA*h_star;
     }
 
@@ -3890,17 +3891,17 @@ static class IF97
     public static double H13_s(double s)
     {
       // Only called for Region determination and debugging.  No range checking.
-      Boundary13HS b13;
+      Boundary13HS b13 = new Boundary13HS();
       return b13.h_s(s);
     }
 
     public static double Hsat_s(double s)
     {
       // Only called for Region determination and debugging.  Has range checking.
-      Boundary14HS b14hs;
-      Boundary3a4HS b3a4hs;
-      Boundary2c3b4HS b2c3b4hs;
-      Boundary2ab4HS b2ab4hs;
+      Boundary14HS b14hs = new Boundary14HS();
+      Boundary3a4HS b3a4hs = new Boundary3a4HS();
+      Boundary2c3b4HS b2c3b4hs = new Boundary2c3b4HS();
+      Boundary2ab4HS b2ab4hs = new Boundary2ab4HS();
       if(s < 0) throw new ArgumentOutOfRangeException("Entropy out of range");
       else if(s <= SfT23 ) return b14hs.h_s(s);
       else if(s <= Scrit)  return b3a4hs.h_s(s);
@@ -4413,7 +4414,7 @@ static class IF97
   static double visc_TRho(double T, double rho)
   {
     // Since we have density, we don't need to determine the region for viscosity.
-    Region1 R1 = new Region();  // All regions use base region equations for visc(T,rho).
+    Region1 R1 = new Region1();  // All regions use base region equations for visc(T,rho).
     return R1.visc( T, rho );
   }
   /// Get the viscosity [Pa-s] as a function of T [K] and p [Pa]
@@ -4480,19 +4481,19 @@ static class IF97
   //                 2-Phase Functions                  //
   // ******************************************************************************** //
   /// Get the saturation temperature [K] as a function of p [Pa]
-  static double Tsat97(double p)
+  public static double Tsat97(double p)
   {
     Region4 R4 = new Region4();
     return R4.T_p(p);
   }
   /// Get the saturation pressure [Pa] as a function of T [K]
-  static double psat97(double T)
+  public static double psat97(double T)
   {
     Region4 R4 = new Region4();
     return R4.p_T(T);
   }
   /// Get surface tension [N/m] as a function of T [K]
-  static double sigma97(double T)
+  public static double sigma97(double T)
   {
     Region4 R4 = new Region4();
     return R4.sigma_t(T);
@@ -4500,57 +4501,55 @@ static class IF97
   // ******************************************************************************** //
   //                Backward Functions                  //
   // ******************************************************************************** //
-  static double T_phmass(double p,double h) { return RegionOutputBackward( p, h, IF97parameters.IF97_HMASS); }
-  static double rhomass_phmass(double p,double h) { return rho_pX( p, h, IF97parameters.IF97_HMASS); }
-  static double T_psmass(double p,double s) { return RegionOutputBackward( p, s, IF97parameters.IF97_SMASS); }
-  static double rhomass_psmass(double p,double s) { return rho_pX( p, s, IF97parameters.IF97_SMASS); }
-  static double p_hsmass(double h, double s) { return BackwardOutputHS(IF97parameters.IF97_P, h, s); }
-  static double T_hsmass(double h, double s) { return BackwardOutputHS(IF97parameters.IF97_T, h, s); }
-  static int Region_ph(double p, double h) { return BackwardRegion( p, h, IF97parameters.IF97_HMASS); }
-  static int Region_ps(double p, double s) { return BackwardRegion( p, s, IF97parameters.IF97_SMASS); }
+  public static double T_phmass(double p,double h) { return RegionOutputBackward( p, h, IF97parameters.IF97_HMASS); }
+  public static double rhomass_phmass(double p,double h) { return rho_pX( p, h, IF97parameters.IF97_HMASS); }
+  public static double T_psmass(double p,double s) { return RegionOutputBackward( p, s, IF97parameters.IF97_SMASS); }
+  public static double rhomass_psmass(double p,double s) { return rho_pX( p, s, IF97parameters.IF97_SMASS); }
+  public static double p_hsmass(double h, double s) { return BackwardOutputHS(IF97parameters.IF97_P, h, s); }
+  public static double T_hsmass(double h, double s) { return BackwardOutputHS(IF97parameters.IF97_T, h, s); }
+  public static int Region_ph(double p, double h) { return BackwardRegion( p, h, IF97parameters.IF97_HMASS); }
+  public static int Region_ps(double p, double s) { return BackwardRegion( p, s, IF97parameters.IF97_SMASS); }
   // ******************************************************************************** //
   //                Trivial Functions                   //
   // ******************************************************************************** //
   /// Get the Triple Point Temperature and Pressure
-  static double get_Ttrip() { return Ttrip; }
-  static double get_ptrip() { return Ptrip; }
+  public static double get_Ttrip() { return Ttrip; }
+  public static double get_ptrip() { return Ptrip; }
   /// Get the Critical Point Temperature and Pressure and Density
-  static double get_Tcrit() { return Tcrit; }
-  static double get_pcrit() { return Pcrit; }
-  static double get_rhocrit() { return Rhocrit; }
+  public static double get_Tcrit() { return Tcrit; }
+  public static double get_pcrit() { return Pcrit; }
+  public static double get_rhocrit() { return Rhocrit; }
   /// Get the Max and Min Temperatures and Pressures
-  static double get_Tmin() { return Tmin; }
-  static double get_Pmin() { return Pmin; }
-  static double get_Tmax() { return Tmax; }
-  static double get_Pmax() { return Pmax; }
+  public static double get_Tmin() { return Tmin; }
+  public static double get_Pmin() { return Pmin; }
+  public static double get_Tmax() { return Tmax; }
+  public static double get_Pmax() { return Pmax; }
   /// Get physical constants
-  static double get_MW() { return MW; }
-  static double get_Rgas() { return Rgas; }
-  static double get_Acentric() { return -log10(psat97(0.7*Tcrit)/Pcrit) - 1; }
+  public static double get_MW() { return MW; }
+  public static double get_Rgas() { return Rgas; }
+  public static double get_Acentric() { return -Math.Log10(psat97(0.7*Tcrit)/Pcrit) - 1; }
   // ******************************************************************************** //
   //                Utility Functions                   //
   // ******************************************************************************** //
-  static string get_if97_version()
+  public static string get_if97_version()
   {
     string IF97VERSION = "v2.1.2";
 #if IAPWS_UNITS
-    string VSTRING = IF97VERSION;
-    VSTRING.append(" (IAPWS Units)");
-    return VSTRING;
+    return IF97VERSION + " (IAPWS Units)";
 #else
     return IF97VERSION;
 #endif
   }
-  static double hmass_pQ(double p,double Q) { return X_pQ(IF97parameters.IF97_HMASS, p, Q); }
-  static double umass_pQ(double p,double Q) { return X_pQ(IF97parameters.IF97_UMASS, p, Q); }
-  static double smass_pQ(double p,double Q) { return X_pQ(IF97parameters.IF97_SMASS, p, Q); }
-  static double v_pQ(double p,double Q) { return 1.0/X_pQ(IF97parameters.IF97_DMASS, p, Q); }
-  static double rhomass_pQ(double p,double Q) { return X_pQ(IF97parameters.IF97_DMASS, p, Q); }
-  static double Q_phmass(double p,double h) { return Q_pX(p, h, IF97parameters.IF97_HMASS); }
-  static double Q_pumass(double p,double u) { return Q_pX(p, u, IF97parameters.IF97_UMASS); }
-  static double Q_psmass(double p,double s) { return Q_pX(p, s, IF97parameters.IF97_SMASS); }
-  static double Q_prhomass(double p,double rho) { return Q_pX(p, rho, IF97parameters.IF97_DMASS); }
-  static double Q_pv(double p,double v) { return Q_pX(p, 1.0/v, IF97parameters.IF97_DMASS); }
+  public static double hmass_pQ(double p,double Q) { return X_pQ(IF97parameters.IF97_HMASS, p, Q); }
+  public static double umass_pQ(double p,double Q) { return X_pQ(IF97parameters.IF97_UMASS, p, Q); }
+  public static double smass_pQ(double p,double Q) { return X_pQ(IF97parameters.IF97_SMASS, p, Q); }
+  public static double v_pQ(double p,double Q) { return 1.0/X_pQ(IF97parameters.IF97_DMASS, p, Q); }
+  public static double rhomass_pQ(double p,double Q) { return X_pQ(IF97parameters.IF97_DMASS, p, Q); }
+  public static double Q_phmass(double p,double h) { return Q_pX(p, h, IF97parameters.IF97_HMASS); }
+  public static double Q_pumass(double p,double u) { return Q_pX(p, u, IF97parameters.IF97_UMASS); }
+  public static double Q_psmass(double p,double s) { return Q_pX(p, s, IF97parameters.IF97_SMASS); }
+  public static double Q_prhomass(double p,double rho) { return Q_pX(p, rho, IF97parameters.IF97_DMASS); }
+  public static double Q_pv(double p,double v) { return Q_pX(p, 1.0/v, IF97parameters.IF97_DMASS); }
 /*************************************************************************/
 /* Vapor Quality as a function of H and S cannot be implemented at this  */
 /* time as there IAPWS has not released a backward formula that covers   */
