@@ -299,7 +299,7 @@ static class IF97
       /// This is the IF97 correlation for drhodp at the reducing temperature, Tr
       double rhobar = rho/Rhocrit;
       double summer = 0;
-      int j;
+      int j = 0;
       //
       if     (rhobar <= 0.310559006) j = 0;
       else if(rhobar <= 0.776397516) j = 1;
@@ -337,26 +337,26 @@ static class IF97
       throw new ArgumentOutOfRangeException("Unable to match input parameters");
     }
 
-    static List<int> Ir;
-    static List<int> Jr;
-    static List<double> nr;
-    static List<int> J0;
-    static List<double> n0;
-    public static double T_star;
-    public static double p_star;
-    public static double R;
+    static List<int> Ir = new List<int>();
+    static List<int> Jr = new List<int>();
+    static List<double> nr = new List<double>();
+    static List<int> J0 = new List<int>();
+    static List<double> n0 = new List<double>();
+    public static double T_star = 0.0;
+    public static double p_star = 0.0;
+    public static double R = 0.0;
     /// For Viscosity Calculations
-    static List<int> muJ0;
-    static List<double> mun0;
-    static List<int> muIr;
-    static List<int> muJr;
-    static List<double> munr;
+    static List<int> muJ0 = new List<int>();
+    static List<double> mun0 = new List<double>();
+    static List<int> muIr = new List<int>();
+    static List<int> muJr = new List<int>();
+    static List<double> munr = new List<double>();
     /// For Thermal Conductivity Calculations
-    static List<int> lamJ0;
-    static List<double> lamn0;
-    static List<int> lamIr;
-    static List<int> lamJr;
-    static List<double> lamnr;
+    static List<int> lamJ0 = new List<int>();
+    static List<double> lamn0 = new List<double>();
+    static List<int> lamIr = new List<int>();
+    static List<int> lamJr = new List<int>();
+    static List<double> lamnr = new List<double>();
 
     public double gammar(double T, double p)
     {
@@ -510,12 +510,12 @@ static class IF97
     }
     public virtual double lambda2(double T, double p, double rho)
     {
-      double y;
-      double Cpbar;
-      double mubar;
-      double k;
-      double Z;
-      double delChi;
+      double y = 0.0;
+      double Cpbar = 0.0;
+      double mubar = 0.0;
+      double k = 0.0;
+      double Z = 0.0;
+      double delChi = 0.0;
       double rhobar = rho/Rhocrit;
       const double LAMBDA = 177.8514;
       const double qD   = 1.0/0.40;
@@ -1695,25 +1695,25 @@ static class IF97
 
     public class Region3BackwardsRegion
     {
-      double v_star;
-      double p_star;
-      double T_star;
-      double X_star;
-      double Y_star;
-      int N;
-      double a;
-      double b;
-      double c;
-      double d;
-      double e;
-      double f;
-      List<int> I;
-      List<int> J;
-      List<double> n;
+      public double v_star = 0.0;
+      public double p_star = 0.0;
+      public double T_star = 0.0;
+      public double X_star = 0.0;
+      public double Y_star = 0.0;
+      public int N = 0;
+      public double a = 0.0;
+      public double b = 0.0;
+      public double c = 0.0;
+      public double d = 0.0;
+      public double e = 0.0;
+      public double f = 0.0;
+      public List<int> I = new List<int>();
+      public List<int> J = new List<int>();
+      public List<double> n = new List<double>();
 
-      public Region3BackwardsRegion(RegionResidualElement[] data, int N)
+      public Region3BackwardsRegion(RegionResidualElement[] data, int _N)
       {
-        this->N = N;
+        N = _N;
         for(int i = 0; i < N; ++i)
         {
           n.Add(data[i].n);
@@ -1795,7 +1795,7 @@ static class IF97
     public class Region3y : Region3BackwardsRegion { public Region3y() : base(Region3Ydata, 20) { v_star = 0.0031; p_star = 22*p_fact; T_star = 650; a = 0.996; b = 0.994; c = 1; d = 1; e = 4; } }
     public class Region3z : Region3BackwardsRegion { public Region3z() : base(Region3Zdata, 23) { v_star = 0.0038; p_star = 22*p_fact; T_star = 650; a = 0.993; b = 0.994; c = 1; d = 1; e = 4; } }
 
-    static double Region3_v_TP(char region, double T, double p)
+    public static double Region3_v_TP(char region, double T, double p)
     {
       Region3a R3a = new Region3a();
       Region3b R3b = new Region3b();
@@ -1964,13 +1964,13 @@ static class IF97
 
     public class Region3RegionDivision
     {
-      int N;
-      List<int> I;
-      List<double> n;
+      public int N = 0;
+      public List<int> I = new List<int>();
+      public List<double> n = new List<double>();
 
-      public Region3RegionDivision(DivisionElement[] data, int N)
+      public Region3RegionDivision(DivisionElement[] data, int _N)
       {
-        this->N = N;
+        N = _N;
         for(int i = 0; i < N; ++i)
         {
           n.Add(data[i].n);
@@ -1989,10 +1989,9 @@ static class IF97
       }
     }
 
-    class ABline : Region3RegionDivision
+    public class ABline : Region3RegionDivision
     {
-      ABline() : base(ABdata, 5)
-      { }
+      public ABline() : base(ABdata, 5) { }
       public override double T_p(double p)
       {
         double pi = p/(1.0*p_fact);
@@ -2005,8 +2004,8 @@ static class IF97
         return summer*1.0;  // sum is multiplied by T* = 1.0 [K]
       }
     }
-    class CDline : Region3RegionDivision { CDline() : base(CDdata, 4) { } }
-    class EFline
+    public class CDline : Region3RegionDivision { public CDline() : base(CDdata, 4) { } }
+    public class EFline
     {
       public double T_p(double p)
       {
@@ -2014,14 +2013,13 @@ static class IF97
         return 3.727888004*(pi - 22.064) + 647.096;
       }
     }
-    class GHline : Region3RegionDivision { GHline() : base(GHdata, 5) { } }
-    class IJline : Region3RegionDivision { IJline() : base(IJdata, 5) { } }
-    class JKline : Region3RegionDivision { JKline() : base(JKdata, 5) { } }
-    class MNline : Region3RegionDivision { MNline() : base(MNdata, 4) { } }
-    class OPline : Region3RegionDivision
+    public class GHline : Region3RegionDivision { public GHline() : base(GHdata, 5) { } }
+    public class IJline : Region3RegionDivision { public IJline() : base(IJdata, 5) { } }
+    public class JKline : Region3RegionDivision { public JKline() : base(JKdata, 5) { } }
+    public class MNline : Region3RegionDivision { public MNline() : base(MNdata, 4) { } }
+    public class OPline : Region3RegionDivision
     {
-      OPline() : base(OPdata, 5)
-      { }
+      public OPline() : base(OPdata, 5) { }
       public override double T_p(double p)
       {
         double pi = p/(1.0*p_fact);
@@ -2034,13 +2032,12 @@ static class IF97
         return summer*1.0;  // sum is multiplied by T* = 1.0 [K]
       }
     }
-    class QUline : Region3RegionDivision { QUline() : base(QUdata, 4) { } }
-    class RXline : Region3RegionDivision { RXline() : base(RXdata, 4) { } }
-    class UVline : Region3RegionDivision { UVline() : base(UVdata, 4) { } }
-    class WXline : Region3RegionDivision
+    public class QUline : Region3RegionDivision { public QUline() : base(QUdata, 4) { } }
+    public class RXline : Region3RegionDivision { public RXline() : base(RXdata, 4) { } }
+    public class UVline : Region3RegionDivision { public UVline() : base(UVdata, 4) { } }
+    public class WXline : Region3RegionDivision
     {
-      WXline() : base(WXdata, 5)
-      { }
+      public WXline() : base(WXdata, 5) { }
       public override double T_p(double p)
       {
         double pi = p/(1.0*p_fact);
@@ -2054,7 +2051,7 @@ static class IF97
       }
     }
 
-    enum DividingLineEnum
+    public enum DividingLineEnum
     {
       LINE_AB,
       LINE_CD,
@@ -2070,7 +2067,7 @@ static class IF97
       LINE_WX
     };
 
-    static double DividingLine(DividingLineEnum region, double p)
+    public static double DividingLine(DividingLineEnum region, double p)
     {
       ABline AB = new ABline();
       CDline CD = new CDline();
@@ -2103,8 +2100,9 @@ static class IF97
           throw new ArgumentOutOfRangeException("Unable to match dividing line");
       }
     }
+
     // In the very near critical region, its messy
-    static char BackwardsRegion3SubRegionDetermination(double T, double p)
+    public static char BackwardsRegion3SubRegionDetermination(double T, double p)
     {
 
       if(p > 22.5*p_fact)
@@ -2284,24 +2282,24 @@ static class IF97
 
   public class Region3
   {
-    List<int> Ir;
-    List<int> Jr;
-    List<double> nr;
+    List<int> Ir = new List<int>();
+    List<int> Jr = new List<int>();
+    List<double> nr = new List<double>();
     /// For Viscosity Calculations
-    List<int> muJ0;
-    List<double> mun0;
-    List<int> muIr;
-    List<int> muJr;
-    List<double> munr;
+    List<int> muJ0 = new List<int>();
+    List<double> mun0 = new List<double>();
+    List<int> muIr = new List<int>();
+    List<int> muJr = new List<int>();
+    List<double> munr = new List<double>();
     /// For Thermal Conductivity Calculations
-    List<int> lamJ0;
-    List<double> lamn0;
-    List<int> lamIr;
-    List<int> lamJr;
-    List<double> lamnr;
-    double T_star;
-    double p_star;
-    double R;
+    List<int> lamJ0 = new List<int>();
+    List<double> lamn0 = new List<double>();
+    List<int> lamIr = new List<int>();
+    List<int> lamJr = new List<int>();
+    List<double> lamnr = new List<double>();
+    double T_star = 0.0;
+    double p_star = 0.0;
+    double R = 0.0;
     public Region3()
     {
       T_star = 1000;
@@ -2473,14 +2471,14 @@ static class IF97
     }
     public double lambda2(double T, double p, double rho)
     {
-      double y;
-      double Cpbar;
-      double mubar;
-      double k;
-      double Z;
-      double zeta;
-      double delChi;
-      double Cpcalc;
+      double y = 0.0;
+      double Cpbar = 0.0;
+      double mubar = 0.0;
+      double k = 0.0;
+      double Z = 0.0;
+      double zeta = 0.0;
+      double delChi = 0.0;
+      double Cpcalc = 0.0;
       double rhobar = rho/Rhocrit;   /// Dimensionless
       const double LAMBDA = 177.8514;    /// Dimensionless
       const double qD   = 1.0/0.40;    /// 1/nm
@@ -2489,7 +2487,7 @@ static class IF97
       const double nu   = 0.630;     /// Dimensionless
       const double gam  = 1.239;     /// Dimensionless
       const double GAMMA0 = 0.06;      /// Dimensionless
-      const double PI   = 2*Math.Acos(0.0);   /// Have to define this in C++
+      double PI   = 2*Math.Acos(0.0);   /// Have to define this in C++
       const double Cpstar = 0.46151805*R_fact;  /// Note: Slightly lower than IF97 Rgas {J/kg-K}
       Cpcalc = cpmass(T,rho);                  /// J/kg-K
       Cpbar = Cpcalc/Cpstar;                   /// Unit-less
@@ -2608,7 +2606,7 @@ static class IF97
       /// This is the IF97 correlation for drhodp at the reducing temperature, Tr
       double rhobar = rho/Rhocrit;
       double summer = 0;
-      int j;
+      int j = 0;
       //
            if(rhobar <= 0.310559006) j = 0;
       else if(rhobar <= 0.776397516) j = 1;
@@ -2670,7 +2668,7 @@ static class IF97
 
     public double output(IF97parameters key, double T, double p, IF97SatState State)
     {
-      double rho;
+      double rho = 0.0;
       char region = Region3Backwards.BackwardsRegion3RegionDetermination(T, p);
 
       // if this is a saturated vapor or liquid function, make sure we're on
@@ -2732,15 +2730,14 @@ static class IF97
   /// This "region" is the saturation curve
   public class Region4
   {
-    List<double> n;
-    double p_star;
-    double T_star;
+    List<double> n = new List<double>();
+    double p_star = 0.0;
+    double T_star = 0.0;
 
     public Region4()
     {
       p_star = 1.0*p_fact;
       T_star = 1.0;
-      n.resize(1);
       n[0] = 0;
       for(int i = 0; i < sat.Length; ++i)
       {
@@ -2784,9 +2781,6 @@ static class IF97
       */
 
       double[] EFG = new double[3];
-      double *E = &EFG[0];
-      double *F = &EFG[1];
-      double *G = &EFG[2];
 
       // Each cycle can be vectorized
       EFG[0] = 1.0;
@@ -2803,7 +2797,7 @@ static class IF97
       //EFG[0] += n[6];    EFG[1] += n[7];     EFG[2] += n[8];
       */
 
-      double D = 2*G/(-F-Math.Sqrt(F*F-4*E*G));
+      double D = 2*EFG[2]/(-EFG[1]-Math.Sqrt(EFG[1]*EFG[1]-4*EFG[0]*EFG[2]));
       double n10pD = n[10]+D;
       return T_star*0.5*(n10pD - Math.Sqrt(n10pD*n10pD - 4*(n[9] + n[10]*D)));
     }
@@ -2816,7 +2810,7 @@ static class IF97
       {
         throw new ArgumentOutOfRangeException("Temperature out of range");
       }
-      const double Tau = 1.0 - T/Tcrit;
+      double Tau = 1.0 - T/Tcrit;
       const double B = 235.8 / 1000;  // Published value in [mN/m]; Convert to SI [N/m] in all cases
       const double b = -0.625;
       const double mu = 1.256;
@@ -2870,7 +2864,7 @@ static class IF97
       public double I; // The first index
       public double J; // The second index
       public double n; // The leading numerical constant
-      public BackwardRegionResidualElement(double I, double J, double n)
+      public BackwardRegionResidualElement(double _I, double _J, double _n)
       {
         I = _I;
         J = _J;
@@ -3699,25 +3693,26 @@ static class IF97
 
     public class BackwardsRegion
     {
-      double p_star;
-      double X_star;
-      double T_star;
-      double h_star;
-      double s_star;
-      double s2_star;
-      int N;
-      double a;
-      double b;
-      double c;
-      double d;
-      double e;
-      double f;
-      List<double> I, J;
-      List<double> n;
+      public double p_star = 0.0;
+      public double X_star = 0.0;
+      public double T_star = 0.0;
+      public double h_star = 0.0;
+      public double s_star = 0.0;
+      public double s2_star = 0.0;
+      public int N = 0;
+      public double a = 0.0;
+      public double b = 0.0;
+      public double c = 0.0;
+      public double d = 0.0;
+      public double e = 0.0;
+      public double f = 0.0;
+      public List<double> I = new List<double>();
+      public List<double> J = new List<double>();
+      public List<double> n = new List<double>();
 
-      public BackwardsRegion(BackwardRegionResidualElement[] data, int N)
+      public BackwardsRegion(BackwardRegionResidualElement[] data, int _N)
       {
-        this->N = N;
+        N = _N;
         for(int i = 0; i < N; ++i)
         {
           n.Add(data[i].n);
@@ -4162,13 +4157,13 @@ static class IF97
 
   static double Q_pX(double p, double X, IF97parameters inkey)
   {
-    double Xliq;
-    double Xvap;
+    double Xliq = 0.0;
+    double Xvap = 0.0;
     if((p<Pmin) || (p>Pmax)) throw new ArgumentOutOfRangeException("Pressure out of range");
     else if(p<Ptrip) return 0;  //Liquid, at all temperatures
     else if(p>Pcrit)
     {
-      double t;
+      double t = 0.0;
       switch (inkey)
       {
         case IF97parameters.IF97_HMASS:
@@ -4211,8 +4206,8 @@ static class IF97
 
   static double X_pQ(IF97parameters inkey, double p, double Q)
   {
-    double Xliq;
-    double Xvap;
+    double Xliq = 0.0;
+    double Xvap = 0.0;
     if((p<Ptrip) || (p>Pcrit))
       throw new ArgumentOutOfRangeException("Pressure out of range");
     if((Q<0.0) || (Q>1.0))
@@ -4559,8 +4554,8 @@ static class IF97
 /*************************************************************************/
 /*  double Q_hsmass(double h, double s)
 {
-    double hliq;
-    double hvap;
+    double hliq = 0.0;
+    double hvap = 0.0;
     if((s < Smin) || (s > Smax))
     {
       throw new ArgumentOutOfRangeException("Entropy out of range");
