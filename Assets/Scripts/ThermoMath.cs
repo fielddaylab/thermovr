@@ -44,6 +44,8 @@ public class ThermoMath : MonoBehaviour
     derive();
     findObjects();
     dotransform();
+    Debug.Log("Hello");
+    Debug.Log(IAPWS97.IF97.rhomass_Tp(300,3));
   }
 
   void reset()
