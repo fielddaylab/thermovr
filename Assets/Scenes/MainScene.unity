@@ -144,7 +144,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 184734809}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: -2}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1127569294}
@@ -1020,11 +1020,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f5565c3359660c94c8db01d407b034d3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pressure: 0
-  temperature: 0
-  specific_volume: 0
+  pressure_p: 0
+  temperature_k: 0
+  specificvolume_q: 0
   entropy: 0
   enthalpy: 0
+  content_moles: 0
+  radius_m: 0
+  minstop_m: 0
+  maxstop_m: 0
+  weight_g: 0
+  lift_g: 0
+  flame_k: 0
+  coolant_k: 0
+  pistonheight_m: 0
+  contentvolume_m3: 0
+  pt_prefab: {fileID: 6434750350594892939, guid: 8db22605e33d66f4e8e7f3ba0d53722e,
+    type: 3}
 --- !u!4 &1957451445
 Transform:
   m_ObjectHideFlags: 0
