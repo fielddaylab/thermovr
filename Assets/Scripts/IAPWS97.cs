@@ -115,6 +115,21 @@ public static class IF97
   */
   //
 
+  static private Region1 R1;
+  static private Region2 R2;
+  static private Region3 R3;
+  static private Region4 R4;
+  static private Region5 R5;
+
+  static public void initRegions()
+  {
+    R1 = new Region1();
+    R2 = new Region2();
+    R3 = new Region3();
+    R4 = new Region4();
+    R5 = new Region5();
+  }
+
   static RegionResidualElement[] Hresiddata = new RegionResidualElement[] // Residual H for viscosity
   {
     new RegionResidualElement(0, 0,  5.20094e-1),
@@ -3937,7 +3952,6 @@ public static class IF97
 
   static IF97REGIONS RegionDetermination_TP(double T, double p)
   {
-    Region4 R4 = new Region4();
     if(T > Text)
     {
       throw new ArgumentOutOfRangeException("Temperature out of range");
@@ -3969,12 +3983,6 @@ public static class IF97
 
   static double RegionOutput(IF97parameters outkey, double T, double p, IF97SatState State)
   {
-    Region1 R1 = new Region1();
-    Region2 R2 = new Region2();
-    Region3 R3 = new Region3();
-    Region4 R4 = new Region4();
-    Region5 R5 = new Region5();
-
     IF97REGIONS region = RegionDetermination_TP(T, p);
 
     switch (region)
@@ -4005,9 +4013,6 @@ public static class IF97
 
   static IF97REGIONS RegionDetermination_pX(double p, double X, IF97parameters inkey)
   {
-    // Setup needed Region Equations for region determination
-    Region1 R1 = new Region1();
-    Region2 R2 = new Region2();
     // Saturation Region Limit Variables
     double Tsat = 0;
     double Xliq = 0;
@@ -4142,8 +4147,6 @@ public static class IF97
     //     However, the 2014 Supplementary Release for v(p,h) and v(p,s) are
     //     more direct and may be slightly faster, since only one algebraic
     //     equation is needed instead of two in Region 3.
-    Region1 R1 = new Region1();
-    Region2 R2 = new Region2();
     double T = RegionOutputBackward( p, X, inkey);
     if(RegionDetermination_pX(p, X, inkey) == IF97REGIONS.REGION_4)
     {    // If in saturation dome
@@ -4414,7 +4417,6 @@ public static class IF97
   static double visc_TRho(double T, double rho)
   {
     // Since we have density, we don't need to determine the region for viscosity.
-    Region1 R1 = new Region1();  // All regions use base region equations for visc(T,rho).
     return R1.visc( T, rho );
   }
   /// Get the viscosity [Pa-s] as a function of T [K] and p [Pa]
@@ -4483,19 +4485,16 @@ public static class IF97
   /// Get the saturation temperature [K] as a function of p [Pa]
   public static double Tsat97(double p)
   {
-    Region4 R4 = new Region4();
     return R4.T_p(p);
   }
   /// Get the saturation pressure [Pa] as a function of T [K]
   public static double psat97(double T)
   {
-    Region4 R4 = new Region4();
     return R4.p_T(T);
   }
   /// Get surface tension [N/m] as a function of T [K]
   public static double sigma97(double T)
   {
-    Region4 R4 = new Region4();
     return R4.sigma_t(T);
   }
   // ******************************************************************************** //

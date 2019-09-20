@@ -68,6 +68,7 @@ public class ThermoMath : MonoBehaviour
   // Start is called before the first frame update
   void Start()
   {
+    IF97.initRegions();
     findObjects();
     genMesh();
     reset();
@@ -84,6 +85,7 @@ public class ThermoMath : MonoBehaviour
   double Powd(double v, double p) { return System.Math.Pow(v,p); }
 
   //sample bias- "graph density"
+  [Range(0.001f,100)]
   public double sample_lbase = 10.0f;
   double sample_lbase_prev = 0.0f;
   /* //linear
@@ -104,6 +106,7 @@ public class ThermoMath : MonoBehaviour
   //*/
 
   //plot bias- "graph zoom"
+  [Range(0.001f,100)]
   public double plot_lbase = 10.0f;
   double plot_lbase_prev = 0.0f;
   /* //Linear
