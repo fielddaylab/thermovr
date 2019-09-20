@@ -4,13 +4,16 @@ using UnityEngine;
 
 public class ThermoMath : MonoBehaviour
 {
-  //math limits ; xYz = pVt
-  double p_min = 0.0035;
-  double p_max = 50;
-  double v_min = 0;
-  double v_max = 1000;
-  double t_min = 300;
-  double t_max = 2000;
+  //math limits ; xYz = vPt
+  //MPa
+  double p_min = IF97.get_Pmin(); // 0.000611213
+  double p_max = IF97.get_Pmax(); // 100.0
+  //M^3/Kg
+  double v_min = 0.001;
+  double v_max = 3000;
+  //K
+  double t_min = IF97.get_Tmin(); // 273.15
+  double t_max = IF97.get_Tmax(); // 1073.15
 
   //state
   public double pressure_p;
@@ -46,8 +49,9 @@ public class ThermoMath : MonoBehaviour
   GameObject lifts;
 
   //mesh
+  GameObject graph;
+   GameObject[] graph_bits;
   public GameObject pt_prefab;
-  GameObject mesh_pts;
 
   /*
   //MATH API
@@ -64,50 +68,89 @@ public class ThermoMath : MonoBehaviour
   // Start is called before the first frame update
   void Start()
   {
-    genMesh();
     findObjects();
+    genMesh();
     reset();
     derive();
     dotransform();
-    IF97.print_tables();
+    //IF97.print_tables();
+
+    sample_lbase_prev = sample_lbase;
+    plot_lbase_prev = plot_lbase;
   }
 
   double Lerpd(double a, double b, double t) { return (b-a)*t+a; }
-  float NormalizeMeshPt(double min, double max, double val) { return (float)((val-min)/(max-min)); }
+  double Clampd(double v, double min, double max) { if(v < min) return min; if(v > max) return max; return v; } //v,min,max ordering mirrors Mathf.Clamp
+  double Powd(double v, double p) { return System.Math.Pow(v,p); }
+
+  //sample bias- "graph density"
+  public double sample_lbase = 10.0f;
+  double sample_lbase_prev = 0.0f;
+  /* //linear
+  double sampleP(double pt, double tt) { return pt; }
+  double sampleT(double pt, double tt) { return tt; }
+  //*/
+  //* //Log
+  double sampleP(double pt, double tt) { return Powd(pt,sample_lbase); }
+  double sampleT(double pt, double tt) { return Powd(tt,sample_lbase); }
+  //*/
+  /* //LLog
+  double sampleP(double pt, double tt) { return Powd(pt,sample_lbase*sample_lbase); }
+  double sampleT(double pt, double tt) { return Powd(tt,sample_lbase*sample_lbase); }
+  //*/
+  /* //curvefit
+  double sampleP(double pt, double tt) { return Powd(pt,Powd(sample_lbase,sample_lbase)); }
+  double sampleT(double pt, double tt) { return Powd(tt,Powd(sample_lbase,sample_lbase)); }
+  //*/
+
+  //plot bias- "graph zoom"
+  public double plot_lbase = 10.0f;
+  double plot_lbase_prev = 0.0f;
+  /* //Linear
+  float plot(double min, double max, double val) { return (float)((val-min)/(max-min)); }
+  //*/
+  //* //Log
+  float plot(double min, double max, double val) { double t = Clampd((val-min)/(max-min),0.0,1.0); return (float)(1.0-Powd(1.0-t,plot_lbase)); }
+  //*/
+  /* //LLog
+  float plot(double min, double max, double val) { double t = (val-min)/(max-min); return (float)1.0-Powd(1.0-t,plot_lbase*plot_lbase); }
+  //*/
 
   void genMesh()
   {
-    mesh_pts = GameObject.Find("MeshPts");
-
-    GameObject[] pt_groups;
-    GameObject pt;
-    Vector3[] pt_positions;
-    Vector3 pt_pos;
-
     int n_tsamples = 100;
     int n_psamples = 100;
     int n_pts = n_tsamples*n_psamples;
     int n_pts_per_group = 1000;
     int n_groups = (int)Mathf.Ceil(n_pts / n_pts_per_group);
-    pt_groups = new GameObject[n_groups];
-    pt = (GameObject)Instantiate(pt_prefab);
-    float pt_size = 0.01f;
+    float pt_size = 0.005f;
+
+    Vector3[] pt_positions;
 
     //gen positions
     pt_positions = new Vector3[n_pts];
-    for(int x = 0; x < n_tsamples; x++)
+    for(int y = 0; y < n_psamples; y++)
     {
-      for(int y = 0; y < n_psamples; y++)
+      double pt = ((double)y/(n_psamples-1));
+      for(int z = 0; z < n_tsamples; z++)
       {
-        double p = Lerpd(p_min,p_max,((double)y/(n_psamples-1)));
-        double t = Lerpd(t_min,t_max,((double)x/(n_tsamples-1)));
-        //Debug.LogFormat("t:{0} p:{1}",t,p);
-        double v = IF97.rhomass_Tp(t,p);
-        pt_positions[n_psamples*y+x] = new Vector3(NormalizeMeshPt(t_min,t_max,t),NormalizeMeshPt(v_min,v_max,v),NormalizeMeshPt(p_min,p_max,p));
+        double tt = ((double)z/(n_tsamples-1));
+        double pst = sampleP(pt,tt);
+        double tst = sampleT(pt,tt);
+        double p = Lerpd(p_min,p_max,pst);
+        double t = Lerpd(t_min,t_max,tst);
+        double v = 1.0/IF97.rhomass_Tp(t,p);
+        //double vt = Lerpd(pst,tst,0.5);
+        //double v = Lerpd(v_min,v_max,vt);
+
+        //Debug.LogFormat("p:{0}MPa, v:{1}m^3/Kg, t:{2}K",p,v,t);
+        pt_positions[n_tsamples*z+y] = new Vector3(plot(v_min,v_max,v),plot(p_min,p_max,p),plot(t_min,t_max,t));
       }
     }
 
     //gen assets
+    graph_bits = new GameObject[n_groups];
+    GameObject ptfab = (GameObject)Instantiate(pt_prefab);
     int n_pts_remaining = n_pts;
     int n_pts_this_group = n_pts_per_group;
     for(int i = 0; i < n_groups; i++)
@@ -117,25 +160,24 @@ public class ThermoMath : MonoBehaviour
 
       for(int j = 0; j < n_pts_this_group; j++)
       {
-        pt_pos = pt_positions[i * n_pts_per_group + j];
-        pt.transform.position = pt_pos;
-        pt.transform.localScale = new Vector3(pt_size, pt_size, pt_size);
+        ptfab.transform.position = pt_positions[i * n_pts_per_group + j];
+        ptfab.transform.localScale = new Vector3(pt_size, pt_size, pt_size);
 
-        combine[j].mesh = pt.transform.GetComponent<MeshFilter>().mesh;
-        combine[j].transform = pt.transform.localToWorldMatrix;
+        combine[j].mesh = ptfab.transform.GetComponent<MeshFilter>().mesh;
+        combine[j].transform = ptfab.transform.localToWorldMatrix;
       }
 
-      pt_groups[i] = (GameObject)Instantiate(pt_prefab);
-      //pt_groups[i].transform.parent = ptsscale.transform;
-      pt_groups[i].transform.localPosition = new Vector3(0, 0, 0);
-      pt_groups[i].transform.localRotation = Quaternion.Euler(0, 0, 0);
-      pt_groups[i].transform.localScale = new Vector3(1, 1, 1);
-      pt_groups[i].transform.GetComponent<MeshFilter>().mesh = new Mesh();
-      pt_groups[i].transform.GetComponent<MeshFilter>().mesh.CombineMeshes(combine);
+      graph_bits[i] = (GameObject)Instantiate(pt_prefab);
+      graph_bits[i].transform.parent = graph.transform;
+      graph_bits[i].transform.localPosition = new Vector3(0, 0, 0);
+      graph_bits[i].transform.localRotation = Quaternion.Euler(0, 0, 0);
+      graph_bits[i].transform.localScale = new Vector3(1, 1, 1);
+      graph_bits[i].transform.GetComponent<MeshFilter>().mesh = new Mesh();
+      graph_bits[i].transform.GetComponent<MeshFilter>().mesh.CombineMeshes(combine);
 
       n_pts_remaining -= n_pts_this_group;
     }
-    Destroy(pt, 0f);
+    Destroy(ptfab, 0f);
 
   }
 
@@ -171,6 +213,7 @@ public class ThermoMath : MonoBehaviour
     coolant   = GameObject.Find("Coolant");
     weights   = GameObject.Find("Weights");
     lifts     = GameObject.Find("Lifts");
+    graph     = GameObject.Find("Graph");
   }
 
   void derive()
@@ -187,6 +230,16 @@ public class ThermoMath : MonoBehaviour
   // Update is called once per frame
   void Update()
   {
-
+    bool modified = false;
+    modified = ((plot_lbase != plot_lbase_prev) || (sample_lbase != sample_lbase_prev));
+    sample_lbase_prev = sample_lbase;
+    plot_lbase_prev = plot_lbase;
+    if(modified)
+    {
+    //delete old
+      for(int i = 0; i < graph_bits.Length; i++)
+        Destroy(graph_bits[i]);
+      genMesh();
+    }
   }
 }
