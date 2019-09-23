@@ -50,7 +50,9 @@ public class ThermoMath : MonoBehaviour
 
   //mesh
   GameObject graph;
-   GameObject[] graph_bits;
+  GameObject [] axis;
+  GameObject [,] axis_markers;
+  GameObject[] graph_bits;
   public GameObject pt_prefab;
 
   /*
@@ -150,6 +152,18 @@ public class ThermoMath : MonoBehaviour
         pt_positions[n_tsamples*z+y] = new Vector3(plot(v_min,v_max,v),plot(p_min,p_max,p),plot(t_min,t_max,t));
       }
     }
+    //x
+    axis_markers[0,0].transform.position = new Vector3(plot(0,1,1.0/2),0,0);
+    axis_markers[0,1].transform.position = new Vector3(plot(0,1,1.0/4),0,0);
+    axis_markers[0,2].transform.position = new Vector3(plot(0,1,1.0/8),0,0);
+    //y
+    axis_markers[1,0].transform.position = new Vector3(0,plot(0,1,1.0/2),0);
+    axis_markers[1,1].transform.position = new Vector3(0,plot(0,1,1.0/4),0);
+    axis_markers[1,2].transform.position = new Vector3(0,plot(0,1,1.0/8),0);
+    //z
+    axis_markers[2,0].transform.position = new Vector3(0,0,plot(0,1,1.0/2));
+    axis_markers[2,1].transform.position = new Vector3(0,0,plot(0,1,1.0/4));
+    axis_markers[2,2].transform.position = new Vector3(0,0,plot(0,1,1.0/8));
 
     //gen assets
     graph_bits = new GameObject[n_groups];
@@ -217,6 +231,17 @@ public class ThermoMath : MonoBehaviour
     weights   = GameObject.Find("Weights");
     lifts     = GameObject.Find("Lifts");
     graph     = GameObject.Find("Graph");
+    axis = new GameObject[3];
+    axis[0]   = graph.transform.Find("x").gameObject;
+    axis[1]   = graph.transform.Find("y").gameObject;
+    axis[2]   = graph.transform.Find("z").gameObject;
+    axis_markers = new GameObject[3,3];
+    for(int i = 0; i < 3; i++)
+    {
+      axis_markers[i,0] = axis[i].transform.Find("mark_2").gameObject;
+      axis_markers[i,1] = axis[i].transform.Find("mark_4").gameObject;
+      axis_markers[i,2] = axis[i].transform.Find("mark_8").gameObject;
+    }
   }
 
   void derive()
