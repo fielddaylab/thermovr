@@ -50,8 +50,9 @@ public class ThermoMath : MonoBehaviour
 
   //mesh
   GameObject graph;
-  GameObject [] axis;
-  GameObject [,] axis_markers;
+  GameObject[] axis;
+  GameObject[,] axis_markers;
+  GameObject[] plot_markers;
   GameObject[] graph_bits;
   public GameObject pt_prefab;
 
@@ -87,7 +88,7 @@ public class ThermoMath : MonoBehaviour
   double Powd(double v, double p) { return System.Math.Pow(v,p); }
 
   //sample bias- "graph density"
-  [Range(0.001f,100)]
+  [Range(0.001f,1000)]
   public double sample_lbase = 10.0f;
   double sample_lbase_prev = 0.0f;
   /* //linear
@@ -98,28 +99,30 @@ public class ThermoMath : MonoBehaviour
   double sampleP(double pt, double tt) { return Powd(pt,sample_lbase); }
   double sampleT(double pt, double tt) { return Powd(tt,sample_lbase); }
   //*/
-  /* //LLog
-  double sampleP(double pt, double tt) { return Powd(pt,sample_lbase*sample_lbase); }
-  double sampleT(double pt, double tt) { return Powd(tt,sample_lbase*sample_lbase); }
-  //*/
-  /* //curvefit
-  double sampleP(double pt, double tt) { return Powd(pt,Powd(sample_lbase,sample_lbase)); }
-  double sampleT(double pt, double tt) { return Powd(tt,Powd(sample_lbase,sample_lbase)); }
-  //*/
 
   //plot bias- "graph zoom"
-  [Range(0.001f,100)]
+  [Range(0.001f,1000)]
   public double plot_lbase = 10.0f;
   double plot_lbase_prev = 0.0f;
-  /* //Linear
-  float plot(double min, double max, double val) { return (float)((val-min)/(max-min)); }
-  //*/
-  //* //Log
-  float plot(double min, double max, double val) { double t = Clampd((val-min)/(max-min),0.0,1.0); return (float)(1.0-Powd(1.0-t,plot_lbase)); }
-  //*/
-  /* //LLog
-  float plot(double min, double max, double val) { double t = (val-min)/(max-min); return (float)1.0-Powd(1.0-t,plot_lbase*plot_lbase); }
-  //*/
+  //Linear
+  //float lin_plot(double min, double max, double val) { return (float)((val-min)/(max-min)); }
+  //Log
+  //float log_plot(double min, double max, double val) { double t = Clampd((val-min)/(max-min),0.0,1.0); return (float)(1.0-Powd(1.0-t,plot_lbase)); }
+
+  // DON'T NORMALIZE
+  //Linear
+  //float lin_plot(double min, double max, double val) { return (float)val; }
+  //Log
+  //float log_plot(double min, double max, double val) { return Mathf.Log((float)val,10.0f); }
+
+  // NORMALIZE AFTER LOG
+  float lin_plot(double min, double max, double val) { return (float)((val-min)/(max-min)); }
+  //Log
+  float log_plot(double min, double max, double val) { return (float)(Mathf.Log((float)val,10.0f)-Mathf.Log((float)min,10.0f))/(Mathf.Log((float)max,10.0f)-Mathf.Log((float)min,10.0f)); }
+
+  float p_plot(double min, double max, double val) { return log_plot(min,max,val); }
+  float v_plot(double min, double max, double val) { return log_plot(min,max,val); }
+  float t_plot(double min, double max, double val) { return log_plot(min,max,val); }
 
   void genMesh()
   {
@@ -145,26 +148,98 @@ public class ThermoMath : MonoBehaviour
         double p = Lerpd(p_min,p_max,pst);
         double t = Lerpd(t_min,t_max,tst);
         double v = 1.0/IF97.rhomass_Tp(t,p);
+        p *= 1000000;
         //double vt = Lerpd(pst,tst,0.5);
         //double v = Lerpd(v_min,v_max,vt);
 
         //Debug.LogFormat("p:{0}MPa, v:{1}m^3/Kg, t:{2}K",p,v,t);
-        pt_positions[n_tsamples*z+y] = new Vector3(plot(v_min,v_max,v),plot(p_min,p_max,p),plot(t_min,t_max,t));
+        float vplot = v_plot(v_min,v_max,v);
+        float pplot = p_plot(p_min*1000000,p_max*1000000,p);
+        float tplot = t_plot(t_min,t_max,t);
+        pt_positions[n_tsamples*z+y] = new Vector3(vplot,pplot,tplot);
       }
     }
     //x
-    axis_markers[0,0].transform.position = new Vector3(plot(0,1,1.0/2),0,0);
-    axis_markers[0,1].transform.position = new Vector3(plot(0,1,1.0/4),0,0);
-    axis_markers[0,2].transform.position = new Vector3(plot(0,1,1.0/8),0,0);
+    axis_markers[0,0].transform.position = new Vector3(p_plot(0,1,1.0/2),0,0);
+    axis_markers[0,1].transform.position = new Vector3(p_plot(0,1,1.0/4),0,0);
+    axis_markers[0,2].transform.position = new Vector3(p_plot(0,1,1.0/8),0,0);
     //y
-    axis_markers[1,0].transform.position = new Vector3(0,plot(0,1,1.0/2),0);
-    axis_markers[1,1].transform.position = new Vector3(0,plot(0,1,1.0/4),0);
-    axis_markers[1,2].transform.position = new Vector3(0,plot(0,1,1.0/8),0);
+    axis_markers[1,0].transform.position = new Vector3(0,v_plot(0,1,1.0/2),0);
+    axis_markers[1,1].transform.position = new Vector3(0,v_plot(0,1,1.0/4),0);
+    axis_markers[1,2].transform.position = new Vector3(0,v_plot(0,1,1.0/8),0);
     //z
-    axis_markers[2,0].transform.position = new Vector3(0,0,plot(0,1,1.0/2));
-    axis_markers[2,1].transform.position = new Vector3(0,0,plot(0,1,1.0/4));
-    axis_markers[2,2].transform.position = new Vector3(0,0,plot(0,1,1.0/8));
+    axis_markers[2,0].transform.position = new Vector3(0,0,t_plot(0,1,1.0/2));
+    axis_markers[2,1].transform.position = new Vector3(0,0,t_plot(0,1,1.0/4));
+    axis_markers[2,2].transform.position = new Vector3(0,0,t_plot(0,1,1.0/8));
 
+/*
+    {
+      double p;
+      double t;
+      double v;
+      float vplot;
+      float pplot;
+      float tplot;
+      int i = 0;
+
+      p = 0.101325;
+      t = 273.2;
+      v= 1.0/IF97.rhomass_Tp(t,p);
+      Debug.LogFormat("p:{0}MPa, v:{1}m^3/Kg, t:{2}K",p,v,t);
+      vplot = v_plot(v_min,v_max,v);
+      pplot = p_plot(p_min,p_max,p);
+      tplot = t_plot(t_min,t_max,t);
+      plot_markers[i].transform.position = new Vector3(vplot,pplot,tplot);
+      i++;
+
+      p = 0.101325;
+      t = 273.0+(50.0*i);
+      v= 1.0/IF97.rhomass_Tp(t,p);
+      Debug.LogFormat("p:{0}MPa, v:{1}m^3/Kg, t:{2}K",p,v,t);
+      vplot = v_plot(v_min,v_max,v);
+      pplot = p_plot(p_min,p_max,p);
+      tplot = t_plot(t_min,t_max,t);
+      plot_markers[i].transform.position = new Vector3(vplot,pplot,tplot);
+      i++;
+
+
+      p = 0.101325;
+      t = 273.0+(50.0*i);
+      v= 1.0/IF97.rhomass_Tp(t,p);
+      Debug.LogFormat("p:{0}MPa, v:{1}m^3/Kg, t:{2}K",p,v,t);
+      vplot = v_plot(v_min,v_max,v);
+      pplot = p_plot(p_min,p_max,p);
+      tplot = t_plot(t_min,t_max,t);
+      plot_markers[i].transform.position = new Vector3(vplot,pplot,tplot);
+      i++;
+
+
+      p = 0.101325;
+      t = 273.0+(50.0*i);
+      v= 1.0/IF97.rhomass_Tp(t,p);
+      Debug.LogFormat("p:{0}MPa, v:{1}m^3/Kg, t:{2}K",p,v,t);
+      vplot = v_plot(v_min,v_max,v);
+      pplot = p_plot(p_min,p_max,p);
+      tplot = t_plot(t_min,t_max,t);
+      plot_markers[i].transform.position = new Vector3(vplot,pplot,tplot);
+      i++;
+
+
+      p = 0.101325;
+      t = 273.0+(50.0*i);
+      v= 1.0/IF97.rhomass_Tp(t,p);
+      Debug.LogFormat("p:{0}MPa, v:{1}m^3/Kg, t:{2}K",p,v,t);
+      vplot = v_plot(v_min,v_max,v);
+      pplot = p_plot(p_min,p_max,p);
+      tplot = t_plot(t_min,t_max,t);
+      plot_markers[i].transform.position = new Vector3(vplot,pplot,tplot);
+      i++;
+
+
+    }
+*/
+
+/*
     //gen assets
     graph_bits = new GameObject[n_groups];
     GameObject ptfab = (GameObject)Instantiate(pt_prefab);
@@ -195,6 +270,18 @@ public class ThermoMath : MonoBehaviour
       n_pts_remaining -= n_pts_this_group;
     }
     Destroy(ptfab, 0f);
+*/
+
+    //HACK
+    //gen assets
+    graph_bits = new GameObject[n_groups*n_pts_per_group];
+    for(int i = 0; i < n_groups*n_pts_per_group; i++)
+    {
+      graph_bits[i] = (GameObject)Instantiate(pt_prefab);
+      graph_bits[i].transform.parent = graph.transform;
+      graph_bits[i].transform.position = pt_positions[i];
+      graph_bits[i].transform.localScale = new Vector3(pt_size, pt_size, pt_size);
+    }
 
   }
 
@@ -242,6 +329,9 @@ public class ThermoMath : MonoBehaviour
       axis_markers[i,1] = axis[i].transform.Find("mark_4").gameObject;
       axis_markers[i,2] = axis[i].transform.Find("mark_8").gameObject;
     }
+    plot_markers = new GameObject[5];
+    for(int i = 0; i < 5; i++)
+      plot_markers[i] = graph.transform.Find("plots/"+i.ToString()).gameObject;
   }
 
   void derive()
@@ -264,7 +354,7 @@ public class ThermoMath : MonoBehaviour
     plot_lbase_prev = plot_lbase;
     if(modified)
     {
-    //delete old
+      //delete old
       for(int i = 0; i < graph_bits.Length; i++)
         Destroy(graph_bits[i]);
       genMesh();
