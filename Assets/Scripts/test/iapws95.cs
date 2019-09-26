@@ -152,6 +152,7 @@ public static class iapws95
   //   Scientific Use, September 2016, Table 5
   //   http://www.iapws.org/relguide/IAPWS-95.html
   //
+
   public static object _phird(object tau, object delta, object coef)
   {
     object b;
@@ -463,7 +464,6 @@ public static class iapws95
 
   public class MEoS : _utils._fase
   {
-
     public string _mode;
     public int a;
     public int a0;
@@ -477,7 +477,7 @@ public static class iapws95
     public object Gas;
     public int h;
     public object h0;
-    public None Hvap;
+    public double Hvap;
     public int IntP;
     public int invT;
     public object Liquid;
@@ -489,8 +489,8 @@ public static class iapws95
     public double rho0;
     public int s;
     public object s0;
-    public None sigma;
-    public None Svap;
+    public double sigma;
+    public double Svap;
     public object T;
     public object Tr;
     public int u;
@@ -503,10 +503,10 @@ public static class iapws95
     public int Z;
     public int Z_rho;
     public object Zc;
-    public None CP = null;
-    public None _Pv = null;
-    public None _rhoL = null;
-    public None _rhoG = null;
+    public double CP = null;
+    public double _Pv = null;
+    public double _rhoL = null;
+    public double _rhoG = null;
 
     public Dictionary<string, double> kwargs = new Dictionary<object, object>
     {
@@ -711,7 +711,18 @@ public static class iapws95
           {
             rhoo = 0.001;
           }
+
+          Func<double, double> f = rho =>
+          {
+            var delta = rho / rhoc;
+            var tau = Tc / T;
+            var fird = _phird(tau, delta, this._constants);
+            var Po = (1 + delta * fird) * this.R * T * rho;
+            return Po - P * 1000;
+          };
+
           rho = fsolve(f, rhoo)[0];
+
           // Calculate quality
           if(T > this.Tc)
           {
@@ -728,14 +739,8 @@ public static class iapws95
               Ps = _tup_1.Item3;
               Ps *= 0.001;
             }
-            if(Ps > P)
-            {
-              x = 1;
-            }
-            else
-            {
-              x = 0;
-            }
+            if(Ps > P) { x = 1; }
+            else { x = 0; }
           }
         }
         else if(this._mode == "Th")
@@ -743,6 +748,16 @@ public static class iapws95
           var tau = Tc / T;
           ideal = this._phi0(tau, 1);
           var fiot = ideal["fiot"];
+
+          Func<double, double> f = rho =>
+          {
+            var delta = rho / rhoc;
+            var fird = _phird(tau, delta, this._constants);
+            var firt = _phirt(tau, delta, this._constants);
+            var ho = this.R * T * (1 + tau * (fiot + firt) + delta * fird);
+            return ho - h;
+          };
+
           if(T >= this.Tc)
           {
             rhoo = this.rhoc;
@@ -777,14 +792,8 @@ public static class iapws95
             }
             else
             {
-              if(h > hv)
-              {
-                rhoo = rhov;
-              }
-              else
-              {
-                rhoo = rhol;
-              }
+              if(h > hv) { rhoo = rhov; }
+              else { rhoo = rhol; }
               rho = fsolve(f, rhoo)[0];
             }
           }
@@ -792,6 +801,20 @@ public static class iapws95
         else if(this._mode == "Ts")
         {
           tau = Tc / T;
+
+          Func<double, double> f = rho =>
+          {
+            if(rho < 0) { rho = 1E-20; }
+            var delta = rho / rhoc;
+            var ideal = this._phi0(tau, delta);
+            var fio = ideal["fio"];
+            var fiot = ideal["fiot"];
+            var fir = _phir(tau, delta, this._constants);
+            var firt = _phirt(tau, delta, this._constants);
+            var so = this.R * (tau * (fiot + firt) - fio - fir);
+            return so - s;
+          };
+
           if(T >= this.Tc)
           {
             rhoo = this.rhoc;
@@ -847,6 +870,17 @@ public static class iapws95
           tau = Tc / T;
           ideal = this._phi0(tau, 1);
           fiot = ideal["fiot"];
+
+          Func<double, double> f = rho =>
+          {
+            var delta = rho / rhoc;
+            var fird = _phird(tau, delta, this._constants);
+            var firt = _phirt(tau, delta, this._constants);
+            var Po = (1 + delta * fird) * this.R * T * rho;
+            var ho = this.R * T * (1 + tau * (fiot + firt) + delta * fird);
+            return ho - Po / rho - u;
+          };
+
           if(T >= this.Tc)
           {
             rhoo = this.rhoc;
@@ -884,14 +918,8 @@ public static class iapws95
             }
             else
             {
-              if(u > uv)
-              {
-                rhoo = rhov;
-              }
-              else
-              {
-                rhoo = rhol;
-              }
+              if(u > uv) { rhoo = rhov; }
+              else { rhoo = rhol; }
               rho = fsolve(f, rhoo)[0];
             }
           }
@@ -899,28 +927,46 @@ public static class iapws95
         else if(this._mode == "Prho")
         {
           delta = rho / rhoc;
+
+          Func<double, double> f = T =>
+          {
+            var tau = Tc / T;
+            var fird = _phird(tau, delta, this._constants);
+            var Po = (1 + delta * fird) * this.R * T * rho;
+            return Po - P * 1000;
+          };
+
           T = fsolve(f, To)[0];
           rhol = this._Liquid_Density(T);
           rhov = this._Vapor_Density(T);
           if(T == To || rhov <= rho <= rhol)
           {
-            foreach (var to in new List<int>
+
+            Func<double, double> f = parr =>
             {
-              To,
-              300,
-              400,
-              500,
-              600
-            })
+              var _tup_1 = parr;
+              var T = _tup_1.Item1;
+              var rhol = _tup_1.Item2;
+              var rhog = _tup_1.Item3;
+              var tau = Tc / T;
+              var deltaL = rhol / this.rhoc;
+              var deltaG = rhog / this.rhoc;
+              var firL = _phir(tau, deltaL, this._constants);
+              var firdL = _phird(tau, deltaL, this._constants);
+              var firG = _phir(tau, deltaG, this._constants);
+              var firdG = _phird(tau, deltaG, this._constants);
+              var Jl = rhol * (1 + deltaL * firdL);
+              var Jv = rhog * (1 + deltaG * firdG);
+              var K = firL - firG;
+              var Ps = this.R * T * rhol * rhog / (rhol - rhog) * (K + Math.Log(rhol / rhog));
+              return (Jl - Jv, Jl * (1 / rhog - 1 / rhol) - Math.Log(rhol / rhog) - K, Ps - P * 1000);
+            };
+
+            foreach (var to in new List<int> { To, 300, 400, 500, 600 })
             {
               rhoLo = this._Liquid_Density(to);
               rhoGo = this._Vapor_Density(to);
-              sol = fsolve(f, new List<object>
-              {
-                to,
-                rhoLo,
-                rhoGo
-              }, full_output: true);
+              sol = fsolve(f, new List<object> { to, rhoLo, rhoGo }, full_output: true);
               var _tup_5 = sol[0];
               T = _tup_5.Item1;
               rhoL = _tup_5.Item2;
@@ -942,17 +988,58 @@ public static class iapws95
         }
         else if(this._mode == "Ph")
         {
-          var _tup_6 = fsolve(funcion, new List<object>
+
+          Func<double, double> funcion = parr =>
           {
-            rhoo,
-            To
-          });
+            var _tup_1 = parr;
+            var rho = _tup_1.Item1;
+            var T = _tup_1.Item2;
+            var delta = rho / rhoc;
+            var tau = Tc / T;
+            var ideal = this._phi0(tau, delta);
+            var fiot = ideal["fiot"];
+            var fird = _phird(tau, delta, this._constants);
+            var firt = _phirt(tau, delta, this._constants);
+            var Po = (1 + delta * fird) * this.R * T * rho;
+            var ho = this.R * T * (1 + tau * (fiot + firt) + delta * fird);
+            return Tuple.Create(Po - P * 1000, ho - h);
+          };
+
+          var _tup_6 = fsolve(funcion, new List<object> { rhoo, To });
           rho = _tup_6.Item1;
           T = _tup_6.Item2;
           rhol = this._Liquid_Density(T);
           rhov = this._Vapor_Density(T);
           if(rho == rhoo || rhov <= rho <= rhol)
           {
+
+            Func<double, double> f = parr =>
+            {
+              var _tup_1 = parr;
+              var T = _tup_1.Item1;
+              var rhol = _tup_1.Item2;
+              var rhog = _tup_1.Item3;
+              var x = _tup_1.Item4;
+              var tau = Tc / T;
+              var deltaL = rhol / this.rhoc;
+              var deltaG = rhog / this.rhoc;
+              var ideal = this._phi0(tau, deltaL);
+              var fiot = ideal["fiot"];
+              var firL = _phir(tau, deltaL, this._constants);
+              var firdL = _phird(tau, deltaL, this._constants);
+              var firtL = _phirt(tau, deltaL, this._constants);
+              var hoL = this.R * T * (1 + tau * (fiot + firtL) + deltaL * firdL);
+              var firG = _phir(tau, deltaG, this._constants);
+              var firdG = _phird(tau, deltaG, this._constants);
+              var firtG = _phirt(tau, deltaG, this._constants);
+              var hoG = this.R * T * (1 + tau * (fiot + firtG) + deltaG * firdG);
+              var Jl = rhol * (1 + deltaL * firdL);
+              var Jv = rhog * (1 + deltaG * firdG);
+              var K = firL - firG;
+              var Ps = this.R * T * rhol * rhog / (rhol - rhog) * (K + Math.Log(rhol / rhog));
+              return (Jl - Jv, Jl * (1 / rhog - 1 / rhol) - Math.Log(rhol / rhog) - K, hoL * (1 - x) + hoG * x - h, Ps - P * 1000);
+            };
+
             foreach(var to in new List<int> { To, 300, 400, 500, 600 })
             {
               rLo = this._Liquid_Density(to);
@@ -990,21 +1077,48 @@ public static class iapws95
           }
           if(x0 == null || x0 == 0 || x0 == 1)
           {
-            var _tup_8 = fsolve(f, new List<object>
+
+            Func<double, double> f = parr =>
             {
-              rhoo,
-              To
-            });
+              var _tup_1 = parr;
+              var rho = _tup_1.Item1;
+              var T = _tup_1.Item2;
+              var delta = rho / rhoc;
+              var tau = Tc / T;
+              var ideal = this._phi0(tau, delta);
+              var fio = ideal["fio"];
+              var fiot = ideal["fiot"];
+              var fird = _phird(tau, delta, this._constants);
+              var fir = _phir(tau, delta, this._constants);
+              var firt = _phirt(tau, delta, this._constants);
+              var Po = (1 + delta * fird) * this.R * T * rho;
+              var so = this.R * (tau * (fiot + firt) - fio - fir);
+              return Tuple.Create(Po - P * 1000, so - s);
+            };
+
+            var _tup_8 = fsolve(f, new List<object> { rhoo, To });
             rho = _tup_8.Item1;
             T = _tup_8.Item2;
           }
           else
           {
-            var _tup_9 = fsolve(funcion, new List<double>
+
+            Func<double, double> funcion = parr =>
             {
-              2.0,
-              500.0
-            });
+              var _tup_1 = parr;
+              var rho = _tup_1.Item1;
+              var T = _tup_1.Item2;
+              var _tup_2 = this._saturation(T);
+              var rhol = _tup_2.Item1;
+              var rhov = _tup_2.Item2;
+              var Ps = _tup_2.Item3;
+              var vapor = this._Helmholtz(rhov, T);
+              var liquido = this._Helmholtz(rhol, T);
+              var x = (1.0 / rho - 1 / rhol) / (1 / rhov - 1 / rhol);
+              return Tuple.Create(Ps - P * 1000, vapor["s"] * x + liquido["s"] * (1 - x) - s);
+            };
+
+            var _tup_9 = fsolve(funcion, new List<double> { 2.0, 500.0 });
             rho = _tup_9.Item1;
             T = _tup_9.Item2;
             var _tup_10 = this._saturation(T);
@@ -1020,11 +1134,24 @@ public static class iapws95
         }
         else if(this._mode == "Pu")
         {
-          sol = fsolve(f, new List<object>
+
+          Func<double, double> f = parr =>
           {
-            rhoo,
-            To
-          }, full_output: true);
+            var _tup_1 = parr;
+            var rho = _tup_1.Item1;
+            var T = _tup_1.Item2;
+            var delta = rho / rhoc;
+            var tau = Tc / T;
+            var ideal = this._phi0(tau, delta);
+            var fiot = ideal["fiot"];
+            var fird = _phird(tau, delta, this._constants);
+            var firt = _phirt(tau, delta, this._constants);
+            var Po = (1 + delta * fird) * this.R * T * rho;
+            var ho = this.R * T * (1 + tau * (fiot + firt) + delta * fird);
+            return Tuple.Create(ho - Po / rho - u, Po - P * 1000);
+          };
+
+          sol = fsolve(f, new List<object> { rhoo, To }, full_output: true);
           var _tup_11 = sol[0];
           rho = _tup_11.Item1;
           T = _tup_11.Item2;
@@ -1032,24 +1159,41 @@ public static class iapws95
           rhov = this._Vapor_Density(T);
           if(rho == rhoo || sol[2] != 1)
           {
-            foreach (var to in new List<int>
+
+            Func<double, double> f = parr =>
             {
-              To,
-              300,
-              400,
-              500,
-              600
-            })
+              var _tup_1 = parr;
+              var T = _tup_1.Item1;
+              var rhol = _tup_1.Item2;
+              var rhog = _tup_1.Item3;
+              var x = _tup_1.Item4;
+              var tau = Tc / T;
+              var deltaL = rhol / this.rhoc;
+              var deltaG = rhog / this.rhoc;
+              var ideal = this._phi0(tau, deltaL);
+              var fiot = ideal["fiot"];
+              var firL = _phir(tau, deltaL, this._constants);
+              var firdL = _phird(tau, deltaL, this._constants);
+              var firtL = _phirt(tau, deltaL, this._constants);
+              var hoL = this.R * T * (1 + tau * (fiot + firtL) + deltaL * firdL);
+              var firG = _phir(tau, deltaG, this._constants);
+              var firdG = _phird(tau, deltaG, this._constants);
+              var firtG = _phirt(tau, deltaG, this._constants);
+              var hoG = this.R * T * (1 + tau * (fiot + firtG) + deltaG * firdG);
+              var Jl = rhol * (1 + deltaL * firdL);
+              var Jv = rhog * (1 + deltaG * firdG);
+              var K = firL - firG;
+              var Ps = this.R * T * rhol * rhog / (rhol - rhog) * (K + Math.Log(rhol / rhog));
+              var vu = hoG - Ps / rhog;
+              var lu = hoL - Ps / rhol;
+              return (Jl - Jv, Jl * (1 / rhog - 1 / rhol) - Math.Log(rhol / rhog) - K, lu * (1 - x) + vu * x - u, Ps - P * 1000);
+            };
+
+            foreach (var to in new List<int> { To, 300, 400, 500, 600 })
             {
               rLo = this._Liquid_Density(to);
               rGo = this._Vapor_Density(to);
-              sol = fsolve(f, new List<object>
-              {
-                to,
-                rLo,
-                rGo,
-                0.5
-              }, full_output: true);
+              sol = fsolve(f, new List<object> { to, rLo, rGo, 0.5 }, full_output: true);
               var _tup_12 = sol[0];
               T = _tup_12.Item1;
               rhoL = _tup_12.Item2;
@@ -1072,28 +1216,55 @@ public static class iapws95
         else if(this._mode == "rhoh")
         {
           delta = rho / rhoc;
+
+          Func<double, double> f = T =>
+          {
+            var tau = Tc / T;
+            var ideal = this._phi0(tau, delta);
+            var fiot = ideal["fiot"];
+            var fird = _phird(tau, delta, this._constants);
+            var firt = _phirt(tau, delta, this._constants);
+            var ho = this.R * T * (1 + tau * (fiot + firt) + delta * fird);
+            return ho - h;
+          };
+
           T = fsolve(f, To)[0];
           rhol = this._Liquid_Density(T);
           rhov = this._Vapor_Density(T);
           if(T == To || rhov <= rho <= rhol)
           {
-            foreach (var to in new List<int>
+
+            Func<double, double> f = parr =>
             {
-              To,
-              300,
-              400,
-              500,
-              600
-            })
+              var _tup_1 = parr;
+              var T = _tup_1.Item1;
+              var rhol = _tup_1.Item2;
+              var rhog = _tup_1.Item3;
+              var tau = Tc / T;
+              var deltaL = rhol / this.rhoc;
+              var deltaG = rhog / this.rhoc;
+              var ideal = this._phi0(tau, deltaL);
+              var fiot = ideal["fiot"];
+              var firL = _phir(tau, deltaL, this._constants);
+              var firdL = _phird(tau, deltaL, this._constants);
+              var firtL = _phirt(tau, deltaL, this._constants);
+              var hoL = this.R * T * (1 + tau * (fiot + firtL) + deltaL * firdL);
+              var firG = _phir(tau, deltaG, this._constants);
+              var firdG = _phird(tau, deltaG, this._constants);
+              var firtG = _phirt(tau, deltaG, this._constants);
+              var hoG = this.R * T * (1 + tau * (fiot + firtG) + deltaG * firdG);
+              var Jl = rhol * (1 + deltaL * firdL);
+              var Jv = rhog * (1 + deltaG * firdG);
+              var K = firL - firG;
+              var x = (1.0 / rho - 1 / rhol) / (1 / rhog - 1 / rhol);
+              return (Jl - Jv, Jl * (1 / rhog - 1 / rhol) - Math.Log(rhol / rhog) - K, hoL * (1 - x) + hoG * x - h);
+            };
+
+            foreach (var to in new List<int> { To, 300, 400, 500, 600 })
             {
               rhoLo = this._Liquid_Density(to);
               rhoGo = this._Vapor_Density(to);
-              sol = fsolve(f, new List<object>
-              {
-                to,
-                rhoLo,
-                rhoGo
-              }, full_output: true);
+              sol = fsolve(f, new List<object> { to, rhoLo, rhoGo }, full_output: true);
               var _tup_13 = sol[0];
               T = _tup_13.Item1;
               rhoL = _tup_13.Item2;
@@ -1116,19 +1287,55 @@ public static class iapws95
         else if(this._mode == "rhos")
         {
           delta = rho / rhoc;
+
+          Func<double, double> f = T =>
+          {
+            var tau = Tc / T;
+            var ideal = this._phi0(tau, delta);
+            var fio = ideal["fio"];
+            var fiot = ideal["fiot"];
+            var fir = _phir(tau, delta, this._constants);
+            var firt = _phirt(tau, delta, this._constants);
+            var so = this.R * (tau * (fiot + firt) - fio - fir);
+            return so - s;
+          };
+
           T = fsolve(f, To)[0];
           rhol = this._Liquid_Density(T);
           rhov = this._Vapor_Density(T);
           if(T == To || rhov <= rho <= rhol)
           {
-            foreach (var to in new List<int>
+
+            Func<double, double> f = parr =>
             {
-              To,
-              300,
-              400,
-              500,
-              600
-            })
+              var _tup_1 = parr;
+              var T = _tup_1.Item1;
+              var rhol = _tup_1.Item2;
+              var rhog = _tup_1.Item3;
+              var tau = Tc / T;
+              var deltaL = rhol / this.rhoc;
+              var deltaG = rhog / this.rhoc;
+              var idealL = this._phi0(tau, deltaL);
+              var fioL = idealL["fio"];
+              var fiot = idealL["fiot"];
+              var idealG = this._phi0(tau, deltaG);
+              var fioG = idealG["fio"];
+              var firL = _phir(tau, deltaL, this._constants);
+              var firdL = _phird(tau, deltaL, this._constants);
+              var firtL = _phirt(tau, deltaL, this._constants);
+              var soL = this.R * (tau * (fiot + firtL) - fioL - firL);
+              var firG = _phir(tau, deltaG, this._constants);
+              var firdG = _phird(tau, deltaG, this._constants);
+              var firtG = _phirt(tau, deltaG, this._constants);
+              var soG = this.R * (tau * (fiot + firtG) - fioG - firG);
+              var Jl = rhol * (1 + deltaL * firdL);
+              var Jv = rhog * (1 + deltaG * firdG);
+              var K = firL - firG;
+              var x = (1.0 / rho - 1 / rhol) / (1 / rhog - 1 / rhol);
+              return (Jl - Jv, Jl * (1 / rhog - 1 / rhol) - Math.Log(rhol / rhog) - K, soL * (1 - x) + soG * x - s);
+            };
+
+            foreach (var to in new List<int> { To, 300, 400, 500, 600 })
             {
               rhoLo = this._Liquid_Density(to);
               rhoGo = this._Vapor_Density(to);
@@ -1160,28 +1367,59 @@ public static class iapws95
         else if(this._mode == "rhou")
         {
           delta = rho / rhoc;
+
+          Func<double, double> f = T =>
+          {
+            var tau = Tc / T;
+            var ideal = this._phi0(tau, delta);
+            var fiot = ideal["fiot"];
+            var fird = _phird(tau, delta, this._constants);
+            var firt = _phirt(tau, delta, this._constants);
+            var Po = (1 + delta * fird) * this.R * T * rho;
+            var ho = this.R * T * (1 + tau * (fiot + firt) + delta * fird);
+            return ho - Po / rho - u;
+          };
+
           T = fsolve(f, To)[0];
           rhol = this._Liquid_Density(T);
           rhov = this._Vapor_Density(T);
           if(T == To || rhov <= rho <= rhol)
           {
-            foreach (var to in new List<int>
+
+            Func<double, double> f = parr =>
             {
-              To,
-              300,
-              400,
-              500,
-              600
-            })
+              var _tup_1 = parr;
+              var T = _tup_1.Item1;
+              var rhol = _tup_1.Item2;
+              var rhog = _tup_1.Item3;
+              var tau = Tc / T;
+              var deltaL = rhol / this.rhoc;
+              var deltaG = rhog / this.rhoc;
+              var ideal = this._phi0(tau, deltaL);
+              var fiot = ideal["fiot"];
+              var firL = _phir(tau, deltaL, this._constants);
+              var firdL = _phird(tau, deltaL, this._constants);
+              var firtL = _phirt(tau, deltaL, this._constants);
+              var hoL = this.R * T * (1 + tau * (fiot + firtL) + deltaL * firdL);
+              var firG = _phir(tau, deltaG, this._constants);
+              var firdG = _phird(tau, deltaG, this._constants);
+              var firtG = _phirt(tau, deltaG, this._constants);
+              var hoG = this.R * T * (1 + tau * (fiot + firtG) + deltaG * firdG);
+              var Jl = rhol * (1 + deltaL * firdL);
+              var Jv = rhog * (1 + deltaG * firdG);
+              var K = firL - firG;
+              var x = (1.0 / rho - 1 / rhol) / (1 / rhog - 1 / rhol);
+              var Ps = this.R * T * rhol * rhog / (rhol - rhog) * (K + Math.Log(rhol / rhog));
+              var vu = hoG - Ps / rhog;
+              var lu = hoL - Ps / rhol;
+              return (Jl - Jv, Jl * (1 / rhog - 1 / rhol) - Math.Log(rhol / rhog) - K, lu * (1 - x) + vu * x - u);
+            };
+
+            foreach (var to in new List<int> { To, 300, 400, 500, 600 })
             {
               rhoLo = this._Liquid_Density(to);
               rhoGo = this._Vapor_Density(to);
-              sol = fsolve(f, new List<object>
-              {
-                to,
-                rhoLo,
-                rhoGo
-              }, full_output: true);
+              sol = fsolve(f, new List<object> { to, rhoLo, rhoGo }, full_output: true);
               var _tup_15 = sol[0];
               T = _tup_15.Item1;
               rhoL = _tup_15.Item2;
@@ -1203,35 +1441,69 @@ public static class iapws95
         }
         else if(this._mode == "hs")
         {
-          var _tup_16 = fsolve(f, new List<object>
+
+          Func<double, Tuple> f = parr =>
           {
-            rhoo,
-            To
-          });
+            var _tup_1 = parr;
+            var rho = _tup_1.Item1;
+            var T = _tup_1.Item2;
+            var delta = rho / rhoc;
+            var tau = Tc / T;
+            var ideal = this._phi0(tau, delta);
+            var fio = ideal["fio"];
+            var fiot = ideal["fiot"];
+            var fird = _phird(tau, delta, this._constants);
+            var fir = _phir(tau, delta, this._constants);
+            var firt = _phirt(tau, delta, this._constants);
+            var ho = this.R * T * (1 + tau * (fiot + firt) + delta * fird);
+            var so = this.R * (tau * (fiot + firt) - fio - fir);
+            return Tuple.Create(ho - h, so - s);
+          };
+
+          var _tup_16 = fsolve(f, new List<object> { rhoo, To });
           rho = _tup_16.Item1;
           T = _tup_16.Item2;
           rhol = this._Liquid_Density(T);
           rhov = this._Vapor_Density(T);
           if(rhov <= rho <= rhol)
           {
-            foreach (var to in new List<int>
+
+            Func<double, double> f = parr =>
             {
-              To,
-              300,
-              400,
-              500,
-              600
-            })
+              var _tup_1 = parr;
+              var T = _tup_1.Item1;
+              var rhol = _tup_1.Item2;
+              var rhog = _tup_1.Item3;
+              var x = _tup_1.Item4;
+              var tau = Tc / T;
+              var deltaL = rhol / this.rhoc;
+              var deltaG = rhog / this.rhoc;
+              var idealL = this._phi0(tau, deltaL);
+              var fiot = idealL["fiot"];
+              var fioL = idealL["fio"];
+              var idealG = this._phi0(tau, deltaG);
+              var fioG = idealG["fio"];
+              var firL = _phir(tau, deltaL, this._constants);
+              var firdL = _phird(tau, deltaL, this._constants);
+              var firtL = _phirt(tau, deltaL, this._constants);
+              var hoL = this.R * T * (1 + tau * (fiot + firtL) + deltaL * firdL);
+              var soL = this.R * (tau * (fiot + firtL) - fioL - firL);
+              var firG = _phir(tau, deltaG, this._constants);
+              var firdG = _phird(tau, deltaG, this._constants);
+              var firtG = _phirt(tau, deltaG, this._constants);
+              var hoG = this.R * T * (1 + tau * (fiot + firtG) + deltaG * firdG);
+              var soG = this.R * (tau * (fiot + firtG) - fioG - firG);
+              var Jl = rhol * (1 + deltaL * firdL);
+              var Jv = rhog * (1 + deltaG * firdG);
+              var K = firL - firG;
+              return (Jl - Jv, Jl * (1 / rhog - 1 / rhol) - Math.Log(rhol / rhog) - K, hoL * (1 - x) + hoG * x - h, soL * (1 - x) + soG * x - s);
+            };
+
+            foreach (var to in new List<int> { To, 300, 400, 500, 600 })
             {
               rLo = this._Liquid_Density(to);
               rGo = this._Vapor_Density(to);
-              sol = fsolve(f, new List<object>
-              {
-                to,
-                rLo,
-                rGo,
-                0.5
-              }, full_output: true);
+              sol = fsolve(f, new List<object> { to, rLo, rGo, 0.5 }, full_output: true);
               var _tup_17 = sol[0];
               T = _tup_17.Item1;
               rhoL = _tup_17.Item2;
@@ -1253,11 +1525,24 @@ public static class iapws95
         }
         else if(this._mode == "hu")
         {
-          sol = fsolve(f, new List<object>
+
+          Func<double, Tuple> f = parr =>
           {
-            rhoo,
-            To
-          }, full_output: true);
+            var _tup_1 = parr;
+            var rho = _tup_1.Item1;
+            var T = _tup_1.Item2;
+            var delta = rho / rhoc;
+            var tau = Tc / T;
+            var ideal = this._phi0(tau, delta);
+            var fiot = ideal["fiot"];
+            var fird = _phird(tau, delta, this._constants);
+            var firt = _phirt(tau, delta, this._constants);
+            var Po = (1 + delta * fird) * this.R * T * rho;
+            var ho = this.R * T * (1 + tau * (fiot + firt) + delta * fird);
+            return Tuple.Create(ho - Po / rho - u, ho - h);
+          };
+
+          sol = fsolve(f, new List<object> { rhoo, To }, full_output: true);
           var _tup_18 = sol[0];
           rho = _tup_18.Item1;
           T = _tup_18.Item2;
@@ -1265,24 +1550,41 @@ public static class iapws95
           rhov = this._Vapor_Density(T);
           if(sol[2] != 1 || rhov <= rho <= rhol)
           {
-            foreach (var to in new List<int>
+
+            Func<double, double> f = parr =>
             {
-              To,
-              300,
-              400,
-              500,
-              600
-            })
+              var _tup_1 = parr;
+              var T = _tup_1.Item1;
+              var rhol = _tup_1.Item2;
+              var rhog = _tup_1.Item3;
+              var x = _tup_1.Item4;
+              var tau = Tc / T;
+              var deltaL = rhol / this.rhoc;
+              var deltaG = rhog / this.rhoc;
+              var ideal = this._phi0(tau, deltaL);
+              var fiot = ideal["fiot"];
+              var firL = _phir(tau, deltaL, this._constants);
+              var firdL = _phird(tau, deltaL, this._constants);
+              var firtL = _phirt(tau, deltaL, this._constants);
+              var hoL = this.R * T * (1 + tau * (fiot + firtL) + deltaL * firdL);
+              var firG = _phir(tau, deltaG, this._constants);
+              var firdG = _phird(tau, deltaG, this._constants);
+              var firtG = _phirt(tau, deltaG, this._constants);
+              var hoG = this.R * T * (1 + tau * (fiot + firtG) + deltaG * firdG);
+              var Jl = rhol * (1 + deltaL * firdL);
+              var Jv = rhog * (1 + deltaG * firdG);
+              var K = firL - firG;
+              var Ps = this.R * T * rhol * rhog / (rhol - rhog) * (K + Math.Log(rhol / rhog));
+              var vu = hoG - Ps / rhog;
+              var lu = hoL - Ps / rhol;
+              return (Jl - Jv, Jl * (1 / rhog - 1 / rhol) - Math.Log(rhol / rhog) - K, hoL * (1 - x) + hoG * x - h, lu * (1 - x) + vu * x - u);
+            };
+
+            foreach (var to in new List<int> { To, 300, 400, 500, 600 })
             {
               rLo = this._Liquid_Density(to);
               rGo = this._Vapor_Density(to);
-              sol = fsolve(f, new List<object>
-              {
-                to,
-                rLo,
-                rGo,
-                0.5
-              }, full_output: true);
+              sol = fsolve(f, new List<object> { to, rLo, rGo, 0.5 }, full_output: true);
               var _tup_19 = sol[0];
               T = _tup_19.Item1;
               rhoL = _tup_19.Item2;
@@ -1304,11 +1606,27 @@ public static class iapws95
         }
         else if(this._mode == "su")
         {
-          sol = fsolve(f, new List<object>
+
+          Func<double, Tuple> f = parr =>
           {
-            rhoo,
-            To
-          }, full_output: true);
+            var _tup_1 = parr;
+            var rho = _tup_1.Item1;
+            var T = _tup_1.Item2;
+            var delta = rho / rhoc;
+            var tau = Tc / T;
+            var ideal = this._phi0(tau, delta);
+            var fio = ideal["fio"];
+            var fiot = ideal["fiot"];
+            var fird = _phird(tau, delta, this._constants);
+            var fir = _phir(tau, delta, this._constants);
+            var firt = _phirt(tau, delta, this._constants);
+            var ho = this.R * T * (1 + tau * (fiot + firt) + delta * fird);
+            var so = this.R * (tau * (fiot + firt) - fio - fir);
+            var Po = (1 + delta * fird) * this.R * T * rho;
+            return Tuple.Create(ho - Po / rho - u, so - s);
+          };
+
+          sol = fsolve(f, new List<object> { rhoo, To }, full_output: true);
           var _tup_20 = sol[0];
           rho = _tup_20.Item1;
           T = _tup_20.Item2;
@@ -1316,24 +1634,46 @@ public static class iapws95
           rhov = this._Vapor_Density(T);
           if(sol[2] != 1 || rhov <= rho <= rhol)
           {
-            foreach (var to in new List<int>
+
+            Func<double, double> f = parr =>
             {
-              To,
-              300,
-              400,
-              500,
-              600
-            })
+              var _tup_1 = parr;
+              var T = _tup_1.Item1;
+              var rhol = _tup_1.Item2;
+              var rhog = _tup_1.Item3;
+              var x = _tup_1.Item4;
+              var tau = Tc / T;
+              var deltaL = rhol / this.rhoc;
+              var deltaG = rhog / this.rhoc;
+              var idealL = this._phi0(tau, deltaL);
+              var fiot = idealL["fiot"];
+              var fioL = idealL["fio"];
+              var idealG = this._phi0(tau, deltaG);
+              var fioG = idealG["fio"];
+              var firL = _phir(tau, deltaL, this._constants);
+              var firdL = _phird(tau, deltaL, this._constants);
+              var firtL = _phirt(tau, deltaL, this._constants);
+              var hoL = this.R * T * (1 + tau * (fiot + firtL) + deltaL * firdL);
+              var soL = this.R * (tau * (fiot + firtL) - fioL - firL);
+              var firG = _phir(tau, deltaG, this._constants);
+              var firdG = _phird(tau, deltaG, this._constants);
+              var firtG = _phirt(tau, deltaG, this._constants);
+              var hoG = this.R * T * (1 + tau * (fiot + firtG) + deltaG * firdG);
+              var soG = this.R * (tau * (fiot + firtG) - fioG - firG);
+              var Jl = rhol * (1 + deltaL * firdL);
+              var Jv = rhog * (1 + deltaG * firdG);
+              var K = firL - firG;
+              var Ps = this.R * T * rhol * rhog / (rhol - rhog) * (K + Math.Log(rhol / rhog));
+              var vu = hoG - Ps / rhog;
+              var lu = hoL - Ps / rhol;
+              return (Jl - Jv, Jl * (1 / rhog - 1 / rhol) - Math.Log(rhol / rhog) - K, soL * (1 - x) + soG * x - s, lu * (1 - x) + vu * x - u);
+            };
+
+            foreach (var to in new List<int> { To, 300, 400, 500, 600 })
             {
               rLo = this._Liquid_Density(to);
               rGo = this._Vapor_Density(to);
-              sol = fsolve(f, new List<object>
-              {
-                to,
-                rLo,
-                rGo,
-                0.5
-              }, full_output: true);
+              sol = fsolve(f, new List<object> { to, rLo, rGo, 0.5 }, full_output: true);
               var _tup_21 = sol[0];
               T = _tup_21.Item1;
               rhoL = _tup_21.Item2;
@@ -1378,18 +1718,9 @@ public static class iapws95
         rho = (float)rho;
         T = (float)T;
         propiedades = this._Helmholtz(rho, T);
-        if(T > this.Tc)
-        {
-          x = 1;
-        }
-        else if(x == null)
-        {
-          x = 0;
-        }
-        if(!P)
-        {
-          P = propiedades["P"] / 1000.0;
-        }
+        if(T > this.Tc) { x = 1; }
+        else if(x == null) { x = 0; }
+        if(!P) { P = propiedades["P"] / 1000.0; }
       }
       else if(this._mode == "Tx")
       {
@@ -1404,14 +1735,8 @@ public static class iapws95
         Ps = _tup_23.Item3;
         vapor = this._Helmholtz(rhov, T);
         liquido = this._Helmholtz(rhol, T);
-        if(x == 0)
-        {
-          propiedades = liquido;
-        }
-        else if(x == 1)
-        {
-          propiedades = vapor;
-        }
+        if(x == 0) { propiedades = liquido; }
+        else if(x == 1) { propiedades = vapor; }
         P = Ps / 1000.0;
       }
       else if(this._mode == "Px")
@@ -1421,19 +1746,24 @@ public static class iapws95
         {
           throw new NotImplementedException("Incoming out of bound");
         }
+
         // Iterate over saturation routine to get T
-        if(T0)
+        Func<double, double> f = T =>
         {
-          To = T0;
-        }
-        else if(this.name == "water")
-        {
-          To = iapws97._TSat_P(P);
-        }
-        else
-        {
-          To = (this.Tc + this.Tt) / 2;
-        }
+          var rhol = this._Liquid_Density(T);
+          var rhog = this._Vapor_Density(T);
+          var deltaL = rhol / this.rhoc;
+          var deltaG = rhog / this.rhoc;
+          var tau = Tc / T;
+          var firL = _phir(tau, deltaL, this._constants);
+          var firG = _phir(tau, deltaG, this._constants);
+          var Ps = this.R * T * rhol * rhog / (rhol - rhog) * (firL - firG + Math.Log(deltaL / deltaG));
+          return Ps / 1000 - P;
+        };
+
+        if(T0) { To = T0; }
+        else if(this.name == "water") { To = iapws97._TSat_P(P); }
+        else { To = (this.Tc + this.Tt) / 2; }
         T = fsolve(f, To)[0];
         var _tup_24 = this._saturation(T);
         rhol = _tup_24.Item1;
@@ -1441,16 +1771,11 @@ public static class iapws95
         Ps = _tup_24.Item3;
         vapor = this._Helmholtz(rhov, T);
         liquido = this._Helmholtz(rhol, T);
-        if(x == 0)
-        {
-          propiedades = liquido;
-        }
-        else if(x == 1)
-        {
-          propiedades = vapor;
-        }
+        if(x == 0) { propiedades = liquido; }
+        else if(x == 1) { propiedades = vapor; }
       }
-      Func<object, object> f = rho =>
+
+      Func<double, double> f = rho =>
       {
         var delta = rho / rhoc;
         var tau = Tc / T;
@@ -1458,226 +1783,8 @@ public static class iapws95
         var Po = (1 + delta * fird) * this.R * T * rho;
         return Po - P * 1000;
       };
-      Func<object, object> f = rho =>
-      {
-        var delta = rho / rhoc;
-        var fird = _phird(tau, delta, this._constants);
-        var firt = _phirt(tau, delta, this._constants);
-        var ho = this.R * T * (1 + tau * (fiot + firt) + delta * fird);
-        return ho - h;
-      };
-      Func<object, object> f = rho =>
-      {
-        if(rho < 0)
-        {
-          rho = 1E-20;
-        }
-        var delta = rho / rhoc;
-        var ideal = this._phi0(tau, delta);
-        var fio = ideal["fio"];
-        var fiot = ideal["fiot"];
-        var fir = _phir(tau, delta, this._constants);
-        var firt = _phirt(tau, delta, this._constants);
-        var so = this.R * (tau * (fiot + firt) - fio - fir);
-        return so - s;
-      };
-      Func<object, object> f = rho =>
-      {
-        var delta = rho / rhoc;
-        var fird = _phird(tau, delta, this._constants);
-        var firt = _phirt(tau, delta, this._constants);
-        var Po = (1 + delta * fird) * this.R * T * rho;
-        var ho = this.R * T * (1 + tau * (fiot + firt) + delta * fird);
-        return ho - Po / rho - u;
-      };
-      Func<object, object> f = T =>
-      {
-        var tau = Tc / T;
-        var fird = _phird(tau, delta, this._constants);
-        var Po = (1 + delta * fird) * this.R * T * rho;
-        return Po - P * 1000;
-      };
-      Func<object, object> f = parr =>
-      {
-        var _tup_1 = parr;
-        var T = _tup_1.Item1;
-        var rhol = _tup_1.Item2;
-        var rhog = _tup_1.Item3;
-        var tau = Tc / T;
-        var deltaL = rhol / this.rhoc;
-        var deltaG = rhog / this.rhoc;
-        var firL = _phir(tau, deltaL, this._constants);
-        var firdL = _phird(tau, deltaL, this._constants);
-        var firG = _phir(tau, deltaG, this._constants);
-        var firdG = _phird(tau, deltaG, this._constants);
-        var Jl = rhol * (1 + deltaL * firdL);
-        var Jv = rhog * (1 + deltaG * firdG);
-        var K = firL - firG;
-        var Ps = this.R * T * rhol * rhog / (rhol - rhog) * (K + Math.Log(rhol / rhog));
-        return (Jl - Jv, Jl * (1 / rhog - 1 / rhol) - Math.Log(rhol / rhog) - K, Ps - P * 1000);
-      };
-      Func<object, object> funcion = parr =>
-      {
-        var _tup_1 = parr;
-        var rho = _tup_1.Item1;
-        var T = _tup_1.Item2;
-        var delta = rho / rhoc;
-        var tau = Tc / T;
-        var ideal = this._phi0(tau, delta);
-        var fiot = ideal["fiot"];
-        var fird = _phird(tau, delta, this._constants);
-        var firt = _phirt(tau, delta, this._constants);
-        var Po = (1 + delta * fird) * this.R * T * rho;
-        var ho = this.R * T * (1 + tau * (fiot + firt) + delta * fird);
-        return Tuple.Create(Po - P * 1000, ho - h);
-      };
-      Func<object, object> f = parr =>
-      {
-        var _tup_1 = parr;
-        var T = _tup_1.Item1;
-        var rhol = _tup_1.Item2;
-        var rhog = _tup_1.Item3;
-        var x = _tup_1.Item4;
-        var tau = Tc / T;
-        var deltaL = rhol / this.rhoc;
-        var deltaG = rhog / this.rhoc;
-        var ideal = this._phi0(tau, deltaL);
-        var fiot = ideal["fiot"];
-        var firL = _phir(tau, deltaL, this._constants);
-        var firdL = _phird(tau, deltaL, this._constants);
-        var firtL = _phirt(tau, deltaL, this._constants);
-        var hoL = this.R * T * (1 + tau * (fiot + firtL) + deltaL * firdL);
-        var firG = _phir(tau, deltaG, this._constants);
-        var firdG = _phird(tau, deltaG, this._constants);
-        var firtG = _phirt(tau, deltaG, this._constants);
-        var hoG = this.R * T * (1 + tau * (fiot + firtG) + deltaG * firdG);
-        var Jl = rhol * (1 + deltaL * firdL);
-        var Jv = rhog * (1 + deltaG * firdG);
-        var K = firL - firG;
-        var Ps = this.R * T * rhol * rhog / (rhol - rhog) * (K + Math.Log(rhol / rhog));
-        return (Jl - Jv, Jl * (1 / rhog - 1 / rhol) - Math.Log(rhol / rhog) - K, hoL * (1 - x) + hoG * x - h, Ps - P * 1000);
-      };
-      Func<object, object> f = parr =>
-      {
-        var _tup_1 = parr;
-        var rho = _tup_1.Item1;
-        var T = _tup_1.Item2;
-        var delta = rho / rhoc;
-        var tau = Tc / T;
-        var ideal = this._phi0(tau, delta);
-        var fio = ideal["fio"];
-        var fiot = ideal["fiot"];
-        var fird = _phird(tau, delta, this._constants);
-        var fir = _phir(tau, delta, this._constants);
-        var firt = _phirt(tau, delta, this._constants);
-        var Po = (1 + delta * fird) * this.R * T * rho;
-        var so = this.R * (tau * (fiot + firt) - fio - fir);
-        return Tuple.Create(Po - P * 1000, so - s);
-      };
-      Func<object, object> funcion = parr =>
-      {
-        var _tup_1 = parr;
-        var rho = _tup_1.Item1;
-        var T = _tup_1.Item2;
-        var _tup_2 = this._saturation(T);
-        var rhol = _tup_2.Item1;
-        var rhov = _tup_2.Item2;
-        var Ps = _tup_2.Item3;
-        var vapor = this._Helmholtz(rhov, T);
-        var liquido = this._Helmholtz(rhol, T);
-        var x = (1.0 / rho - 1 / rhol) / (1 / rhov - 1 / rhol);
-        return Tuple.Create(Ps - P * 1000, vapor["s"] * x + liquido["s"] * (1 - x) - s);
-      };
-      Func<object, object> f = parr =>
-      {
-        var _tup_1 = parr;
-        var rho = _tup_1.Item1;
-        var T = _tup_1.Item2;
-        var delta = rho / rhoc;
-        var tau = Tc / T;
-        var ideal = this._phi0(tau, delta);
-        var fiot = ideal["fiot"];
-        var fird = _phird(tau, delta, this._constants);
-        var firt = _phirt(tau, delta, this._constants);
-        var Po = (1 + delta * fird) * this.R * T * rho;
-        var ho = this.R * T * (1 + tau * (fiot + firt) + delta * fird);
-        return Tuple.Create(ho - Po / rho - u, Po - P * 1000);
-      };
-      Func<object, object> f = parr =>
-      {
-        var _tup_1 = parr;
-        var T = _tup_1.Item1;
-        var rhol = _tup_1.Item2;
-        var rhog = _tup_1.Item3;
-        var x = _tup_1.Item4;
-        var tau = Tc / T;
-        var deltaL = rhol / this.rhoc;
-        var deltaG = rhog / this.rhoc;
-        var ideal = this._phi0(tau, deltaL);
-        var fiot = ideal["fiot"];
-        var firL = _phir(tau, deltaL, this._constants);
-        var firdL = _phird(tau, deltaL, this._constants);
-        var firtL = _phirt(tau, deltaL, this._constants);
-        var hoL = this.R * T * (1 + tau * (fiot + firtL) + deltaL * firdL);
-        var firG = _phir(tau, deltaG, this._constants);
-        var firdG = _phird(tau, deltaG, this._constants);
-        var firtG = _phirt(tau, deltaG, this._constants);
-        var hoG = this.R * T * (1 + tau * (fiot + firtG) + deltaG * firdG);
-        var Jl = rhol * (1 + deltaL * firdL);
-        var Jv = rhog * (1 + deltaG * firdG);
-        var K = firL - firG;
-        var Ps = this.R * T * rhol * rhog / (rhol - rhog) * (K + Math.Log(rhol / rhog));
-        var vu = hoG - Ps / rhog;
-        var lu = hoL - Ps / rhol;
-        return (Jl - Jv, Jl * (1 / rhog - 1 / rhol) - Math.Log(rhol / rhog) - K, lu * (1 - x) + vu * x - u, Ps - P * 1000);
-      };
-      Func<object, object> f = T =>
-      {
-        var tau = Tc / T;
-        var ideal = this._phi0(tau, delta);
-        var fiot = ideal["fiot"];
-        var fird = _phird(tau, delta, this._constants);
-        var firt = _phirt(tau, delta, this._constants);
-        var ho = this.R * T * (1 + tau * (fiot + firt) + delta * fird);
-        return ho - h;
-      };
-      Func<object, object> f = parr =>
-      {
-        var _tup_1 = parr;
-        var T = _tup_1.Item1;
-        var rhol = _tup_1.Item2;
-        var rhog = _tup_1.Item3;
-        var tau = Tc / T;
-        var deltaL = rhol / this.rhoc;
-        var deltaG = rhog / this.rhoc;
-        var ideal = this._phi0(tau, deltaL);
-        var fiot = ideal["fiot"];
-        var firL = _phir(tau, deltaL, this._constants);
-        var firdL = _phird(tau, deltaL, this._constants);
-        var firtL = _phirt(tau, deltaL, this._constants);
-        var hoL = this.R * T * (1 + tau * (fiot + firtL) + deltaL * firdL);
-        var firG = _phir(tau, deltaG, this._constants);
-        var firdG = _phird(tau, deltaG, this._constants);
-        var firtG = _phirt(tau, deltaG, this._constants);
-        var hoG = this.R * T * (1 + tau * (fiot + firtG) + deltaG * firdG);
-        var Jl = rhol * (1 + deltaL * firdL);
-        var Jv = rhog * (1 + deltaG * firdG);
-        var K = firL - firG;
-        var x = (1.0 / rho - 1 / rhol) / (1 / rhog - 1 / rhol);
-        return (Jl - Jv, Jl * (1 / rhog - 1 / rhol) - Math.Log(rhol / rhog) - K, hoL * (1 - x) + hoG * x - h);
-      };
-      Func<object, object> f = T =>
-      {
-        var tau = Tc / T;
-        var ideal = this._phi0(tau, delta);
-        var fio = ideal["fio"];
-        var fiot = ideal["fiot"];
-        var fir = _phir(tau, delta, this._constants);
-        var firt = _phirt(tau, delta, this._constants);
-        var so = this.R * (tau * (fiot + firt) - fio - fir);
-        return so - s;
-      };
-      Func<object, object> f = parr =>
+
+      Func<double, double> f = parr =>
       {
         var _tup_1 = parr;
         var T = _tup_1.Item1;
@@ -1705,215 +1812,14 @@ public static class iapws95
         var x = (1.0 / rho - 1 / rhol) / (1 / rhog - 1 / rhol);
         return (Jl - Jv, Jl * (1 / rhog - 1 / rhol) - Math.Log(rhol / rhog) - K, soL * (1 - x) + soG * x - s);
       };
-      Func<object, object> f = T =>
-      {
-        var tau = Tc / T;
-        var ideal = this._phi0(tau, delta);
-        var fiot = ideal["fiot"];
-        var fird = _phird(tau, delta, this._constants);
-        var firt = _phirt(tau, delta, this._constants);
-        var Po = (1 + delta * fird) * this.R * T * rho;
-        var ho = this.R * T * (1 + tau * (fiot + firt) + delta * fird);
-        return ho - Po / rho - u;
-      };
-      Func<object, object> f = parr =>
-      {
-        var _tup_1 = parr;
-        var T = _tup_1.Item1;
-        var rhol = _tup_1.Item2;
-        var rhog = _tup_1.Item3;
-        var tau = Tc / T;
-        var deltaL = rhol / this.rhoc;
-        var deltaG = rhog / this.rhoc;
-        var ideal = this._phi0(tau, deltaL);
-        var fiot = ideal["fiot"];
-        var firL = _phir(tau, deltaL, this._constants);
-        var firdL = _phird(tau, deltaL, this._constants);
-        var firtL = _phirt(tau, deltaL, this._constants);
-        var hoL = this.R * T * (1 + tau * (fiot + firtL) + deltaL * firdL);
-        var firG = _phir(tau, deltaG, this._constants);
-        var firdG = _phird(tau, deltaG, this._constants);
-        var firtG = _phirt(tau, deltaG, this._constants);
-        var hoG = this.R * T * (1 + tau * (fiot + firtG) + deltaG * firdG);
-        var Jl = rhol * (1 + deltaL * firdL);
-        var Jv = rhog * (1 + deltaG * firdG);
-        var K = firL - firG;
-        var x = (1.0 / rho - 1 / rhol) / (1 / rhog - 1 / rhol);
-        var Ps = this.R * T * rhol * rhog / (rhol - rhog) * (K + Math.Log(rhol / rhog));
-        var vu = hoG - Ps / rhog;
-        var lu = hoL - Ps / rhol;
-        return (Jl - Jv, Jl * (1 / rhog - 1 / rhol) - Math.Log(rhol / rhog) - K, lu * (1 - x) + vu * x - u);
-      };
-      Func<object, object> f = parr =>
-      {
-        var _tup_1 = parr;
-        var rho = _tup_1.Item1;
-        var T = _tup_1.Item2;
-        var delta = rho / rhoc;
-        var tau = Tc / T;
-        var ideal = this._phi0(tau, delta);
-        var fio = ideal["fio"];
-        var fiot = ideal["fiot"];
-        var fird = _phird(tau, delta, this._constants);
-        var fir = _phir(tau, delta, this._constants);
-        var firt = _phirt(tau, delta, this._constants);
-        var ho = this.R * T * (1 + tau * (fiot + firt) + delta * fird);
-        var so = this.R * (tau * (fiot + firt) - fio - fir);
-        return Tuple.Create(ho - h, so - s);
-      };
-      Func<object, object> f = parr =>
-      {
-        var _tup_1 = parr;
-        var T = _tup_1.Item1;
-        var rhol = _tup_1.Item2;
-        var rhog = _tup_1.Item3;
-        var x = _tup_1.Item4;
-        var tau = Tc / T;
-        var deltaL = rhol / this.rhoc;
-        var deltaG = rhog / this.rhoc;
-        var idealL = this._phi0(tau, deltaL);
-        var fiot = idealL["fiot"];
-        var fioL = idealL["fio"];
-        var idealG = this._phi0(tau, deltaG);
-        var fioG = idealG["fio"];
-        var firL = _phir(tau, deltaL, this._constants);
-        var firdL = _phird(tau, deltaL, this._constants);
-        var firtL = _phirt(tau, deltaL, this._constants);
-        var hoL = this.R * T * (1 + tau * (fiot + firtL) + deltaL * firdL);
-        var soL = this.R * (tau * (fiot + firtL) - fioL - firL);
-        var firG = _phir(tau, deltaG, this._constants);
-        var firdG = _phird(tau, deltaG, this._constants);
-        var firtG = _phirt(tau, deltaG, this._constants);
-        var hoG = this.R * T * (1 + tau * (fiot + firtG) + deltaG * firdG);
-        var soG = this.R * (tau * (fiot + firtG) - fioG - firG);
-        var Jl = rhol * (1 + deltaL * firdL);
-        var Jv = rhog * (1 + deltaG * firdG);
-        var K = firL - firG;
-        return (Jl - Jv, Jl * (1 / rhog - 1 / rhol) - Math.Log(rhol / rhog) - K, hoL * (1 - x) + hoG * x - h, soL * (1 - x) + soG * x - s);
-      };
-      Func<object, object> f = parr =>
-      {
-        var _tup_1 = parr;
-        var rho = _tup_1.Item1;
-        var T = _tup_1.Item2;
-        var delta = rho / rhoc;
-        var tau = Tc / T;
-        var ideal = this._phi0(tau, delta);
-        var fiot = ideal["fiot"];
-        var fird = _phird(tau, delta, this._constants);
-        var firt = _phirt(tau, delta, this._constants);
-        var Po = (1 + delta * fird) * this.R * T * rho;
-        var ho = this.R * T * (1 + tau * (fiot + firt) + delta * fird);
-        return Tuple.Create(ho - Po / rho - u, ho - h);
-      };
-      Func<object, object> f = parr =>
-      {
-        var _tup_1 = parr;
-        var T = _tup_1.Item1;
-        var rhol = _tup_1.Item2;
-        var rhog = _tup_1.Item3;
-        var x = _tup_1.Item4;
-        var tau = Tc / T;
-        var deltaL = rhol / this.rhoc;
-        var deltaG = rhog / this.rhoc;
-        var ideal = this._phi0(tau, deltaL);
-        var fiot = ideal["fiot"];
-        var firL = _phir(tau, deltaL, this._constants);
-        var firdL = _phird(tau, deltaL, this._constants);
-        var firtL = _phirt(tau, deltaL, this._constants);
-        var hoL = this.R * T * (1 + tau * (fiot + firtL) + deltaL * firdL);
-        var firG = _phir(tau, deltaG, this._constants);
-        var firdG = _phird(tau, deltaG, this._constants);
-        var firtG = _phirt(tau, deltaG, this._constants);
-        var hoG = this.R * T * (1 + tau * (fiot + firtG) + deltaG * firdG);
-        var Jl = rhol * (1 + deltaL * firdL);
-        var Jv = rhog * (1 + deltaG * firdG);
-        var K = firL - firG;
-        var Ps = this.R * T * rhol * rhog / (rhol - rhog) * (K + Math.Log(rhol / rhog));
-        var vu = hoG - Ps / rhog;
-        var lu = hoL - Ps / rhol;
-        return (Jl - Jv, Jl * (1 / rhog - 1 / rhol) - Math.Log(rhol / rhog) - K, hoL * (1 - x) + hoG * x - h, lu * (1 - x) + vu * x - u);
-      };
-      Func<object, object> f = parr =>
-      {
-        var _tup_1 = parr;
-        var rho = _tup_1.Item1;
-        var T = _tup_1.Item2;
-        var delta = rho / rhoc;
-        var tau = Tc / T;
-        var ideal = this._phi0(tau, delta);
-        var fio = ideal["fio"];
-        var fiot = ideal["fiot"];
-        var fird = _phird(tau, delta, this._constants);
-        var fir = _phir(tau, delta, this._constants);
-        var firt = _phirt(tau, delta, this._constants);
-        var ho = this.R * T * (1 + tau * (fiot + firt) + delta * fird);
-        var so = this.R * (tau * (fiot + firt) - fio - fir);
-        var Po = (1 + delta * fird) * this.R * T * rho;
-        return Tuple.Create(ho - Po / rho - u, so - s);
-      };
-      Func<object, object> f = parr =>
-      {
-        var _tup_1 = parr;
-        var T = _tup_1.Item1;
-        var rhol = _tup_1.Item2;
-        var rhog = _tup_1.Item3;
-        var x = _tup_1.Item4;
-        var tau = Tc / T;
-        var deltaL = rhol / this.rhoc;
-        var deltaG = rhog / this.rhoc;
-        var idealL = this._phi0(tau, deltaL);
-        var fiot = idealL["fiot"];
-        var fioL = idealL["fio"];
-        var idealG = this._phi0(tau, deltaG);
-        var fioG = idealG["fio"];
-        var firL = _phir(tau, deltaL, this._constants);
-        var firdL = _phird(tau, deltaL, this._constants);
-        var firtL = _phirt(tau, deltaL, this._constants);
-        var hoL = this.R * T * (1 + tau * (fiot + firtL) + deltaL * firdL);
-        var soL = this.R * (tau * (fiot + firtL) - fioL - firL);
-        var firG = _phir(tau, deltaG, this._constants);
-        var firdG = _phird(tau, deltaG, this._constants);
-        var firtG = _phirt(tau, deltaG, this._constants);
-        var hoG = this.R * T * (1 + tau * (fiot + firtG) + deltaG * firdG);
-        var soG = this.R * (tau * (fiot + firtG) - fioG - firG);
-        var Jl = rhol * (1 + deltaL * firdL);
-        var Jv = rhog * (1 + deltaG * firdG);
-        var K = firL - firG;
-        var Ps = this.R * T * rhol * rhog / (rhol - rhog) * (K + Math.Log(rhol / rhog));
-        var vu = hoG - Ps / rhog;
-        var lu = hoL - Ps / rhol;
-        return (Jl - Jv, Jl * (1 / rhog - 1 / rhol) - Math.Log(rhol / rhog) - K, soL * (1 - x) + soG * x - s, lu * (1 - x) + vu * x - u);
-      };
-      Func<object, object> f = T =>
-      {
-        var rhol = this._Liquid_Density(T);
-        var rhog = this._Vapor_Density(T);
-        var deltaL = rhol / this.rhoc;
-        var deltaG = rhog / this.rhoc;
-        var tau = Tc / T;
-        var firL = _phir(tau, deltaL, this._constants);
-        var firG = _phir(tau, deltaG, this._constants);
-        var Ps = this.R * T * rhol * rhog / (rhol - rhog) * (firL - firG + Math.Log(deltaL / deltaG));
-        return Ps / 1000 - P;
-      };
+
       this.T = T;
       this.Tr = T / this.Tc;
       this.P = P;
       this.Pr = this.P / this.Pc;
       this.x = x;
-      if(new List<string>
-      {
-        "Tx",
-        "Px"
-      }.Contains(this._mode) || 0 < x < 1)
-      {
-        region = 4;
-      }
-      else
-      {
-        region = 0;
-      }
+      if(new List<string> { "Tx", "Px" }.Contains(this._mode) || 0 < x < 1) { region = 4; }
+      else { region = 0; }
       this.phase = _utils.getphase(this.Tc, this.Pc, this.T, this.P, this.x, region);
       this.Liquid = _utils._fase();
       this.Gas = _utils._fase();
@@ -2076,14 +1982,12 @@ public static class iapws95
       object Ps;
       var rhoc = this._constants.get("rhoref", this.rhoc);
       var Tc = this._constants.get("Tref", this.Tc);
-      if(T > Tc)
-      {
-        T = Tc;
-      }
+      if(T > Tc) { T = Tc; }
       var tau = Tc / T;
       var rhoLo = this._Liquid_Density(T);
       var rhoGo = this._Vapor_Density(T);
-      Func<object, object> f = parr =>
+
+      Func<double, Tuple> f = parr =>
       {
         var _tup_1 = parr;
         var rhol = _tup_1.Item1;
@@ -2100,11 +2004,9 @@ public static class iapws95
         var Kv = deltaG * phirdG + phirG + Math.Log(deltaG);
         return Tuple.Create(Kv - Kl, Jv - Jl);
       };
-      var _tup_1 = fsolve(f, new List<object>
-      {
-        rhoLo,
-        rhoGo
-      });
+
+      var _tup_1 = fsolve(f, new List<object> { rhoLo, rhoGo });
+
       var rhoL = _tup_1.Item1;
       var rhoG = _tup_1.Item2;
       if(rhoL == rhoG)
@@ -2154,7 +2056,7 @@ public static class iapws95
     //     http://www.iapws.org/relguide/IAPWS-95.html
     //
 
-    public virtual object _Helmholtz(object rho, object T)
+    public virtual Dictionary<string, double> _Helmholtz(object rho, object T)
     {
       if(rho is ndarray) { rho = rho[0]; }
       if(T is ndarray) { T = T[0]; }
@@ -2176,7 +2078,7 @@ public static class iapws95
       var fird = res["fird"];
       var firdd = res["firdd"];
       var firdt = res["firdt"];
-      var propiedades = new Dictionary<object, object> { };
+      var propiedades = new Dictionary<string, double> { };
 
       propiedades["fir"] = fir;
       propiedades["fird"] = fird;
@@ -2194,7 +2096,7 @@ public static class iapws95
     }
 
     // Ideal gas properties
-    public virtual object _prop0(object rho, object T)
+    public virtual _utils._fase _prop0(object rho, object T)
     {
       var rhoc = this._constants.get("rhoref", this.rhoc);
       var Tc = this._constants.get("Tref", this.Tc);
@@ -2204,6 +2106,7 @@ public static class iapws95
       var fio = ideal["fio"];
       var fiot = ideal["fiot"];
       var fiott = ideal["fiott"];
+
       var propiedades = _utils._fase();
 
       propiedades.h = this.R * T * (1 + tau * fiot);
@@ -2243,7 +2146,7 @@ public static class iapws95
     //     http://www.iapws.org/relguide/IAPWS-95.html
     //
 
-    public virtual object _phi0(object tau, object delta)
+    public virtual Dictionary<string, double> _phi0(object tau, object delta)
     {
       object t;
       object n;
@@ -2297,9 +2200,7 @@ public static class iapws95
         }
       }
 
-      var prop = new Dictionary<object, object>
-      {
-      };
+      var prop = new Dictionary<string, double> { };
 
       prop["fio"] = fio;
       prop["fiot"] = fiot;
@@ -2339,7 +2240,7 @@ public static class iapws95
     //     http://www.iapws.org/relguide/IAPWS-95.html
     //
 
-    public virtual object _phir(object tau, object delta)
+    public virtual Dictionary<string, double> _phir(object tau, object delta)
     {
       object Deltadd;
       object b;
@@ -2466,7 +2367,7 @@ public static class iapws95
         firdt += n * (Math.Pow(Delta, b) * (Ft + delta * Fdt) + delta * DeltaBd * Ft + DeltaBt * (F + delta * Fd) + DeltaBdt * delta * F);
       }
 
-      var prop = new Dictionary<object, object> { };
+      var prop = new Dictionary<string, double> { };
       prop["fir"] = fir;
       prop["firt"] = firt;
       prop["firtt"] = firtt;
@@ -2492,7 +2393,7 @@ public static class iapws95
     //         * C: ∂²fir/∂δ²|δ->0
     //
 
-    public virtual object _virial(object T)
+    public virtual Dictionary<string, double> _virial(object T)
     {
       object b;
       object a;
@@ -2591,7 +2492,7 @@ public static class iapws95
         C += n * (Math.Pow(Delta, b) * (2 * Fd + delta * Fdd) + 2 * DeltaBd * (F + delta * Fd) + DeltaBdd * delta * F);
       }
 
-      var prop = new Dictionary<object, object> { };
+      var prop = new Dictionary<string, double> { };
       prop["B"] = B;
       prop["C"] = C;
 
@@ -2627,12 +2528,12 @@ public static class iapws95
     //     http://www.iapws.org/relguide/SeaAir.html
     //
 
-    public virtual object _derivDimensional(object rho, object T)
+    public virtual Dictionary<string, double> _derivDimensional(object rho, object T)
     {
       object prop;
       if(!rho)
       {
-        prop = new Dictionary<object, object> { };
+        prop = new Dictionary<string, double> { };
         prop["fir"] = 0;
         prop["firt"] = 0;
         prop["fird"] = 0;
@@ -2661,7 +2562,7 @@ public static class iapws95
       var firdd = res["firdd"];
       var firdt = res["firdt"];
 
-      prop = new Dictionary<object, object> { };
+      prop = new Dictionary<string, double> { };
       prop["fir"] = R * T * (fio + fir);
       prop["firt"] = R * (fio + fir - (fiot + firt) * tau);
       prop["fird"] = R * T / rhoc * (fiod + fird);
@@ -2691,7 +2592,7 @@ public static class iapws95
     //       exp: exponent
     //
 
-    public virtual object _surface(object T)
+    public virtual double _surface(double T)
     {
       var tau = 1 - T / this.Tc;
       var sigma = 0;
@@ -2723,7 +2624,7 @@ public static class iapws95
     //     http://www.iapws.org/relguide/Supp-sat.html, Eq.1
     //
 
-    public static object _Vapor_Pressure(object cls, object T)
+    public static double _Vapor_Pressure(Dictionary<string, double> cls, double T)
     {
       var Tita = 1 - T / cls.Tc;
       var suma = 0;
@@ -2757,7 +2658,7 @@ public static class iapws95
     //     http://www.iapws.org/relguide/Supp-sat.html, Eq.2
     //
 
-    public static object _Liquid_Density(object cls, object T)
+    public static double _Liquid_Density(Dictionary<string, double> cls, double T)
     {
       var eq = cls._rhoL["eq"];
       var Tita = 1 - T / cls.Tc;
@@ -2796,7 +2697,7 @@ public static class iapws95
     //     http://www.iapws.org/relguide/Supp-sat.html, Eq.3
     //
 
-    public static object _Vapor_Density(object cls, object T)
+    public static double _Vapor_Density(Dictionary<string, double> cls, double T)
     {
       var eq = cls._rhoG["eq"];
       var Tita = 1 - T / cls.Tc;
@@ -2835,7 +2736,7 @@ public static class iapws95
     //     http://www.iapws.org/relguide/Supp-sat.html, derived from Eq.1
     //
 
-    public static object _dPdT_sat(object cls, object T)
+    public static double _dPdT_sat(Dictionary<string, double> cls, double T)
     {
       var Tita = 1 - T / cls.Tc;
       var suma1 = 0;
@@ -2968,10 +2869,10 @@ public static class iapws95
     public string CASNumber = "7732-18-5";
     public string formula = "H2O";
     public string synonym = "R-718";
-    public object Tc = Tc;
-    public object rhoc = rhoc;
-    public object Pc = Pc;
-    public object M = M;
+    public double Tc = Tc;
+    public double rhoc = rhoc;
+    public double Pc = Pc;
+    public double M = M;
     public double Tt = 273.16;
     public double Tb = 373.1243;
     public double f_acent = 0.3443;

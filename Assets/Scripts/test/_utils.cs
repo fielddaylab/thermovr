@@ -41,12 +41,13 @@ public static class _utils
   //     Phase name
   //
 
-  public static object getphase( object Tc, object Pc, object T, object P, object x, object region)
+  public static string getphase(double Tc, double Pc, double T, double P, double x, int region)
   {
     // Avoid round problem
-    P = round(P, 8);
-    T = round(T, 8);
-    if(P > Pc && T > Tc) var phase = "Supercritical fluid";
+    P = Math.Round(P, 8);
+    T = Math.Round(T, 8);
+    string phase = "";
+    if(P > Pc && T > Tc) phase = "Supercritical fluid";
     else if(T > Tc) phase = "Gas";
     else if(P > Pc) phase = "Compressible liquid";
     else if(P == Pc && T == Tc) phase = "Critical point";
@@ -62,52 +63,53 @@ public static class _utils
 
   public class _fase : object
   {
-    public None v = null;
-    public None rho = null;
-    public None h = null;
-    public None s = null;
-    public None u = null;
-    public None a = null;
-    public None g = null;
-    public None cp = null;
-    public None cv = null;
-    public None cp_cv = null;
-    public None w = null;
-    public None Z = null;
-    public None fi = null;
-    public None f = null;
-    public None mu = null;
-    public None k = null;
-    public None nu = null;
-    public None Prandt = null;
-    public None epsilon = null;
-    public None alfa = null;
-    public None n = null;
-    public None alfap = null;
-    public None betap = null;
-    public None joule = null;
-    public None Gruneisen = null;
-    public None alfav = null;
-    public None kappa = null;
-    public None betas = null;
-    public None gamma = null;
-    public None Kt = null;
-    public None kt = null;
-    public None Ks = null;
-    public None ks = null;
-    public None dpdT_rho = null;
-    public None dpdrho_T = null;
-    public None drhodT_P = null;
-    public None drhodP_T = null;
-    public None dhdT_rho = null;
-    public None dhdT_P = null;
-    public None dhdrho_T = null;
-    public None dhdrho_P = null;
-    public None dhdP_T = null;
-    public None dhdP_rho = null;
-    public None Z_rho = null;
-    public None IntP = null;
-    public None hInput = null;
+    public double v = 0.0;
+    public double rho = 0.0;
+    public double h = 0.0;
+    public double s = 0.0;
+    public double u = 0.0;
+    public double a = 0.0;
+    public double g = 0.0;
+    public double cp = 0.0;
+    public double cv = 0.0;
+    public double cp_cv = 0.0;
+    public double w = 0.0;
+    public double Z = 0.0;
+    public double fi = 0.0;
+    public double f = 0.0;
+    public double mu = 0.0;
+    public double k = 0.0;
+    public double nu = 0.0;
+    public double Prandt = 0.0;
+    public double epsilon = 0.0;
+    public double alfa = 0.0;
+    public double n = 0.0;
+    public double alfap = 0.0;
+    public double betap = 0.0;
+    public double joule = 0.0;
+    public double Gruneisen = 0.0;
+    public double alfav = 0.0;
+    public double kappa = 0.0;
+    public double betas = 0.0;
+    public double gamma = 0.0;
+    public double Kt = 0.0;
+    public double kt = 0.0;
+    public double Ks = 0.0;
+    public double ks = 0.0;
+    public double dpdT_rho = 0.0;
+    public double dpdrho_T = 0.0;
+    public double drhodT_P = 0.0;
+    public double drhodP_T = 0.0;
+    public double dhdT_rho = 0.0;
+    public double dhdT_P = 0.0;
+    public double dhdrho_T = 0.0;
+    public double dhdrho_P = 0.0;
+    public double dhdP_T = 0.0;
+    public double dhdP_rho = 0.0;
+    public double Z_rho = 0.0;
+    public double IntP = 0.0;
+    public double hInput = 0.0;
+    public double xkappa = 0.0; //phil added this
   }
 
   // Calculate generic partial derivative
@@ -152,12 +154,12 @@ public static class _utils
   //   Formulations, http://www.iapws.org/relguide/Advise3.pdf
   //
 
-  public static object deriv_H(object state, object z, object x, object y, object fase)
+  public static object deriv_H(object state, string z, string x, string y, _utils._fase fase)
   {
     // We use the relation between rho and v and his partial derivative
     // ∂v/∂b|c = -1/ρ² ∂ρ/∂b|c
     // ∂a/∂v|c = -ρ² ∂a/∂ρ|c
-    var mul = 1;
+    double mul = 1;
     if(z == "rho")
     {
       mul = -Math.Pow(fase.rho, 2);
@@ -168,11 +170,9 @@ public static class _utils
       mul = -1 / Math.Pow(fase.rho, 2);
       x = "v";
     }
-    if(y == "rho")
-    {
-      y = "v";
-    }
-    var dT = new Dictionary<object, object>
+    if(y == "rho") { y = "v"; }
+
+    var dT = new Dictionary<string, double>
     {
       { "P", state.P * 1000 * fase.alfap},
       { "T", 1},
@@ -183,7 +183,7 @@ public static class _utils
       { "g", state.P * 1000 * fase.v * fase.alfap - fase.s},
       { "a", -fase.s}
     };
-    var dv = new Dictionary<object, object>
+    var dv = new Dictionary<string, double>
     {
       { "P", -state.P * 1000 * fase.betap},
       { "T", 0},
@@ -194,6 +194,7 @@ public static class _utils
       { "g", -state.P * 1000 * fase.v * fase.betap},
       { "a", -state.P * 1000}
     };
+
     var deriv = (dv[z] * dT[y] - dT[z] * dv[y]) / (dv[x] * dT[y] - dT[x] * dv[y]);
     return mul * deriv;
   }
@@ -240,9 +241,9 @@ public static class _utils
   //   Formulations, http://www.iapws.org/relguide/Advise3.pdf
   //
 
-  public static object deriv_G( object state, object z, object x, object y, object fase)
+  public static object deriv_G(object state, string z, string x, string y, _utils._fase fase)
   {
-    var mul = 1;
+    double mul = 1;
     if(z == "rho")
     {
       mul = -Math.Pow(fase.rho, 2);
@@ -253,7 +254,7 @@ public static class _utils
       mul = -1 / Math.Pow(fase.rho, 2);
       x = "v";
     }
-    var dT = new Dictionary<object, object>
+    var dT = new Dictionary<string, double>
     {
       { "P", 0},
       { "T", 1},
@@ -264,7 +265,7 @@ public static class _utils
       { "g", -fase.s},
       { "a", -state.P * 1000 * fase.v * fase.alfav - fase.s}
     };
-    var dP = new Dictionary<object, object>
+    var dP = new Dictionary<string, double>
     {
       { "P", 1},
       { "T", 0},

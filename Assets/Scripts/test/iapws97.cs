@@ -6,16 +6,6 @@ using rhoc = _iapws.rhoc;
 using Tt = _iapws.Tt;
 using Pt = _iapws.Pt;
 using Tb = _iapws.Tb;
-using Dipole = _iapws.Dipole;
-using f_acent = _iapws.f_acent;
-using _Viscosity = _iapws._Viscosity;
-using _ThCond = _iapws._ThCond;
-using _Tension = _iapws._Tension;
-using _Dielectric = _iapws._Dielectric;
-using _Refractive = _iapws._Refractive;
-using getphase = _utils.getphase;
-using deriv_G = _utils.deriv_G;
-using _fase = _utils._fase;
 */
 using System;
 using System.Collections.Generic;
@@ -1252,7 +1242,7 @@ public static class iapws97
   //   0.00112892188
   //
 
-  public static object _Region1(object T, object P)
+  public static Dictionary<string, double> _Region1(double T, double P)
   {
     if(P < 0) { P = Pmin; }
 
@@ -1382,9 +1372,8 @@ public static class iapws97
       gtt += ni * j * (j - 1) * Math.Pow(7.1 - Pr, i) * Math.Pow(Tr - 1.222, j - 2);
       gpt -= ni * i * j * Math.Pow(7.1 - Pr, i - 1) * Math.Pow(Tr - 1.222, j - 1);
     }
-    var propiedades = new Dictionary<object, object>
-    {
-    };
+
+    var propiedades = new Dictionary<string, double> { };
     propiedades["T"] = T;
     propiedades["P"] = P;
     propiedades["v"] = Pr * gp * R * T / P / 1000;
@@ -1789,7 +1778,7 @@ public static class iapws97
   //   286.239651
   //
 
-  public static object _Region2(object T, object P)
+  public static Dictionary<string, double> _Region2(double T, double P)
   {
     if(P < 0) { P = Pmin; }
 
@@ -1953,9 +1942,7 @@ public static class iapws97
       grtt += ni * j * (j - 1) * Math.Pow(Pr, i) * Math.Pow(Tr - 0.5, j - 2);
       grpt += ni * i * j * Math.Pow(Pr, i - 1) * Math.Pow(Tr - 0.5, j - 1);
     }
-    var propiedades = new Dictionary<object, object>
-    {
-    };
+    var propiedades = new Dictionary<string, double> { };
     propiedades["T"] = T;
     propiedades["P"] = P;
     propiedades["v"] = Pr * (gop + grp) * R * T / P / 1000;
@@ -3686,7 +3673,7 @@ public static class iapws97
   //   0.00806710817
   //
 
-  public static object _Region3(object rho, object T)
+  public static Dictionary<string, double> _Region3(double rho, double T)
   {
     var I = new List<int>
     {
@@ -3832,9 +3819,8 @@ public static class iapws97
       gtt += ni * j * (j - 1) * Math.Pow(d, i) * Math.Pow(Tr, j - 2);
       gdt += ni * i * j * Math.Pow(d, i - 1) * Math.Pow(Tr, j - 1);
     }
-    var propiedades = new Dictionary<object, object>
-    {
-    };
+
+    var propiedades = new Dictionary<string, double> { };
     propiedades["T"] = T;
     propiedades["P"] = d * gd * R * T * rho / 1000;
     propiedades["v"] = 1 / rho;
@@ -9111,7 +9097,7 @@ public static class iapws97
   //       * s: Specific entropy, [kJ/kgK]
   //
 
-  public static object _Region4(object P, object x)
+  public static Dictionary<string, double> _Region4(double P, double x)
   {
     object P2;
     object P1;
@@ -9128,9 +9114,8 @@ public static class iapws97
       P1 = _Region1(T, P);
       P2 = _Region2(T, P);
     }
-    var propiedades = new Dictionary<object, object>
-    {
-    };
+
+    var propiedades = new Dictionary<string, double> { };
     propiedades["T"] = T;
     propiedades["P"] = P;
     propiedades["v"] = P1["v"] + x * (P2["v"] - P1["v"]);
@@ -9362,7 +9347,7 @@ public static class iapws97
   //   0.0329193892
   //
 
-  public static object _Region5(object T, object P)
+  public static Dictionary<string, double> _Region5(double T, double P)
   {
     if(P < 0)
     {
@@ -9417,9 +9402,8 @@ public static class iapws97
       grtt += ni * j * (j - 1) * Math.Pow(Pr, i) * Math.Pow(Tr, j - 2);
       grpt += ni * i * j * Math.Pow(Pr, i - 1) * Math.Pow(Tr, j - 1);
     }
-    var propiedades = new Dictionary<object, object>
-    {
-    };
+
+    var propiedades = new Dictionary<string, double> { };
     propiedades["T"] = T;
     propiedades["P"] = P;
     propiedades["v"] = Pr * (gop + grp) * R * T / P / 1000;
@@ -10023,18 +10007,18 @@ public static class iapws97
   {
     public string _thermo;
     public int a;
-    public None a0;
+    public double a0;
     public string CAS;
-    public None cp0;
-    public None cp0_cv;
-    public None cv0;
+    public double cp0;
+    public double cp0_cv;
+    public double cv0;
     public object dipole;
     public object f_accent;
     public object g;
     public int g0;
-    public None gamma0;
+    public double gamma0;
     public object h;
-    public None h0;
+    public double h0;
     public object Hvap;
     public object Liquid;
     public double M;
@@ -10047,7 +10031,7 @@ public static class iapws97
     public int rho;
     public object rhoc;
     public object s;
-    public None s0;
+    public double s0;
     public object sigma;
     public object Svap;
     public string synonim;
@@ -10057,11 +10041,11 @@ public static class iapws97
     public object Tr;
     public object Tt;
     public int u;
-    public None u0;
+    public double u0;
     public object v;
-    public None v0;
+    public double v0;
     public object Vapor;
-    public None w0;
+    public double w0;
     public object x;
 
     public Dictionary<string, double> kwargs = new Dictionary<object, object>
@@ -10131,7 +10115,8 @@ public static class iapws97
       object region;
       object P;
       object T;
-      object propiedades = null;
+      Dictionary<string, double> propiedades = null;
+
       var args = (this.kwargs[this._thermo[0]], this.kwargs[this._thermo[1]]);
       if(this._thermo == "TP")
       {
@@ -10415,7 +10400,7 @@ public static class iapws97
         {
           throw new NotImplementedException("Incoming out of bound");
         }
-        this.sigma = _Tension(T);
+        this.sigma = _iapws._Tension(T);
         propiedades["x"] = x;
       }
       else if(this._thermo == "Tx")
@@ -10437,7 +10422,7 @@ public static class iapws97
         {
           throw new NotImplementedException("Incoming out of bound");
         }
-        this.sigma = _Tension(T);
+        this.sigma = _iapws._Tension(T);
         propiedades["x"] = x;
       }
       Func<object, object> funcion = rho =>
@@ -10474,8 +10459,8 @@ public static class iapws97
       this.rhoc = rhoc;
       this.Tt = Tt;
       this.Tb = Tb;
-      this.f_accent = f_acent;
-      this.dipole = Dipole;
+      this.f_accent = _iapws.f_acent;
+      this.dipole = _iapws.Dipole;
       this.x = propiedades["x"];
       this.region = propiedades["region"];
       this.name = "water";
@@ -10485,7 +10470,7 @@ public static class iapws97
       this.P = propiedades["P"];
       this.v = propiedades["v"];
       this.rho = 1 / this.v;
-      this.phase = getphase(this.Tc, this.Pc, this.T, this.P, this.x, this.region);
+      this.phase = _utils.getphase(this.Tc, this.Pc, this.T, this.P, this.x, this.region);
       this.Tr = this.T / this.Tc;
       this.Pr = this.P / this.Pc;
       // Ideal properties
@@ -10522,14 +10507,14 @@ public static class iapws97
         this.w0 = null;
         this.gamma0 = null;
       }
-      this.Liquid = _fase();
-      this.Vapor = _fase();
+      this.Liquid = _utils._fase();
+      this.Vapor = _utils._fase();
       if(this.x == 0)
       {
         // only liquid phase
         this.fill(this, propiedades);
         this.fill(this.Liquid, propiedades);
-        this.sigma = _Tension(this.T);
+        this.sigma = _iapws._Tension(this.T);
       }
       else if(this.x == 1)
       {
@@ -10549,13 +10534,13 @@ public static class iapws97
         this.s = propiedades["s"];
         this.a = this.u - this.T * this.s;
         this.g = this.h - this.T * this.s;
-        this.sigma = _Tension(this.T);
+        this.sigma = _iapws._Tension(this.T);
         this.Hvap = vapor["h"] - liquido["h"];
         this.Svap = vapor["s"] - liquido["s"];
       }
     }
 
-    public virtual object fill(object fase, object estado)
+    public virtual void fill(_utils._fase fase, Dictionary<string, double> estado)
     {
       fase.v = estado["v"];
       fase.rho = 1 / fase.v;
@@ -10579,19 +10564,19 @@ public static class iapws97
       fase.betap = -1 / this.P * this.derivative("P", "v", "T", fase);
       fase.fi = Math.Exp((fase.g - this.g0) / R / this.T);
       fase.f = this.P * fase.fi;
-      fase.mu = _Viscosity(fase.rho, this.T);
+      fase.mu = _iapws._Viscosity(fase.rho, this.T);
       // Use industrial formulation for critical enhancement in thermal
       // conductivity calculation
       fase.drhodP_T = this.derivative("rho", "P", "T", fase);
-      fase.k = _ThCond(fase.rho, this.T, fase);
+      fase.k = _iapws._ThCond(fase.rho, this.T, fase);
       fase.nu = fase.mu / fase.rho;
       fase.alfa = fase.k / 1000 / fase.rho / fase.cp;
 
-      try { fase.epsilon = _Dielectric(fase.rho, this.T); }
+      try { fase.epsilon = _iapws._Dielectric(fase.rho, this.T); }
       catch (NotImplementedError) { fase.epsilon = null; }
 
       fase.Prandt = fase.mu * fase.cp * 1000 / fase.k;
-      try { fase.n = _Refractive(fase.rho, this.T, this.kwargs["l"]); }
+      try { fase.n = _iapws._Refractive(fase.rho, this.T, this.kwargs["l"]); }
       catch (NotImplementedError) { fase.n = null; }
     }
 
@@ -10599,7 +10584,7 @@ public static class iapws97
     //     where x, y, z can be: P, T, v, u, h, s, g, a
     public virtual object derivative(object z, object x, object y, object fase)
     {
-      return deriv_G(this, z, x, y, fase);
+      return _utils.deriv_G(this, z, x, y, fase);
     }
 
   }

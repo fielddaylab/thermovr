@@ -97,7 +97,7 @@ public static class _iapws
   //   September 2009, http://iapws.org/relguide/Ice-2009.html
   //
 
-  public static object _Ice(double T, double P)
+  public static Dictionary<string, double> _Ice(double T, double P)
   {
     // Check input in range of validity
     if(T > 273.16)
@@ -142,41 +142,44 @@ public static class _iapws
     var t1 = new Complex(0.0368017112855051, 0.0510878114959572);
     var t2 = new Complex(0.337315741065416, 0.335449415919309);
     var r1 = new Complex(44.7050716285388, 65.6876847463481) * 0.001;
-    var go = 0;
+    double go = 0;
     foreach (var k in Enumerable.Range(0, 5))
     {
       go += gok[k] * 0.001 * Math.Pow(Pr - P0, k);
     }
+    double gop = 0;
     foreach (var k in Enumerable.Range(1, 5 - 1))
     {
       gop += gok[k] * 0.001 * k / Pt * Math.Pow(Pr - P0, k - 1);
     }
+    double gopp = 0;
     foreach (var k in Enumerable.Range(2, 5 - 2))
     {
       gopp += gok[k] * 0.001 * k * (k - 1) / Math.Pow(Pt, 2) * Math.Pow(Pr - P0, k - 2);
     }
-    var r2 = 0;
+    double r2 = 0;
     foreach (var k in Enumerable.Range(0, 3))
     {
       r2 += r2k[k] * Math.Pow(Pr - P0, k);
     }
+    double r2p = 0;
     foreach (var k in Enumerable.Range(1, 3 - 1))
     {
       r2p += r2k[k] * k / Pt * Math.Pow(Pr - P0, k - 1);
     }
-    var r2pp = r2k[2] * 2 / Math.Pow(Pt, 2);
-    var c = r1 * ((t1 - Tr) * log_c(t1 - Tr) + (t1 + Tr) * log_c(t1 + Tr) - 2 * t1 * log_c(t1) - Math.Pow(Tr, 2) / t1) + r2 * ((t2 - Tr) * log_c(t2 - Tr) + (t2 + Tr) * log_c(t2 + Tr) - 2 * t2 * log_c(t2) - Math.Pow(Tr, 2) / t2);
-    var ct = r1 * (-log_c(t1 - Tr) + log_c(t1 + Tr) - 2 * Tr / t1) + r2 * (-log_c(t2 - Tr) + log_c(t2 + Tr) - 2 * Tr / t2);
-    var ctt = r1 * (1 / (t1 - Tr) + 1 / (t1 + Tr) - 2 / t1) + r2 * (1 / (t2 - Tr) + 1 / (t2 + Tr) - 2 / t2);
-    var cp = r2p * ((t2 - Tr) * log_c(t2 - Tr) + (t2 + Tr) * log_c(t2 + Tr) - 2 * t2 * log_c(t2) - Math.Pow(Tr, 2) / t2);
-    var ctp = r2p * (-log_c(t2 - Tr) + log_c(t2 + Tr) - 2 * Tr / t2);
-    var cpp = r2pp * ((t2 - Tr) * log_c(t2 - Tr) + (t2 + Tr) * log_c(t2 + Tr) - 2 * t2 * log_c(t2) - Math.Pow(Tr, 2) / t2);
-    var g = go - s0 * Tt * Tr + Tt * c.real;
-    var gt = -s0 + ct.real;
-    var gp = gop + Tt * cp.real;
-    var gtt = ctt.real / Tt;
-    var gtp = ctp.real;
-    var gpp = gopp + Tt * cpp.real;
+    double r2pp = r2k[2] * 2 / Math.Pow(Pt, 2);
+    double c = r1 * ((t1 - Tr) * log_c(t1 - Tr) + (t1 + Tr) * log_c(t1 + Tr) - 2 * t1 * log_c(t1) - Math.Pow(Tr, 2) / t1) + r2 * ((t2 - Tr) * log_c(t2 - Tr) + (t2 + Tr) * log_c(t2 + Tr) - 2 * t2 * log_c(t2) - Math.Pow(Tr, 2) / t2);
+    double ct = r1 * (-log_c(t1 - Tr) + log_c(t1 + Tr) - 2 * Tr / t1) + r2 * (-log_c(t2 - Tr) + log_c(t2 + Tr) - 2 * Tr / t2);
+    double ctt = r1 * (1 / (t1 - Tr) + 1 / (t1 + Tr) - 2 / t1) + r2 * (1 / (t2 - Tr) + 1 / (t2 + Tr) - 2 / t2);
+    double cp = r2p * ((t2 - Tr) * log_c(t2 - Tr) + (t2 + Tr) * log_c(t2 + Tr) - 2 * t2 * log_c(t2) - Math.Pow(Tr, 2) / t2);
+    double ctp = r2p * (-log_c(t2 - Tr) + log_c(t2 + Tr) - 2 * Tr / t2);
+    double cpp = r2pp * ((t2 - Tr) * log_c(t2 - Tr) + (t2 + Tr) * log_c(t2 + Tr) - 2 * t2 * log_c(t2) - Math.Pow(Tr, 2) / t2);
+    double g = go - s0 * Tt * Tr + Tt * c.real;
+    double gt = -s0 + ct.real;
+    double gp = gop + Tt * cp.real;
+    double gtt = ctt.real / Tt;
+    double gtp = ctp.real;
+    double gpp = gopp + Tt * cpp.real;
 
     var propiedades = new Dictionary<string, double> { };
     propiedades["gt"] = gt;
@@ -259,7 +262,7 @@ public static class _iapws
   //   MPa, http://www.iapws.org/relguide/LiquidWater.html
   //
 
-  public static object _Liquid(double T, double P = 0.1)
+  public static Dictionary<string, double> _Liquid(double T, double P = 0.1)
   {
     // Check input in range of validity
     if(T <= 253.15 || T >= 383.15 || P < 0.1 || P > 0.3)
@@ -501,7 +504,7 @@ public static class _iapws
   //   http://iapws.org/relguide/Supercooled.html
   //
 
-  public static object _Supercooled(double T, double P)
+  public static Dictionary<string, double> _Supercooled(double T, double P)
   {
     // Check input in range of validity
     if(P < 198.9)
@@ -735,7 +738,7 @@ public static class _iapws
   //   Curves of Ordinary Water Substance, http://iapws.org/relguide/MeltSub.html.
   //
 
-  public static object _Sublimation_Pressure(double T)
+  public static double _Sublimation_Pressure(double T)
   {
     if(50 <= T <= 273.16)
     {
@@ -792,7 +795,7 @@ public static class _iapws
   //   Curves of Ordinary Water Substance, http://iapws.org/relguide/MeltSub.html.
   //
 
-  public static object _Melting_Pressure(double T, string ice = "Ih")
+  public static double _Melting_Pressure(double T, string ice = "Ih")
   {
     if(ice == "Ih" && 251.165 <= T <= 273.16)
     {
@@ -892,7 +895,7 @@ public static class _iapws
   //   Water Substance, http://www.iapws.org/relguide/viscosity.html
   //
 
-  public static object _Viscosity(object rho, object T, object fase = null, object drho = null)
+  public static double _Viscosity(double rho, double T, _utils._fase fase = null, double drho = 0.0)
   {
     object mu2;
     object Lw;
@@ -1060,7 +1063,7 @@ public static class _iapws
   //   of Ordinary Water Substance, http://www.iapws.org/relguide/ThCond.html
   //
 
-  public static object _ThCond(object rho, object T, object fase = null, object drho = null)
+  public static double _ThCond(double rho, double T, _utils._fase fase = null, double drho = 0.0)
   {
     object k2;
     object Z;
@@ -1175,7 +1178,7 @@ public static class _iapws
     if(fase)
     {
       var R = 0.46151805;
-      if(!drho)
+      if(drho == 0.0)
       {
         // Industrial formulation
         // Eq 25
@@ -1265,7 +1268,7 @@ public static class _iapws
   //   June 2014, http://www.iapws.org/relguide/Surf-H2O.html
   //
 
-  public static object _Tension(double T)
+  public static double _Tension(double T)
   {
     if(248.15 <= T <= Tc)
     {
@@ -1312,7 +1315,7 @@ public static class _iapws
   //   MPa, http://www.iapws.org/relguide/Dielec.html
   //
 
-  public static object _Dielectric(double rho, double T)
+  public static double _Dielectric(double rho, double T)
   {
     // Check input parameters
     if(T < 238 || T > 1200)
@@ -1420,7 +1423,7 @@ public static class _iapws
   //   http://www.iapws.org/relguide/rindex.pdf
   //
 
-  public static object _Refractive(double rho, double T, double l = 0.5893)
+  public static double _Refractive(double rho, double T, double l = 0.5893)
   {
     // Check input parameters
     if(rho < 0 || rho > 1060 || T < 261.15 || T > 773.15 || l < 0.2 || l > 1.1)
@@ -1469,7 +1472,7 @@ public static class _iapws
   //   http://www.iapws.org/relguide/Ionization.pdf
   //
 
-  public static object _Kw(double rho, double T)
+  public static double _Kw(double rho, double T)
   {
     // Check input parameters
     if(rho < 0 || rho > 1250 || T < 273.15 || T > 1073.15)
@@ -1527,7 +1530,7 @@ public static class _iapws
   //   http://www.iapws.org/relguide/conduct.pdf
   //
 
-  public static object _Conductivity(double rho, double T)
+  public static double _Conductivity(double rho, double T)
   {
     // FIXME: Dont work
     var rho_ = rho / 1000;
@@ -1581,7 +1584,7 @@ public static class _iapws
   //   http://www.iapws.org/relguide/HenGuide.html
   //
 
-  public static object _Henry(double T, string gas, string liquid = "H2O")
+  public static double _Henry(double T, string gas, string liquid = "H2O")
   {
     object bi;
     object ai;
@@ -1702,12 +1705,12 @@ public static class _iapws
   //   http://www.iapws.org/relguide/HenGuide.html
   //
 
-  public static object _Kvalue(double T, string gas, string liquid = "H2O")
+  public static double _Kvalue(double T, string gas, string liquid = "H2O")
   {
-    object q;
-    object di;
-    object ci;
-    object Tc;
+    double q;
+    List<int> di;
+    List<double> ci;
+    double Tc;
     var limit = new Dictionary<string, object>
     {
       { "He", (273.21, 553.18)},

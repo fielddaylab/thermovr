@@ -152,14 +152,14 @@ public static class iapws08
     public object cp;
     public int cv;
     public object h;
-    public None haline;
+    public double haline;
     public object k;
     public int ks;
     public double m;
-    public None mu;
-    public None mus;
-    public None muw;
-    public None osm;
+    public double mu;
+    public double mus;
+    public double muw;
+    public double osm;
     public object P;
     public double rho;
     public object s;
@@ -219,9 +219,8 @@ public static class iapws08
         pw = this._water(T, P);
       }
       var ps = this._saline(T, P, S);
-      var prop = new Dictionary<object, object>
-      {
-      };
+
+      var prop = new Dictionary<string, double> { };
       foreach (var key in ps)
       {
         prop[key] = pw[key] + ps[key];
@@ -283,9 +282,10 @@ public static class iapws08
     }
 
     // Get properties of pure water, Table4 pag 8
-    public static object _water(object cls, object T, object P)
+    public static Dictionary<string, double> _water(object cls, object T, object P)
     {
       var water = iapws95.IAPWS95(P: P, T: T);
+
       var prop = new Dictionary<string, double> { };
       prop["g"] = water.h - T * water.s;
       prop["gt"] = -water.s;
@@ -299,10 +299,11 @@ public static class iapws08
       return prop;
     }
 
-    public static object _waterIF97(object cls, object T, object P)
+    public static Dictionary<string, double> _waterIF97(object cls, object T, object P)
     {
       var water = iapws97.IAPWS97(P: P, T: T);
       var betas = water.derivative("T", "P", "s", water);
+
       var prop = new Dictionary<string, double> { };
       prop["g"] = water.h - T * water.s;
       prop["gt"] = -water.s;
@@ -317,7 +318,7 @@ public static class iapws08
 
     // Get properties of pure water using the supplementary release SR7-09,
     //     Table4 pag 6
-    public static object _waterSupp(object cls, object T, object P)
+    public static Dictionary<string, double> _waterSupp(object cls, object T, object P)
     {
       var tau = (T - 273.15) / 40;
       var pi = (P - 0.101325) / 100;
@@ -486,9 +487,8 @@ public static class iapws08
           gpp += k * (k - 1) * gi * Math.Pow(tau, j) * Math.Pow(pi, k - 2);
         }
       }
-      var prop = new Dictionary<object, object>
-      {
-      };
+
+      var prop = new Dictionary<string, double> { };
       prop["g"] = g * 0.001;
       prop["gt"] = gt / 40 * 0.001;
       prop["gp"] = gp / 100 * 1E-06;
@@ -501,7 +501,7 @@ public static class iapws08
     }
 
     // Eq 4
-    public static object _saline(object cls, object T, object P, object S)
+    public static Dictionary<string, double> _saline(double cls, double T, double P, double S)
     {
       // Check input in range of validity
       if(T <= 261 || T > 353 || P <= 0 || P > 100 || S < 0 || S > 0.12)
@@ -834,6 +834,7 @@ public static class iapws08
       prop["gsp"] = gsp / S_ / 2 / 100 * 1E-06;
       return prop;
     }
+
   }
 
   // Procedure to calculate the boiling temperature of seawater
@@ -856,9 +857,9 @@ public static class iapws08
   //   Properties of Seawater, http://www.iapws.org/relguide/Advise5.html, Eq 7
   //
 
-  public static object _Tb(object P, object S)
+  public static object _Tb(double P, double S)
   {
-    Func<object, object> f = T =>
+    Func<double, double> f = T =>
     {
       var pw = iapws97._Region1(T, P);
       var gw = pw["h"] - T * pw["s"];
@@ -891,9 +892,9 @@ public static class iapws08
   //   Properties of Seawater, http://www.iapws.org/relguide/Advise5.html, Eq 12
   //
 
-  public static object _Tf(object P, object S)
+  public static object _Tf(double P, double S)
   {
-    Func<object, object> f = T =>
+    Func<double, double> f = T =>
     {
       T = (float)T;
       var pw = iapws97._Region1(T, P);
@@ -928,9 +929,9 @@ public static class iapws08
   //   Properties of Seawater, http://www.iapws.org/relguide/Advise5.html, Eq 7
   //
 
-  public static object _Triple(object S)
+  public static Dictionary<string, double> _Triple(double S)
   {
-    Func<object, object> f = parr =>
+    Func<double, double> f = parr =>
     {
       var _tup_1 = parr;
       var T = _tup_1.Item1;
@@ -951,7 +952,7 @@ public static class iapws08
     var Tt = _tup_1.Item1;
     var Pt = _tup_1.Item2;
 
-    var prop = new Dictionary<object, object> { };
+    var prop = new Dictionary<string, double> { };
     prop["Tt"] = Tt;
     prop["Pt"] = Pt;
 
@@ -984,7 +985,7 @@ public static class iapws08
   {
     var pw = iapws97._Region1(T, P);
     var gw = pw["h"] - T * pw["s"];
-    Func<object, object> f = Posm =>
+    Func<double, double> f = Posm =>
     {
       var pw2 = iapws97._Region1(T, P + Posm);
       var gw2 = pw2["h"] - T * pw2["s"];
@@ -1030,7 +1031,7 @@ public static class iapws08
   //   http://www.iapws.org/relguide/Seawater-ThCond.html
   //
 
-  public static object _ThCond_SeaWater(object T, object P, object S)
+  public static double _ThCond_SeaWater(double T, double P, double S)
   {
     // Check input parameters
     if(T < 273.15 || T > 523.15 || P < 0 || P > 140 || S < 0 || S > 0.17)
@@ -1139,7 +1140,7 @@ public static class iapws08
   //   Sodium Chloride, http://www.iapws.org/relguide/critnacl.html
   //
 
-  public static object _critNaCl(object x)
+  public static Dictionary<string, double> _critNaCl(object x)
   {
     // Check input parameters
     if(x < 0 || x > 0.12)
@@ -1157,6 +1158,7 @@ public static class iapws08
     // Eq 8
     var DT = tc - _iapws.Tc;
     var pc = _iapws.Pc * (1 + 0.0091443 * DT + 5.1636E-05 * Math.Pow(DT, 2) - 2.536E-07 * Math.Pow(DT, 3) + 3.6494E-10 * Math.Pow(DT, 4));
+
     var prop = new Dictionary<string, double> { };
     prop["Tc"] = tc;
     prop["rhoc"] = rc;
