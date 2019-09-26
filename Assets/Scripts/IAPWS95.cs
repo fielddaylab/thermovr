@@ -16,32 +16,32 @@ ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
 IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-public class IAPWS95
+public static class IAPWS95
 {
 
-//double IAPWS95_IG_phi(double delta, double tau);
-//double IAPWS95_IG_phi_delta(double delta, double tau);
-//double IAPWS95_IG_phi_delta_delta(double delta,double tau);
-//double IAPWS95_IG_phi_tau(double delta, double tau);
-//double IAPWS95_IG_phi_tau_tau(double delta,double tau);
-//double IAPWS95_IG_phi_delta_tau(double delta, double tau);
-//double IAPWS95_RES_phi(double delta, double tau);
-//double IAPWS95_RES_phi_delta(double delta, double tau);
-//double IAPWS95_RES_phi_delta_delta(double delta,double tau);
-//double IAPWS95_RES_phi_tau(double delta,double tau);
-//double IAPWS95_RES_phi_tau_tau(double delta,double tau);
-//double IAPWS95_RES_phi_delta_tau(double delta,double tau);
+//public static double IAPWS95_IG_phi(double delta, double tau);
+//public static double IAPWS95_IG_phi_delta(double delta, double tau);
+//public static double IAPWS95_IG_phi_delta_delta(double delta,double tau);
+//public static double IAPWS95_IG_phi_tau(double delta, double tau);
+//public static double IAPWS95_IG_phi_tau_tau(double delta,double tau);
+//public static double IAPWS95_IG_phi_delta_tau(double delta, double tau);
+//public static double IAPWS95_RES_phi(double delta, double tau);
+//public static double IAPWS95_RES_phi_delta(double delta, double tau);
+//public static double IAPWS95_RES_phi_delta_delta(double delta,double tau);
+//public static double IAPWS95_RES_phi_tau(double delta,double tau);
+//public static double IAPWS95_RES_phi_tau_tau(double delta,double tau);
+//public static double IAPWS95_RES_phi_delta_tau(double delta,double tau);
 //
-//double IAPWS95_pressure(double rho, double T); /*Input: rho in kg/m3, T in K, Output: Pa*/
-//double IAPWS95_internal_energy(double rho, double T); /*Input: rho in kg/m3, T in K, Output: Pa*/
-//double IAPWS95_entropy(double rho, double T); /*Input: rho in kg/m3, T in K, Output: kJ/kg-K*/
-//double IAPWS95_enthalpy(double rho, double T); /*Input: rho in kg/m3, T in K, Output: kJ/kg*/
-//double IAPWS95_isochoric_heat_capacity(double rho, double T); /*Input: rho in kg/m3, T in K, Output: kJ/kg-K*/
-//double IAPWS95_isobaric_heat_capacity(double rho, double T); /*Input: rho in kg/m3, T in K, Output: kJ/kg-K*/
-//double IAPWS95_speed_of_sound(double rho, double T); /*Input: rho in kg/m3, T in K, Output: m/s*/
-//double IAPWS95_joule_thompson_coefficient(double rho, double T); /*Input: rho in kg/m3, T in K*/
-//double IAPWS95_isothermal_throttling_coefficient(double rho, double T); /*Input: rho in kg/m3, T in K*/
-//double IAPWS95_isentropic_temperature_pressure_coefficent(double rho, double T); /*Input: rho in kg/m3, T in K*/
+//public static double IAPWS95_pressure(double rho, double T); /*Input: rho in kg/m3, T in K, Output: Pa*/
+//public static double IAPWS95_internal_energy(double rho, double T); /*Input: rho in kg/m3, T in K, Output: Pa*/
+//public static double IAPWS95_entropy(double rho, double T); /*Input: rho in kg/m3, T in K, Output: kJ/kg-K*/
+//public static double IAPWS95_enthalpy(double rho, double T); /*Input: rho in kg/m3, T in K, Output: kJ/kg*/
+//public static double IAPWS95_isochoric_heat_capacity(double rho, double T); /*Input: rho in kg/m3, T in K, Output: kJ/kg-K*/
+//public static double IAPWS95_isobaric_heat_capacity(double rho, double T); /*Input: rho in kg/m3, T in K, Output: kJ/kg-K*/
+//public static double IAPWS95_speed_of_sound(double rho, double T); /*Input: rho in kg/m3, T in K, Output: m/s*/
+//public static double IAPWS95_joule_thompson_coefficient(double rho, double T); /*Input: rho in kg/m3, T in K*/
+//public static double IAPWS95_isothermal_throttling_coefficient(double rho, double T); /*Input: rho in kg/m3, T in K*/
+//public static double IAPWS95_isentropic_temperature_pressure_coefficent(double rho, double T); /*Input: rho in kg/m3, T in K*/
 
 /*
 Copyright (c) 2008, Kiran Pashikanti
@@ -63,10 +63,10 @@ const double IAPWS95_CRITICAL_TEMPERATURE  = 647.096;   //#K
 const double IAPWS95_CRITICAL_DENSITY    = 322.0;     //#kg m^-3
 const double IAPWS95_SPECIFIC_GAS_CONSTANT = 0.46151805;  //#kJ kg^-1 K^-1
 
-double [] IG_n = {0,-8.32044648201,6.6832105268,3.00632,0.012436,0.97315,1.27950,0.96956,0.24873};
-double [] IG_gamma = {0,0,0,0,1.28728967,3.53734222,7.74073708,9.24437796,27.5075105};
+static double [] IG_n = {0,-8.32044648201,6.6832105268,3.00632,0.012436,0.97315,1.27950,0.96956,0.24873};
+static double [] IG_gamma = {0,0,0,0,1.28728967,3.53734222,7.74073708,9.24437796,27.5075105};
 
-double [] RES_n =  {0,
+static double [] RES_n =  {0,
       0.12533547935523e-1,  0.78957634722828e+1, -0.87803203303561e+1,
       0.31802509345418e+0, -0.26145533859358e+0, -0.78199751687981e-2,
       0.88089493102134e-2, -0.66856572307965e+0,  0.20433810950965e+0,
@@ -87,19 +87,19 @@ double [] RES_n =  {0,
      -0.31306260323435e+2,  0.31546140237781e+2, -0.25213154341695e+4,
      -0.14874640856724e+0,  0.31806110878444e+0};
 
-double [] RES_c = {0,
+static double [] RES_c = {0,
       0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0,
       1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 2.0, 2.0, 2.0, 2.0,
       2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0, 2.0,
       2.0, 2.0, 2.0, 3.0, 3.0, 3.0, 3.0, 4.0, 6.0, 6.0, 6.0, 6.0};
 
-double [] RES_d = {0,
+static double [] RES_d = {0,
       1.0, 1.0, 1.0, 2.0,  2.0,  3.0,  4.0,  1.0,  1.0, 1.0, 2.0,  2.0,  3.0,  4.0,
       4.0, 5.0, 7.0, 9.0, 10.0, 11.0, 13.0, 15.0,  1.0, 2.0, 2.0,  2.0,  3.0,  4.0,
       4.0, 4.0, 5.0, 6.0,  6.0,  7.0,  9.0,  9.0,  9.0, 9.0, 9.0, 10.0, 10.0, 12.0,
       3.0, 4.0, 4.0, 5.0, 14.0,  3.0,  6.0,  6.0,  6.0, 3.0, 3.0,  3.0};
 
-double [] RES_t = {0,
+static double [] RES_t = {0,
       -0.5, 0.875,  1.0,  0.5,  0.75, 0.375,  1.0,  4.0,  6.0, 12.0,  1.0,
        5.0, 4.0  ,  2.0, 13.0,  9.0 , 3.0  ,  4.0, 11.0,  4.0, 13.0,  1.0,
        7.0, 1.0  ,  9.0, 10.0, 10.0 , 3.0  ,  7.0, 10.0, 10.0,  6.0, 10.0,
@@ -107,31 +107,31 @@ double [] RES_t = {0,
       23.0,23.0  , 10.0, 50.0, 44.0, 46.0  , 50.0,  0.0,  1.0,  4.0};
 
 
-double [] off_RES_alpha = {20.0,20.0,20.0};
-double [] off_RES_beta  = {150.0,150.0,250.0,0.3,0.3};
-double [] off_RES_gamma = {1.21,1.21,1.25};
-double [] off_RES_eps   = {1.0, 1.0 ,1.0 };
+static double [] off_RES_alpha = {20.0,20.0,20.0};
+static double [] off_RES_beta  = {150.0,150.0,250.0,0.3,0.3};
+static double [] off_RES_gamma = {1.21,1.21,1.25};
+static double [] off_RES_eps   = {1.0, 1.0 ,1.0 };
 
-double RES_alpha(int x) { return off_RES_alpha[x-52]; }
-double RES_beta(int x) { return off_RES_beta[x-52]; }
-double RES_gamma(int x) { return off_RES_gamma[x-52]; }
-double RES_eps(int x) { return off_RES_eps[x-52]; }
+static double RES_alpha(int x) { return off_RES_alpha[x-52]; }
+static double RES_beta(int x) { return off_RES_beta[x-52]; }
+static double RES_gamma(int x) { return off_RES_gamma[x-52]; }
+static double RES_eps(int x) { return off_RES_eps[x-52]; }
 
-double [] off_RES_a = {3.5 ,3.5};
-double [] off_RES_b = {0.85,0.95};
-double [] off_RES_B = {0.2,0.2};
-double [] off_RES_C = {28.0,32.0};
-double [] off_RES_D = {700.0,800.0};
-double [] off_RES_A = {0.32,0.32};
+static double [] off_RES_a = {3.5 ,3.5};
+static double [] off_RES_b = {0.85,0.95};
+static double [] off_RES_B = {0.2,0.2};
+static double [] off_RES_C = {28.0,32.0};
+static double [] off_RES_D = {700.0,800.0};
+static double [] off_RES_A = {0.32,0.32};
 
-double RES_a(int x) { return off_RES_a[x-55]; }
-double RES_b(int x) { return off_RES_b[x-55]; }
-double RES_B(int x) { return off_RES_B[x-55]; }
-double RES_C(int x) { return off_RES_C[x-55]; }
-double RES_D(int x) { return off_RES_D[x-55]; }
-double RES_A(int x) { return off_RES_A[x-55]; }
+static double RES_a(int x) { return off_RES_a[x-55]; }
+static double RES_b(int x) { return off_RES_b[x-55]; }
+static double RES_B(int x) { return off_RES_B[x-55]; }
+static double RES_C(int x) { return off_RES_C[x-55]; }
+static double RES_D(int x) { return off_RES_D[x-55]; }
+static double RES_A(int x) { return off_RES_A[x-55]; }
 
-double IAPWS95_IG_phi(double delta, double tau)
+public static double IAPWS95_IG_phi(double delta, double tau)
 {
   double t1 = 0.0;
   for(int i=4; i<9; i++)
@@ -141,17 +141,17 @@ double IAPWS95_IG_phi(double delta, double tau)
   return Math.Log(delta) + IG_n[1] + IG_n[2]*tau + IG_n[3]*Math.Log(tau) + t1;
 }
 
-double IAPWS95_IG_phi_delta(double delta, double tau)
+public static double IAPWS95_IG_phi_delta(double delta, double tau)
 {
   return 1.0/delta;
 }
 
-double IAPWS95_IG_phi_delta_delta(double delta,double tau)
+public static double IAPWS95_IG_phi_delta_delta(double delta,double tau)
 {
   return -1.0/(delta*delta);
 }
 
-double IAPWS95_IG_phi_tau(double delta, double tau)
+public static double IAPWS95_IG_phi_tau(double delta, double tau)
 {
   double t1 = 0.0;
   for(int i=4; i<9; i++)
@@ -161,7 +161,7 @@ double IAPWS95_IG_phi_tau(double delta, double tau)
   return IG_n[2] + IG_n[3]/tau + t1;
 }
 
-double IAPWS95_IG_phi_tau_tau(double delta,double tau)
+public static double IAPWS95_IG_phi_tau_tau(double delta,double tau)
 {
   double t1 = 0.0;
   for(int i=4; i<9; i++)
@@ -171,13 +171,13 @@ double IAPWS95_IG_phi_tau_tau(double delta,double tau)
   return -IG_n[3]/(tau*tau) - t1;
 }
 
-double IAPWS95_IG_phi_delta_tau(double delta, double tau)
+public static double IAPWS95_IG_phi_delta_tau(double delta, double tau)
 {
   return 0.0;
 }
 
 
-double IAPWS95_RES_phi(double delta, double tau)
+public static double IAPWS95_RES_phi(double delta, double tau)
 {
   double t1;
   double t2;
@@ -223,7 +223,7 @@ double IAPWS95_RES_phi(double delta, double tau)
 }
 
 
-double IAPWS95_RES_phi_delta(double delta, double tau)
+public static double IAPWS95_RES_phi_delta(double delta, double tau)
 {
   double t1;
   double t2;
@@ -281,7 +281,7 @@ double IAPWS95_RES_phi_delta(double delta, double tau)
 
 
 
-double IAPWS95_RES_phi_delta_delta(double delta,double tau)
+public static double IAPWS95_RES_phi_delta_delta(double delta,double tau)
 {
   double t1;
   double t2;
@@ -359,7 +359,7 @@ double IAPWS95_RES_phi_delta_delta(double delta,double tau)
 }
 
 
-double IAPWS95_RES_phi_tau(double delta,double tau)
+public static double IAPWS95_RES_phi_tau(double delta,double tau)
 {
   double t1;
   double t2;
@@ -409,7 +409,7 @@ double IAPWS95_RES_phi_tau(double delta,double tau)
   return t1 + t2 + t3 + t4;
 }
 
-double IAPWS95_RES_phi_tau_tau(double delta,double tau)
+public static double IAPWS95_RES_phi_tau_tau(double delta,double tau)
 {
   double t1;
   double t2;
@@ -464,7 +464,7 @@ double IAPWS95_RES_phi_tau_tau(double delta,double tau)
   return t1 + t2 + t3 + t4;
 }
 
-double IAPWS95_RES_phi_delta_tau(double delta,double tau)
+public static double IAPWS95_RES_phi_delta_tau(double delta,double tau)
 {
   double t1;
   double t2;
@@ -542,7 +542,7 @@ double IAPWS95_RES_phi_delta_tau(double delta,double tau)
 }
 
 
-double IAPWS95_pressure(double rho, double T)
+public static double IAPWS95_pressure(double rho, double T)
 {
   double delta;
   double tau;
@@ -552,7 +552,7 @@ double IAPWS95_pressure(double rho, double T)
   return rho*IAPWS95_SPECIFIC_GAS_CONSTANT*T*(1.0 + delta*IAPWS95_RES_phi_delta(delta,tau));
 }
 
-double IAPWS95_internal_energy(double rho, double T)
+public static double IAPWS95_internal_energy(double rho, double T)
 {
   double delta;
   double tau;
@@ -562,7 +562,7 @@ double IAPWS95_internal_energy(double rho, double T)
   return tau*IAPWS95_SPECIFIC_GAS_CONSTANT*T*(IAPWS95_IG_phi_tau(delta,tau) + IAPWS95_RES_phi_tau(delta,tau));
 }
 
-double IAPWS95_entropy(double rho, double T)
+public static double IAPWS95_entropy(double rho, double T)
 {
   double delta;
   double tau;
@@ -572,7 +572,7 @@ double IAPWS95_entropy(double rho, double T)
   return IAPWS95_SPECIFIC_GAS_CONSTANT*(tau*(IAPWS95_IG_phi_tau(delta,tau) + IAPWS95_RES_phi_tau(delta,tau)) - IAPWS95_IG_phi(delta,tau) - IAPWS95_RES_phi(delta,tau));
 }
 
-double IAPWS95_enthalpy(double rho, double T)
+public static double IAPWS95_enthalpy(double rho, double T)
 {
   double delta;
   double tau;
@@ -582,7 +582,7 @@ double IAPWS95_enthalpy(double rho, double T)
   return (IAPWS95_SPECIFIC_GAS_CONSTANT*T)*(1.0 + tau*(IAPWS95_IG_phi_tau(delta,tau) + IAPWS95_RES_phi_tau(delta,tau)) + delta*IAPWS95_RES_phi_delta(delta,tau));
 }
 
-double IAPWS95_isochoric_heat_capacity(double rho, double T)
+public static double IAPWS95_isochoric_heat_capacity(double rho, double T)
 {
   double delta;
   double tau;
@@ -592,7 +592,7 @@ double IAPWS95_isochoric_heat_capacity(double rho, double T)
   return (-(tau*tau)*(IAPWS95_IG_phi_tau_tau(delta,tau) + IAPWS95_RES_phi_tau_tau(delta,tau)))*IAPWS95_SPECIFIC_GAS_CONSTANT;
 }
 
-double IAPWS95_isobaric_heat_capacity(double rho, double T)
+public static double IAPWS95_isobaric_heat_capacity(double rho, double T)
 {
   double delta;
   double tau;
@@ -609,7 +609,7 @@ double IAPWS95_isobaric_heat_capacity(double rho, double T)
   return (p1 + p2/p3)*IAPWS95_SPECIFIC_GAS_CONSTANT;
 }
 
-double IAPWS95_speed_of_sound(double rho, double T)
+public static double IAPWS95_speed_of_sound(double rho, double T)
 {
   double delta;
   double tau;
@@ -626,7 +626,7 @@ double IAPWS95_speed_of_sound(double rho, double T)
   return Math.Sqrt((IAPWS95_SPECIFIC_GAS_CONSTANT*T)*(p1 - p2/p3)*1000.0);
 }
 
-double IAPWS95_joule_thompson_coefficient(double rho, double T)
+public static double IAPWS95_joule_thompson_coefficient(double rho, double T)
 {
   double delta;
   double tau;
@@ -645,7 +645,7 @@ double IAPWS95_joule_thompson_coefficient(double rho, double T)
   return (-p1/(p2 - (tau*tau)*p3*p4))/(IAPWS95_SPECIFIC_GAS_CONSTANT*rho);
 }
 
-double IAPWS95_isothermal_throttling_coefficient(double rho, double T)
+public static double IAPWS95_isothermal_throttling_coefficient(double rho, double T)
 {
   double delta;
   double tau;
@@ -660,7 +660,7 @@ double IAPWS95_isothermal_throttling_coefficient(double rho, double T)
   return (1.0 - p1/p2)/rho;
 }
 
-double IAPWS95_isentropic_temperature_pressure_coefficent(double rho, double T)
+public static double IAPWS95_isentropic_temperature_pressure_coefficent(double rho, double T)
 {
   double delta;
   double tau;

@@ -1,16 +1,17 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class ThermoMath : MonoBehaviour
 {
   //math limits ; xYz = vPt
-  //MPa
-  double p_min = IF97.get_Pmin(); // 0.000611213
-  double p_max = IF97.get_Pmax(); // 100.0
-  //M^3/Kg
-  double v_min = 0.001;
-  double v_max = 3000;
+  //Pa
+  double p_min = IF97.get_Pmin()*1000000.0; // 0.000611213
+  double p_max = IF97.get_Pmax()*1000000.0; // 100.0
+  //Kg/M^3
+  double v_min = 1.0/3000;
+  double v_max = 1.0/0.001;
   //K
   double t_min = IF97.get_Tmin(); // 273.15
   double t_max = IF97.get_Tmax(); // 1073.15
@@ -85,40 +86,20 @@ public class ThermoMath : MonoBehaviour
 
   double Lerpd(double a, double b, double t) { return (b-a)*t+a; }
   double Clampd(double v, double min, double max) { if(v < min) return min; if(v > max) return max; return v; } //v,min,max ordering mirrors Mathf.Clamp
-  double Powd(double v, double p) { return System.Math.Pow(v,p); }
 
   //sample bias- "graph density"
   [Range(0.001f,1000)]
   public double sample_lbase = 10.0f;
   double sample_lbase_prev = 0.0f;
-  /* //linear
-  double sampleP(double pt, double tt) { return pt; }
-  double sampleT(double pt, double tt) { return tt; }
-  //*/
-  //* //Log
-  double sampleP(double pt, double tt) { return Powd(pt,sample_lbase); }
-  double sampleT(double pt, double tt) { return Powd(tt,sample_lbase); }
-  //*/
+  double sampleP(double pt, double tt) { return Math.Pow(pt,sample_lbase); }
+  double sampleV(double vt, double tt) { return Math.Pow(vt,sample_lbase); }
+  double sampleT(double pt, double tt) { return Math.Pow(tt,sample_lbase); }
 
   //plot bias- "graph zoom"
   [Range(0.001f,1000)]
   public double plot_lbase = 10.0f;
   double plot_lbase_prev = 0.0f;
-  //Linear
-  //float lin_plot(double min, double max, double val) { return (float)((val-min)/(max-min)); }
-  //Log
-  //float log_plot(double min, double max, double val) { double t = Clampd((val-min)/(max-min),0.0,1.0); return (float)(1.0-Powd(1.0-t,plot_lbase)); }
-
-  // DON'T NORMALIZE
-  //Linear
-  //float lin_plot(double min, double max, double val) { return (float)val; }
-  //Log
-  //float log_plot(double min, double max, double val) { return Mathf.Log((float)val,10.0f); }
-
-  // NORMALIZE AFTER LOG
-  float lin_plot(double min, double max, double val) { return (float)((val-min)/(max-min)); }
-  //Log
-  float log_plot(double min, double max, double val) { return (float)(Mathf.Log((float)val,10.0f)-Mathf.Log((float)min,10.0f))/(Mathf.Log((float)max,10.0f)-Mathf.Log((float)min,10.0f)); }
+  float log_plot(double min, double max, double val) { return (float)((Math.Log(val,plot_lbase)-Math.Log(min,plot_lbase))/(Math.Log(max,plot_lbase)-Math.Log(min,plot_lbase))); }
 
   float p_plot(double min, double max, double val) { return log_plot(min,max,val); }
   float v_plot(double min, double max, double val) { return log_plot(min,max,val); }
@@ -126,8 +107,9 @@ public class ThermoMath : MonoBehaviour
 
   void genMesh()
   {
-    int n_tsamples = 100;
     int n_psamples = 100;
+    int n_vsamples = 100;
+    int n_tsamples = 100;
     int n_pts = n_tsamples*n_psamples;
     int n_pts_per_group = 1000;
     int n_groups = (int)Mathf.Ceil(n_pts / n_pts_per_group);
@@ -135,6 +117,7 @@ public class ThermoMath : MonoBehaviour
 
     Vector3[] pt_positions;
 
+/*IF97
     //gen positions
     pt_positions = new Vector3[n_pts];
     for(int y = 0; y < n_psamples; y++)
@@ -147,18 +130,59 @@ public class ThermoMath : MonoBehaviour
         double tst = sampleT(pt,tt);
         double p = Lerpd(p_min,p_max,pst);
         double t = Lerpd(t_min,t_max,tst);
-        double v = 1.0/IF97.rhomass_Tp(t,p);
-        p *= 1000000;
-        //double vt = Lerpd(pst,tst,0.5);
-        //double v = Lerpd(v_min,v_max,vt);
+        double v = 1.0/IF97.rhomass_Tp(t,p/1000000.0); //expects p:MPa, v:M^3/Kg, t:K
 
-        //Debug.LogFormat("p:{0}MPa, v:{1}m^3/Kg, t:{2}K",p,v,t);
+        //Debug.LogFormat("p:{0}Pa, v:{1}Kg/M^3, t:{2}K",p,v,t);
+        float pplot = p_plot(p_min,p_max,p);
         float vplot = v_plot(v_min,v_max,v);
-        float pplot = p_plot(p_min*1000000,p_max*1000000,p);
         float tplot = t_plot(t_min,t_max,t);
-        pt_positions[n_tsamples*z+y] = new Vector3(vplot,pplot,tplot);
+
+        int i = n_tsamples*x+z;
+
+        pt_positions[i] = new Vector3(vplot,pplot,tplot);
       }
     }
+//*/
+
+//*IAPWS95
+    //gen positions
+    pt_positions = new Vector3[n_pts];
+    for(int x = 0; x < n_vsamples; x++)
+    {
+      double vt = ((double)x/(n_vsamples-1));
+      for(int z = 0; z < n_tsamples; z++)
+      {
+        double tt = ((double)z/(n_tsamples-1));
+        double vst = sampleV(vt,tt);
+        double tst = sampleT(vt,tt);
+        double v = Lerpd(v_min,v_max,vst);
+        double t = Lerpd(t_min,t_max,tst);
+        double p = IAPWS95.IAPWS95_pressure(v,t);
+
+        //Debug.LogFormat("p:{0}Pa, v:{1}Kg/M^3, t:{2}K",p,v,t);
+        float pplot = p_plot(p_min,p_max,p);
+        float vplot = v_plot(v_min,v_max,v);
+        float tplot = t_plot(t_min,t_max,t);
+
+        int i = n_tsamples*x+z;
+
+        //if(Double.IsNaN(vplot)) Debug.LogFormat("vi{0} {1} {2} {3}",i,vplot,pplot,tplot);
+        //if(Double.IsNaN(pplot)) Debug.LogFormat("pi{0} {1} {2} {3}",i,vplot,pplot,tplot);
+        //if(Double.IsNaN(tplot)) Debug.LogFormat("ti{0} {1} {2} {3}",i,vplot,pplot,tplot);
+
+             if(i <  4200 &&  Double.IsNaN(pplot)) Debug.LogFormat("pi{0} {1} {2} {3}",i,vplot,pplot,tplot);
+        else if(i >= 4200 && !Double.IsNaN(pplot)) Debug.LogFormat("pi{0} {1} {2} {3}",i,vplot,pplot,tplot);
+
+        pt_positions[i] = new Vector3(vplot,pplot,tplot);
+      }
+    }
+//*/
+
+
+
+
+
+/*
     //x
     axis_markers[0,0].transform.position = new Vector3(p_plot(0,1,1.0/2),0,0);
     axis_markers[0,1].transform.position = new Vector3(p_plot(0,1,1.0/4),0,0);
@@ -171,72 +195,6 @@ public class ThermoMath : MonoBehaviour
     axis_markers[2,0].transform.position = new Vector3(0,0,t_plot(0,1,1.0/2));
     axis_markers[2,1].transform.position = new Vector3(0,0,t_plot(0,1,1.0/4));
     axis_markers[2,2].transform.position = new Vector3(0,0,t_plot(0,1,1.0/8));
-
-/*
-    {
-      double p;
-      double t;
-      double v;
-      float vplot;
-      float pplot;
-      float tplot;
-      int i = 0;
-
-      p = 0.101325;
-      t = 273.2;
-      v= 1.0/IF97.rhomass_Tp(t,p);
-      Debug.LogFormat("p:{0}MPa, v:{1}m^3/Kg, t:{2}K",p,v,t);
-      vplot = v_plot(v_min,v_max,v);
-      pplot = p_plot(p_min,p_max,p);
-      tplot = t_plot(t_min,t_max,t);
-      plot_markers[i].transform.position = new Vector3(vplot,pplot,tplot);
-      i++;
-
-      p = 0.101325;
-      t = 273.0+(50.0*i);
-      v= 1.0/IF97.rhomass_Tp(t,p);
-      Debug.LogFormat("p:{0}MPa, v:{1}m^3/Kg, t:{2}K",p,v,t);
-      vplot = v_plot(v_min,v_max,v);
-      pplot = p_plot(p_min,p_max,p);
-      tplot = t_plot(t_min,t_max,t);
-      plot_markers[i].transform.position = new Vector3(vplot,pplot,tplot);
-      i++;
-
-
-      p = 0.101325;
-      t = 273.0+(50.0*i);
-      v= 1.0/IF97.rhomass_Tp(t,p);
-      Debug.LogFormat("p:{0}MPa, v:{1}m^3/Kg, t:{2}K",p,v,t);
-      vplot = v_plot(v_min,v_max,v);
-      pplot = p_plot(p_min,p_max,p);
-      tplot = t_plot(t_min,t_max,t);
-      plot_markers[i].transform.position = new Vector3(vplot,pplot,tplot);
-      i++;
-
-
-      p = 0.101325;
-      t = 273.0+(50.0*i);
-      v= 1.0/IF97.rhomass_Tp(t,p);
-      Debug.LogFormat("p:{0}MPa, v:{1}m^3/Kg, t:{2}K",p,v,t);
-      vplot = v_plot(v_min,v_max,v);
-      pplot = p_plot(p_min,p_max,p);
-      tplot = t_plot(t_min,t_max,t);
-      plot_markers[i].transform.position = new Vector3(vplot,pplot,tplot);
-      i++;
-
-
-      p = 0.101325;
-      t = 273.0+(50.0*i);
-      v= 1.0/IF97.rhomass_Tp(t,p);
-      Debug.LogFormat("p:{0}MPa, v:{1}m^3/Kg, t:{2}K",p,v,t);
-      vplot = v_plot(v_min,v_max,v);
-      pplot = p_plot(p_min,p_max,p);
-      tplot = t_plot(t_min,t_max,t);
-      plot_markers[i].transform.position = new Vector3(vplot,pplot,tplot);
-      i++;
-
-
-    }
 */
 
 /*
@@ -279,6 +237,11 @@ public class ThermoMath : MonoBehaviour
     {
       graph_bits[i] = (GameObject)Instantiate(pt_prefab);
       graph_bits[i].transform.parent = graph.transform;
+      /*
+      if(Double.IsNaN(pt_positions[i].x)) Debug.LogFormat("xi{0}",i);
+      if(Double.IsNaN(pt_positions[i].y)) Debug.LogFormat("yi{0}",i);
+      if(Double.IsNaN(pt_positions[i].z)) Debug.LogFormat("zi{0}",i);
+      */
       graph_bits[i].transform.position = pt_positions[i];
       graph_bits[i].transform.localScale = new Vector3(pt_size, pt_size, pt_size);
     }
