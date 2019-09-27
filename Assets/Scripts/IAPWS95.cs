@@ -32,15 +32,15 @@ public static class IAPWS95
 //public static double IAPWS95_RES_phi_tau_tau(double delta,double tau);
 //public static double IAPWS95_RES_phi_delta_tau(double delta,double tau);
 //
-//public static double IAPWS95_pressure(double rho, double T); /*Input: rho in kg/m3, T in K, Output: Pa*/
-//public static double IAPWS95_internal_energy(double rho, double T); /*Input: rho in kg/m3, T in K, Output: Pa*/
-//public static double IAPWS95_entropy(double rho, double T); /*Input: rho in kg/m3, T in K, Output: kJ/kg-K*/
-//public static double IAPWS95_enthalpy(double rho, double T); /*Input: rho in kg/m3, T in K, Output: kJ/kg*/
-//public static double IAPWS95_isochoric_heat_capacity(double rho, double T); /*Input: rho in kg/m3, T in K, Output: kJ/kg-K*/
-//public static double IAPWS95_isobaric_heat_capacity(double rho, double T); /*Input: rho in kg/m3, T in K, Output: kJ/kg-K*/
-//public static double IAPWS95_speed_of_sound(double rho, double T); /*Input: rho in kg/m3, T in K, Output: m/s*/
-//public static double IAPWS95_joule_thompson_coefficient(double rho, double T); /*Input: rho in kg/m3, T in K*/
-//public static double IAPWS95_isothermal_throttling_coefficient(double rho, double T); /*Input: rho in kg/m3, T in K*/
+//public static double IAPWS95_pressure(double rho, double T);                                   /*Input: rho in kg/m3, T in K, Output: Pa*/
+//public static double IAPWS95_internal_energy(double rho, double T);                            /*Input: rho in kg/m3, T in K, Output: Pa*/
+//public static double IAPWS95_entropy(double rho, double T);                                    /*Input: rho in kg/m3, T in K, Output: kJ/kg-K*/
+//public static double IAPWS95_enthalpy(double rho, double T);                                   /*Input: rho in kg/m3, T in K, Output: kJ/kg*/
+//public static double IAPWS95_isochoric_heat_capacity(double rho, double T);                    /*Input: rho in kg/m3, T in K, Output: kJ/kg-K*/
+//public static double IAPWS95_isobaric_heat_capacity(double rho, double T);                     /*Input: rho in kg/m3, T in K, Output: kJ/kg-K*/
+//public static double IAPWS95_speed_of_sound(double rho, double T);                             /*Input: rho in kg/m3, T in K, Output: m/s*/
+//public static double IAPWS95_joule_thompson_coefficient(double rho, double T);                 /*Input: rho in kg/m3, T in K*/
+//public static double IAPWS95_isothermal_throttling_coefficient(double rho, double T);          /*Input: rho in kg/m3, T in K*/
 //public static double IAPWS95_isentropic_temperature_pressure_coefficent(double rho, double T); /*Input: rho in kg/m3, T in K*/
 
 /*

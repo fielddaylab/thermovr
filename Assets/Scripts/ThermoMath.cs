@@ -117,7 +117,7 @@ public class ThermoMath : MonoBehaviour
 
     Vector3[] pt_positions;
 
-/*IF97
+//*IF97
     //gen positions
     pt_positions = new Vector3[n_pts];
     for(int y = 0; y < n_psamples; y++)
@@ -137,14 +137,14 @@ public class ThermoMath : MonoBehaviour
         float vplot = v_plot(v_min,v_max,v);
         float tplot = t_plot(t_min,t_max,t);
 
-        int i = n_tsamples*x+z;
+        int i = n_tsamples*y+z;
 
         pt_positions[i] = new Vector3(vplot,pplot,tplot);
       }
     }
 //*/
 
-//*IAPWS95
+/*IAPWS95
     //gen positions
     pt_positions = new Vector3[n_pts];
     for(int x = 0; x < n_vsamples; x++)
@@ -159,7 +159,7 @@ public class ThermoMath : MonoBehaviour
         double t = Lerpd(t_min,t_max,tst);
         double p = IAPWS95.IAPWS95_pressure(v,t);
 
-        //Debug.LogFormat("p:{0}Pa, v:{1}Kg/M^3, t:{2}K",p,v,t);
+        Debug.LogFormat("p:{0}Pa, v:{1}Kg/M^3, t:{2}K",p,v,t);
         float pplot = p_plot(p_min,p_max,p);
         float vplot = v_plot(v_min,v_max,v);
         float tplot = t_plot(t_min,t_max,t);
