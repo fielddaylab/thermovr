@@ -51,9 +51,6 @@ public class ThermoMath : MonoBehaviour
 
   //mesh
   GameObject graph;
-  GameObject[] axis;
-  GameObject[,] axis_markers;
-  GameObject[] plot_markers;
   GameObject[] graph_bits;
   public GameObject pt_prefab;
 
@@ -178,26 +175,7 @@ public class ThermoMath : MonoBehaviour
     }
 //*/
 
-
-
-
-
-/*
-    //x
-    axis_markers[0,0].transform.position = new Vector3(p_plot(0,1,1.0/2),0,0);
-    axis_markers[0,1].transform.position = new Vector3(p_plot(0,1,1.0/4),0,0);
-    axis_markers[0,2].transform.position = new Vector3(p_plot(0,1,1.0/8),0,0);
-    //y
-    axis_markers[1,0].transform.position = new Vector3(0,v_plot(0,1,1.0/2),0);
-    axis_markers[1,1].transform.position = new Vector3(0,v_plot(0,1,1.0/4),0);
-    axis_markers[1,2].transform.position = new Vector3(0,v_plot(0,1,1.0/8),0);
-    //z
-    axis_markers[2,0].transform.position = new Vector3(0,0,t_plot(0,1,1.0/2));
-    axis_markers[2,1].transform.position = new Vector3(0,0,t_plot(0,1,1.0/4));
-    axis_markers[2,2].transform.position = new Vector3(0,0,t_plot(0,1,1.0/8));
-*/
-
-/*
+//*
     //gen assets
     graph_bits = new GameObject[n_groups];
     GameObject ptfab = (GameObject)Instantiate(pt_prefab);
@@ -228,8 +206,9 @@ public class ThermoMath : MonoBehaviour
       n_pts_remaining -= n_pts_this_group;
     }
     Destroy(ptfab, 0f);
-*/
+//*/
 
+/*
     //HACK
     //gen assets
     graph_bits = new GameObject[n_groups*n_pts_per_group];
@@ -237,14 +216,10 @@ public class ThermoMath : MonoBehaviour
     {
       graph_bits[i] = (GameObject)Instantiate(pt_prefab);
       graph_bits[i].transform.parent = graph.transform;
-      /*
-      if(Double.IsNaN(pt_positions[i].x)) Debug.LogFormat("xi{0}",i);
-      if(Double.IsNaN(pt_positions[i].y)) Debug.LogFormat("yi{0}",i);
-      if(Double.IsNaN(pt_positions[i].z)) Debug.LogFormat("zi{0}",i);
-      */
-      graph_bits[i].transform.position = pt_positions[i];
+      graph_bits[i].transform.localPosition = pt_positions[i];
       graph_bits[i].transform.localScale = new Vector3(pt_size, pt_size, pt_size);
     }
+*/
 
   }
 
@@ -281,20 +256,6 @@ public class ThermoMath : MonoBehaviour
     weights   = GameObject.Find("Weights");
     lifts     = GameObject.Find("Lifts");
     graph     = GameObject.Find("Graph");
-    axis = new GameObject[3];
-    axis[0]   = graph.transform.Find("x").gameObject;
-    axis[1]   = graph.transform.Find("y").gameObject;
-    axis[2]   = graph.transform.Find("z").gameObject;
-    axis_markers = new GameObject[3,3];
-    for(int i = 0; i < 3; i++)
-    {
-      axis_markers[i,0] = axis[i].transform.Find("mark_2").gameObject;
-      axis_markers[i,1] = axis[i].transform.Find("mark_4").gameObject;
-      axis_markers[i,2] = axis[i].transform.Find("mark_8").gameObject;
-    }
-    plot_markers = new GameObject[5];
-    for(int i = 0; i < 5; i++)
-      plot_markers[i] = graph.transform.Find("plots/"+i.ToString()).gameObject;
   }
 
   void derive()
