@@ -1,4 +1,5 @@
 using System;
+using UnityEngine;
 
 /*
 Copyright (c) 2008, Kiran Pashikanti
@@ -676,7 +677,80 @@ public static double IAPWS95_isentropic_temperature_pressure_coefficent(double r
   p2 = Math.Pow(1.0 + delta*IAPWS95_RES_phi_delta(delta,tau) - delta*tau*IAPWS95_RES_phi_delta_tau(delta,tau),2.0);
   p3 = IAPWS95_IG_phi_tau_tau(delta,tau) + IAPWS95_RES_phi_tau_tau(delta,tau);
   p4 = 1.0 + 2.0*delta*IAPWS95_RES_phi_delta(delta,tau) + (delta*delta)*IAPWS95_RES_phi_delta_delta(delta,tau);
+
   return (p1/(p2 - (tau*tau)*p3*p4))/(IAPWS95_SPECIFIC_GAS_CONSTANT*rho);
+}
+
+public static void print_tables()
+{
+  double delta = 838.025/IAPWS95_CRITICAL_DENSITY;
+  double tau = IAPWS95_CRITICAL_TEMPERATURE/500.0;
+  double T;
+  double rho;
+
+  double [] Ta = {275.0,450.0,625.0};
+  double [] rhoL = {0.999887406e3,0.890341250e3,0.567090385e3};
+  double [] rhoV = {0.550664919e-2,0.481200360e1,0.118290280e3};
+
+  Debug.Log("IAPWS95: TABLE 6 (IDEAL AND RESIDUAL)\n");
+  Debug.Log("-------------------------------\n");
+  Debug.LogFormat("PHI              {0,9:E} \t {1,9:E}\n",IAPWS95_IG_phi(delta,tau),IAPWS95_RES_phi(delta,tau));
+  Debug.LogFormat("PHI_delta        {0,9:E} \t {1,9:E}\n",IAPWS95_IG_phi_delta(delta,tau),IAPWS95_RES_phi_delta(delta,tau));
+  Debug.LogFormat("PHI_delta_delta  {0,9:E} \t {1,9:E}\n",IAPWS95_IG_phi_delta_delta(delta,tau),IAPWS95_RES_phi_delta_delta(delta,tau));
+  Debug.LogFormat("PHI_tau          {0,9:E} \t {1,9:E}\n",IAPWS95_IG_phi_tau(delta,tau),IAPWS95_RES_phi_tau(delta,tau));
+  Debug.LogFormat("PHI_tau_tau      {0,9:E} \t {1,9:E}\n",IAPWS95_IG_phi_tau_tau(delta,tau),IAPWS95_RES_phi_tau_tau(delta,tau));
+  Debug.LogFormat("PHI_delta_tau    {0,9:E} \t {1,9:E}\n",IAPWS95_IG_phi_delta_tau(delta,tau),IAPWS95_RES_phi_delta_tau(delta,tau));
+
+
+  Debug.Log("IAPWS95: TABLE 7 (VERIFICATION)\n");
+  Debug.Log("-------------------------------\n");
+  T = 300.0;
+  rho = 0.996556e3;
+  Debug.LogFormat("{0} {1,9:E} {2,9:E} {3,9:E} {4,9:E} {5,9:E}\n", T,rho,IAPWS95_pressure(rho,T)*1e-3,IAPWS95_isochoric_heat_capacity(rho,T),IAPWS95_speed_of_sound(rho,T),IAPWS95_entropy(rho,T));
+  rho = 0.1005308e4;
+  Debug.LogFormat("{0} {1,9:E} {2,9:E} {3,9:E} {4,9:E} {5,9:E}\n", T,rho,IAPWS95_pressure(rho,T)*1e-3,IAPWS95_isochoric_heat_capacity(rho,T),IAPWS95_speed_of_sound(rho,T),IAPWS95_entropy(rho,T));
+  rho = 0.1188202e4;
+  Debug.LogFormat("{0} {1,9:E} {2,9:E} {3,9:E} {4,9:E} {5,9:E}\n", T,rho,IAPWS95_pressure(rho,T)*1e-3,IAPWS95_isochoric_heat_capacity(rho,T),IAPWS95_speed_of_sound(rho,T),IAPWS95_entropy(rho,T));
+
+  Debug.Log("\n\n");
+
+  T = 500.0;
+  rho = 0.435;
+  Debug.LogFormat("{0} {1,9:E} {2,9:E} {3,9:E} {4,9:E} {5,9:E}\n", T,rho,IAPWS95_pressure(rho,T)*1e-3,IAPWS95_isochoric_heat_capacity(rho,T),IAPWS95_speed_of_sound(rho,T),IAPWS95_entropy(rho,T));
+  rho = 0.4352e1;
+  Debug.LogFormat("{0} {1,9:E} {2,9:E} {3,9:E} {4,9:E} {5,9:E}\n", T,rho,IAPWS95_pressure(rho,T)*1e-3,IAPWS95_isochoric_heat_capacity(rho,T),IAPWS95_speed_of_sound(rho,T),IAPWS95_entropy(rho,T));
+  rho = 0.838025e3;
+  Debug.LogFormat("{0} {1,9:E} {2,9:E} {3,9:E} {4,9:E} {5,9:E}\n", T,rho,IAPWS95_pressure(rho,T)*1e-3,IAPWS95_isochoric_heat_capacity(rho,T),IAPWS95_speed_of_sound(rho,T),IAPWS95_entropy(rho,T));
+  rho = 0.1084564e4;
+  Debug.LogFormat("{0} {1,9:E} {2,9:E} {3,9:E} {4,9:E} {5,9:E}\n", T,rho,IAPWS95_pressure(rho,T)*1e-3,IAPWS95_isochoric_heat_capacity(rho,T),IAPWS95_speed_of_sound(rho,T),IAPWS95_entropy(rho,T));
+
+  Debug.Log("\n\n");
+
+  T = 647.0;
+  rho = 0.358e3;
+  Debug.LogFormat("{0} {1,9:E} {2,9:E} {3,9:E} {4,9:E} {5,9:E}\n", T,rho,IAPWS95_pressure(rho,T)*1e-3,IAPWS95_isochoric_heat_capacity(rho,T),IAPWS95_speed_of_sound(rho,T),IAPWS95_entropy(rho,T));
+
+  Debug.Log("\n\n");
+
+  T = 900.0;
+  rho = 0.241;
+  Debug.LogFormat("{0} {1,9:E} {2,9:E} {3,9:E} {4,9:E} {5,9:E}\n", T,rho,IAPWS95_pressure(rho,T)*1e-3,IAPWS95_isochoric_heat_capacity(rho,T),IAPWS95_speed_of_sound(rho,T),IAPWS95_entropy(rho,T));
+  rho = 0.526150e2;
+  Debug.LogFormat("{0} {1,9:E} {2,9:E} {3,9:E} {4,9:E} {5,9:E}\n", T,rho,IAPWS95_pressure(rho,T)*1e-3,IAPWS95_isochoric_heat_capacity(rho,T),IAPWS95_speed_of_sound(rho,T),IAPWS95_entropy(rho,T));
+  rho = 0.870769e3;
+  Debug.LogFormat("{0} {1,9:E} {2,9:E} {3,9:E} {4,9:E} {5,9:E}\n", T,rho,IAPWS95_pressure(rho,T)*1e-3,IAPWS95_isochoric_heat_capacity(rho,T),IAPWS95_speed_of_sound(rho,T),IAPWS95_entropy(rho,T));
+  Debug.LogFormat("\n\n");
+
+  Debug.Log("IAPWS95: TABLE 8 (2-PHASE)\n");
+  Debug.Log("--------------------------\n");
+  Debug.LogFormat("{0,9:E} {1,9:E} {2,9:E}\n", IAPWS95_pressure(rhoL[0],Ta[0]),IAPWS95_pressure(rhoL[1],Ta[1]),IAPWS95_pressure(rhoL[2],Ta[2]));
+  Debug.LogFormat("{0,9:E} {1,9:E} {2,9:E}\n", IAPWS95_pressure(rhoV[0],Ta[0]),IAPWS95_pressure(rhoV[1],Ta[1]),IAPWS95_pressure(rhoV[2],Ta[2]));
+  Debug.LogFormat("{0,9:E} {1,9:E} {2,9:E}\n", rhoL[0], rhoL[1], rhoL[2]); 
+  Debug.LogFormat("{0,9:E} {1,9:E} {2,9:E}\n", rhoV[0], rhoV[1], rhoV[2]);
+  Debug.LogFormat("{0,9:E} {1,9:E} {2,9:E}\n", IAPWS95_enthalpy(rhoL[0],Ta[0]),IAPWS95_enthalpy(rhoL[1],Ta[1]),IAPWS95_enthalpy(rhoL[2],Ta[2]));
+  Debug.LogFormat("{0,9:E} {1,9:E} {2,9:E}\n", IAPWS95_enthalpy(rhoV[0],Ta[0]),IAPWS95_enthalpy(rhoV[1],Ta[1]),IAPWS95_enthalpy(rhoV[2],Ta[2]));
+  Debug.LogFormat("{0,9:E} {1,9:E} {2,9:E}\n", IAPWS95_entropy(rhoL[0],Ta[0]),IAPWS95_entropy(rhoL[1],Ta[1]),IAPWS95_entropy(rhoL[2],Ta[2]));
+  Debug.LogFormat("{0,9:E} {1,9:E} {2,9:E}\n", IAPWS95_entropy(rhoV[0],Ta[0]),IAPWS95_entropy(rhoV[1],Ta[1]),IAPWS95_entropy(rhoV[2],Ta[2]));
 }
 
 }

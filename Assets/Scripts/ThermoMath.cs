@@ -76,9 +76,57 @@ public class ThermoMath : MonoBehaviour
     derive();
     dotransform();
     //IF97.print_tables();
+    //IAPWS95.print_tables();
+    //compare_impls();
 
     sample_lbase_prev = sample_lbase;
     plot_lbase_prev = plot_lbase;
+  }
+
+  void compare_impls()
+  {
+    int n_psamples = 100;
+    int n_vsamples = 100;
+    int n_tsamples = 100;
+
+    //IF97 primary
+    for(int y = 0; y < n_psamples; y++)
+    {
+      double pt = ((double)y/(n_psamples-1));
+      for(int z = 0; z < n_tsamples; z++)
+      {
+        double tt = ((double)z/(n_tsamples-1));
+        double pst = sampleP(pt,tt);
+        double tst = sampleT(pt,tt);
+        double p = Lerpd(p_min,p_max,pst);
+        double t = Lerpd(t_min,t_max,tst);
+        double v = 1.0/IF97.rhomass_Tp(t,p/1000000.0); //expects p:MPa, v:M^3/Kg, t:K
+        double _p = IAPWS95.IAPWS95_pressure(v,t);
+
+        Debug.LogFormat("error:{0} p:{1}Pa ({2}Pa), v:{3}Kg/M^3, t:{4}K",p-_p,p,_p,v,t);
+      }
+    }
+
+    Debug.Log("DONE");
+
+    //IAPWS95 primary
+    for(int x = 0; x < n_vsamples; x++)
+    {
+      double vt = ((double)x/(n_vsamples-1));
+      for(int z = 0; z < n_tsamples; z++)
+      {
+        double tt = ((double)z/(n_tsamples-1));
+        double vst = sampleV(vt,tt);
+        double tst = sampleT(vt,tt);
+        double v = Lerpd(v_min,v_max,vst);
+        double t = Lerpd(t_min,t_max,tst);
+        double p = IAPWS95.IAPWS95_pressure(v,t);
+        double _v = 1.0/IF97.rhomass_Tp(t,p/1000000.0); //expects p:MPa, v:M^3/Kg, t:K
+
+        Debug.LogFormat("error:{0} p:{1}Pa, v:{2}Kg/M^3 ({3}Kg/M^3), t:{4}K",v-_v,p,v,_v,t);
+      }
+    }
+
   }
 
   double Lerpd(double a, double b, double t) { return (b-a)*t+a; }
