@@ -7,11 +7,11 @@ public class ThermoMath : MonoBehaviour
 {
   //math limits ; xYz = vPt
   //Pa
-  double p_min = IF97.get_Pmin()*1000000.0; // 0.000611213
-  double p_max = IF97.get_Pmax()*1000000.0; // 100.0
-  //Kg/M^3
-  double v_min = 1.0/3000;
-  double v_max = 1.0/0.001;
+  double p_min = IF97.get_Pmin()*1000000.0; // 611.213
+  double p_max = IF97.get_Pmax()*1000000.0; // 100000000
+  //M^3/kg
+  double v_min = 1.0/3000;  //0.0003_
+  double v_max = 1.0/0.001; //1000
   //K
   double t_min = IF97.get_Tmin(); // 273.15
   double t_max = IF97.get_Tmax(); // 1073.15
@@ -55,7 +55,7 @@ public class ThermoMath : MonoBehaviour
   public GameObject pt_prefab;
 
   /*
-  //MATH API
+  //IF97 API
   public static double rhomass_Tp(double T, double p)     // Get the mass density [kg/m^3] as a function of T [K] and p [Pa]
   public static double hmass_Tp(double T, double p)       // Get the mass enthalpy [J/kg] as a function of T [K] and p [Pa]
   public static double smass_Tp(double T, double p)       // Get the mass entropy [J/kg/K] as a function of T [K] and p [Pa]
@@ -64,11 +64,32 @@ public class ThermoMath : MonoBehaviour
   public static double cvmass_Tp(double T, double p)      // Get the mass constant-volume specific heat [J/kg/K] as a function of T [K] and p [Pa]
   public static double speed_sound_Tp(double T, double p) // Get the speed of sound [m/s] as a function of T [K] and p [Pa]
   public static double drhodp_Tp(double T, double p)      // Get the [d(rho)/d(p)]T [kg/mï¿½/Pa] as a function of T [K] and p [Pa]
+  //IF97 Paper verified units:
+  rhomass_Tp(T,p) | 1.0/rhomass_Tp(300, 3) = 0.00100215 | p:MPa, v:M^3/Kg, T:K | expects:K,MPa returns Kg/M^3
+  */
+
+  /*
+  //IAPWS95 API
+  public static double IAPWS95_pressure(double rho, double T);                                   //Input: rho in kg/m3, T in K, Output: Pa
+  public static double IAPWS95_internal_energy(double rho, double T);                            //Input: rho in kg/m3, T in K, Output: Pa
+  public static double IAPWS95_entropy(double rho, double T);                                    //Input: rho in kg/m3, T in K, Output: kJ/kg-K
+  public static double IAPWS95_enthalpy(double rho, double T);                                   //Input: rho in kg/m3, T in K, Output: kJ/kg
+  public static double IAPWS95_isochoric_heat_capacity(double rho, double T);                    //Input: rho in kg/m3, T in K, Output: kJ/kg-K
+  public static double IAPWS95_isobaric_heat_capacity(double rho, double T);                     //Input: rho in kg/m3, T in K, Output: kJ/kg-K
+  public static double IAPWS95_speed_of_sound(double rho, double T);                             //Input: rho in kg/m3, T in K, Output: m/s
+  public static double IAPWS95_joule_thompson_coefficient(double rho, double T);                 //Input: rho in kg/m3, T in K
+  public static double IAPWS95_isothermal_throttling_coefficient(double rho, double T);          //Input: rho in kg/m3, T in K
+  public static double IAPWS95_isentropic_temperature_pressure_coefficent(double rho, double T); //Input: rho in kg/m3, T in K
+  //IAPWS95 Paper verified units:
+  IAPWS95_pressure(rho, T) | IAPWS95_pressure(999.887406, 275.0)/1000 = 0.0006982125 | p:MPa, v:???, t:K | expects:???,K returns KPa
   */
 
   // Start is called before the first frame update
   void Start()
   {
+    sample_lbase_prev = sample_lbase;
+    plot_lbase_prev = plot_lbase;
+
     IF97.initRegions();
     findObjects();
     genMesh();
@@ -79,8 +100,17 @@ public class ThermoMath : MonoBehaviour
     //IAPWS95.print_tables();
     //compare_impls();
 
-    sample_lbase_prev = sample_lbase;
-    plot_lbase_prev = plot_lbase;
+    //controlled test
+    double [] t = {275.0,450.0,625.0}; //K
+    double [] v = {999.887406,890.341250,567.090385}; //???
+    double [] p = {0.000698451,0.932203,16.9082};
+    int i = 0;
+    double p_kpa = IAPWS95.IAPWS95_pressure(v[i],t[i]); //expects:???,K returns KPa
+    double p_pa = p_kpa*1000;
+    double p_mpa = p_kpa/1000;
+    double v_kgm = IF97.rhomass_Tp(t[i],p_mpa); //expects:K,MPa returns Kg/M^3
+    Debug.LogFormat("{0,3:E} {1,3:E} {2,3:E}\n", p_pa, v[i], t[i]);
+    Debug.LogFormat("{0,3:E} {1,3:E} {2,3:E}\n", p_pa, v_kgm, t[i]);
   }
 
   void compare_impls()
@@ -89,6 +119,7 @@ public class ThermoMath : MonoBehaviour
     int n_vsamples = 100;
     int n_tsamples = 100;
 
+    //*
     //IF97 primary
     for(int y = 0; y < n_psamples; y++)
     {
@@ -100,15 +131,17 @@ public class ThermoMath : MonoBehaviour
         double tst = sampleT(pt,tt);
         double p = Lerpd(p_min,p_max,pst);
         double t = Lerpd(t_min,t_max,tst);
-        double v = 1.0/IF97.rhomass_Tp(t,p/1000000.0); //expects p:MPa, v:M^3/Kg, t:K
-        double _p = IAPWS95.IAPWS95_pressure(v,t);
+        double v = 1.0/IF97.rhomass_Tp(t,p/1000000.0); //expects:K,MPa returns Kg/M^3
+        //pvt in Pa, M^3/Kg, K
+        double _p = IAPWS95.IAPWS95_pressure(v,t)*1000.0; //expects:???,K returns KPa
 
-        Debug.LogFormat("error:{0} p:{1}Pa ({2}Pa), v:{3}Kg/M^3, t:{4}K",p-_p,p,_p,v,t);
+        Debug.LogFormat("error:{0} p:{1}Pa ({2}Pa), v:{3}M^3/Kg, t:{4}K",p-_p,p,_p,v,t);
       }
     }
+    //*/
 
-    Debug.Log("DONE");
 
+    /*
     //IAPWS95 primary
     for(int x = 0; x < n_vsamples; x++)
     {
@@ -120,12 +153,14 @@ public class ThermoMath : MonoBehaviour
         double tst = sampleT(vt,tt);
         double v = Lerpd(v_min,v_max,vst);
         double t = Lerpd(t_min,t_max,tst);
-        double p = IAPWS95.IAPWS95_pressure(v,t);
-        double _v = 1.0/IF97.rhomass_Tp(t,p/1000000.0); //expects p:MPa, v:M^3/Kg, t:K
+        double p = IAPWS95.IAPWS95_pressure(v,t)*1000.0; //expects:???,K returns KPa
+        //pvt in Pa, M^3/Kg, K
+        double _v = 1.0/IF97.rhomass_Tp(t,p/1000000.0); //expects:K,MPa returns Kg/M^3
 
-        Debug.LogFormat("error:{0} p:{1}Pa, v:{2}Kg/M^3 ({3}Kg/M^3), t:{4}K",v-_v,p,v,_v,t);
+        Debug.LogFormat("error:{0} p:{1}Pa, v:{2}M^3/Kg ({3}M^3/Kg), t:{4}K",v-_v,p,v,_v,t);
       }
     }
+    //*/
 
   }
 
@@ -162,7 +197,7 @@ public class ThermoMath : MonoBehaviour
 
     Vector3[] pt_positions;
 
-//*IF97
+/*IF97
     //gen positions
     pt_positions = new Vector3[n_pts];
     for(int y = 0; y < n_psamples; y++)
@@ -175,21 +210,21 @@ public class ThermoMath : MonoBehaviour
         double tst = sampleT(pt,tt);
         double p = Lerpd(p_min,p_max,pst);
         double t = Lerpd(t_min,t_max,tst);
-        double v = 1.0/IF97.rhomass_Tp(t,p/1000000.0); //expects p:MPa, v:M^3/Kg, t:K
+        double v = 1.0/IF97.rhomass_Tp(t,p/1000000.0); //expects:K,MPa returns Kg/M^3
+        //pvt in Pa, M^3/Kg, K
 
-        //Debug.LogFormat("p:{0}Pa, v:{1}Kg/M^3, t:{2}K",p,v,t);
+        //Debug.LogFormat("p:{0}Pa, v:{1}M^3/Kg, t:{2}K",p,v,t);
         float pplot = p_plot(p_min,p_max,p);
         float vplot = v_plot(v_min,v_max,v);
         float tplot = t_plot(t_min,t_max,t);
 
         int i = n_tsamples*y+z;
-
         pt_positions[i] = new Vector3(vplot,pplot,tplot);
       }
     }
 //*/
 
-/*IAPWS95
+//*IAPWS95
     //gen positions
     pt_positions = new Vector3[n_pts];
     for(int x = 0; x < n_vsamples; x++)
@@ -202,22 +237,15 @@ public class ThermoMath : MonoBehaviour
         double tst = sampleT(vt,tt);
         double v = Lerpd(v_min,v_max,vst);
         double t = Lerpd(t_min,t_max,tst);
-        double p = IAPWS95.IAPWS95_pressure(v,t);
+        double p = IAPWS95.IAPWS95_pressure(v,t)*1000.0; //expects:???,K returns KPa
+        //pvt in Pa, M^3/Kg, K
 
-        Debug.LogFormat("p:{0}Pa, v:{1}Kg/M^3, t:{2}K",p,v,t);
+        //Debug.LogFormat("p:{0}Pa, v:{1}M^3/Kg, t:{2}K",p,v,t);
         float pplot = p_plot(p_min,p_max,p);
         float vplot = v_plot(v_min,v_max,v);
         float tplot = t_plot(t_min,t_max,t);
 
         int i = n_tsamples*x+z;
-
-        //if(Double.IsNaN(vplot)) Debug.LogFormat("vi{0} {1} {2} {3}",i,vplot,pplot,tplot);
-        //if(Double.IsNaN(pplot)) Debug.LogFormat("pi{0} {1} {2} {3}",i,vplot,pplot,tplot);
-        //if(Double.IsNaN(tplot)) Debug.LogFormat("ti{0} {1} {2} {3}",i,vplot,pplot,tplot);
-
-             if(i <  4200 &&  Double.IsNaN(pplot)) Debug.LogFormat("pi{0} {1} {2} {3}",i,vplot,pplot,tplot);
-        else if(i >= 4200 && !Double.IsNaN(pplot)) Debug.LogFormat("pi{0} {1} {2} {3}",i,vplot,pplot,tplot);
-
         pt_positions[i] = new Vector3(vplot,pplot,tplot);
       }
     }
