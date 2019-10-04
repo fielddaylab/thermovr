@@ -52,6 +52,7 @@ public class ThermoMath : MonoBehaviour
   //mesh
   GameObject graph;
   GameObject[] graph_bits;
+  public Material graph_material;
   public GameObject pt_prefab;
 
   /*
@@ -247,7 +248,7 @@ public class ThermoMath : MonoBehaviour
     }
 //*/
 
-//*
+/*
     //gen assets
     graph_bits = new GameObject[n_groups];
     GameObject ptfab = (GameObject)Instantiate(pt_prefab);
@@ -293,32 +294,83 @@ public class ThermoMath : MonoBehaviour
     }
 //*/
 
-/*
-    //HACK
-    Mesh mesh = new Mesh();
-    mesh.vertices = pt_positions;
+//*
+    //MESH
+    Vector3 []mesh_vertices;
+    Vector3 []mesh_normals;
+    Vector2 []mesh_uv;
+    int []mesh_triangles;
 
-    mesh.uv = new Vector2[n_pts];
-    for(int i = 0; i < n_pts; i++) mesh.uv[i] = new Vector2(0.0,0.0);
+    mesh_vertices = pt_positions;
+    mesh_normals = new Vector3[n_pts];
 
-    int i = 0;
-    mesh.triangles = new int[n_pts*4];
-    for(int y = 0; y < n_psamples; y++)
+    mesh_uv = new Vector2[n_pts];
+    for(int i = 0; i < n_pts; i++) mesh_uv[i] = new Vector2(0.0f,0.0f);
+
+    int vi = 0;
+    int ni = 0;
+    mesh_triangles = new int[(n_psamples-1)*(n_tsamples-1)*6];
+    for(int y = 0; y < n_psamples-1; y++)
     {
-      for(int z = 0; z < n_tsamples; z++)
+      for(int z = 0; z < n_tsamples-1; z++)
       {
-        mesh.triangles[i] = 
+        vi = n_tsamples*y+z;
+        mesh_triangles[ni] = vi           +0; ni++;
+        mesh_triangles[ni] = vi+n_tsamples+0; ni++;
+        mesh_triangles[ni] = vi           +1; ni++;
+        mesh_triangles[ni] = vi+n_tsamples+0; ni++;
+        mesh_triangles[ni] = vi+n_tsamples+1; ni++;
+        mesh_triangles[ni] = vi           +1; ni++;
+
+        mesh_normals[vi]   = Vector3.Cross(Vector3.Normalize(mesh_vertices[vi+n_tsamples+0]-mesh_vertices[vi+0]),Vector3.Normalize(mesh_vertices[vi+1]-mesh_vertices[vi+0]));
+        mesh_normals[vi+1] = Vector3.Cross(Vector3.Normalize(mesh_vertices[vi+n_tsamples+0]-mesh_vertices[vi+1]),Vector3.Normalize(mesh_vertices[vi+1]-mesh_vertices[vi+n_tsamples+1]));
+      }
+    }
+    {
+      //fill out the rest of the normals
+      int y = n_psamples-1;
+      for(int z = 0; z < n_tsamples-1; z++)
+      {
+        vi = n_tsamples*y+z;
+        mesh_normals[vi]   = Vector3.Cross(Vector3.Normalize(mesh_vertices[vi-n_tsamples+0]-mesh_vertices[vi+0]),Vector3.Normalize(mesh_vertices[vi+1]-mesh_vertices[vi+0]));
+        mesh_normals[vi+1] = Vector3.Cross(Vector3.Normalize(mesh_vertices[vi-n_tsamples+0]-mesh_vertices[vi+1]),Vector3.Normalize(mesh_vertices[vi+1]-mesh_vertices[vi-n_tsamples+1]));
       }
     }
 
-    graph_bits = new GameObject[n_groups*n_pts_per_group];
-    for(int i = 0; i < n_groups*n_pts_per_group; i++)
-    {
-      graph_bits[i] = (GameObject)Instantiate(pt_prefab);
-      graph_bits[i].transform.parent = graph.transform;
-      graph_bits[i].transform.localPosition = pt_positions[i];
-      graph_bits[i].transform.localScale = new Vector3(pt_size, pt_size, pt_size);
-    }
+/*
+    mesh_vertices = new Vector3[4];
+    mesh_vertices[0] = new Vector3(0.0f,1.0f,0.0f);
+    mesh_vertices[1] = new Vector3(1.0f,1.0f,0.0f);
+    mesh_vertices[2] = new Vector3(0.0f,0.0f,0.0f);
+    mesh_vertices[3] = new Vector3(1.0f,0.0f,0.0f);
+
+    mesh_uv = new Vector2[4];
+    mesh_uv[0] = new Vector2(0.0f,1.0f);
+    mesh_uv[1] = new Vector2(1.0f,1.0f);
+    mesh_uv[2] = new Vector2(0.0f,0.0f);
+    mesh_uv[3] = new Vector2(1.0f,0.0f);
+
+    mesh_triangles = new int[6];
+    mesh_triangles[0] = 0;
+    mesh_triangles[1] = 1;
+    mesh_triangles[2] = 2;
+    mesh_triangles[3] = 2;
+    mesh_triangles[4] = 1;
+    mesh_triangles[5] = 3;
+*/
+
+    Mesh mesh = new Mesh();
+    mesh.vertices = mesh_vertices;
+    mesh.normals = mesh_normals;
+    mesh.uv = mesh_uv;
+    mesh.triangles = mesh_triangles;
+
+    GameObject gameObject = new GameObject("graph_mesh", typeof(MeshFilter), typeof(MeshRenderer));
+    gameObject.transform.parent = graph.transform;
+    gameObject.transform.localPosition = new Vector3(0.0f,0.0f,0.0f);
+    gameObject.transform.localScale = new Vector3(1.0f,1.0f,1.0f);
+    gameObject.GetComponent<MeshFilter>().mesh = mesh;
+    gameObject.GetComponent<MeshRenderer>().material = graph_material;
 //*/
 
 

@@ -664,7 +664,7 @@ Light:
   m_BounceIntensity: 1
   m_ColorTemperature: 6570
   m_UseColorTemperature: 0
-  m_BoundingSphereOverride: {x: 1.5e-44, y: 0, z: 1, w: 0}
+  m_BoundingSphereOverride: {x: 0, y: 2.75508e-40, z: -1.14e-43, w: -1.49e-43}
   m_UseBoundingSphereOverride: 0
   m_ShadowRadius: 0
   m_ShadowAngle: 0
@@ -1353,6 +1353,7 @@ MonoBehaviour:
   coolant_k: 0
   pistonheight_m: 0
   contentvolume_m3: 0
+  graph_material: {fileID: 2100000, guid: 0ddf9de8dbc3db34f94dce2e6e70f2ad, type: 2}
   pt_prefab: {fileID: 6434750350594892939, guid: 8db22605e33d66f4e8e7f3ba0d53722e,
     type: 3}
   sample_lbase: 6
