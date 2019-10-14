@@ -343,6 +343,298 @@ public class ThermoMath : MonoBehaviour
     }
 
     int concentrated_samples = samples*2;
+    int position_new_region = mesh_positions.Count;
+    int triangle_new_region = mesh_triangles.Count;
+    for(int y = 0; y < concentrated_samples; y++)
+    {
+      double pt = ((double)y/(concentrated_samples-1));
+      double pst = sample(pt);
+      double p = Lerpd(psat_min,psat_max,pst);
+      double t = IF97.Tsat97(p/1000000.0);
+      //pvt in Pa, M^3/Kg, K
+
+      //Debug.LogFormat("p:{0}Pa, v:{1}M^3/Kg, t:{2}K",p,v,t);
+      float pplot = plot(p_min,p_max,p);
+      float tplot = plot(t_min,t_max,t);
+
+      double v;
+      float vplot;
+      Vector3 point;
+
+      v = 1.0/IF97.rholiq_p(p/1000000.0); //expects:MPa returns Kg/M^3
+      vplot = plot(v_min,v_max,v);
+      point = new Vector3(vplot,pplot,tplot);
+      mesh_positions.Add(point);
+      mesh_normals.Add(Vector3.Normalize(point));
+
+      v = 1.0/IF97.rhovap_p(p/1000000.0); //expects:MPa returns Kg/M^3
+      vplot = plot(v_min,v_max,v);
+      point = new Vector3(vplot,pplot,tplot);
+      mesh_positions.Add(point);
+      mesh_normals.Add(Vector3.Normalize(point));
+    }
+    for(int y = 0; y < concentrated_samples-1; y++)
+    {
+      mesh_triangles.Add(position_new_region+y*2+0);
+      mesh_triangles.Add(position_new_region+y*2+2);
+      mesh_triangles.Add(position_new_region+y*2+1);
+      mesh_triangles.Add(position_new_region+y*2+1);
+      mesh_triangles.Add(position_new_region+y*2+2);
+      mesh_triangles.Add(position_new_region+y*2+3);
+    }
+
+    //kill spanning triangles; replace with nice ones
+    float max_dist = 0.1f;
+    int left_ladder_i = position_new_region;
+    int left_swing_i = -1;
+    Vector3 left_ladder = mesh_positions[left_ladder_i];
+    Vector3 left_rung = mesh_positions[left_ladder_i+2];
+    Vector3 left_swing;
+    int right_ladder_i = position_new_region+1;
+    int right_swing_i = -1;
+    Vector3 right_ladder = mesh_positions[right_ladder_i];
+    Vector3 right_rung = mesh_positions[right_ladder_i+2];
+    Vector3 right_swing;
+    for(var i = 0; i < triangle_new_region-500; i+=3)
+    {
+      int ai = mesh_triangles[i+0];
+      int bi = mesh_triangles[i+1];
+      int ci = mesh_triangles[i+2];
+      Vector3 a = mesh_positions[ai];
+      Vector3 b = mesh_positions[bi];
+      Vector3 c = mesh_positions[ci];
+
+      if(Mathf.Abs(a.x-b.x) > max_dist || Mathf.Abs(b.x-c.x) > max_dist || Mathf.Abs(c.x-a.x) > max_dist)
+      {
+        mesh_triangles.RemoveAt(i+2);
+        mesh_triangles.RemoveAt(i+1);
+        mesh_triangles.RemoveAt(i+0);
+        i -= 3;
+        triangle_new_region -= 3;
+
+        int left_low_i = -1;
+        int left_high_i = -1;
+        int right_low_i = -1;
+        int right_high_i = -1;
+        bool left_prime = false;
+
+        float ll_cmp = (left_ladder.x+right_ladder.x)/2.0f;
+
+        if(a.x < ll_cmp && b.x < ll_cmp)
+        {
+          if(a.y < b.y)
+          {
+            left_low_i = ai;
+            left_high_i = bi;
+          }
+          else
+          {
+            left_low_i = bi;
+            left_high_i = ai;
+          }
+          right_low_i = ci;
+          left_prime = true;
+        }
+        else if(b.x < ll_cmp && c.x < ll_cmp)
+        {
+          if(b.y < c.y)
+          {
+            left_low_i = bi;
+            left_high_i = ci;
+          }
+          else
+          {
+            left_low_i = ci;
+            left_high_i = bi;
+          }
+          right_low_i = ai;
+          left_prime = true;
+        }
+        else if(c.x < ll_cmp && a.x < ll_cmp)
+        {
+          if(c.y < a.y)
+          {
+            left_low_i = ci;
+            left_high_i = ai;
+          }
+          else
+          {
+            left_low_i = ai;
+            left_high_i = ci;
+          }
+          right_low_i = bi;
+          left_prime = true;
+        }
+        else if(a.x < ll_cmp)
+        {
+          if(b.y < c.y)
+          {
+            right_low_i = bi;
+            right_high_i = ci;
+          }
+          else
+          {
+            right_low_i = ci;
+            right_high_i = bi;
+          }
+          left_low_i = ai;
+          left_prime = false;
+        }
+        else if(b.x < ll_cmp)
+        {
+          if(a.y < c.y)
+          {
+            right_low_i = ai;
+            right_high_i = ci;
+          }
+          else
+          {
+            right_low_i = ci;
+            right_high_i = ai;
+          }
+          left_low_i = bi;
+          left_prime = false;
+        }
+        else if(c.x < ll_cmp)
+        {
+          if(a.y < b.y)
+          {
+            right_low_i = ai;
+            right_high_i = bi;
+          }
+          else
+          {
+            right_low_i = bi;
+            right_high_i = ai;
+          }
+          left_low_i = ci;
+          left_prime = false;
+        }
+        else
+        {
+          Debug.Log("NOOOO");
+        }
+
+        if(left_swing_i == -1)
+        {
+          if(left_prime)
+          {
+            mesh_triangles.Add(left_ladder_i);
+            mesh_triangles.Add(left_low_i);
+            mesh_triangles.Add(left_high_i);
+            left_swing_i = left_high_i;
+            left_swing = mesh_positions[left_swing_i];
+
+            right_swing_i = right_low_i;
+            right_swing = mesh_positions[right_low_i];
+          }
+          else
+          {
+            mesh_triangles.Add(right_ladder_i);
+            mesh_triangles.Add(right_high_i);
+            mesh_triangles.Add(right_low_i);
+            right_swing_i = right_high_i;
+            right_swing = mesh_positions[right_swing_i];
+
+            left_swing_i = left_low_i;
+            left_swing = mesh_positions[left_low_i];
+          }
+        }
+        else
+        {
+          int next_i;
+          Vector3 next;
+          //merge left low
+          next_i = left_low_i;
+          next = mesh_positions[next_i];
+
+          mesh_triangles.Add(left_ladder_i);
+          mesh_triangles.Add(left_swing_i);
+          mesh_triangles.Add(next_i);
+          left_swing_i = next_i;
+          left_swing = next;
+          if(Mathf.Abs(next.y-left_rung.y) < Mathf.Abs(next.y-left_ladder.y))
+          {
+            mesh_triangles.Add(left_ladder_i);
+            mesh_triangles.Add(next_i);
+            mesh_triangles.Add(left_ladder_i+2);
+            left_ladder_i = left_ladder_i+2;
+            left_ladder = mesh_positions[left_ladder_i];
+            left_rung = mesh_positions[left_ladder_i+2];
+          }
+
+          //merge right low
+          next_i = right_low_i;
+          next = mesh_positions[next_i];
+
+          mesh_triangles.Add(right_ladder_i);
+          mesh_triangles.Add(next_i);
+          mesh_triangles.Add(right_swing_i);
+          right_swing_i = next_i;
+          right_swing = next;
+          if(Mathf.Abs(next.y-right_rung.y) < Mathf.Abs(next.y-right_ladder.y))
+          {
+            mesh_triangles.Add(right_ladder_i);
+            mesh_triangles.Add(right_ladder_i+2);
+            mesh_triangles.Add(next_i);
+            right_ladder_i = right_ladder_i+2;
+            right_ladder = mesh_positions[right_ladder_i];
+            right_rung = mesh_positions[right_ladder_i+2];
+          }
+
+          if(left_prime)
+          {
+            //merge left high
+            next_i = left_high_i;
+            next = mesh_positions[next_i];
+
+            mesh_triangles.Add(left_ladder_i);
+            mesh_triangles.Add(left_swing_i);
+            mesh_triangles.Add(next_i);
+            left_swing_i = next_i;
+            left_swing = next;
+            if(Mathf.Abs(next.y-left_rung.y) < Mathf.Abs(next.y-left_ladder.y))
+            {
+              mesh_triangles.Add(left_ladder_i);
+              mesh_triangles.Add(next_i);
+              mesh_triangles.Add(left_ladder_i+2);
+              left_ladder_i = left_ladder_i+2;
+              left_ladder = mesh_positions[left_ladder_i];
+              left_rung = mesh_positions[left_ladder_i+2];
+            }
+          }
+          else
+          {
+            //merge right high
+            next_i = right_high_i;
+            next = mesh_positions[next_i];
+
+            mesh_triangles.Add(right_ladder_i);
+            mesh_triangles.Add(next_i);
+            mesh_triangles.Add(right_swing_i);
+            right_swing_i = next_i;
+            right_swing = next;
+            if(Mathf.Abs(next.y-right_rung.y) < Mathf.Abs(next.y-right_ladder.y))
+            {
+              mesh_triangles.Add(right_ladder_i);
+              mesh_triangles.Add(right_ladder_i+2);
+              mesh_triangles.Add(next_i);
+              right_ladder_i = right_ladder_i+2;
+              right_ladder = mesh_positions[right_ladder_i];
+              right_rung = mesh_positions[right_ladder_i+2];
+            }
+          }
+        }
+
+      }
+    }
+
+
+
+
+
+/*
+    int concentrated_samples = samples*2;
     for(int i = 0; i < 2; i++)
     {
       for(int y = 0; y < concentrated_samples; y++)
@@ -364,6 +656,7 @@ public class ThermoMath : MonoBehaviour
         merge_pt(point, mesh_positions, mesh_normals, mesh_triangles);
       }
     }
+*/
 
     Mesh mesh = new Mesh();
     mesh.vertices = mesh_positions.ToArray();
