@@ -19,7 +19,7 @@ public class ThermoMath : MonoBehaviour
   double t_min = IF97.get_Tmin(); // 273.15
   double t_max = IF97.get_Tmax(); // 1073.15
 
-  int samples = 20;
+  int samples = 40;
 
   //state
   public double pressure_p;
@@ -186,6 +186,7 @@ public class ThermoMath : MonoBehaviour
 
   float plot(double min, double max, double val) { return log_plot(min,max,val); }
 
+  String pv(Vector3 v) { return String.Format("{0}, {1}, {2}",v.x.ToString(".################"),v.y.ToString(".################"),v.z.ToString(".################"));}
   void genMesh()
   {
     var rand = new System.Random();
@@ -395,7 +396,7 @@ public class ThermoMath : MonoBehaviour
     Vector3 right_ladder = mesh_positions[right_ladder_i];
     Vector3 right_rung = mesh_positions[right_ladder_i+2];
     Vector3 right_swing;
-    for(var i = 0; i < triangle_new_region-500; i+=3)
+    for(var i = 0; i < triangle_new_region && right_ladder_i+2 < mesh_positions.Count; i+=3)
     {
       int ai = mesh_triangles[i+0];
       int bi = mesh_triangles[i+1];
@@ -404,7 +405,12 @@ public class ThermoMath : MonoBehaviour
       Vector3 b = mesh_positions[bi];
       Vector3 c = mesh_positions[ci];
 
-      if(Mathf.Abs(a.x-b.x) > max_dist || Mathf.Abs(b.x-c.x) > max_dist || Mathf.Abs(c.x-a.x) > max_dist)
+      float ll_cmp = (left_ladder.x+right_ladder.x)/2.0f;
+      if(
+        (a.x < ll_cmp || b.x < ll_cmp || c.x < ll_cmp) &&
+        (a.x > ll_cmp || b.x > ll_cmp || c.x > ll_cmp)
+      )
+      //if(Mathf.Abs(a.x-b.x) > max_dist || Mathf.Abs(b.x-c.x) > max_dist || Mathf.Abs(c.x-a.x) > max_dist)
       {
         mesh_triangles.RemoveAt(i+2);
         mesh_triangles.RemoveAt(i+1);
@@ -418,11 +424,9 @@ public class ThermoMath : MonoBehaviour
         int right_high_i = -1;
         bool left_prime = false;
 
-        float ll_cmp = (left_ladder.x+right_ladder.x)/2.0f;
-
         if(a.x < ll_cmp && b.x < ll_cmp)
         {
-          if(a.y < b.y)
+          if(a.y < b.y || (a.y == b.y && a.z < b.z))
           {
             left_low_i = ai;
             left_high_i = bi;
@@ -437,7 +441,7 @@ public class ThermoMath : MonoBehaviour
         }
         else if(b.x < ll_cmp && c.x < ll_cmp)
         {
-          if(b.y < c.y)
+          if(b.y < c.y || (b.y == c.y && b.z < c.z))
           {
             left_low_i = bi;
             left_high_i = ci;
@@ -452,7 +456,7 @@ public class ThermoMath : MonoBehaviour
         }
         else if(c.x < ll_cmp && a.x < ll_cmp)
         {
-          if(c.y < a.y)
+          if(c.y < a.y || (c.y == a.y && c.z < a.z))
           {
             left_low_i = ci;
             left_high_i = ai;
@@ -467,7 +471,7 @@ public class ThermoMath : MonoBehaviour
         }
         else if(a.x < ll_cmp)
         {
-          if(b.y < c.y)
+          if(b.y < c.y || (b.y == c.y && b.z > c.z))
           {
             right_low_i = bi;
             right_high_i = ci;
@@ -482,7 +486,7 @@ public class ThermoMath : MonoBehaviour
         }
         else if(b.x < ll_cmp)
         {
-          if(a.y < c.y)
+          if(a.y < c.y || (a.y == c.y && a.z > c.z))
           {
             right_low_i = ai;
             right_high_i = ci;
@@ -497,7 +501,7 @@ public class ThermoMath : MonoBehaviour
         }
         else if(c.x < ll_cmp)
         {
-          if(a.y < b.y)
+          if(a.y < b.y || (a.y == b.y && a.z > b.z))
           {
             right_low_i = ai;
             right_high_i = bi;
@@ -522,6 +526,7 @@ public class ThermoMath : MonoBehaviour
             mesh_triangles.Add(left_ladder_i);
             mesh_triangles.Add(left_low_i);
             mesh_triangles.Add(left_high_i);
+            if(winding(mesh_positions[left_ladder_i],mesh_positions[left_low_i],mesh_positions[left_high_i]) < 0) Debug.Log("BAD A");
             left_swing_i = left_high_i;
             left_swing = mesh_positions[left_swing_i];
 
@@ -533,6 +538,7 @@ public class ThermoMath : MonoBehaviour
             mesh_triangles.Add(right_ladder_i);
             mesh_triangles.Add(right_high_i);
             mesh_triangles.Add(right_low_i);
+            if(winding(mesh_positions[right_ladder_i],mesh_positions[right_high_i],mesh_positions[right_low_i]) < 0) Debug.Log("BAD B");
             right_swing_i = right_high_i;
             right_swing = mesh_positions[right_swing_i];
 
@@ -551,6 +557,7 @@ public class ThermoMath : MonoBehaviour
           mesh_triangles.Add(left_ladder_i);
           mesh_triangles.Add(left_swing_i);
           mesh_triangles.Add(next_i);
+          if(winding(mesh_positions[left_ladder_i],mesh_positions[left_swing_i],mesh_positions[next_i]) < 0) Debug.Log("BAD C");
           left_swing_i = next_i;
           left_swing = next;
           if(Mathf.Abs(next.y-left_rung.y) < Mathf.Abs(next.y-left_ladder.y))
@@ -558,6 +565,7 @@ public class ThermoMath : MonoBehaviour
             mesh_triangles.Add(left_ladder_i);
             mesh_triangles.Add(next_i);
             mesh_triangles.Add(left_ladder_i+2);
+            if(winding(mesh_positions[left_ladder_i],mesh_positions[next_i],mesh_positions[left_ladder_i+2]) < 0) Debug.Log("BAD D");
             left_ladder_i = left_ladder_i+2;
             left_ladder = mesh_positions[left_ladder_i];
             left_rung = mesh_positions[left_ladder_i+2];
@@ -570,6 +578,7 @@ public class ThermoMath : MonoBehaviour
           mesh_triangles.Add(right_ladder_i);
           mesh_triangles.Add(next_i);
           mesh_triangles.Add(right_swing_i);
+          if(winding(mesh_positions[right_ladder_i],mesh_positions[next_i],mesh_positions[right_swing_i]) < 0) Debug.Log("BAD E");
           right_swing_i = next_i;
           right_swing = next;
           if(Mathf.Abs(next.y-right_rung.y) < Mathf.Abs(next.y-right_ladder.y))
@@ -577,9 +586,10 @@ public class ThermoMath : MonoBehaviour
             mesh_triangles.Add(right_ladder_i);
             mesh_triangles.Add(right_ladder_i+2);
             mesh_triangles.Add(next_i);
+            if(winding(mesh_positions[right_ladder_i],mesh_positions[right_ladder_i+2],mesh_positions[next_i]) < 0) Debug.Log("BAD F");
             right_ladder_i = right_ladder_i+2;
             right_ladder = mesh_positions[right_ladder_i];
-            right_rung = mesh_positions[right_ladder_i+2];
+            if(right_ladder_i+2 < mesh_positions.Count) right_rung = mesh_positions[right_ladder_i+2];
           }
 
           if(left_prime)
@@ -588,19 +598,29 @@ public class ThermoMath : MonoBehaviour
             next_i = left_high_i;
             next = mesh_positions[next_i];
 
-            mesh_triangles.Add(left_ladder_i);
-            mesh_triangles.Add(left_swing_i);
-            mesh_triangles.Add(next_i);
-            left_swing_i = next_i;
-            left_swing = next;
-            if(Mathf.Abs(next.y-left_rung.y) < Mathf.Abs(next.y-left_ladder.y))
+            if(winding(mesh_positions[left_ladder_i],mesh_positions[left_swing_i],mesh_positions[next_i]) < 0)
+            {
+              //bad winding; attach all points to ladder
+              for(int j = 0; j < mesh_triangles.Count; j++)
+                if(mesh_triangles[j] == next_i) mesh_triangles[j] = left_ladder_i;
+            }
+            else
             {
               mesh_triangles.Add(left_ladder_i);
+              mesh_triangles.Add(left_swing_i);
               mesh_triangles.Add(next_i);
-              mesh_triangles.Add(left_ladder_i+2);
-              left_ladder_i = left_ladder_i+2;
-              left_ladder = mesh_positions[left_ladder_i];
-              left_rung = mesh_positions[left_ladder_i+2];
+              left_swing_i = next_i;
+              left_swing = next;
+              if(Mathf.Abs(next.y-left_rung.y) < Mathf.Abs(next.y-left_ladder.y))
+              {
+                mesh_triangles.Add(left_ladder_i);
+                mesh_triangles.Add(next_i);
+                mesh_triangles.Add(left_ladder_i+2);
+                if(winding(mesh_positions[left_ladder_i],mesh_positions[next_i],mesh_positions[left_ladder_i+2]) < 0) Debug.Log("BAD H");
+                left_ladder_i = left_ladder_i+2;
+                left_ladder = mesh_positions[left_ladder_i];
+                left_rung = mesh_positions[left_ladder_i+2];
+              }
             }
           }
           else
@@ -609,19 +629,29 @@ public class ThermoMath : MonoBehaviour
             next_i = right_high_i;
             next = mesh_positions[next_i];
 
-            mesh_triangles.Add(right_ladder_i);
-            mesh_triangles.Add(next_i);
-            mesh_triangles.Add(right_swing_i);
-            right_swing_i = next_i;
-            right_swing = next;
-            if(Mathf.Abs(next.y-right_rung.y) < Mathf.Abs(next.y-right_ladder.y))
+            if(winding(mesh_positions[right_ladder_i],mesh_positions[next_i],mesh_positions[right_swing_i]) < 0)
+            {
+              //bad winding; attach all points to ladder
+              for(int j = 0; j < mesh_triangles.Count; j++)
+                if(mesh_triangles[j] == next_i) mesh_triangles[j] = right_ladder_i;
+            }
+            else
             {
               mesh_triangles.Add(right_ladder_i);
-              mesh_triangles.Add(right_ladder_i+2);
               mesh_triangles.Add(next_i);
-              right_ladder_i = right_ladder_i+2;
-              right_ladder = mesh_positions[right_ladder_i];
-              right_rung = mesh_positions[right_ladder_i+2];
+              mesh_triangles.Add(right_swing_i);
+              right_swing_i = next_i;
+              right_swing = next;
+              if(Mathf.Abs(next.y-right_rung.y) < Mathf.Abs(next.y-right_ladder.y))
+              {
+                mesh_triangles.Add(right_ladder_i);
+                mesh_triangles.Add(right_ladder_i+2);
+                mesh_triangles.Add(next_i);
+                if(winding(mesh_positions[right_ladder_i],mesh_positions[right_ladder_i+2],mesh_positions[next_i]) < 0) Debug.Log("BAD J");
+                right_ladder_i = right_ladder_i+2;
+                right_ladder = mesh_positions[right_ladder_i];
+                if(right_ladder_i+2 < mesh_positions.Count) right_rung = mesh_positions[right_ladder_i+2];
+              }
             }
           }
         }
