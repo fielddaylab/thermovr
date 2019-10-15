@@ -19,7 +19,7 @@ public class ThermoMath : MonoBehaviour
   double t_min = IF97.get_Tmin(); // 273.15
   double t_max = IF97.get_Tmax(); // 1073.15
 
-  int samples = 40;
+  int samples = 80;
 
   //state
   public double pressure_p;
@@ -303,7 +303,6 @@ public class ThermoMath : MonoBehaviour
     List<int> mesh_triangles;
 
     mesh_positions = new List<Vector3>(pt_positions);
-    mesh_normals = new List<Vector3>(n_pts);
 
     int vi = 0;
     int ni = 0;
@@ -319,21 +318,7 @@ public class ThermoMath : MonoBehaviour
         mesh_triangles.Add(vi           +0); ni++;
         mesh_triangles.Add(vi+n_tsamples+1); ni++;
         mesh_triangles.Add(vi           +1); ni++;
-
-        mesh_normals.Add(Vector3.Cross(Vector3.Normalize(mesh_positions[vi+n_tsamples+0]-mesh_positions[vi+0]),Vector3.Normalize(mesh_positions[vi+1]-mesh_positions[vi+0])));
       }
-      mesh_normals.Add(Vector3.Cross(Vector3.Normalize(mesh_positions[vi+n_tsamples+0]-mesh_positions[vi+1]),Vector3.Normalize(mesh_positions[vi+1]-mesh_positions[vi+n_tsamples+1])));
-    }
-
-    {
-      //fill out the rest of the normals
-      int y = n_psamples-1;
-      for(int z = 0; z < n_tsamples-1; z++)
-      {
-        vi = n_tsamples*y+z;
-        mesh_normals.Add(Vector3.Cross(Vector3.Normalize(mesh_positions[vi-n_tsamples+0]-mesh_positions[vi+0]),Vector3.Normalize(mesh_positions[vi+1]-mesh_positions[vi+0])));
-      }
-      mesh_normals.Add(Vector3.Cross(Vector3.Normalize(mesh_positions[vi-n_tsamples+0]-mesh_positions[vi+1]),Vector3.Normalize(mesh_positions[vi+1]-mesh_positions[vi-n_tsamples+1])));
     }
 
     for(var i = 0; i < mesh_triangles.Count; i+=3)
@@ -344,7 +329,7 @@ public class ThermoMath : MonoBehaviour
 
     int concentrated_samples = samples*2;
     int position_dome_region = mesh_positions.Count;
-    int triangle_dome_region = mesh_triangles.Count;
+    float highest_y = 0.0f;
     for(int y = 0; y < concentrated_samples; y++)
     {
       double pt = ((double)y/(concentrated_samples-1));
@@ -355,6 +340,7 @@ public class ThermoMath : MonoBehaviour
 
       //Debug.LogFormat("p:{0}Pa, v:{1}M^3/Kg, t:{2}K",p,v,t);
       float pplot = plot(p_min,p_max,p);
+      if(pplot > highest_y) highest_y = pplot;
       float tplot = plot(t_min,t_max,t);
 
       double v;
@@ -365,22 +351,11 @@ public class ThermoMath : MonoBehaviour
       vplot = plot(v_min,v_max,v);
       point = new Vector3(vplot,pplot,tplot);
       mesh_positions.Add(point);
-      mesh_normals.Add(Vector3.Normalize(point));
 
       v = 1.0/IF97.rhovap_p(p/1000000.0); //expects:MPa returns Kg/M^3
       vplot = plot(v_min,v_max,v);
       point = new Vector3(vplot,pplot,tplot);
       mesh_positions.Add(point);
-      mesh_normals.Add(Vector3.Normalize(point));
-    }
-    for(int y = 0; y < concentrated_samples-1; y++)
-    {
-      mesh_triangles.Add(position_dome_region+y*2+0);
-      mesh_triangles.Add(position_dome_region+y*2+2);
-      mesh_triangles.Add(position_dome_region+y*2+1);
-      mesh_triangles.Add(position_dome_region+y*2+1);
-      mesh_triangles.Add(position_dome_region+y*2+2);
-      mesh_triangles.Add(position_dome_region+y*2+3);
     }
 
     //kill spanning triangles; gather orphans
@@ -392,7 +367,7 @@ public class ThermoMath : MonoBehaviour
     int right_ladder_i = left_ladder_i+1;
     Vector3 right_ladder = mesh_positions[right_ladder_i];
     Vector3 right_rung = mesh_positions[right_ladder_i+2];
-    for(var i = 0; i < triangle_dome_region; i+=3)
+    for(var i = 0; i < mesh_triangles.Count; i+=3)
     {
       int ai = mesh_triangles[i+0];
       int bi = mesh_triangles[i+1];
@@ -406,6 +381,7 @@ public class ThermoMath : MonoBehaviour
 
       float x_cmp = (left_ladder.x+right_ladder.x)/2.0f;
       if(
+        (a.y < highest_y || b.y < highest_y || c.y < highest_y) &&
         (a.x < x_cmp || b.x < x_cmp || c.x < x_cmp) &&
         (a.x > x_cmp || b.x > x_cmp || c.x > x_cmp)
       )
@@ -414,7 +390,6 @@ public class ThermoMath : MonoBehaviour
         mesh_triangles.RemoveAt(i+1);
         mesh_triangles.RemoveAt(i+0);
         i -= 3;
-        triangle_dome_region -= 3;
 
         if(a.x < x_cmp && b.x < x_cmp)
         {
@@ -508,6 +483,7 @@ public class ThermoMath : MonoBehaviour
     }
 
     //stitch orphans
+    int triangle_stitch_region = mesh_triangles.Count;
     List<int> orphans;
     int ladder_i;
     Vector3 rung;
@@ -576,6 +552,53 @@ public class ThermoMath : MonoBehaviour
         if(orphan_i+1 < orphans.Count) orung = mesh_positions[orphans[orphan_i+1]]; //yes, both this AND previous line need +2 (+2 for advance, +2 for rung)
         mesh_triangles.Add(orphans[orphan_i]);
       }
+    }
+
+    //fill in dome
+    int triangle_inner_dome_region = mesh_triangles.Count;
+    int position_dome_inner_region = mesh_positions.Count;
+    for(int i = position_dome_region; i < position_dome_inner_region; i++) //duplicate inner positions so each can have own normal at seam
+    {
+      mesh_positions.Add(mesh_positions[i]);
+    }
+    for(int y = 0; y < concentrated_samples-1; y++)
+    {
+      mesh_triangles.Add(position_dome_inner_region+y*2+0);
+      mesh_triangles.Add(position_dome_inner_region+y*2+2);
+      mesh_triangles.Add(position_dome_inner_region+y*2+1);
+      mesh_triangles.Add(position_dome_inner_region+y*2+1);
+      mesh_triangles.Add(position_dome_inner_region+y*2+2);
+      mesh_triangles.Add(position_dome_inner_region+y*2+3);
+    }
+
+    //set normals
+    mesh_normals = new List<Vector3>(new Vector3[mesh_positions.Count]);
+    for(int i = 0; i < triangle_inner_dome_region; i+=3)
+    {
+      int ai = mesh_triangles[i+0];
+      int bi = mesh_triangles[i+1];
+      int ci = mesh_triangles[i+2];
+      Vector3 a = mesh_positions[ai];
+      Vector3 b = mesh_positions[bi];
+      Vector3 c = mesh_positions[ci];
+      Vector3 n = Vector3.Cross(Vector3.Normalize(b-a),Vector3.Normalize(c-a));
+      mesh_normals[ai] = n;
+      mesh_normals[bi] = n;
+      mesh_normals[ci] = n;
+    }
+
+    for(int i = triangle_inner_dome_region; i < mesh_triangles.Count; i+=3)
+    {
+      int ai = mesh_triangles[i+0];
+      int bi = mesh_triangles[i+1];
+      int ci = mesh_triangles[i+2];
+      Vector3 a = mesh_positions[ai];
+      Vector3 b = mesh_positions[bi];
+      Vector3 c = mesh_positions[ci];
+      Vector3 n = Vector3.Cross(Vector3.Normalize(b-a),Vector3.Normalize(c-a));
+      mesh_normals[ai] = n;
+      mesh_normals[bi] = n;
+      mesh_normals[ci] = n;
     }
 
     Mesh mesh = new Mesh();
