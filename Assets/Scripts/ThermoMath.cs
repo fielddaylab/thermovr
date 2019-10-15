@@ -297,7 +297,6 @@ public class ThermoMath : MonoBehaviour
     }
 //*/
 
-//*
     //MESH
     List<Vector3> mesh_positions;
     List<Vector3> mesh_normals;
@@ -344,8 +343,8 @@ public class ThermoMath : MonoBehaviour
     }
 
     int concentrated_samples = samples*2;
-    int position_new_region = mesh_positions.Count;
-    int triangle_new_region = mesh_triangles.Count;
+    int position_dome_region = mesh_positions.Count;
+    int triangle_dome_region = mesh_triangles.Count;
     for(int y = 0; y < concentrated_samples; y++)
     {
       double pt = ((double)y/(concentrated_samples-1));
@@ -376,27 +375,24 @@ public class ThermoMath : MonoBehaviour
     }
     for(int y = 0; y < concentrated_samples-1; y++)
     {
-      mesh_triangles.Add(position_new_region+y*2+0);
-      mesh_triangles.Add(position_new_region+y*2+2);
-      mesh_triangles.Add(position_new_region+y*2+1);
-      mesh_triangles.Add(position_new_region+y*2+1);
-      mesh_triangles.Add(position_new_region+y*2+2);
-      mesh_triangles.Add(position_new_region+y*2+3);
+      mesh_triangles.Add(position_dome_region+y*2+0);
+      mesh_triangles.Add(position_dome_region+y*2+2);
+      mesh_triangles.Add(position_dome_region+y*2+1);
+      mesh_triangles.Add(position_dome_region+y*2+1);
+      mesh_triangles.Add(position_dome_region+y*2+2);
+      mesh_triangles.Add(position_dome_region+y*2+3);
     }
 
-    //kill spanning triangles; replace with nice ones
-    float max_dist = 0.1f;
-    int left_ladder_i = position_new_region;
-    int left_swing_i = -1;
+    //kill spanning triangles; gather orphans
+    List<int> left_orphans = new List<int>();
+    List<int> right_orphans = new List<int>();
+    int left_ladder_i = position_dome_region;
     Vector3 left_ladder = mesh_positions[left_ladder_i];
     Vector3 left_rung = mesh_positions[left_ladder_i+2];
-    Vector3 left_swing;
-    int right_ladder_i = position_new_region+1;
-    int right_swing_i = -1;
+    int right_ladder_i = left_ladder_i+1;
     Vector3 right_ladder = mesh_positions[right_ladder_i];
     Vector3 right_rung = mesh_positions[right_ladder_i+2];
-    Vector3 right_swing;
-    for(var i = 0; i < triangle_new_region && right_ladder_i+2 < mesh_positions.Count; i+=3)
+    for(var i = 0; i < triangle_dome_region; i+=3)
     {
       int ai = mesh_triangles[i+0];
       int bi = mesh_triangles[i+1];
@@ -405,288 +401,182 @@ public class ThermoMath : MonoBehaviour
       Vector3 b = mesh_positions[bi];
       Vector3 c = mesh_positions[ci];
 
-      float ll_cmp = (left_ladder.x+right_ladder.x)/2.0f;
+      if((left_rung.y  < a.y || left_rung.y  < b.y || left_rung.y  < c.y) && left_ladder_i+4 < mesh_positions.Count)  { left_ladder_i  += 2; left_ladder  = mesh_positions[left_ladder_i];  left_rung  = mesh_positions[left_ladder_i+2];  }
+      if((right_rung.y < a.y || right_rung.y < b.y || right_rung.y < c.y) && right_ladder_i+4 < mesh_positions.Count) { right_ladder_i += 2; right_ladder = mesh_positions[right_ladder_i]; right_rung = mesh_positions[right_ladder_i+2]; }
+
+      float x_cmp = (left_ladder.x+right_ladder.x)/2.0f;
       if(
-        (a.x < ll_cmp || b.x < ll_cmp || c.x < ll_cmp) &&
-        (a.x > ll_cmp || b.x > ll_cmp || c.x > ll_cmp)
+        (a.x < x_cmp || b.x < x_cmp || c.x < x_cmp) &&
+        (a.x > x_cmp || b.x > x_cmp || c.x > x_cmp)
       )
-      //if(Mathf.Abs(a.x-b.x) > max_dist || Mathf.Abs(b.x-c.x) > max_dist || Mathf.Abs(c.x-a.x) > max_dist)
       {
         mesh_triangles.RemoveAt(i+2);
         mesh_triangles.RemoveAt(i+1);
         mesh_triangles.RemoveAt(i+0);
         i -= 3;
-        triangle_new_region -= 3;
+        triangle_dome_region -= 3;
 
-        int left_low_i = -1;
-        int left_high_i = -1;
-        int right_low_i = -1;
-        int right_high_i = -1;
-        bool left_prime = false;
-
-        if(a.x < ll_cmp && b.x < ll_cmp)
+        if(a.x < x_cmp && b.x < x_cmp)
         {
           if(a.y < b.y || (a.y == b.y && a.z < b.z))
           {
-            left_low_i = ai;
-            left_high_i = bi;
+            left_orphans.Add(ai);
+            left_orphans.Add(bi);
           }
           else
           {
-            left_low_i = bi;
-            left_high_i = ai;
+            left_orphans.Add(bi);
+            left_orphans.Add(ai);
           }
-          right_low_i = ci;
-          left_prime = true;
+          right_orphans.Add(ci);
         }
-        else if(b.x < ll_cmp && c.x < ll_cmp)
+        else if(b.x < x_cmp && c.x < x_cmp)
         {
           if(b.y < c.y || (b.y == c.y && b.z < c.z))
           {
-            left_low_i = bi;
-            left_high_i = ci;
+            left_orphans.Add(bi);
+            left_orphans.Add(ci);
           }
           else
           {
-            left_low_i = ci;
-            left_high_i = bi;
+            left_orphans.Add(ci);
+            left_orphans.Add(bi);
           }
-          right_low_i = ai;
-          left_prime = true;
+          right_orphans.Add(ai);
         }
-        else if(c.x < ll_cmp && a.x < ll_cmp)
+        else if(c.x < x_cmp && a.x < x_cmp)
         {
           if(c.y < a.y || (c.y == a.y && c.z < a.z))
           {
-            left_low_i = ci;
-            left_high_i = ai;
+            left_orphans.Add(ci);
+            left_orphans.Add(ai);
           }
           else
           {
-            left_low_i = ai;
-            left_high_i = ci;
+            left_orphans.Add(ai);
+            left_orphans.Add(ci);
           }
-          right_low_i = bi;
-          left_prime = true;
+          right_orphans.Add(bi);
         }
-        else if(a.x < ll_cmp)
+        else if(a.x < x_cmp)
         {
           if(b.y < c.y || (b.y == c.y && b.z > c.z))
           {
-            right_low_i = bi;
-            right_high_i = ci;
+            right_orphans.Add(bi);
+            right_orphans.Add(ci);
           }
           else
           {
-            right_low_i = ci;
-            right_high_i = bi;
+            right_orphans.Add(ci);
+            right_orphans.Add(bi);
           }
-          left_low_i = ai;
-          left_prime = false;
+          left_orphans.Add(ai);
         }
-        else if(b.x < ll_cmp)
+        else if(b.x < x_cmp)
         {
           if(a.y < c.y || (a.y == c.y && a.z > c.z))
           {
-            right_low_i = ai;
-            right_high_i = ci;
+            right_orphans.Add(ai);
+            right_orphans.Add(ci);
           }
           else
           {
-            right_low_i = ci;
-            right_high_i = ai;
+            right_orphans.Add(ci);
+            right_orphans.Add(ai);
           }
-          left_low_i = bi;
-          left_prime = false;
+          left_orphans.Add(bi);
         }
-        else if(c.x < ll_cmp)
+        else if(c.x < x_cmp)
         {
           if(a.y < b.y || (a.y == b.y && a.z > b.z))
           {
-            right_low_i = ai;
-            right_high_i = bi;
+            right_orphans.Add(ai);
+            right_orphans.Add(bi);
           }
           else
           {
-            right_low_i = bi;
-            right_high_i = ai;
+            right_orphans.Add(bi);
+            right_orphans.Add(ai);
           }
-          left_low_i = ci;
-          left_prime = false;
+          left_orphans.Add(ci);
         }
         else
         {
           Debug.Log("NOOOO");
         }
-
-        if(left_swing_i == -1)
-        {
-          if(left_prime)
-          {
-            mesh_triangles.Add(left_ladder_i);
-            mesh_triangles.Add(left_low_i);
-            mesh_triangles.Add(left_high_i);
-            if(winding(mesh_positions[left_ladder_i],mesh_positions[left_low_i],mesh_positions[left_high_i]) < 0) Debug.Log("BAD A");
-            left_swing_i = left_high_i;
-            left_swing = mesh_positions[left_swing_i];
-
-            right_swing_i = right_low_i;
-            right_swing = mesh_positions[right_low_i];
-          }
-          else
-          {
-            mesh_triangles.Add(right_ladder_i);
-            mesh_triangles.Add(right_high_i);
-            mesh_triangles.Add(right_low_i);
-            if(winding(mesh_positions[right_ladder_i],mesh_positions[right_high_i],mesh_positions[right_low_i]) < 0) Debug.Log("BAD B");
-            right_swing_i = right_high_i;
-            right_swing = mesh_positions[right_swing_i];
-
-            left_swing_i = left_low_i;
-            left_swing = mesh_positions[left_low_i];
-          }
-        }
-        else
-        {
-          int next_i;
-          Vector3 next;
-          //merge left low
-          next_i = left_low_i;
-          next = mesh_positions[next_i];
-
-          mesh_triangles.Add(left_ladder_i);
-          mesh_triangles.Add(left_swing_i);
-          mesh_triangles.Add(next_i);
-          if(winding(mesh_positions[left_ladder_i],mesh_positions[left_swing_i],mesh_positions[next_i]) < 0) Debug.Log("BAD C");
-          left_swing_i = next_i;
-          left_swing = next;
-          if(Mathf.Abs(next.y-left_rung.y) < Mathf.Abs(next.y-left_ladder.y))
-          {
-            mesh_triangles.Add(left_ladder_i);
-            mesh_triangles.Add(next_i);
-            mesh_triangles.Add(left_ladder_i+2);
-            if(winding(mesh_positions[left_ladder_i],mesh_positions[next_i],mesh_positions[left_ladder_i+2]) < 0) Debug.Log("BAD D");
-            left_ladder_i = left_ladder_i+2;
-            left_ladder = mesh_positions[left_ladder_i];
-            left_rung = mesh_positions[left_ladder_i+2];
-          }
-
-          //merge right low
-          next_i = right_low_i;
-          next = mesh_positions[next_i];
-
-          mesh_triangles.Add(right_ladder_i);
-          mesh_triangles.Add(next_i);
-          mesh_triangles.Add(right_swing_i);
-          if(winding(mesh_positions[right_ladder_i],mesh_positions[next_i],mesh_positions[right_swing_i]) < 0) Debug.Log("BAD E");
-          right_swing_i = next_i;
-          right_swing = next;
-          if(Mathf.Abs(next.y-right_rung.y) < Mathf.Abs(next.y-right_ladder.y))
-          {
-            mesh_triangles.Add(right_ladder_i);
-            mesh_triangles.Add(right_ladder_i+2);
-            mesh_triangles.Add(next_i);
-            if(winding(mesh_positions[right_ladder_i],mesh_positions[right_ladder_i+2],mesh_positions[next_i]) < 0) Debug.Log("BAD F");
-            right_ladder_i = right_ladder_i+2;
-            right_ladder = mesh_positions[right_ladder_i];
-            if(right_ladder_i+2 < mesh_positions.Count) right_rung = mesh_positions[right_ladder_i+2];
-          }
-
-          if(left_prime)
-          {
-            //merge left high
-            next_i = left_high_i;
-            next = mesh_positions[next_i];
-
-            if(winding(mesh_positions[left_ladder_i],mesh_positions[left_swing_i],mesh_positions[next_i]) < 0)
-            {
-              //bad winding; attach all points to ladder
-              for(int j = 0; j < mesh_triangles.Count; j++)
-                if(mesh_triangles[j] == next_i) mesh_triangles[j] = left_ladder_i;
-            }
-            else
-            {
-              mesh_triangles.Add(left_ladder_i);
-              mesh_triangles.Add(left_swing_i);
-              mesh_triangles.Add(next_i);
-              left_swing_i = next_i;
-              left_swing = next;
-              if(Mathf.Abs(next.y-left_rung.y) < Mathf.Abs(next.y-left_ladder.y))
-              {
-                mesh_triangles.Add(left_ladder_i);
-                mesh_triangles.Add(next_i);
-                mesh_triangles.Add(left_ladder_i+2);
-                if(winding(mesh_positions[left_ladder_i],mesh_positions[next_i],mesh_positions[left_ladder_i+2]) < 0) Debug.Log("BAD H");
-                left_ladder_i = left_ladder_i+2;
-                left_ladder = mesh_positions[left_ladder_i];
-                left_rung = mesh_positions[left_ladder_i+2];
-              }
-            }
-          }
-          else
-          {
-            //merge right high
-            next_i = right_high_i;
-            next = mesh_positions[next_i];
-
-            if(winding(mesh_positions[right_ladder_i],mesh_positions[next_i],mesh_positions[right_swing_i]) < 0)
-            {
-              //bad winding; attach all points to ladder
-              for(int j = 0; j < mesh_triangles.Count; j++)
-                if(mesh_triangles[j] == next_i) mesh_triangles[j] = right_ladder_i;
-            }
-            else
-            {
-              mesh_triangles.Add(right_ladder_i);
-              mesh_triangles.Add(next_i);
-              mesh_triangles.Add(right_swing_i);
-              right_swing_i = next_i;
-              right_swing = next;
-              if(Mathf.Abs(next.y-right_rung.y) < Mathf.Abs(next.y-right_ladder.y))
-              {
-                mesh_triangles.Add(right_ladder_i);
-                mesh_triangles.Add(right_ladder_i+2);
-                mesh_triangles.Add(next_i);
-                if(winding(mesh_positions[right_ladder_i],mesh_positions[right_ladder_i+2],mesh_positions[next_i]) < 0) Debug.Log("BAD J");
-                right_ladder_i = right_ladder_i+2;
-                right_ladder = mesh_positions[right_ladder_i];
-                if(right_ladder_i+2 < mesh_positions.Count) right_rung = mesh_positions[right_ladder_i+2];
-              }
-            }
-          }
-        }
-
       }
     }
 
+    //stitch orphans
+    List<int> orphans;
+    int ladder_i;
+    Vector3 rung;
+    int orphan_i;
+    Vector3 orphan;
 
-
-
-
-/*
-    int concentrated_samples = samples*2;
-    for(int i = 0; i < 2; i++)
+    //left
+    orphans = left_orphans;
+    orphan_i = 0;
+    orphan = mesh_positions[orphans[orphan_i]];
+    ladder_i = position_dome_region;
+    rung = mesh_positions[ladder_i+2];
+    mesh_triangles.Add(ladder_i);
+    mesh_triangles.Add(orphans[orphan_i]);
+    orphan_i++;
+    orphan = mesh_positions[orphans[orphan_i]];
+    mesh_triangles.Add(orphans[orphan_i]);
+    orphan = mesh_positions[orphans[orphan_i]];
+    while(ladder_i+2 < mesh_positions.Count)
     {
-      for(int y = 0; y < concentrated_samples; y++)
+      while(orphan.y < rung.y && orphan_i+1 < orphans.Count)
       {
-        double pt = ((double)y/(concentrated_samples-1));
-        double pst = sample(pt);
-        double p = Lerpd(psat_min,psat_max,pst);
-        double v = 0.0;
-             if(i == 0) v = 1.0/IF97.rholiq_p(p/1000000.0); //expects:MPa returns Kg/M^3
-        else if(i == 1) v = 1.0/IF97.rhovap_p(p/1000000.0); //expects:MPa returns Kg/M^3
-        double t = IF97.Tsat97(p/1000000.0);
-        //pvt in Pa, M^3/Kg, K
-
-        //Debug.LogFormat("p:{0}Pa, v:{1}M^3/Kg, t:{2}K",p,v,t);
-        float pplot = plot(p_min,p_max,p);
-        float vplot = plot(v_min,v_max,v);
-        float tplot = plot(t_min,t_max,t);
-        Vector3 point = new Vector3(vplot,pplot,tplot);
-        merge_pt(point, mesh_positions, mesh_normals, mesh_triangles);
+        mesh_triangles.Add(ladder_i);
+        mesh_triangles.Add(orphans[orphan_i]);
+        orphan_i++;
+        orphan = mesh_positions[orphans[orphan_i]];
+        mesh_triangles.Add(orphans[orphan_i]);
+      }
+      if(ladder_i+2 < mesh_positions.Count)
+      {
+        mesh_triangles.Add(ladder_i);
+        mesh_triangles.Add(orphans[orphan_i]);
+        ladder_i += 2;
+        if(ladder_i+2 < mesh_positions.Count) rung = mesh_positions[ladder_i+2]; //yes, both this AND previous line need +2 (+2 for advance, +2 for rung)
+        mesh_triangles.Add(ladder_i);
       }
     }
-*/
+
+    //right
+    orphans = right_orphans;
+    orphan_i = 0;
+    orphan = mesh_positions[orphans[orphan_i]];
+    ladder_i = position_dome_region+1;
+    Vector3 ladder = mesh_positions[ladder_i];
+    Vector3 orung = mesh_positions[orphans[orphan_i+1]];
+    mesh_triangles.Add(orphans[orphan_i]);
+    mesh_triangles.Add(ladder_i);
+    ladder_i += 2;
+    ladder = mesh_positions[ladder_i];
+    mesh_triangles.Add(ladder_i);
+    while(orphan_i+1 < orphans.Count)
+    {
+      while(ladder.y < orung.y && ladder_i+2 < mesh_positions.Count)
+      {
+        mesh_triangles.Add(orphans[orphan_i]);
+        mesh_triangles.Add(ladder_i);
+        ladder_i += 2;
+        ladder = mesh_positions[ladder_i];
+        mesh_triangles.Add(ladder_i);
+      }
+      if(orphan_i+1 < orphans.Count)
+      {
+        mesh_triangles.Add(orphans[orphan_i]);
+        mesh_triangles.Add(ladder_i);
+        orphan_i++;
+        if(orphan_i+1 < orphans.Count) orung = mesh_positions[orphans[orphan_i+1]]; //yes, both this AND previous line need +2 (+2 for advance, +2 for rung)
+        mesh_triangles.Add(orphans[orphan_i]);
+      }
+    }
 
     Mesh mesh = new Mesh();
     mesh.vertices = mesh_positions.ToArray();
@@ -699,9 +589,6 @@ public class ThermoMath : MonoBehaviour
     gameObject.transform.localScale = new Vector3(1.0f,1.0f,1.0f);
     gameObject.GetComponent<MeshFilter>().mesh = mesh;
     gameObject.GetComponent<MeshRenderer>().material = graph_material;
-//*/
-
-
   }
 
   void reset()
@@ -766,279 +653,6 @@ public class ThermoMath : MonoBehaviour
     }
   }
 
-  float cross_fv2z(Vector3 a, Vector3 b) { return (a.z*b.y)-(a.y*b.z); } //z of cross_fv3 with zs set to 0 (good for '2d pt in tri')
-  float len_fv2(Vector3 v) { return Mathf.Sqrt(v.z*v.z+v.y*v.y); }
-  float norm_f(float f) { if(f < 0.0f) return -1.0f; if(f > 0.0f) return 1.0f; return 0.0f; }
-
-  bool pt_in_triangle_inclusive(Vector3 a, Vector3 b, Vector3 c, Vector3 p)
-  {
-    Vector3 subab = a-b;
-    Vector3 subac = a-c;
-    Vector3 subba = b-a;
-    Vector3 subbc = b-c;
-    Vector3 subca = c-a;
-    Vector3 subcb = c-b;
-    float one   = norm_f(cross_fv2z(subba,p-a));
-    float two   = norm_f(cross_fv2z(subba,subca));
-    float three = norm_f(cross_fv2z(subcb,p-b));
-    float four  = norm_f(cross_fv2z(subcb,subab));
-    float five  = norm_f(cross_fv2z(subac,p-c));
-    float six   = norm_f(cross_fv2z(subac,subbc));
-
-    return (
-      (one == 0.0f || two == 0.0f || one == two)  &&
-      (three == 0.0f || four == 0.0f || three == four)  &&
-      (five == 0.0f || six == 0.0f || five == six)
-    );
-  }
-
-  bool pt_in_triangle(Vector3 a, Vector3 b, Vector3 c, Vector3 p)
-  {
-    Vector3 subab = a-b;
-    Vector3 subac = a-c;
-    Vector3 subba = b-a;
-    Vector3 subbc = b-c;
-    Vector3 subca = c-a;
-    Vector3 subcb = c-b;
-    float one   = norm_f(cross_fv2z(subba,p-a));
-    float two   = norm_f(cross_fv2z(subba,subca));
-    float three = norm_f(cross_fv2z(subcb,p-b));
-    float four  = norm_f(cross_fv2z(subcb,subab));
-    float five  = norm_f(cross_fv2z(subac,p-c));
-    float six   = norm_f(cross_fv2z(subac,subbc));
-
-    return (
-      one == two &&
-      three == four &&
-      five == six
-    );
-  }
-
-  void delaunay_massage_zy(int i, List<Vector3> vbuff, List<int> ibuff)
-  {
-    //whoo boy.this is a bad (but straightforward...ish?) algorithm.
-    //find and execute delaunay flips. if you flip, start over
-    Vector3 circum_center = new Vector3();
-    float circum_rad = 0.0f;
-    int t1_ai = 0; Vector3 t1_a = new Vector3();
-    int t1_bi = 0; Vector3 t1_b = new Vector3();
-    int t1_ci = 0; Vector3 t1_c = new Vector3();
-    int t2_ai = 0; Vector3 t2_a = new Vector3();
-    int t2_bi = 0; Vector3 t2_b = new Vector3();
-    int t2_ci = 0; Vector3 t2_c = new Vector3();
-    int sai = 0;
-    int sbi = 0;
-    int sci = 0;
-    int sdi = 0;
-
-    //this is kinda clever (uh oh). ii starts at three triangle indexes before the end (max num created by adding vertex/splitting),
-    //but if a flip is made it researches by setting ii = -3.
-    for(int ii = i-9; ii < i; ii+=3)
-    {
-      t1_ai = ibuff[ii+0]; t1_a = vbuff[t1_ai];
-      t1_bi = ibuff[ii+1]; t1_b = vbuff[t1_bi];
-      t1_ci = ibuff[ii+2]; t1_c = vbuff[t1_ci];
-
-      //don't *really* understand... from https://www.ics.uci.edu/~eppstein/junkyard/circumcenter.html
-      float d = (t1_a.z - t1_c.z) * (t1_b.y - t1_c.y) - (t1_b.z - t1_c.z) * (t1_a.y - t1_c.y);
-      circum_center.z = (((t1_a.z - t1_c.z) * (t1_a.z + t1_c.z) + (t1_a.y - t1_c.y) * (t1_a.y + t1_c.y)) / 2 * (t1_b.y - t1_c.y) - ((t1_b.z - t1_c.z) * (t1_b.z + t1_c.z) + (t1_b.y - t1_c.y) * (t1_b.y + t1_c.y)) / 2 * (t1_a.y - t1_c.y)) / d;
-      circum_center.y = (((t1_b.z - t1_c.z) * (t1_b.z + t1_c.z) + (t1_b.y - t1_c.y) * (t1_b.y + t1_c.y)) / 2 * (t1_a.z - t1_c.z) - ((t1_a.z - t1_c.z) * (t1_a.z + t1_c.z) + (t1_a.y - t1_c.y) * (t1_a.y + t1_c.y)) / 2 * (t1_b.z - t1_c.z)) / d;
-      circum_rad = Mathf.Sqrt(Mathf.Pow(t1_c.z-circum_center.z,2.0f) + Mathf.Pow(t1_c.y-circum_center.y,2.0f));
-
-      int flip = 0;
-      //does first prioritized iteration. at every ii, the entire ii list before has been internally exhausted.
-      //add iii, test against all prev ii's, maintain internal exhaustion. (used in tandem with clever bit above- uh oh)
-      for(int iii = 0; iii < ii && flip == 0; iii+=3)
-      {
-        int n_matching = 0;
-        int t1a_matching = 0;
-        int t1b_matching = 0;
-        int t1c_matching = 0;
-        int t2a_matching = 0;
-        int t2b_matching = 0;
-        int t2c_matching = 0;
-
-        t2_ai = ibuff[iii+0]; t2_a = vbuff[t2_ai];
-        t2_bi = ibuff[iii+1]; t2_b = vbuff[t2_bi];
-        t2_ci = ibuff[iii+2]; t2_c = vbuff[t2_ci];
-
-        if(t1_ai == t2_ai) { t1a_matching = 1; t2a_matching = 1; n_matching++; }
-        if(t1_ai == t2_bi) { t1a_matching = 1; t2b_matching = 1; n_matching++; }
-        if(t1_ai == t2_ci) { t1a_matching = 1; t2c_matching = 1; n_matching++; }
-        if(t1_bi == t2_ai) { t1b_matching = 1; t2a_matching = 1; n_matching++; }
-        if(t1_bi == t2_bi) { t1b_matching = 1; t2b_matching = 1; n_matching++; }
-        if(t1_bi == t2_ci) { t1b_matching = 1; t2c_matching = 1; n_matching++; }
-        if(t1_ci == t2_ai) { t1c_matching = 1; t2a_matching = 1; n_matching++; }
-        if(t1_ci == t2_bi) { t1c_matching = 1; t2b_matching = 1; n_matching++; }
-        if(t1_ci == t2_ci) { t1c_matching = 1; t2c_matching = 1; n_matching++; }
-
-        if(n_matching == 2)
-        {
-          int unused_t1i = 0;
-          if(t1a_matching == 0) unused_t1i = t1_ai;
-          if(t1b_matching == 0) unused_t1i = t1_bi;
-          if(t1c_matching == 0) unused_t1i = t1_ci;
-
-               if(t2a_matching == 0 && (d != 0 && len_fv2(circum_center-t2_a)/circum_rad <= 0.5f))
-          {
-            flip = 1;
-            sai = t2_ai;
-            sbi = t2_bi;
-            sci = t2_ci;
-            sdi = unused_t1i;
-          }
-          else if(t2b_matching == 0 && (d != 0 && len_fv2(circum_center-t2_b)/circum_rad <= 0.5f))
-          {
-            flip = 1;
-            sci = t2_ai;
-            sai = t2_bi;
-            sbi = t2_ci;
-            sdi = unused_t1i;
-          }
-          else if(t2c_matching == 0 && (d != 0 && len_fv2(circum_center-t2_c)/circum_rad <= 0.5f))
-          {
-            flip = 1;
-            sbi = t2_ai;
-            sci = t2_bi;
-            sai = t2_ci;
-            sdi = unused_t1i;
-          }
-
-          if(flip != 0)
-          {
-            //  //cur layout, needs to be flipped
-            //
-            //  sdi sbi
-            //     /
-            //  sci sai
-
-            ibuff[ii+0] = sdi;
-            ibuff[ii+1] = sci;
-            ibuff[ii+2] = sai;
-
-            ibuff[iii+0] = sdi;
-            ibuff[iii+1] = sai;
-            ibuff[iii+2] = sbi;
-
-            ii = -3; //reset search! (ouch)
-          }
-        }
-      }
-    }
-  }
-  void delaunay_massage_xz(int i, List<Vector3> vbuff, List<int> ibuff)
-  {
-    //whoo boy.this is a bad (but straightforward...ish?) algorithm.
-    //find and execute delaunay flips. if you flip, start over
-    Vector3 circum_center = new Vector3();
-    float circum_rad = 0.0f;
-    int t1_ai = 0; Vector3 t1_a = new Vector3();
-    int t1_bi = 0; Vector3 t1_b = new Vector3();
-    int t1_ci = 0; Vector3 t1_c = new Vector3();
-    int t2_ai = 0; Vector3 t2_a = new Vector3();
-    int t2_bi = 0; Vector3 t2_b = new Vector3();
-    int t2_ci = 0; Vector3 t2_c = new Vector3();
-    int sai = 0;
-    int sbi = 0;
-    int sci = 0;
-    int sdi = 0;
-
-    //this is kinda clever (uh oh). ii starts at three triangle indexes before the end (max num created by adding vertex/splitting),
-    //but if a flip is made it researches by setting ii = -3.
-    for(int ii = i-9; ii < i; ii+=3)
-    {
-      t1_ai = ibuff[ii+0]; t1_a = vbuff[t1_ai];
-      t1_bi = ibuff[ii+1]; t1_b = vbuff[t1_bi];
-      t1_ci = ibuff[ii+2]; t1_c = vbuff[t1_ci];
-
-      //don't *really* understand... from https://www.ics.uci.edu/~eppstein/junkyard/circumcenter.html
-      float d = (t1_a.x - t1_c.x) * (t1_b.z - t1_c.z) - (t1_b.x - t1_c.x) * (t1_a.z - t1_c.z);
-      circum_center.x = (((t1_a.x - t1_c.x) * (t1_a.x + t1_c.x) + (t1_a.z - t1_c.z) * (t1_a.z + t1_c.z)) / 2 * (t1_b.z - t1_c.z) - ((t1_b.x - t1_c.x) * (t1_b.x + t1_c.x) + (t1_b.z - t1_c.z) * (t1_b.z + t1_c.z)) / 2 * (t1_a.z - t1_c.z)) / d;
-      circum_center.z = (((t1_b.x - t1_c.x) * (t1_b.x + t1_c.x) + (t1_b.z - t1_c.z) * (t1_b.z + t1_c.z)) / 2 * (t1_a.x - t1_c.x) - ((t1_a.x - t1_c.x) * (t1_a.x + t1_c.x) + (t1_a.z - t1_c.z) * (t1_a.z + t1_c.z)) / 2 * (t1_b.x - t1_c.x)) / d;
-      circum_rad = Mathf.Sqrt(Mathf.Pow(t1_c.x-circum_center.x,2.0f) + Mathf.Pow(t1_c.z-circum_center.z,2.0f));
-
-      int flip = 0;
-      //does first prioritized iteration. at every ii, the entire ii list before has been internally exhausted.
-      //add iii, test against all prev ii's, maintain internal exhaustion. (used in tandem with clever bit above- uh oh)
-      for(int iii = 0; iii < ii && flip == 0; iii+=3)
-      {
-        int n_matching = 0;
-        int t1a_matching = 0;
-        int t1b_matching = 0;
-        int t1c_matching = 0;
-        int t2a_matching = 0;
-        int t2b_matching = 0;
-        int t2c_matching = 0;
-
-        t2_ai = ibuff[iii+0]; t2_a = vbuff[t2_ai];
-        t2_bi = ibuff[iii+1]; t2_b = vbuff[t2_bi];
-        t2_ci = ibuff[iii+2]; t2_c = vbuff[t2_ci];
-
-        if(t1_ai == t2_ai) { t1a_matching = 1; t2a_matching = 1; n_matching++; }
-        if(t1_ai == t2_bi) { t1a_matching = 1; t2b_matching = 1; n_matching++; }
-        if(t1_ai == t2_ci) { t1a_matching = 1; t2c_matching = 1; n_matching++; }
-        if(t1_bi == t2_ai) { t1b_matching = 1; t2a_matching = 1; n_matching++; }
-        if(t1_bi == t2_bi) { t1b_matching = 1; t2b_matching = 1; n_matching++; }
-        if(t1_bi == t2_ci) { t1b_matching = 1; t2c_matching = 1; n_matching++; }
-        if(t1_ci == t2_ai) { t1c_matching = 1; t2a_matching = 1; n_matching++; }
-        if(t1_ci == t2_bi) { t1c_matching = 1; t2b_matching = 1; n_matching++; }
-        if(t1_ci == t2_ci) { t1c_matching = 1; t2c_matching = 1; n_matching++; }
-
-        if(n_matching == 2)
-        {
-          int unused_t1i = 0;
-          if(t1a_matching == 0) unused_t1i = t1_ai;
-          if(t1b_matching == 0) unused_t1i = t1_bi;
-          if(t1c_matching == 0) unused_t1i = t1_ci;
-
-               if(t2a_matching == 0 && (d != 0 && len_fv2(circum_center-t2_a)/circum_rad <= 0.5f))
-          {
-            flip = 1;
-            sai = t2_ai;
-            sbi = t2_bi;
-            sci = t2_ci;
-            sdi = unused_t1i;
-          }
-          else if(t2b_matching == 0 && (d != 0 && len_fv2(circum_center-t2_b)/circum_rad <= 0.5f))
-          {
-            flip = 1;
-            sci = t2_ai;
-            sai = t2_bi;
-            sbi = t2_ci;
-            sdi = unused_t1i;
-          }
-          else if(t2c_matching == 0 && (d != 0 && len_fv2(circum_center-t2_c)/circum_rad <= 0.5f))
-          {
-            flip = 1;
-            sbi = t2_ai;
-            sci = t2_bi;
-            sai = t2_ci;
-            sdi = unused_t1i;
-          }
-
-          if(flip != 0)
-          {
-            //  //cur layout, needs to be flipped
-            //
-            //  sdi sbi
-            //     /
-            //  sci sai
-
-            ibuff[ii+0] = sdi;
-            ibuff[ii+1] = sci;
-            ibuff[ii+2] = sai;
-
-            ibuff[iii+0] = sdi;
-            ibuff[iii+1] = sai;
-            ibuff[iii+2] = sbi;
-
-            ii = -3; //reset search! (ouch)
-          }
-        }
-      }
-    }
-  }
-
   int winding(Vector3 a, Vector3 b, Vector3 c)
   {
       a.x = 0.0f;
@@ -1050,259 +664,7 @@ public class ThermoMath : MonoBehaviour
       return 0;
   }
 
-  double amt_off_line(double ax, double ay, double bx, double by, double px, double py)
-  {
-    if(bx == ax) return Math.Abs(bx-px);
-    if(by == ay) return Math.Abs(by-py);
-    double xoff = (px-ax)/(bx-ax);
-    double yoff = (py-ay)/(by-ay);
-    return Math.Abs(xoff-yoff);
-  }
 
-  void merge_pt(Vector3 pt, List<Vector3> vbuff, List<Vector3> nbuff, List<int> ibuff)
-  {
-    for(int ti = 0; ti < vbuff.Count; ti++)
-      if(pt == vbuff[ti]) return;
-
-    int i = ibuff.Count;
-    int start = vbuff.Count;
-
-    //add new pt
-    vbuff.Add(pt);
-
-    //for every vert, find+split bounding triangle into three
-    for(int v = start; v < vbuff.Count; v++)
-    {
-
-      bool found_tri = false;
-      for(int ii = 0; ii < i && !found_tri; ii+=3)
-      {
-        int ai = ibuff[ii+0];
-        int bi = ibuff[ii+1];
-        int ci = ibuff[ii+2];
-        int pi = v;
-
-        Vector3 a = vbuff[ai];
-        Vector3 b = vbuff[bi];
-        Vector3 c = vbuff[ci];
-        Vector3 p = vbuff[pi];
-
-        if(pt_in_triangle(a,b,c,p))
-        {
-          found_tri = true;
-          nbuff.Add(nbuff[ai]);
-
-          //split bounding triangle into 3 by
-          //swap cur triangle with last (to keep all new tris near end)
-          ibuff[ii+0] = ibuff[i-3];
-          ibuff[ii+1] = ibuff[i-2];
-          ibuff[ii+2] = ibuff[i-1];
-          if(winding(vbuff[ibuff[i-3]],vbuff[ibuff[i-2]],vbuff[ibuff[i-1]]) == -1) Debug.Log("Z");
-          //then hijack existing triangle in ibuff
-          ibuff[i-3] = ai;
-          ibuff[i-2] = bi;
-          ibuff[i-1] = pi;
-          if(winding(vbuff[ai],vbuff[bi],vbuff[pi]) == -1) Debug.Log("A");
-          //then adding two more triangle buffs
-          ibuff.Add(bi); i++;
-          ibuff.Add(ci); i++;
-          ibuff.Add(pi); i++;
-          if(winding(vbuff[bi],vbuff[ci],vbuff[pi]) == -1) Debug.Log("B");
-
-          ibuff.Add(ci); i++;
-          ibuff.Add(ai); i++;
-          ibuff.Add(pi); i++;
-          if(winding(vbuff[ci],vbuff[ai],vbuff[pi]) == -1) Debug.Log("C");
-
-        }
-        else if(pt_in_triangle_inclusive(a,b,c,p))
-        {
-          Debug.Log("inclusive!");
-          found_tri = true;
-          nbuff.Add(nbuff[ai]);
-
-          double off_ab = amt_off_line(a.z,a.y,b.z,b.y,p.z,p.y);
-          double off_bc = amt_off_line(b.z,b.y,c.z,c.y,p.z,p.y);
-          double off_ca = amt_off_line(c.z,c.y,a.z,a.y,p.z,p.y);
-          double min_off = 0.001f;
-          int which = 0;
-          if(off_ab < min_off) { min_off = off_ab; which = 1; }
-          if(off_bc < min_off) { min_off = off_bc; which = 2; }
-          if(off_ca < min_off) { min_off = off_ca; which = 3; }
-          if(min_off == 0.0)
-          {
-                 if(off_ab == off_bc && off_ab == 0.0) which = 4; //pt ON b
-            else if(off_bc == off_ca && off_ab == 0.0) which = 5; //pt ON c
-            else if(off_ca == off_ab && off_ab == 0.0) which = 6; //pt ON a
-          }
-
-          if(which > 3) //ON a point
-          {
-            switch(which)
-            {
-              case 4: //on B
-              {
-                int tmp = ai;
-                ai = ci;
-                ci = bi;
-                bi = tmp;
-              }
-              break;
-              case 5: //on C
-              {
-                //good to go!
-              }
-              break;
-              case 6: //on A
-              {
-                int tmp = ai;
-                ai = bi;
-                bi = ci;
-                ci = tmp;
-              }
-              break;
-            }
-            //pt now on C
-
-            if(vbuff[ci].x > pt.x)
-              vbuff[ci] = new Vector3(vbuff[ci].x,vbuff[ci].y,vbuff[ci].z+0.00001f);
-            else
-              vbuff[ci] = new Vector3(vbuff[ci].x,vbuff[ci].y,vbuff[ci].z-0.00001f);
-
-            ii -= 3;
-            continue;
-          }
-
-          //BETWEEN points
-          {
-            switch(which)
-            {
-              case 0: //not on any particular line
-              {
-                Debug.Log("uh oh b");
-              }
-              break;
-              case 1: //between a and b
-              {
-                int tmp = ai;
-                ai = ci;
-                ci = bi;
-                bi = tmp;
-              }
-              break;
-              case 2: //between b and c
-              {
-                //good to go!
-              }
-              break;
-              case 3: //between c and a
-              {
-                int tmp = ai;
-                ai = bi;
-                bi = ci;
-                ci = tmp;
-              }
-              break;
-            }
-            //position p now between b and c
-
-            //find triangle that shares conflicting edge (if it exists)
-            bool found_line = false;
-            for(int iii = ii+3; iii < i && !found_line; iii+=3)
-            {
-              if(ibuff[iii+0] == ci && ibuff[iii+1] == bi)
-              {
-                found_line = true;
-                //first add one triangle buff
-                ibuff.Add(ibuff[iii+2]); i++;
-                ibuff.Add(ci); i++;
-                ibuff.Add(pi); i++;
-                if(winding(vbuff[ibuff[iii+2]],vbuff[ci],vbuff[pi]) == -1)
-                {
-                  Debug.Log("(fix)A'");
-                  //fix
-                  ibuff[i-2] = pi;
-                  ibuff[i-1] = ci;
-                }
-
-                //then split second in place
-                ibuff[iii+0] = pi;
-                ibuff[iii+1] = bi;
-                ibuff[iii+2] = ibuff[iii+2]; //leave the same
-                if(winding(vbuff[pi],vbuff[bi],vbuff[ibuff[iii+2]]) == -1) Debug.Log("B'");
-              }
-              else if(ibuff[iii+1] == ci && ibuff[iii+2] == bi)
-              {
-                found_line = true;
-                //first add one triangle buff
-                ibuff.Add(ibuff[iii+0]); i++;
-                ibuff.Add(ci); i++;
-                ibuff.Add(pi); i++;
-                if(winding(vbuff[ibuff[iii+0]],vbuff[ci],vbuff[pi]) == -1)
-                {
-                  Debug.Log("(fix)A''");
-                  //fix
-                  ibuff[i-2] = pi;
-                  ibuff[i-1] = ci;
-                }
-
-                //then split second in place
-                ibuff[iii+0] = ibuff[iii+0]; //leave the same
-                ibuff[iii+1] = pi;
-                ibuff[iii+2] = bi;
-                if(winding(vbuff[ibuff[iii+0]],vbuff[pi],vbuff[bi]) == -1) Debug.Log("B''");
-              }
-              else if(ibuff[iii+2] == ci && ibuff[iii+0] == bi)
-              {
-                found_line = true;
-                //first add one triangle buff
-                ibuff.Add(ibuff[iii+1]); i++;
-                ibuff.Add(ci); i++;
-                ibuff.Add(pi); i++;
-                if(winding(vbuff[ibuff[iii+1]],vbuff[ci],vbuff[pi]) == -1) Debug.Log("A'''");
-
-                //then split second in place
-                ibuff[iii+0] = bi;
-                ibuff[iii+1] = ibuff[iii+1]; //leave the same
-                ibuff[iii+2] = pi;
-                if(winding(vbuff[bi],vbuff[ibuff[iii+1]],vbuff[pi]) == -1) Debug.Log("B'''");
-              }
-              
-            }
-            if(!found_line) Debug.Log("UH OH");
-
-            //split bounding triangle into 2 by
-            //hijacking existing triangle in ibuff
-            ibuff[ii+0] = ai;
-            ibuff[ii+1] = bi;
-            ibuff[ii+2] = pi;
-            if(winding(vbuff[ai],vbuff[bi],vbuff[pi]) == -1)
-            {
-              Debug.Log("(fix)C'");
-              //fix
-              ibuff[ii+1] = pi;
-              ibuff[ii+2] = bi;
-            }
-
-            //then adding one more triangle buffs
-            ibuff.Add(ai); i++;
-            ibuff.Add(pi); i++;
-            ibuff.Add(ci); i++;
-            if(winding(vbuff[ai],vbuff[pi],vbuff[ci]) == -1)
-            {
-              Debug.Log("(fix)D'");
-              //fix
-              ibuff[i-2] = ci;
-              ibuff[i-1] = pi;
-            }
-          }
-        }
-      }
-
-      delaunay_massage_zy(i, vbuff, ibuff);
-      //delaunay_massage_xz(i, vbuff, ibuff);
-    }
-  }
 
 
 }
