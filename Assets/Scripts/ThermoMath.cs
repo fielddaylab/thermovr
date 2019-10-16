@@ -3,6 +3,40 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+class L_CMP : IComparer<int> 
+{
+  public List<Vector3> mesh_positions;
+  public L_CMP(List<Vector3> _mesh_positions)
+  {
+    mesh_positions = _mesh_positions;
+  }
+
+  public int Compare(int ai, int bi) 
+  {
+    Vector3 a = mesh_positions[ai];
+    Vector3 b = mesh_positions[bi];
+    if(a.y > b.y || (a.y == b.y && a.z > b.z)) return 1;
+    return -1;
+  }
+}
+
+class R_CMP : IComparer<int> 
+{
+  public List<Vector3> mesh_positions;
+  public R_CMP(List<Vector3> _mesh_positions)
+  {
+    mesh_positions = _mesh_positions;
+  }
+
+  public int Compare(int ai, int bi) 
+  {
+    Vector3 a = mesh_positions[ai];
+    Vector3 b = mesh_positions[bi];
+    if(a.y > b.y || (a.y == b.y && a.z > b.z)) return 1;
+    return -1;
+  }
+}
+
 public class ThermoMath : MonoBehaviour
 {
   //math limits ; xYz = vPt
@@ -393,86 +427,38 @@ public class ThermoMath : MonoBehaviour
 
         if(a.x < x_cmp && b.x < x_cmp)
         {
-          if(a.y < b.y || (a.y == b.y && a.z < b.z))
-          {
-            left_orphans.Add(ai);
-            left_orphans.Add(bi);
-          }
-          else
-          {
-            left_orphans.Add(bi);
-            left_orphans.Add(ai);
-          }
+          left_orphans.Add(ai);
+          left_orphans.Add(bi);
           right_orphans.Add(ci);
         }
         else if(b.x < x_cmp && c.x < x_cmp)
         {
-          if(b.y < c.y || (b.y == c.y && b.z < c.z))
-          {
-            left_orphans.Add(bi);
-            left_orphans.Add(ci);
-          }
-          else
-          {
-            left_orphans.Add(ci);
-            left_orphans.Add(bi);
-          }
+          left_orphans.Add(bi);
+          left_orphans.Add(ci);
           right_orphans.Add(ai);
         }
         else if(c.x < x_cmp && a.x < x_cmp)
         {
-          if(c.y < a.y || (c.y == a.y && c.z < a.z))
-          {
-            left_orphans.Add(ci);
-            left_orphans.Add(ai);
-          }
-          else
-          {
-            left_orphans.Add(ai);
-            left_orphans.Add(ci);
-          }
+          left_orphans.Add(ci);
+          left_orphans.Add(ai);
           right_orphans.Add(bi);
         }
         else if(a.x < x_cmp)
         {
-          if(b.y < c.y || (b.y == c.y && b.z > c.z))
-          {
-            right_orphans.Add(bi);
-            right_orphans.Add(ci);
-          }
-          else
-          {
-            right_orphans.Add(ci);
-            right_orphans.Add(bi);
-          }
+          right_orphans.Add(bi);
+          right_orphans.Add(ci);
           left_orphans.Add(ai);
         }
         else if(b.x < x_cmp)
         {
-          if(a.y < c.y || (a.y == c.y && a.z > c.z))
-          {
-            right_orphans.Add(ai);
-            right_orphans.Add(ci);
-          }
-          else
-          {
-            right_orphans.Add(ci);
-            right_orphans.Add(ai);
-          }
+          right_orphans.Add(ai);
+          right_orphans.Add(ci);
           left_orphans.Add(bi);
         }
         else if(c.x < x_cmp)
         {
-          if(a.y < b.y || (a.y == b.y && a.z > b.z))
-          {
-            right_orphans.Add(ai);
-            right_orphans.Add(bi);
-          }
-          else
-          {
-            right_orphans.Add(bi);
-            right_orphans.Add(ai);
-          }
+          right_orphans.Add(ai);
+          right_orphans.Add(bi);
           left_orphans.Add(ci);
         }
         else
@@ -482,75 +468,132 @@ public class ThermoMath : MonoBehaviour
       }
     }
 
+    //sort orphans
+    L_CMP l_cmp = new L_CMP(mesh_positions);
+    left_orphans.Sort(l_cmp);
+    for(int i = 1; i < left_orphans.Count; i++)
+    { if(left_orphans[i-1] == left_orphans[i]) { left_orphans.RemoveAt(i); i--; } }
+
+    R_CMP r_cmp = new R_CMP(mesh_positions);
+    right_orphans.Sort(r_cmp);
+    for(int i = 1; i < right_orphans.Count; i++)
+    { if(right_orphans[i-1] == right_orphans[i]) { right_orphans.RemoveAt(i); i--; } }
+
     //stitch orphans
-    int triangle_stitch_region = mesh_triangles.Count;
-    List<int> orphans;
-    int ladder_i;
-    Vector3 rung;
-    int orphan_i;
-    Vector3 orphan;
-
-    //left
-    orphans = left_orphans;
-    orphan_i = 0;
-    orphan = mesh_positions[orphans[orphan_i]];
-    ladder_i = position_dome_region;
-    rung = mesh_positions[ladder_i+2];
-    mesh_triangles.Add(ladder_i);
-    mesh_triangles.Add(orphans[orphan_i]);
-    orphan_i++;
-    orphan = mesh_positions[orphans[orphan_i]];
-    mesh_triangles.Add(orphans[orphan_i]);
-    orphan = mesh_positions[orphans[orphan_i]];
-    while(ladder_i+2 < mesh_positions.Count)
     {
-      while(orphan.y < rung.y && orphan_i+1 < orphans.Count)
-      {
-        mesh_triangles.Add(ladder_i);
-        mesh_triangles.Add(orphans[orphan_i]);
-        orphan_i++;
-        orphan = mesh_positions[orphans[orphan_i]];
-        mesh_triangles.Add(orphans[orphan_i]);
-      }
-      if(ladder_i+2 < mesh_positions.Count)
-      {
-        mesh_triangles.Add(ladder_i);
-        mesh_triangles.Add(orphans[orphan_i]);
-        ladder_i += 2;
-        if(ladder_i+2 < mesh_positions.Count) rung = mesh_positions[ladder_i+2]; //yes, both this AND previous line need +2 (+2 for advance, +2 for rung)
-        mesh_triangles.Add(ladder_i);
-      }
-    }
+      int triangle_stitch_region = mesh_triangles.Count;
+      List<int> orphans;
+      int ladder_i;
+      Vector3 ladder;
+      Vector3 rung;
+      int orphan_i;
+      Vector3 orphan;
+      Vector3 orung;
+      int ai = 0;
+      int bi = 0;
+      int ci = 0;
 
-    //right
-    orphans = right_orphans;
-    orphan_i = 0;
-    orphan = mesh_positions[orphans[orphan_i]];
-    ladder_i = position_dome_region+1;
-    Vector3 ladder = mesh_positions[ladder_i];
-    Vector3 orung = mesh_positions[orphans[orphan_i+1]];
-    mesh_triangles.Add(orphans[orphan_i]);
-    mesh_triangles.Add(ladder_i);
-    ladder_i += 2;
-    ladder = mesh_positions[ladder_i];
-    mesh_triangles.Add(ladder_i);
-    while(orphan_i+1 < orphans.Count)
-    {
-      while(ladder.y < orung.y && ladder_i+2 < mesh_positions.Count)
+      //left
+      orphans = left_orphans;
+      orphan_i = 0;
+      orphan = mesh_positions[orphans[orphan_i]];
+      ladder_i = position_dome_region;
+      ladder = mesh_positions[ladder_i];
+      rung = mesh_positions[ladder_i+2];
+      mesh_triangles.Add(ladder_i);
+      mesh_triangles.Add(orphans[orphan_i]);
+      orphan_i++;
+      orphan = mesh_positions[orphans[orphan_i]];
+      orung = mesh_positions[orphans[orphan_i+1]];
+      mesh_triangles.Add(orphans[orphan_i]);
+      orphan = mesh_positions[orphans[orphan_i]];
+      while(ladder_i+2 < mesh_positions.Count)
       {
-        mesh_triangles.Add(orphans[orphan_i]);
-        mesh_triangles.Add(ladder_i);
-        ladder_i += 2;
-        ladder = mesh_positions[ladder_i];
-        mesh_triangles.Add(ladder_i);
+        while(orung.z < rung.z && orung.y < rung.y && orphan_i+1 < orphans.Count)
+        { //increment orphan
+          ai = ladder_i;
+          bi = orphans[orphan_i];
+          ci = orphans[orphan_i+1];
+          mesh_triangles.Add(ai);
+          mesh_triangles.Add(bi);
+          mesh_triangles.Add(ci);
+          if(winding(mesh_positions[ai],mesh_positions[bi],mesh_positions[ci]) < 0)
+          {
+            Debug.Log("OOPSIE");
+          }
+
+          orphan_i++;
+          orphan = mesh_positions[orphans[orphan_i]];
+          if(orphan_i+1 < orphans.Count) orung = mesh_positions[orphans[orphan_i+1]]; //yes, both this AND previous line need +1 (+1 for advance, +1 for orung)
+        }
+        if(ladder_i+2 < mesh_positions.Count)
+        { //increment ladder
+          ai = ladder_i;
+          bi = orphans[orphan_i];
+          ci = ladder_i+2;
+          mesh_triangles.Add(ai);
+          mesh_triangles.Add(bi);
+          mesh_triangles.Add(ci);
+          if(winding(mesh_positions[ai],mesh_positions[bi],mesh_positions[ci]) < 0)
+          {
+            Debug.Log("OOPSIE");
+          }
+
+          ladder_i += 2;
+          ladder = mesh_positions[ladder_i];
+          if(ladder_i+2 < mesh_positions.Count) rung = mesh_positions[ladder_i+2]; //yes, both this AND previous line need +2 (+2 for advance, +2 for rung)
+        }
       }
-      if(orphan_i+1 < orphans.Count)
+
+      //right
+      orphans = right_orphans;
+      orphan_i = 0;
+      orphan = mesh_positions[orphans[orphan_i]];
+      orung = mesh_positions[orphans[orphan_i+1]];
+      ladder_i = position_dome_region+1;
+      ladder = mesh_positions[ladder_i];
+      rung = mesh_positions[ladder_i+2];
+      mesh_triangles.Add(orphans[orphan_i]);
+      mesh_triangles.Add(ladder_i);
+      ladder_i += 2;
+      ladder = mesh_positions[ladder_i];
+      mesh_triangles.Add(ladder_i);
+      while(orphan_i+1 < orphans.Count)
       {
-        mesh_triangles.Add(orphans[orphan_i]);
-        mesh_triangles.Add(ladder_i);
-        orphan_i++;
-        if(orphan_i+1 < orphans.Count) orung = mesh_positions[orphans[orphan_i+1]]; //yes, both this AND previous line need +2 (+2 for advance, +2 for rung)
-        mesh_triangles.Add(orphans[orphan_i]);
+        while(rung.z < orung.z && rung.y < orung.y && ladder_i+2 < mesh_positions.Count)
+        { //increment ladder
+          ai = orphans[orphan_i];
+          bi = ladder_i;
+          ci = ladder_i+2;
+          mesh_triangles.Add(ai);
+          mesh_triangles.Add(bi);
+          mesh_triangles.Add(ci);
+          if(winding(mesh_positions[ai],mesh_positions[bi],mesh_positions[ci]) < 0)
+          {
+            Debug.Log("OOPSIE");
+          }
+
+          ladder_i += 2;
+          ladder = mesh_positions[ladder_i];
+          if(ladder_i+2 < mesh_positions.Count) rung = mesh_positions[ladder_i+2]; //yes, both this AND previous line need +2 (+2 for advance, +2 for rung)
+        }
+        if(orphan_i+1 < orphans.Count)
+        { //increment orphan
+          ai = orphans[orphan_i];
+          bi = ladder_i;
+          ci = orphans[orphan_i+1];
+          mesh_triangles.Add(ai);
+          mesh_triangles.Add(bi);
+          mesh_triangles.Add(ci);
+          if(winding(mesh_positions[ai],mesh_positions[bi],mesh_positions[ci]) < 0)
+          {
+            Debug.Log("OOPSIE");
+          }
+
+          orphan_i++;
+          orphan = mesh_positions[orphans[orphan_i]];
+          if(orphan_i+1 < orphans.Count) orung = mesh_positions[orphans[orphan_i+1]]; //yes, both this AND previous line need +1 (+1 for advance, +1 for orung)
+        }
       }
     }
 
