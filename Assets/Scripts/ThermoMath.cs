@@ -271,6 +271,7 @@ public class ThermoMath : MonoBehaviour
     int concentrated_samples = samples*2;
     int position_dome_region = mesh_positions.Count;
     float highest_y = 0.0f;
+    int highest_y_i = 0;
     for(int y = 0; y < concentrated_samples; y++)
     {
       double pt = ((double)y/(concentrated_samples-1));
@@ -281,7 +282,7 @@ public class ThermoMath : MonoBehaviour
 
       //Debug.LogFormat("p:{0}Pa, v:{1}M^3/Kg, t:{2}K",p,v,t);
       float pplot = plot(p_min,p_max,p);
-      if(pplot > highest_y) highest_y = pplot;
+      if(pplot > highest_y) { highest_y = pplot; highest_y_i = mesh_positions.Count; }
       float tplot = plot(t_min,t_max,t);
 
       double v;
@@ -388,6 +389,8 @@ public class ThermoMath : MonoBehaviour
     { if(right_orphans[i-1] == right_orphans[i]) { right_orphans.RemoveAt(i); i--; } }
 
     //stitch orphans
+    int left_orphan_i = 0;
+    int right_orphan_i = 0;
     {
       int triangle_stitch_region = mesh_triangles.Count;
       List<int> orphans;
@@ -444,6 +447,7 @@ public class ThermoMath : MonoBehaviour
           if(ladder_i+2 < mesh_positions.Count) rung = mesh_positions[ladder_i+2]; //yes, both this AND previous line need +2 (+2 for advance, +2 for rung)
         }
       }
+      left_orphan_i = orphan_i;
 
       //right
       orphans = right_orphans;
@@ -458,22 +462,9 @@ public class ThermoMath : MonoBehaviour
       ladder_i += 2;
       ladder = mesh_positions[ladder_i];
       mesh_triangles.Add(ladder_i);
-      while(orphan_i+1 < orphans.Count)
+      while(ladder_i+2 < mesh_positions.Count)
       {
-        while(ladder.y <= orung.y && rung.z <= orung.z && ladder_i+2 < mesh_positions.Count)
-        { //increment ladder
-          ai = orphans[orphan_i];
-          bi = ladder_i;
-          ci = ladder_i+2;
-          mesh_triangles.Add(ai);
-          mesh_triangles.Add(bi);
-          mesh_triangles.Add(ci);
-
-          ladder_i += 2;
-          ladder = mesh_positions[ladder_i];
-          if(ladder_i+2 < mesh_positions.Count) rung = mesh_positions[ladder_i+2]; //yes, both this AND previous line need +2 (+2 for advance, +2 for rung)
-        }
-        if(orphan_i+1 < orphans.Count)
+        while((ladder.y > orung.y || rung.z > orung.z) && orphan_i+1 < orphans.Count)
         { //increment orphan
           ai = orphans[orphan_i];
           bi = ladder_i;
@@ -486,8 +477,39 @@ public class ThermoMath : MonoBehaviour
           orphan = mesh_positions[orphans[orphan_i]];
           if(orphan_i+1 < orphans.Count) orung = mesh_positions[orphans[orphan_i+1]]; //yes, both this AND previous line need +1 (+1 for advance, +1 for orung)
         }
+        if(ladder_i+2 < mesh_positions.Count)
+        { //increment ladder
+          ai = orphans[orphan_i];
+          bi = ladder_i;
+          ci = ladder_i+2;
+          mesh_triangles.Add(ai);
+          mesh_triangles.Add(bi);
+          mesh_triangles.Add(ci);
+
+          ladder_i += 2;
+          ladder = mesh_positions[ladder_i];
+          if(ladder_i+2 < mesh_positions.Count) rung = mesh_positions[ladder_i+2]; //yes, both this AND previous line need +2 (+2 for advance, +2 for rung)
+        }
       }
+      right_orphan_i = orphan_i;
     }
+
+    //fan missing top
+    for(int i = left_orphan_i+1; i < left_orphans.Count; i++)
+    {
+      mesh_triangles.Add(left_orphans[i-1]);
+      mesh_triangles.Add(left_orphans[i]);
+      mesh_triangles.Add(highest_y_i);
+    }
+    for(int i = right_orphan_i+1; i < right_orphans.Count; i++)
+    {
+      mesh_triangles.Add(right_orphans[i]);
+      mesh_triangles.Add(right_orphans[i-1]);
+      mesh_triangles.Add(highest_y_i);
+    }
+    mesh_triangles.Add(left_orphans[left_orphans.Count-1]);
+    mesh_triangles.Add(right_orphans[right_orphans.Count-1]);
+    mesh_triangles.Add(highest_y_i);
 
     //fill in dome
     int triangle_inner_dome_region = mesh_triangles.Count;
