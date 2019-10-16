@@ -3,37 +3,23 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-class L_CMP : IComparer<int> 
+class CMP : IComparer<int> 
 {
   public List<Vector3> mesh_positions;
-  public L_CMP(List<Vector3> _mesh_positions)
+  public CMP(List<Vector3> _mesh_positions)
   {
     mesh_positions = _mesh_positions;
   }
 
-  public int Compare(int ai, int bi) 
+  public int Compare(int ai, int bi)
   {
     Vector3 a = mesh_positions[ai];
     Vector3 b = mesh_positions[bi];
-    if(a.y > b.y || (a.y == b.y && a.z > b.z)) return 1;
-    return -1;
-  }
-}
-
-class R_CMP : IComparer<int> 
-{
-  public List<Vector3> mesh_positions;
-  public R_CMP(List<Vector3> _mesh_positions)
-  {
-    mesh_positions = _mesh_positions;
-  }
-
-  public int Compare(int ai, int bi) 
-  {
-    Vector3 a = mesh_positions[ai];
-    Vector3 b = mesh_positions[bi];
-    if(a.y > b.y || (a.y == b.y && a.z > b.z)) return 1;
-    return -1;
+    if(a.y > b.y) return 1;
+    if(a.y < b.y) return -1;
+    if(a.z > b.z) return 1;
+    if(a.z < b.z) return -1;
+    return 0;
   }
 }
 
@@ -134,6 +120,7 @@ public class ThermoMath : MonoBehaviour
 
     findObjects();
     genMesh();
+    genHackMesh();
     reset();
     derive();
     dotransform();
@@ -207,23 +194,363 @@ public class ThermoMath : MonoBehaviour
   double Clampd(double v, double min, double max) { if(v < min) return min; if(v > max) return max; return v; } //v,min,max ordering mirrors Mathf.Clamp
 
   //sample bias- "graph density"
-  [Range(0.001f,1000)]
+  [Range(0.001f,10)]
   public double sample_lbase = 10.0f;
   double sample_lbase_prev = 0.0f;
   double sample(double t) { return Math.Pow(t,sample_lbase); }
 
   //plot bias- "graph zoom"
-  [Range(0.001f,1000)]
+  [Range(0.001f,10)]
   public double plot_lbase = 10.0f;
   double plot_lbase_prev = 0.0f;
   float log_plot(double min, double max, double val) { return (float)((Math.Log(val,plot_lbase)-Math.Log(min,plot_lbase))/(Math.Log(max,plot_lbase)-Math.Log(min,plot_lbase))); }
 
   float plot(double min, double max, double val) { return log_plot(min,max,val); }
-
   String pv(Vector3 v) { return String.Format("{0}, {1}, {2}",v.x.ToString(".################"),v.y.ToString(".################"),v.z.ToString(".################"));}
+
   void genMesh()
   {
-    var rand = new System.Random();
+    int n_psamples = samples;
+    int n_tsamples = samples;
+    int n_pts = n_tsamples*n_psamples;
+    int n_pts_per_group = 1000;
+    int n_groups = (int)Mathf.Ceil(n_pts / n_pts_per_group);
+    float pt_size = 0.005f;
+
+    Vector3[] pt_positions;
+
+    //gen positions
+    pt_positions = new Vector3[n_pts];
+    for(int y = 0; y < n_psamples; y++)
+    {
+      double pt = ((double)y/(n_psamples-1));
+      for(int z = 0; z < n_tsamples; z++)
+      {
+        double tt = ((double)z/(n_tsamples-1));
+        double pst = sample(pt);
+        double tst = sample(tt);
+        double p = Lerpd(p_min,p_max,pst);
+        double t = Lerpd(t_min,t_max,tst);
+        double v = 1.0/IF97.rhomass_Tp(t,p/1000000.0); //expects:K,MPa returns Kg/M^3
+        //pvt in Pa, M^3/Kg, K
+
+        //Debug.LogFormat("p:{0}Pa, v:{1}M^3/Kg, t:{2}K",p,v,t);
+        float pplot = plot(p_min,p_max,p);
+        float vplot = plot(v_min,v_max,v);
+        float tplot = plot(t_min,t_max,t);
+
+        int i = n_tsamples*y+z;
+        pt_positions[i] = new Vector3(vplot,pplot,tplot);
+      }
+    }
+
+    //MESH
+    List<Vector3> mesh_positions;
+    List<Vector3> mesh_normals;
+    List<int> mesh_triangles;
+
+    mesh_positions = new List<Vector3>(pt_positions);
+
+    int vi = 0;
+    int ni = 0;
+    mesh_triangles = new List<int>((n_psamples-1)*(n_tsamples-1)*6);
+    for(int y = 0; y < n_psamples-1; y++)
+    {
+      for(int z = 0; z < n_tsamples-1; z++)
+      {
+        vi = n_tsamples*y+z;
+        mesh_triangles.Add(vi           +0); ni++;
+        mesh_triangles.Add(vi+n_tsamples+0); ni++;
+        mesh_triangles.Add(vi+n_tsamples+1); ni++;
+        mesh_triangles.Add(vi           +0); ni++;
+        mesh_triangles.Add(vi+n_tsamples+1); ni++;
+        mesh_triangles.Add(vi           +1); ni++;
+      }
+    }
+
+    int concentrated_samples = samples*2;
+    int position_dome_region = mesh_positions.Count;
+    float highest_y = 0.0f;
+    for(int y = 0; y < concentrated_samples; y++)
+    {
+      double pt = ((double)y/(concentrated_samples-1));
+      double pst = sample(pt);
+      double p = Lerpd(psat_min,psat_max,pst);
+      double t = IF97.Tsat97(p/1000000.0);
+      //pvt in Pa, M^3/Kg, K
+
+      //Debug.LogFormat("p:{0}Pa, v:{1}M^3/Kg, t:{2}K",p,v,t);
+      float pplot = plot(p_min,p_max,p);
+      if(pplot > highest_y) highest_y = pplot;
+      float tplot = plot(t_min,t_max,t);
+
+      double v;
+      float vplot;
+      Vector3 point;
+
+      v = 1.0/IF97.rholiq_p(p/1000000.0); //expects:MPa returns Kg/M^3
+      vplot = plot(v_min,v_max,v);
+      point = new Vector3(vplot,pplot,tplot);
+      mesh_positions.Add(point);
+
+      v = 1.0/IF97.rhovap_p(p/1000000.0); //expects:MPa returns Kg/M^3
+      vplot = plot(v_min,v_max,v);
+      point = new Vector3(vplot,pplot,tplot);
+      mesh_positions.Add(point);
+    }
+    highest_y = Mathf.Lerp(highest_y,1.0f,0.1f); //extra nudge up
+
+    //kill spanning triangles; gather orphans
+    List<int> left_orphans = new List<int>();
+    List<int> right_orphans = new List<int>();
+    int left_ladder_i = position_dome_region;
+    Vector3 left_ladder = mesh_positions[left_ladder_i];
+    Vector3 left_rung = mesh_positions[left_ladder_i+2];
+    int right_ladder_i = left_ladder_i+1;
+    Vector3 right_ladder = mesh_positions[right_ladder_i];
+    Vector3 right_rung = mesh_positions[right_ladder_i+2];
+    for(var i = 0; i < mesh_triangles.Count; i+=3)
+    {
+      int ai = mesh_triangles[i+0];
+      int bi = mesh_triangles[i+1];
+      int ci = mesh_triangles[i+2];
+      Vector3 a = mesh_positions[ai];
+      Vector3 b = mesh_positions[bi];
+      Vector3 c = mesh_positions[ci];
+
+      if((left_rung.y  < a.y || left_rung.y  < b.y || left_rung.y  < c.y) && left_ladder_i+4  < mesh_positions.Count) { left_ladder_i  += 2; left_ladder  = mesh_positions[left_ladder_i];  left_rung  = mesh_positions[left_ladder_i+2];  }
+      if((right_rung.y < a.y || right_rung.y < b.y || right_rung.y < c.y) && right_ladder_i+4 < mesh_positions.Count) { right_ladder_i += 2; right_ladder = mesh_positions[right_ladder_i]; right_rung = mesh_positions[right_ladder_i+2]; }
+
+      float x_cmp = (left_ladder.x+right_ladder.x)/2.0f;
+      if(
+        (a.y < highest_y || b.y < highest_y || c.y < highest_y) &&
+        (a.x < x_cmp || b.x < x_cmp || c.x < x_cmp) &&
+        (a.x > x_cmp || b.x > x_cmp || c.x > x_cmp)
+      )
+      {
+        mesh_triangles.RemoveAt(i+2);
+        mesh_triangles.RemoveAt(i+1);
+        mesh_triangles.RemoveAt(i+0);
+        i -= 3;
+
+        if(a.x < x_cmp && b.x < x_cmp)
+        {
+          left_orphans.Add(ai);
+          left_orphans.Add(bi);
+          right_orphans.Add(ci);
+        }
+        else if(b.x < x_cmp && c.x < x_cmp)
+        {
+          left_orphans.Add(bi);
+          left_orphans.Add(ci);
+          right_orphans.Add(ai);
+        }
+        else if(c.x < x_cmp && a.x < x_cmp)
+        {
+          left_orphans.Add(ci);
+          left_orphans.Add(ai);
+          right_orphans.Add(bi);
+        }
+        else if(a.x < x_cmp)
+        {
+          right_orphans.Add(bi);
+          right_orphans.Add(ci);
+          left_orphans.Add(ai);
+        }
+        else if(b.x < x_cmp)
+        {
+          right_orphans.Add(ai);
+          right_orphans.Add(ci);
+          left_orphans.Add(bi);
+        }
+        else if(c.x < x_cmp)
+        {
+          right_orphans.Add(ai);
+          right_orphans.Add(bi);
+          left_orphans.Add(ci);
+        }
+        else
+        {
+          Debug.Log("NOOOO");
+        }
+      }
+    }
+
+    //sort orphans
+    CMP cmp = new CMP(mesh_positions);
+
+    left_orphans.Sort(cmp);
+    for(int i = 1; i < left_orphans.Count; i++)
+    { if(left_orphans[i-1] == left_orphans[i]) { left_orphans.RemoveAt(i); i--; } }
+
+    right_orphans.Sort(cmp);
+    for(int i = 1; i < right_orphans.Count; i++)
+    { if(right_orphans[i-1] == right_orphans[i]) { right_orphans.RemoveAt(i); i--; } }
+
+    //stitch orphans
+    {
+      int triangle_stitch_region = mesh_triangles.Count;
+      List<int> orphans;
+      int ladder_i;
+      Vector3 ladder;
+      Vector3 rung;
+      int orphan_i;
+      Vector3 orphan;
+      Vector3 orung;
+      int ai = 0;
+      int bi = 0;
+      int ci = 0;
+
+      //left
+      orphans = left_orphans;
+      orphan_i = 0;
+      orphan = mesh_positions[orphans[orphan_i]];
+      ladder_i = position_dome_region;
+      ladder = mesh_positions[ladder_i];
+      rung = mesh_positions[ladder_i+2];
+      mesh_triangles.Add(ladder_i);
+      mesh_triangles.Add(orphans[orphan_i]);
+      orphan_i++;
+      orphan = mesh_positions[orphans[orphan_i]];
+      orung = mesh_positions[orphans[orphan_i+1]];
+      mesh_triangles.Add(orphans[orphan_i]);
+      orphan = mesh_positions[orphans[orphan_i]];
+      while(ladder_i+2 < mesh_positions.Count)
+      {
+        while(orung.z <= rung.z && orung.y <= rung.y && orphan_i+1 < orphans.Count)
+        { //increment orphan
+          ai = ladder_i;
+          bi = orphans[orphan_i];
+          ci = orphans[orphan_i+1];
+          mesh_triangles.Add(ai);
+          mesh_triangles.Add(bi);
+          mesh_triangles.Add(ci);
+
+          orphan_i++;
+          orphan = mesh_positions[orphans[orphan_i]];
+          if(orphan_i+1 < orphans.Count) orung = mesh_positions[orphans[orphan_i+1]]; //yes, both this AND previous line need +1 (+1 for advance, +1 for orung)
+        }
+        if(ladder_i+2 < mesh_positions.Count)
+        { //increment ladder
+          ai = ladder_i;
+          bi = orphans[orphan_i];
+          ci = ladder_i+2;
+          mesh_triangles.Add(ai);
+          mesh_triangles.Add(bi);
+          mesh_triangles.Add(ci);
+
+          ladder_i += 2;
+          ladder = mesh_positions[ladder_i];
+          if(ladder_i+2 < mesh_positions.Count) rung = mesh_positions[ladder_i+2]; //yes, both this AND previous line need +2 (+2 for advance, +2 for rung)
+        }
+      }
+
+      //right
+      orphans = right_orphans;
+      orphan_i = 0;
+      orphan = mesh_positions[orphans[orphan_i]];
+      orung = mesh_positions[orphans[orphan_i+1]];
+      ladder_i = position_dome_region+1;
+      ladder = mesh_positions[ladder_i];
+      rung = mesh_positions[ladder_i+2];
+      mesh_triangles.Add(orphans[orphan_i]);
+      mesh_triangles.Add(ladder_i);
+      ladder_i += 2;
+      ladder = mesh_positions[ladder_i];
+      mesh_triangles.Add(ladder_i);
+      while(orphan_i+1 < orphans.Count)
+      {
+        while(ladder.y <= orung.y && rung.z <= orung.z && ladder_i+2 < mesh_positions.Count)
+        { //increment ladder
+          ai = orphans[orphan_i];
+          bi = ladder_i;
+          ci = ladder_i+2;
+          mesh_triangles.Add(ai);
+          mesh_triangles.Add(bi);
+          mesh_triangles.Add(ci);
+
+          ladder_i += 2;
+          ladder = mesh_positions[ladder_i];
+          if(ladder_i+2 < mesh_positions.Count) rung = mesh_positions[ladder_i+2]; //yes, both this AND previous line need +2 (+2 for advance, +2 for rung)
+        }
+        if(orphan_i+1 < orphans.Count)
+        { //increment orphan
+          ai = orphans[orphan_i];
+          bi = ladder_i;
+          ci = orphans[orphan_i+1];
+          mesh_triangles.Add(ai);
+          mesh_triangles.Add(bi);
+          mesh_triangles.Add(ci);
+
+          orphan_i++;
+          orphan = mesh_positions[orphans[orphan_i]];
+          if(orphan_i+1 < orphans.Count) orung = mesh_positions[orphans[orphan_i+1]]; //yes, both this AND previous line need +1 (+1 for advance, +1 for orung)
+        }
+      }
+    }
+
+    //fill in dome
+    int triangle_inner_dome_region = mesh_triangles.Count;
+    int position_dome_inner_region = mesh_positions.Count;
+    for(int i = position_dome_region; i < position_dome_inner_region; i++) //duplicate inner positions so each can have own normal at seam
+    {
+      mesh_positions.Add(mesh_positions[i]);
+    }
+    for(int y = 0; y < concentrated_samples-1; y++)
+    {
+      mesh_triangles.Add(position_dome_inner_region+y*2+0);
+      mesh_triangles.Add(position_dome_inner_region+y*2+2);
+      mesh_triangles.Add(position_dome_inner_region+y*2+1);
+      mesh_triangles.Add(position_dome_inner_region+y*2+1);
+      mesh_triangles.Add(position_dome_inner_region+y*2+2);
+      mesh_triangles.Add(position_dome_inner_region+y*2+3);
+    }
+
+    //set normals
+    mesh_normals = new List<Vector3>(new Vector3[mesh_positions.Count]);
+    for(int i = 0; i < triangle_inner_dome_region; i+=3)
+    {
+      int ai = mesh_triangles[i+0];
+      int bi = mesh_triangles[i+1];
+      int ci = mesh_triangles[i+2];
+      Vector3 a = mesh_positions[ai];
+      Vector3 b = mesh_positions[bi];
+      Vector3 c = mesh_positions[ci];
+      Vector3 n = Vector3.Cross(Vector3.Normalize(b-a),Vector3.Normalize(c-a));
+      mesh_normals[ai] = n;
+      mesh_normals[bi] = n;
+      mesh_normals[ci] = n;
+    }
+
+    for(int i = triangle_inner_dome_region; i < mesh_triangles.Count; i+=3)
+    {
+      int ai = mesh_triangles[i+0];
+      int bi = mesh_triangles[i+1];
+      int ci = mesh_triangles[i+2];
+      Vector3 a = mesh_positions[ai];
+      Vector3 b = mesh_positions[bi];
+      Vector3 c = mesh_positions[ci];
+      Vector3 n = Vector3.Cross(Vector3.Normalize(b-a),Vector3.Normalize(c-a));
+      mesh_normals[ai] = n;
+      mesh_normals[bi] = n;
+      mesh_normals[ci] = n;
+    }
+
+    Mesh mesh = new Mesh();
+    mesh.vertices = mesh_positions.ToArray();
+    mesh.normals = mesh_normals.ToArray();
+    mesh.triangles = mesh_triangles.ToArray();
+
+    GameObject gameObject = new GameObject("graph_mesh", typeof(MeshFilter), typeof(MeshRenderer));
+    gameObject.transform.parent = graph.transform;
+    gameObject.transform.localPosition = new Vector3(0.0f,0.0f,0.0f);
+    gameObject.transform.localScale = new Vector3(1.0f,1.0f,1.0f);
+    gameObject.GetComponent<MeshFilter>().mesh = mesh;
+    gameObject.GetComponent<MeshRenderer>().material = graph_material;
+  }
+
+  void genHackMesh()
+  {
     int n_psamples = samples;
     int n_tsamples = samples;
     int n_pts = n_tsamples*n_psamples;
@@ -318,7 +645,7 @@ public class ThermoMath : MonoBehaviour
     Destroy(ptfab, 0f);
 //*/
 
-/*
+//*
     //HACK
     //gen assets
     graph_bits = new GameObject[n_groups*n_pts_per_group];
@@ -330,341 +657,6 @@ public class ThermoMath : MonoBehaviour
       graph_bits[i].transform.localScale = new Vector3(pt_size, pt_size, pt_size);
     }
 //*/
-
-    //MESH
-    List<Vector3> mesh_positions;
-    List<Vector3> mesh_normals;
-    List<int> mesh_triangles;
-
-    mesh_positions = new List<Vector3>(pt_positions);
-
-    int vi = 0;
-    int ni = 0;
-    mesh_triangles = new List<int>((n_psamples-1)*(n_tsamples-1)*6);
-    for(int y = 0; y < n_psamples-1; y++)
-    {
-      for(int z = 0; z < n_tsamples-1; z++)
-      {
-        vi = n_tsamples*y+z;
-        mesh_triangles.Add(vi           +0); ni++;
-        mesh_triangles.Add(vi+n_tsamples+0); ni++;
-        mesh_triangles.Add(vi+n_tsamples+1); ni++;
-        mesh_triangles.Add(vi           +0); ni++;
-        mesh_triangles.Add(vi+n_tsamples+1); ni++;
-        mesh_triangles.Add(vi           +1); ni++;
-      }
-    }
-
-    for(var i = 0; i < mesh_triangles.Count; i+=3)
-    {
-      if(winding(mesh_positions[mesh_triangles[i+0]],mesh_positions[mesh_triangles[i+1]],mesh_positions[mesh_triangles[i+2]]) == -1)
-        Debug.Log("GAH");
-    }
-
-    int concentrated_samples = samples*2;
-    int position_dome_region = mesh_positions.Count;
-    float highest_y = 0.0f;
-    for(int y = 0; y < concentrated_samples; y++)
-    {
-      double pt = ((double)y/(concentrated_samples-1));
-      double pst = sample(pt);
-      double p = Lerpd(psat_min,psat_max,pst);
-      double t = IF97.Tsat97(p/1000000.0);
-      //pvt in Pa, M^3/Kg, K
-
-      //Debug.LogFormat("p:{0}Pa, v:{1}M^3/Kg, t:{2}K",p,v,t);
-      float pplot = plot(p_min,p_max,p);
-      if(pplot > highest_y) highest_y = pplot;
-      float tplot = plot(t_min,t_max,t);
-
-      double v;
-      float vplot;
-      Vector3 point;
-
-      v = 1.0/IF97.rholiq_p(p/1000000.0); //expects:MPa returns Kg/M^3
-      vplot = plot(v_min,v_max,v);
-      point = new Vector3(vplot,pplot,tplot);
-      mesh_positions.Add(point);
-
-      v = 1.0/IF97.rhovap_p(p/1000000.0); //expects:MPa returns Kg/M^3
-      vplot = plot(v_min,v_max,v);
-      point = new Vector3(vplot,pplot,tplot);
-      mesh_positions.Add(point);
-    }
-
-    //kill spanning triangles; gather orphans
-    List<int> left_orphans = new List<int>();
-    List<int> right_orphans = new List<int>();
-    int left_ladder_i = position_dome_region;
-    Vector3 left_ladder = mesh_positions[left_ladder_i];
-    Vector3 left_rung = mesh_positions[left_ladder_i+2];
-    int right_ladder_i = left_ladder_i+1;
-    Vector3 right_ladder = mesh_positions[right_ladder_i];
-    Vector3 right_rung = mesh_positions[right_ladder_i+2];
-    for(var i = 0; i < mesh_triangles.Count; i+=3)
-    {
-      int ai = mesh_triangles[i+0];
-      int bi = mesh_triangles[i+1];
-      int ci = mesh_triangles[i+2];
-      Vector3 a = mesh_positions[ai];
-      Vector3 b = mesh_positions[bi];
-      Vector3 c = mesh_positions[ci];
-
-      if((left_rung.y  < a.y || left_rung.y  < b.y || left_rung.y  < c.y) && left_ladder_i+4 < mesh_positions.Count)  { left_ladder_i  += 2; left_ladder  = mesh_positions[left_ladder_i];  left_rung  = mesh_positions[left_ladder_i+2];  }
-      if((right_rung.y < a.y || right_rung.y < b.y || right_rung.y < c.y) && right_ladder_i+4 < mesh_positions.Count) { right_ladder_i += 2; right_ladder = mesh_positions[right_ladder_i]; right_rung = mesh_positions[right_ladder_i+2]; }
-
-      float x_cmp = (left_ladder.x+right_ladder.x)/2.0f;
-      if(
-        (a.y < highest_y || b.y < highest_y || c.y < highest_y) &&
-        (a.x < x_cmp || b.x < x_cmp || c.x < x_cmp) &&
-        (a.x > x_cmp || b.x > x_cmp || c.x > x_cmp)
-      )
-      {
-        mesh_triangles.RemoveAt(i+2);
-        mesh_triangles.RemoveAt(i+1);
-        mesh_triangles.RemoveAt(i+0);
-        i -= 3;
-
-        if(a.x < x_cmp && b.x < x_cmp)
-        {
-          left_orphans.Add(ai);
-          left_orphans.Add(bi);
-          right_orphans.Add(ci);
-        }
-        else if(b.x < x_cmp && c.x < x_cmp)
-        {
-          left_orphans.Add(bi);
-          left_orphans.Add(ci);
-          right_orphans.Add(ai);
-        }
-        else if(c.x < x_cmp && a.x < x_cmp)
-        {
-          left_orphans.Add(ci);
-          left_orphans.Add(ai);
-          right_orphans.Add(bi);
-        }
-        else if(a.x < x_cmp)
-        {
-          right_orphans.Add(bi);
-          right_orphans.Add(ci);
-          left_orphans.Add(ai);
-        }
-        else if(b.x < x_cmp)
-        {
-          right_orphans.Add(ai);
-          right_orphans.Add(ci);
-          left_orphans.Add(bi);
-        }
-        else if(c.x < x_cmp)
-        {
-          right_orphans.Add(ai);
-          right_orphans.Add(bi);
-          left_orphans.Add(ci);
-        }
-        else
-        {
-          Debug.Log("NOOOO");
-        }
-      }
-    }
-
-    //sort orphans
-    L_CMP l_cmp = new L_CMP(mesh_positions);
-    left_orphans.Sort(l_cmp);
-    for(int i = 1; i < left_orphans.Count; i++)
-    { if(left_orphans[i-1] == left_orphans[i]) { left_orphans.RemoveAt(i); i--; } }
-
-    R_CMP r_cmp = new R_CMP(mesh_positions);
-    right_orphans.Sort(r_cmp);
-    for(int i = 1; i < right_orphans.Count; i++)
-    { if(right_orphans[i-1] == right_orphans[i]) { right_orphans.RemoveAt(i); i--; } }
-
-    //stitch orphans
-    {
-      int triangle_stitch_region = mesh_triangles.Count;
-      List<int> orphans;
-      int ladder_i;
-      Vector3 ladder;
-      Vector3 rung;
-      int orphan_i;
-      Vector3 orphan;
-      Vector3 orung;
-      int ai = 0;
-      int bi = 0;
-      int ci = 0;
-
-      //left
-      orphans = left_orphans;
-      orphan_i = 0;
-      orphan = mesh_positions[orphans[orphan_i]];
-      ladder_i = position_dome_region;
-      ladder = mesh_positions[ladder_i];
-      rung = mesh_positions[ladder_i+2];
-      mesh_triangles.Add(ladder_i);
-      mesh_triangles.Add(orphans[orphan_i]);
-      orphan_i++;
-      orphan = mesh_positions[orphans[orphan_i]];
-      orung = mesh_positions[orphans[orphan_i+1]];
-      mesh_triangles.Add(orphans[orphan_i]);
-      orphan = mesh_positions[orphans[orphan_i]];
-      while(ladder_i+2 < mesh_positions.Count)
-      {
-        while(orphan.z < ladder.z && orung.y < rung.y && orphan_i+1 < orphans.Count)
-        /*
-          ai = ladder_i;
-          bi = orphans[orphan_i];
-          ci = orphans[orphan_i+1];
-        while(
-          winding(mesh_positions[ai],mesh_positions[bi],mesh_positions[ci]) > 0 &&
-          !pt_in_triangle_inclusive(mesh_positions[ai],mesh_positions[bi],mesh_positions[ci],rung)
-          )
-        */
-        { //increment orphan
-          ai = ladder_i;
-          bi = orphans[orphan_i];
-          ci = orphans[orphan_i+1];
-          //Debug.Log("WHAAA");
-          mesh_triangles.Add(ai);
-          mesh_triangles.Add(bi);
-          mesh_triangles.Add(ci);
-          if(winding(mesh_positions[ai],mesh_positions[bi],mesh_positions[ci]) < 0)
-          {
-            Debug.Log("OOPSIE");
-          }
-
-          orphan_i++;
-          orphan = mesh_positions[orphans[orphan_i]];
-          if(orphan_i+1 < orphans.Count) orung = mesh_positions[orphans[orphan_i+1]]; //yes, both this AND previous line need +1 (+1 for advance, +1 for orung)
-        }
-        if(ladder_i+2 < mesh_positions.Count)
-        { //increment ladder
-          ai = ladder_i;
-          bi = orphans[orphan_i];
-          ci = ladder_i+2;
-          mesh_triangles.Add(ai);
-          mesh_triangles.Add(bi);
-          mesh_triangles.Add(ci);
-          if(winding(mesh_positions[ai],mesh_positions[bi],mesh_positions[ci]) < 0)
-          {
-            Debug.Log("OOPSIE");
-          }
-
-          ladder_i += 2;
-          ladder = mesh_positions[ladder_i];
-          if(ladder_i+2 < mesh_positions.Count) rung = mesh_positions[ladder_i+2]; //yes, both this AND previous line need +2 (+2 for advance, +2 for rung)
-        }
-      }
-
-      //right
-      orphans = right_orphans;
-      orphan_i = 0;
-      orphan = mesh_positions[orphans[orphan_i]];
-      orung = mesh_positions[orphans[orphan_i+1]];
-      ladder_i = position_dome_region+1;
-      ladder = mesh_positions[ladder_i];
-      rung = mesh_positions[ladder_i+2];
-      mesh_triangles.Add(orphans[orphan_i]);
-      mesh_triangles.Add(ladder_i);
-      ladder_i += 2;
-      ladder = mesh_positions[ladder_i];
-      mesh_triangles.Add(ladder_i);
-      while(orphan_i+1 < orphans.Count)
-      {
-        while(rung.z < orung.z && rung.y < orung.y && ladder_i+2 < mesh_positions.Count)
-        { //increment ladder
-          ai = orphans[orphan_i];
-          bi = ladder_i;
-          ci = ladder_i+2;
-          mesh_triangles.Add(ai);
-          mesh_triangles.Add(bi);
-          mesh_triangles.Add(ci);
-          if(winding(mesh_positions[ai],mesh_positions[bi],mesh_positions[ci]) < 0)
-          {
-            Debug.Log("OOPSIE");
-          }
-
-          ladder_i += 2;
-          ladder = mesh_positions[ladder_i];
-          if(ladder_i+2 < mesh_positions.Count) rung = mesh_positions[ladder_i+2]; //yes, both this AND previous line need +2 (+2 for advance, +2 for rung)
-        }
-        if(orphan_i+1 < orphans.Count)
-        { //increment orphan
-          ai = orphans[orphan_i];
-          bi = ladder_i;
-          ci = orphans[orphan_i+1];
-          mesh_triangles.Add(ai);
-          mesh_triangles.Add(bi);
-          mesh_triangles.Add(ci);
-          if(winding(mesh_positions[ai],mesh_positions[bi],mesh_positions[ci]) < 0)
-          {
-            Debug.Log("OOPSIE");
-          }
-
-          orphan_i++;
-          orphan = mesh_positions[orphans[orphan_i]];
-          if(orphan_i+1 < orphans.Count) orung = mesh_positions[orphans[orphan_i+1]]; //yes, both this AND previous line need +1 (+1 for advance, +1 for orung)
-        }
-      }
-    }
-
-    //fill in dome
-    int triangle_inner_dome_region = mesh_triangles.Count;
-    int position_dome_inner_region = mesh_positions.Count;
-    for(int i = position_dome_region; i < position_dome_inner_region; i++) //duplicate inner positions so each can have own normal at seam
-    {
-      mesh_positions.Add(mesh_positions[i]);
-    }
-    for(int y = 0; y < concentrated_samples-1; y++)
-    {
-      mesh_triangles.Add(position_dome_inner_region+y*2+0);
-      mesh_triangles.Add(position_dome_inner_region+y*2+2);
-      mesh_triangles.Add(position_dome_inner_region+y*2+1);
-      mesh_triangles.Add(position_dome_inner_region+y*2+1);
-      mesh_triangles.Add(position_dome_inner_region+y*2+2);
-      mesh_triangles.Add(position_dome_inner_region+y*2+3);
-    }
-
-    //set normals
-    mesh_normals = new List<Vector3>(new Vector3[mesh_positions.Count]);
-    for(int i = 0; i < triangle_inner_dome_region; i+=3)
-    {
-      int ai = mesh_triangles[i+0];
-      int bi = mesh_triangles[i+1];
-      int ci = mesh_triangles[i+2];
-      Vector3 a = mesh_positions[ai];
-      Vector3 b = mesh_positions[bi];
-      Vector3 c = mesh_positions[ci];
-      Vector3 n = Vector3.Cross(Vector3.Normalize(b-a),Vector3.Normalize(c-a));
-      mesh_normals[ai] = n;
-      mesh_normals[bi] = n;
-      mesh_normals[ci] = n;
-    }
-
-    for(int i = triangle_inner_dome_region; i < mesh_triangles.Count; i+=3)
-    {
-      int ai = mesh_triangles[i+0];
-      int bi = mesh_triangles[i+1];
-      int ci = mesh_triangles[i+2];
-      Vector3 a = mesh_positions[ai];
-      Vector3 b = mesh_positions[bi];
-      Vector3 c = mesh_positions[ci];
-      Vector3 n = Vector3.Cross(Vector3.Normalize(b-a),Vector3.Normalize(c-a));
-      mesh_normals[ai] = n;
-      mesh_normals[bi] = n;
-      mesh_normals[ci] = n;
-    }
-
-    Mesh mesh = new Mesh();
-    mesh.vertices = mesh_positions.ToArray();
-    mesh.normals = mesh_normals.ToArray();
-    mesh.triangles = mesh_triangles.ToArray();
-
-    GameObject gameObject = new GameObject("graph_mesh", typeof(MeshFilter), typeof(MeshRenderer));
-    gameObject.transform.parent = graph.transform;
-    gameObject.transform.localPosition = new Vector3(0.0f,0.0f,0.0f);
-    gameObject.transform.localScale = new Vector3(1.0f,1.0f,1.0f);
-    gameObject.GetComponent<MeshFilter>().mesh = mesh;
-    gameObject.GetComponent<MeshRenderer>().material = graph_material;
   }
 
   void reset()
@@ -725,7 +717,7 @@ public class ThermoMath : MonoBehaviour
       //delete old
       for(int i = 0; i < graph_bits.Length; i++)
         Destroy(graph_bits[i]);
-      genMesh();
+      genHackMesh();
     }
   }
 
