@@ -509,11 +509,21 @@ public class ThermoMath : MonoBehaviour
       orphan = mesh_positions[orphans[orphan_i]];
       while(ladder_i+2 < mesh_positions.Count)
       {
-        while(orung.z < rung.z && orung.y < rung.y && orphan_i+1 < orphans.Count)
+        while(orphan.z < ladder.z && orung.y < rung.y && orphan_i+1 < orphans.Count)
+        /*
+          ai = ladder_i;
+          bi = orphans[orphan_i];
+          ci = orphans[orphan_i+1];
+        while(
+          winding(mesh_positions[ai],mesh_positions[bi],mesh_positions[ci]) > 0 &&
+          !pt_in_triangle_inclusive(mesh_positions[ai],mesh_positions[bi],mesh_positions[ci],rung)
+          )
+        */
         { //increment orphan
           ai = ladder_i;
           bi = orphans[orphan_i];
           ci = orphans[orphan_i+1];
+          //Debug.Log("WHAAA");
           mesh_triangles.Add(ai);
           mesh_triangles.Add(bi);
           mesh_triangles.Add(ci);
@@ -717,6 +727,31 @@ public class ThermoMath : MonoBehaviour
         Destroy(graph_bits[i]);
       genMesh();
     }
+  }
+
+  float cross_fv2z(Vector3 a, Vector3 b) { return (a.x*b.y)-(a.y*b.x); } //z of cross_fv3 with zs set to 0 (good for '2d pt in tri')
+  float norm_f(float f) { if(f < 0.0f) return -1.0f; if(f > 0.0f) return 1.0f; return 0.0f; }
+
+  bool pt_in_triangle_inclusive(Vector3 a, Vector3 b, Vector3 c, Vector3 p)
+  {
+    Vector3 subab = a-b;
+    Vector3 subac = a-c;
+    Vector3 subba = b-a;
+    Vector3 subbc = b-c;
+    Vector3 subca = c-a;
+    Vector3 subcb = c-b;
+    float one   = norm_f(cross_fv2z(subba,p-a));
+    float two   = norm_f(cross_fv2z(subba,subca));
+    float three = norm_f(cross_fv2z(subcb,p-b));
+    float four  = norm_f(cross_fv2z(subcb,subab));
+    float five  = norm_f(cross_fv2z(subac,p-c));
+    float six   = norm_f(cross_fv2z(subac,subbc));
+
+    return (
+      (one == 0.0f || two == 0.0f || one == two)  &&
+      (three == 0.0f || four == 0.0f || three == four)  &&
+      (five == 0.0f || six == 0.0f || five == six)
+    );
   }
 
   int winding(Vector3 a, Vector3 b, Vector3 c)
