@@ -77,6 +77,7 @@ public class ThermoMath : MonoBehaviour
   //mesh
   GameObject graph;
   GameObject[] graph_bits;
+  GameObject state;
   public Material graph_material;
   public GameObject pt_prefab;
 
@@ -117,16 +118,24 @@ public class ThermoMath : MonoBehaviour
     plot_lbase_prev = plot_lbase;
 
     IF97.initRegions();
-
     findObjects();
     genMesh();
-    genHackMesh();
-    reset();
-    derive();
-    dotransform();
+    //genHackMesh();
     //IF97.print_tables();
     //IAPWS95.print_tables();
     //compare_impls();
+
+    reset();
+    pressure_p = Lerpd(p_min,p_max,0.1);
+    temperature_k = Lerpd(t_min,t_max,0.9);
+    specificvolume_q = 1.0/IF97.rhomass_Tp(temperature_k,pressure_p/1000000.0);
+    derive();
+    /*
+    Debug.LogFormat("{0}",pressure_p);
+    Debug.LogFormat("{0}",specificvolume_q);
+    Debug.LogFormat("{0}",temperature_k);
+    */
+    dotransform();
   }
 
   void compare_impls()
@@ -140,7 +149,6 @@ public class ThermoMath : MonoBehaviour
     v = 1.0/IF97.rhomass_Tp(t,p/1000000); //expects:K,MPa returns Kg/M^3
     Debug.LogFormat("{0,3:E} {1,3:E} {2,3:E}\n", p, v, t);
     */
-
 
     //*
     //IF97 primary
@@ -574,6 +582,7 @@ public class ThermoMath : MonoBehaviour
   void genHackMesh()
   {
     int n_psamples = samples;
+    int n_vsamples = samples;
     int n_tsamples = samples;
     int n_pts = n_tsamples*n_psamples;
     int n_pts_per_group = 1000;
@@ -582,7 +591,7 @@ public class ThermoMath : MonoBehaviour
 
     Vector3[] pt_positions;
 
-//*IF97
+/*IF97
     //gen positions
     pt_positions = new Vector3[n_pts];
     for(int y = 0; y < n_psamples; y++)
@@ -609,7 +618,7 @@ public class ThermoMath : MonoBehaviour
     }
 //*/
 
-/*IAPWS95
+//*IAPWS95
     //gen positions
     pt_positions = new Vector3[n_pts];
     for(int x = 0; x < n_vsamples; x++)
@@ -714,6 +723,7 @@ public class ThermoMath : MonoBehaviour
     weights   = GameObject.Find("Weights");
     lifts     = GameObject.Find("Lifts");
     graph     = GameObject.Find("Graph");
+    state     = GameObject.Find("state");
   }
 
   void derive()
@@ -724,7 +734,10 @@ public class ThermoMath : MonoBehaviour
 
   void dotransform()
   {
-
+    float pplot = plot(p_min,p_max,pressure_p);
+    float vplot = plot(v_min,v_max,specificvolume_q);
+    float tplot = plot(t_min,t_max,temperature_k);
+    state.transform.localPosition = new Vector3(vplot,pplot,tplot);
   }
 
   // Update is called once per frame
