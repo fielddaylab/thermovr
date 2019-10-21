@@ -591,7 +591,7 @@ public class ThermoMath : MonoBehaviour
 
     Vector3[] pt_positions;
 
-/*IF97
+//*IF97
     //gen positions
     pt_positions = new Vector3[n_pts];
     for(int y = 0; y < n_psamples; y++)
@@ -618,7 +618,7 @@ public class ThermoMath : MonoBehaviour
     }
 //*/
 
-//*IAPWS95
+/*IAPWS95
     //gen positions
     pt_positions = new Vector3[n_pts];
     for(int x = 0; x < n_vsamples; x++)
