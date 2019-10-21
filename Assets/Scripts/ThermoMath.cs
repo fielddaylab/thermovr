@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-class CMP : IComparer<int> 
+class CMP : IComparer<int>
 {
   public List<Vector3> mesh_positions;
   public CMP(List<Vector3> _mesh_positions)
@@ -723,7 +723,7 @@ public class ThermoMath : MonoBehaviour
     weights   = GameObject.Find("Weights");
     lifts     = GameObject.Find("Lifts");
     graph     = GameObject.Find("Graph");
-    state     = GameObject.Find("state");
+    state     = GameObject.Find("State");
   }
 
   void derive()
