@@ -27,17 +27,17 @@ public class ThermoMath : MonoBehaviour
 {
   //math limits ; xYz = vPt
   //Pa
-  double p_min = IF97.get_Pmin()*1000000.0; // 611.213
-  double p_max = IF97.get_Pmax()*1000000.0; // 100000000
+  public double p_min = IF97.get_Pmin()*1000000.0; // 611.213
+  public double p_max = IF97.get_Pmax()*1000000.0; // 100000000
   //Pa
-  double psat_min = IF97.get_ptrip()*1000000.0; // ???
-  double psat_max = IF97.get_pcrit()*1000000.0; // ???
+  public double psat_min = IF97.get_ptrip()*1000000.0; // ???
+  public double psat_max = IF97.get_pcrit()*1000000.0; // ???
   //M^3/kg
-  double v_min = 1.0/3000;  //0.0003_
-  double v_max = 1.0/0.001; //1000
+  public double v_min = 1.0/3000;  //0.0003_
+  public double v_max = 1.0/0.001; //1000
   //K
-  double t_min = IF97.get_Tmin(); // 273.15
-  double t_max = IF97.get_Tmax(); // 1073.15
+  public double t_min = IF97.get_Tmin(); // 273.15
+  public double t_max = IF97.get_Tmax(); // 1073.15
 
   int samples = 80;
 
@@ -152,14 +152,12 @@ public class ThermoMath : MonoBehaviour
 
     //*
     //IF97 primary
-    int n_psamples = samples;
-    int n_tsamples = samples;
-    for(int y = 0; y < n_psamples; y++)
+    for(int y = 0; y < samples; y++)
     {
-      double pt = ((double)y/(n_psamples-1));
-      for(int z = 0; z < n_tsamples; z++)
+      double pt = ((double)y/(samples-1));
+      for(int z = 0; z < samples; z++)
       {
-        double tt = ((double)z/(n_tsamples-1));
+        double tt = ((double)z/(samples-1));
         double pst = sample(pt);
         double tst = sample(tt);
         double p = Lerpd(p_min,p_max,pst);
@@ -175,14 +173,12 @@ public class ThermoMath : MonoBehaviour
 
     /*
     //IAPWS95 primary
-    int n_vsamples = samples;
-    int n_tsamples = samples;
-    for(int x = 0; x < n_vsamples; x++)
+    for(int x = 0; x < samples; x++)
     {
-      double vt = ((double)x/(n_vsamples-1));
-      for(int z = 0; z < n_tsamples; z++)
+      double vt = ((double)x/(samples-1));
+      for(int z = 0; z < samples; z++)
       {
-        double tt = ((double)z/(n_tsamples-1));
+        double tt = ((double)z/(samples-1));
         double vst = sample(vt);
         double tst = sample(tt);
         double v = Lerpd(v_min,v_max,vst);
@@ -218,9 +214,7 @@ public class ThermoMath : MonoBehaviour
 
   void genMesh()
   {
-    int n_psamples = samples;
-    int n_tsamples = samples;
-    int n_pts = n_tsamples*n_psamples;
+    int n_pts = samples*samples;
     int n_pts_per_group = 1000;
     int n_groups = (int)Mathf.Ceil(n_pts / n_pts_per_group);
     float pt_size = 0.005f;
@@ -229,12 +223,12 @@ public class ThermoMath : MonoBehaviour
 
     //gen positions
     pt_positions = new Vector3[n_pts];
-    for(int y = 0; y < n_psamples; y++)
+    for(int y = 0; y < samples; y++)
     {
-      double pt = ((double)y/(n_psamples-1));
-      for(int z = 0; z < n_tsamples; z++)
+      double pt = ((double)y/(samples-1));
+      for(int z = 0; z < samples; z++)
       {
-        double tt = ((double)z/(n_tsamples-1));
+        double tt = ((double)z/(samples-1));
         double pst = sample(pt);
         double tst = sample(tt);
         double p = Lerpd(p_min,p_max,pst);
@@ -247,7 +241,7 @@ public class ThermoMath : MonoBehaviour
         float vplot = plot(v_min,v_max,v);
         float tplot = plot(t_min,t_max,t);
 
-        int i = n_tsamples*y+z;
+        int i = samples*y+z;
         pt_positions[i] = new Vector3(vplot,pplot,tplot);
       }
     }
@@ -261,18 +255,18 @@ public class ThermoMath : MonoBehaviour
 
     int vi = 0;
     int ni = 0;
-    mesh_triangles = new List<int>((n_psamples-1)*(n_tsamples-1)*6);
-    for(int y = 0; y < n_psamples-1; y++)
+    mesh_triangles = new List<int>((samples-1)*(samples-1)*6);
+    for(int y = 0; y < samples-1; y++)
     {
-      for(int z = 0; z < n_tsamples-1; z++)
+      for(int z = 0; z < samples-1; z++)
       {
-        vi = n_tsamples*y+z;
-        mesh_triangles.Add(vi           +0); ni++;
-        mesh_triangles.Add(vi+n_tsamples+0); ni++;
-        mesh_triangles.Add(vi+n_tsamples+1); ni++;
-        mesh_triangles.Add(vi           +0); ni++;
-        mesh_triangles.Add(vi+n_tsamples+1); ni++;
-        mesh_triangles.Add(vi           +1); ni++;
+        vi = samples*y+z;
+        mesh_triangles.Add(vi        +0); ni++;
+        mesh_triangles.Add(vi+samples+0); ni++;
+        mesh_triangles.Add(vi+samples+1); ni++;
+        mesh_triangles.Add(vi        +0); ni++;
+        mesh_triangles.Add(vi+samples+1); ni++;
+        mesh_triangles.Add(vi        +1); ni++;
       }
     }
 
@@ -581,10 +575,7 @@ public class ThermoMath : MonoBehaviour
 
   void genHackMesh()
   {
-    int n_psamples = samples;
-    int n_vsamples = samples;
-    int n_tsamples = samples;
-    int n_pts = n_tsamples*n_psamples;
+    int n_pts = samples*samples;
     int n_pts_per_group = 1000;
     int n_groups = (int)Mathf.Ceil(n_pts / n_pts_per_group);
     float pt_size = 0.005f;
@@ -594,12 +585,12 @@ public class ThermoMath : MonoBehaviour
 //*IF97
     //gen positions
     pt_positions = new Vector3[n_pts];
-    for(int y = 0; y < n_psamples; y++)
+    for(int y = 0; y < samples; y++)
     {
-      double pt = ((double)y/(n_psamples-1));
-      for(int z = 0; z < n_tsamples; z++)
+      double pt = ((double)y/(samples-1));
+      for(int z = 0; z < samples; z++)
       {
-        double tt = ((double)z/(n_tsamples-1));
+        double tt = ((double)z/(samples-1));
         double pst = sample(pt);
         double tst = sample(tt);
         double p = Lerpd(p_min,p_max,pst);
@@ -612,7 +603,7 @@ public class ThermoMath : MonoBehaviour
         float vplot = plot(v_min,v_max,v);
         float tplot = plot(t_min,t_max,t);
 
-        int i = n_tsamples*y+z;
+        int i = samples*y+z;
         pt_positions[i] = new Vector3(vplot,pplot,tplot);
       }
     }
@@ -621,12 +612,12 @@ public class ThermoMath : MonoBehaviour
 /*IAPWS95
     //gen positions
     pt_positions = new Vector3[n_pts];
-    for(int x = 0; x < n_vsamples; x++)
+    for(int x = 0; x < samples; x++)
     {
-      double vt = ((double)x/(n_vsamples-1));
-      for(int z = 0; z < n_tsamples; z++)
+      double vt = ((double)x/(samples-1));
+      for(int z = 0; z < samples; z++)
       {
-        double tt = ((double)z/(n_tsamples-1));
+        double tt = ((double)z/(samples-1));
         double vst = sample(vt);
         double tst = sample(tt);
         double v = Lerpd(v_min,v_max,vst);
@@ -637,7 +628,7 @@ public class ThermoMath : MonoBehaviour
         float vplot = plot(v_min,v_max,v);
         float tplot = plot(t_min,t_max,t);
 
-        int i = n_tsamples*x+z;
+        int i = samples*x+z;
         pt_positions[i] = new Vector3(vplot,pplot,tplot);
       }
     }
@@ -725,6 +716,48 @@ public class ThermoMath : MonoBehaviour
     graph     = GameObject.Find("Graph");
     state     = GameObject.Find("State");
   }
+
+  public void inc_t()
+  {
+    temperature_k = Lerpd(temperature_k,t_max,0.01);
+    specificvolume_q = 1.0/IF97.rhomass_Tp(temperature_k,pressure_p/1000000.0); //expects:K,MPa returns Kg/M^3
+    derive();
+    dotransform();
+  }
+  public void dec_t()
+  {
+    temperature_k = Lerpd(temperature_k,t_min,0.01);
+    specificvolume_q = 1.0/IF97.rhomass_Tp(temperature_k,pressure_p/1000000.0); //expects:K,MPa returns Kg/M^3
+    derive();
+    dotransform();
+  }
+  public void inc_p()
+  {
+    pressure_p = Lerpd(pressure_p,p_max,0.01);
+    specificvolume_q = 1.0/IF97.rhomass_Tp(temperature_k,pressure_p/1000000.0); //expects:K,MPa returns Kg/M^3
+    derive();
+    dotransform();
+  }
+  public void dec_p()
+  {
+    pressure_p = Lerpd(pressure_p,p_min,0.01);
+    specificvolume_q = 1.0/IF97.rhomass_Tp(temperature_k,pressure_p/1000000.0); //expects:K,MPa returns Kg/M^3
+    derive();
+    dotransform();
+  }
+  public void inc_v()
+  {
+    //specificvolume_q = Lerpd(specificvolume_q,v_max,0.01);
+    derive();
+    dotransform();
+  }
+  public void dec_v()
+  {
+    //specificvolume_q = Lerpd(specificvolume_q,q_min,0.01);
+    derive();
+    dotransform();
+  }
+
 
   void derive()
   {

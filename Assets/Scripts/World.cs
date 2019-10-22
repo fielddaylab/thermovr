@@ -5,9 +5,7 @@ using UnityEngine;
 public class World : MonoBehaviour
 {
 
-  GameObject room;
-  GameObject graph;
-  GameObject vessel;
+  ThermoMath thermo;
   GameObject lhand;
   GameObject rhand;
 
@@ -22,12 +20,19 @@ public class World : MonoBehaviour
   bool ltrigger = false;
   bool rtrigger = false;
 
+  //buttons
+  GameObject TInc;
+  GameObject TDec;
+  GameObject PInc;
+  GameObject PDec;
+  GameObject VInc;
+  GameObject VDec;
+
   // Start is called before the first frame update
   void Start()
   {
-    room   = GameObject.Find("Room");
-    graph  = GameObject.Find("Graph");
-    vessel = GameObject.Find("Vessel");
+    thermo = GameObject.Find("Oracle").GetComponent<ThermoMath>();
+
     lhand  = GameObject.Find("LHand");
     rhand  = GameObject.Find("RHand");
 
@@ -35,8 +40,33 @@ public class World : MonoBehaviour
     rhand.GetComponent<MeshRenderer>().material = hand_empty;
 
     grabbables = new List<Grabbable>();
-    grabbables.Add(graph.GetComponent<Grabbable>());
-    grabbables.Add(vessel.GetComponent<Grabbable>());
+    grabbables.Add(GameObject.Find("Graph").GetComponent<Grabbable>());
+    grabbables.Add(GameObject.Find("Vessel").GetComponent<Grabbable>());
+
+    //buttons
+    TInc = GameObject.Find("TInc");
+    grabbables.Add(TInc.GetComponent<Grabbable>());
+    TDec = GameObject.Find("TDec");
+    grabbables.Add(TDec.GetComponent<Grabbable>());
+    PInc = GameObject.Find("PInc");
+    grabbables.Add(PInc.GetComponent<Grabbable>());
+    PDec = GameObject.Find("PDec");
+    grabbables.Add(PDec.GetComponent<Grabbable>());
+    VInc = GameObject.Find("VInc");
+    grabbables.Add(VInc.GetComponent<Grabbable>());
+    VDec = GameObject.Find("VDec");
+    grabbables.Add(VDec.GetComponent<Grabbable>());
+
+  }
+
+  void TryAct(GameObject actable)
+  {
+         if(actable == TInc) thermo.inc_t();
+    else if(actable == TDec) thermo.dec_t();
+    else if(actable == PInc) thermo.inc_p();
+    else if(actable == PDec) thermo.dec_p();
+    else if(actable == VInc) thermo.inc_v();
+    else if(actable == VDec) thermo.dec_v();
   }
 
   // Update is called once per frame
@@ -76,7 +106,7 @@ public class World : MonoBehaviour
     }
     else if(lgrabbed && ltrigger_delta == -1)
     {
-      lgrabbed.transform.SetParent(room.transform);
+      lgrabbed.transform.SetParent(lgrabbed.GetComponent<Grabbable>().og_parent);
       lgrabbed = null;
     }
     if(lgrabbed == null)
@@ -123,7 +153,7 @@ public class World : MonoBehaviour
     }
     else if(rgrabbed && rtrigger_delta == -1)
     {
-      rgrabbed.transform.SetParent(room.transform);
+      rgrabbed.transform.SetParent(rgrabbed.GetComponent<Grabbable>().og_parent);
       rgrabbed = null;
     }
     if(rgrabbed == null)
@@ -138,6 +168,10 @@ public class World : MonoBehaviour
         }
       }
     }
+
+    //buttons
+    if(lgrabbed && OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger)   > trigger_threshhold) TryAct(lgrabbed);
+    if(rgrabbed && OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger) > trigger_threshhold) TryAct(rgrabbed);
 
   }
 

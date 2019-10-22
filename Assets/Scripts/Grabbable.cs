@@ -8,6 +8,7 @@ public class Grabbable : MonoBehaviour
   GameObject rhand;
   Collider lhand_c;
   Collider rhand_c;
+  public Transform og_parent;
 
   // Start is called before the first frame update
   void Start()
@@ -16,6 +17,7 @@ public class Grabbable : MonoBehaviour
     rhand = GameObject.Find("RHand");
     lhand_c = lhand.GetComponent<Collider>();
     rhand_c = rhand.GetComponent<Collider>();
+    og_parent = gameObject.transform.parent;
   }
 
   // Update is called once per frame
