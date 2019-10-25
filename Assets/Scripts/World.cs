@@ -13,9 +13,11 @@ public class World : MonoBehaviour
   public Material hand_intersecting;
   public Material hand_grabbing;
 
-  List<Grabbable> grabbables;
+  List<Touchable> grabbables;
   GameObject lgrabbed = null;
   GameObject rgrabbed = null;
+
+  List<Tool> tools;
 
   bool ltrigger = false;
   bool rtrigger = false;
@@ -39,23 +41,27 @@ public class World : MonoBehaviour
     lhand.GetComponent<MeshRenderer>().material = hand_empty;
     rhand.GetComponent<MeshRenderer>().material = hand_empty;
 
-    grabbables = new List<Grabbable>();
-    grabbables.Add(GameObject.Find("Graph").GetComponent<Grabbable>());
-    grabbables.Add(GameObject.Find("Vessel").GetComponent<Grabbable>());
+    tools = new List<Tool>();
+    tools.Add(GameObject.Find("Tool_Insulator").GetComponent<Tool>());
+
+    grabbables = new List<Touchable>();
+    for(int i = 0; i < tools.Count; i++) grabbables.Add(tools[i].gameObject.GetComponent<Touchable>()); //important that tools take priority, so they can be grabbed and removed
+    grabbables.Add(GameObject.Find("Graph").GetComponent<Touchable>());
+    grabbables.Add(GameObject.Find("Vessel").GetComponent<Touchable>());
 
     //buttons
     TInc = GameObject.Find("TInc");
-    grabbables.Add(TInc.GetComponent<Grabbable>());
+    grabbables.Add(TInc.GetComponent<Touchable>());
     TDec = GameObject.Find("TDec");
-    grabbables.Add(TDec.GetComponent<Grabbable>());
+    grabbables.Add(TDec.GetComponent<Touchable>());
     PInc = GameObject.Find("PInc");
-    grabbables.Add(PInc.GetComponent<Grabbable>());
+    grabbables.Add(PInc.GetComponent<Touchable>());
     PDec = GameObject.Find("PDec");
-    grabbables.Add(PDec.GetComponent<Grabbable>());
+    grabbables.Add(PDec.GetComponent<Touchable>());
     VInc = GameObject.Find("VInc");
-    grabbables.Add(VInc.GetComponent<Grabbable>());
+    grabbables.Add(VInc.GetComponent<Touchable>());
     VDec = GameObject.Find("VDec");
-    grabbables.Add(VDec.GetComponent<Grabbable>());
+    grabbables.Add(VDec.GetComponent<Touchable>());
 
   }
 
@@ -106,7 +112,25 @@ public class World : MonoBehaviour
     }
     else if(lgrabbed && ltrigger_delta == -1)
     {
-      lgrabbed.transform.SetParent(lgrabbed.GetComponent<Grabbable>().og_parent);
+      Tool t = lgrabbed.GetComponent<Tool>();
+      if(t)
+      {
+        if(t.active.GetComponent<Touchable>().lintersect)
+        {
+          lgrabbed.transform.SetParent(t.active.transform);
+          lgrabbed.transform.localPosition = new Vector3(0f,0f,0f);
+          lgrabbed.transform.localRotation = new Vector3(0f,0f,0f);
+        }
+        else if(t.storage.GetComponent<Touchable>().lintersect)
+        {
+          lgrabbed.transform.SetParent(t.storage.transform);
+          lgrabbed.transform.localPosition = new Vector3(0f,0f,0f);
+          lgrabbed.transform.localRotation = new Vector3(0f,0f,0f);
+        }
+        else t = null;
+      }
+      if(t == null) lgrabbed.transform.SetParent(lgrabbed.GetComponent<Touchable>().og_parent);
+
       lgrabbed = null;
     }
     if(lgrabbed == null)
@@ -153,7 +177,25 @@ public class World : MonoBehaviour
     }
     else if(rgrabbed && rtrigger_delta == -1)
     {
-      rgrabbed.transform.SetParent(rgrabbed.GetComponent<Grabbable>().og_parent);
+      Tool t = rgrabbed.GetComponent<Tool>();
+      if(t)
+      {
+        if(t.active.GetComponent<Touchable>().rintersect)
+        {
+          rgrabbed.transform.SetParent(t.active.transform);
+          rgrabbed.transform.localPosition = new Vector3(0f,0f,0f);
+          rgrabbed.transform.localRotation = new Vector3(0f,0f,0f);
+        }
+        else if(t.storage.GetComponent<Touchable>().rintersect)
+        {
+          rgrabbed.transform.SetParent(t.storage.transform);
+          rgrabbed.transform.localPosition = new Vector3(0f,0f,0f);
+          rgrabbed.transform.localRotation = new Vector3(0f,0f,0f);
+        }
+        else t = null;
+      }
+      if(t == null) rgrabbed.transform.SetParent(rgrabbed.GetComponent<Touchable>().og_parent);
+
       rgrabbed = null;
     }
     if(rgrabbed == null)
