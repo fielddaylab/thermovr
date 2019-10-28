@@ -54,6 +54,11 @@ public class World : MonoBehaviour
 
     tools = new List<Tool>();
     tools.Add(GameObject.Find("Tool_Insulator").GetComponent<Tool>());
+    tools.Add(GameObject.Find("Tool_Clamp").GetComponent<Tool>());
+    tools.Add(GameObject.Find("Tool_Burner").GetComponent<Tool>());
+    tools.Add(GameObject.Find("Tool_Coil").GetComponent<Tool>());
+    tools.Add(GameObject.Find("Tool_Weight").GetComponent<Tool>());
+    tools.Add(GameObject.Find("Tool_Balloon").GetComponent<Tool>());
 
     dials = new List<Grabbable>();
     for(int i = 0; i < tools.Count; i++) dials.Add(tools[i].dial.GetComponent<Grabbable>());
