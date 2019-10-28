@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class World : MonoBehaviour
 {
+  List<TextMesh> DEBUGTEXTS;
 
   ThermoMath thermo;
   GameObject lhand;
@@ -13,14 +14,19 @@ public class World : MonoBehaviour
   public Material hand_intersecting;
   public Material hand_grabbing;
 
-  List<Touchable> grabbables;
+  List<Grabbable> movables;
   GameObject lgrabbed = null;
   GameObject rgrabbed = null;
+  float ltwist = 0.0f;
+  float rtwist = 0.0f;
 
   List<Tool> tools;
+  List<Grabbable> dials;
 
-  bool ltrigger = false;
-  bool rtrigger = false;
+  bool lhtrigger = false;
+  bool rhtrigger = false;
+  bool litrigger = false;
+  bool ritrigger = false;
 
   //buttons
   GameObject TInc;
@@ -33,6 +39,11 @@ public class World : MonoBehaviour
   // Start is called before the first frame update
   void Start()
   {
+    DEBUGTEXTS = new List<TextMesh>();
+    GameObject dtexts = GameObject.Find("DEBUGTEXTS");
+    foreach(Transform child in dtexts.transform)
+      DEBUGTEXTS.Add(child.gameObject.GetComponent<TextMesh>());
+
     thermo = GameObject.Find("Oracle").GetComponent<ThermoMath>();
 
     lhand  = GameObject.Find("LHand");
@@ -44,28 +55,31 @@ public class World : MonoBehaviour
     tools = new List<Tool>();
     tools.Add(GameObject.Find("Tool_Insulator").GetComponent<Tool>());
 
-    grabbables = new List<Touchable>();
-    for(int i = 0; i < tools.Count; i++) grabbables.Add(tools[i].gameObject.GetComponent<Touchable>()); //important that tools take priority, so they can be grabbed and removed
-    grabbables.Add(GameObject.Find("Graph").GetComponent<Touchable>());
-    grabbables.Add(GameObject.Find("Vessel").GetComponent<Touchable>());
+    dials = new List<Grabbable>();
+    for(int i = 0; i < tools.Count; i++) dials.Add(tools[i].dial.GetComponent<Grabbable>());
+
+    movables = new List<Grabbable>();
+    for(int i = 0; i < tools.Count; i++) movables.Add(tools[i].gameObject.GetComponent<Grabbable>()); //important that tools take priority, so they can be grabbed and removed
+    movables.Add(GameObject.Find("Graph").GetComponent<Grabbable>());
+    movables.Add(GameObject.Find("Vessel").GetComponent<Grabbable>());
 
     //buttons
     TInc = GameObject.Find("TInc");
-    grabbables.Add(TInc.GetComponent<Touchable>());
+    movables.Add(TInc.GetComponent<Grabbable>());
     TDec = GameObject.Find("TDec");
-    grabbables.Add(TDec.GetComponent<Touchable>());
+    movables.Add(TDec.GetComponent<Grabbable>());
     PInc = GameObject.Find("PInc");
-    grabbables.Add(PInc.GetComponent<Touchable>());
+    movables.Add(PInc.GetComponent<Grabbable>());
     PDec = GameObject.Find("PDec");
-    grabbables.Add(PDec.GetComponent<Touchable>());
+    movables.Add(PDec.GetComponent<Grabbable>());
     VInc = GameObject.Find("VInc");
-    grabbables.Add(VInc.GetComponent<Touchable>());
+    movables.Add(VInc.GetComponent<Grabbable>());
     VDec = GameObject.Find("VDec");
-    grabbables.Add(VDec.GetComponent<Touchable>());
+    movables.Add(VDec.GetComponent<Grabbable>());
 
   }
 
-  void TryAct(GameObject actable)
+  void TryAct(GameObject actable, float twist_val, ref float r_twist)
   {
          if(actable == TInc) thermo.inc_t();
     else if(actable == TDec) thermo.dec_t();
@@ -73,148 +87,141 @@ public class World : MonoBehaviour
     else if(actable == PDec) thermo.dec_p();
     else if(actable == VInc) thermo.inc_v();
     else if(actable == VDec) thermo.dec_v();
+    else
+    {
+      Dial d = actable.GetComponent<Dial>();
+      if(d != null)
+      {
+        float dtwist = r_twist-twist_val;
+        d.val = Mathf.Clamp(d.val-dtwist,0.0f,1.0f);
+        DEBUGTEXTS[0].text = twist_val.ToString();
+        DEBUGTEXTS[1].text = dtwist.ToString();
+        DEBUGTEXTS[2].text = d.val.ToString();
+      }
+    }
+
+    r_twist = twist_val;
+  }
+
+  void TryGrab(bool which, float htrigger_val, float itrigger_val, float twist_val, ref bool r_htrigger, ref bool r_itrigger, ref float r_twist, ref GameObject r_hand, ref GameObject r_grabbed, ref GameObject r_ohand, ref GameObject r_ograbbed)
+  {
+    float htrigger_threshhold = 0.1f;
+    float itrigger_threshhold = 0.1f;
+
+    int htrigger_delta = 0;
+    if(!r_htrigger && htrigger_val > htrigger_threshhold)
+    {
+      htrigger_delta = 1;
+      r_htrigger = true;
+    }
+    else if(r_htrigger && htrigger_val <= htrigger_threshhold)
+    {
+      htrigger_delta = -1;
+      r_htrigger = false;
+    }
+
+    int itrigger_delta = 0;
+    if(!r_itrigger && itrigger_val > itrigger_threshhold)
+    {
+      itrigger_delta = 1;
+      r_itrigger = true;
+      r_twist = twist_val;
+    }
+    else if(r_itrigger && itrigger_val <= itrigger_threshhold)
+    {
+      itrigger_delta = -1;
+      r_itrigger = false;
+    }
+
+    if(r_grabbed == null && htrigger_delta == 1)
+    {
+      for(int i = 0; r_grabbed == null && i < movables.Count; i++)
+      {
+        if(
+           ( which && movables[i].lintersect) ||
+           (!which && movables[i].rintersect)
+          )
+        {
+          r_grabbed = movables[i].gameObject;
+          r_grabbed.transform.SetParent(r_hand.transform);
+          r_hand.GetComponent<MeshRenderer>().material = hand_grabbing;
+          if(r_grabbed == r_ograbbed)
+          {
+            r_ograbbed = null;
+            r_ohand.GetComponent<MeshRenderer>().material = hand_intersecting;
+          }
+        }
+      }
+      for(int i = 0; r_grabbed == null && i < dials.Count; i++)
+      {
+        if(
+           ( which && dials[i].lintersect) ||
+           (!which && dials[i].rintersect)
+          )
+        {
+          r_grabbed = dials[i].gameObject;
+          r_hand.GetComponent<MeshRenderer>().material = hand_grabbing;
+          if(r_grabbed == r_ograbbed)
+          {
+            r_ograbbed = null;
+            r_ohand.GetComponent<MeshRenderer>().material = hand_intersecting;
+          }
+        }
+      }
+    }
+    else if(r_grabbed && htrigger_delta == -1)
+    {
+      Tool t = r_grabbed.GetComponent<Tool>();
+      if(t)
+      {
+        if(
+           ( which && t.active.GetComponent<Grabbable>().lintersect) ||
+           (!which && t.active.GetComponent<Grabbable>().rintersect)
+          )
+        {
+          r_grabbed.transform.SetParent(t.active.transform);
+          r_grabbed.transform.localPosition = new Vector3(0f,0f,0f);
+          r_grabbed.transform.localRotation = Quaternion.identity;
+        }
+        else if(
+           ( which && t.storage.GetComponent<Grabbable>().lintersect) ||
+           (!which && t.storage.GetComponent<Grabbable>().rintersect)
+          )
+        {
+          r_grabbed.transform.SetParent(t.storage.transform);
+          r_grabbed.transform.localPosition = new Vector3(0f,0f,0f);
+          r_grabbed.transform.localRotation = Quaternion.identity;
+        }
+        else t = null;
+      }
+      if(t == null) r_grabbed.transform.SetParent(r_grabbed.GetComponent<Grabbable>().og_parent); //ok to do, even with a dial
+
+      r_grabbed = null;
+    }
+    if(r_grabbed == null)
+    {
+      r_hand.GetComponent<MeshRenderer>().material = hand_empty;
+      for(int i = 0; i < movables.Count; i++)
+      {
+        if(
+           ( which && movables[i].lintersect) ||
+           (!which && movables[i].rintersect)
+          )
+        {
+          r_hand.GetComponent<MeshRenderer>().material = hand_intersecting;
+          break;
+        }
+      }
+    }
+
+    if(r_grabbed && r_itrigger) TryAct(r_grabbed, twist_val, ref r_twist);
   }
 
   // Update is called once per frame
   void Update()
   {
-    float trigger_threshhold = 0.1f;
-
-    //left hand
-    int ltrigger_delta = 0;
-    if(!ltrigger && OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger) > trigger_threshhold)
-    {
-      ltrigger_delta = 1;
-      ltrigger = true;
-    }
-    else if(ltrigger && OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger) <= trigger_threshhold)
-    {
-      ltrigger_delta = -1;
-      ltrigger = false;
-    }
-
-    if(lgrabbed == null && ltrigger_delta == 1)
-    {
-      for(int i = 0; lgrabbed == null && i < grabbables.Count; i++)
-      {
-        if(grabbables[i].lintersect)
-        {
-          lgrabbed = grabbables[i].gameObject;
-          lgrabbed.transform.SetParent(lhand.transform);
-          lhand.GetComponent<MeshRenderer>().material = hand_grabbing;
-          if(lgrabbed == rgrabbed)
-          {
-            rgrabbed = null;
-            rhand.GetComponent<MeshRenderer>().material = hand_intersecting;
-          }
-        }
-      }
-    }
-    else if(lgrabbed && ltrigger_delta == -1)
-    {
-      Tool t = lgrabbed.GetComponent<Tool>();
-      if(t)
-      {
-        if(t.active.GetComponent<Touchable>().lintersect)
-        {
-          lgrabbed.transform.SetParent(t.active.transform);
-          lgrabbed.transform.localPosition = new Vector3(0f,0f,0f);
-          lgrabbed.transform.localRotation = new Vector3(0f,0f,0f);
-        }
-        else if(t.storage.GetComponent<Touchable>().lintersect)
-        {
-          lgrabbed.transform.SetParent(t.storage.transform);
-          lgrabbed.transform.localPosition = new Vector3(0f,0f,0f);
-          lgrabbed.transform.localRotation = new Vector3(0f,0f,0f);
-        }
-        else t = null;
-      }
-      if(t == null) lgrabbed.transform.SetParent(lgrabbed.GetComponent<Touchable>().og_parent);
-
-      lgrabbed = null;
-    }
-    if(lgrabbed == null)
-    {
-      lhand.GetComponent<MeshRenderer>().material = hand_empty;
-      for(int i = 0; i < grabbables.Count; i++)
-      {
-        if(grabbables[i].lintersect)
-        {
-          lhand.GetComponent<MeshRenderer>().material = hand_intersecting;
-          break;
-        }
-      }
-    }
-
-    //right hand
-    int rtrigger_delta = 0;
-    if(!rtrigger && OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger) > trigger_threshhold)
-    {
-      rtrigger_delta = 1;
-      rtrigger = true;
-    }
-    else if(rtrigger && OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger) <= trigger_threshhold)
-    {
-      rtrigger_delta = -1;
-      rtrigger = false;
-    }
-    if(rgrabbed == null && rtrigger_delta == 1)
-    {
-      for(int i = 0; rgrabbed == null && i < grabbables.Count; i++)
-      {
-        if(grabbables[i].rintersect)
-        {
-          rgrabbed = grabbables[i].gameObject;
-          rgrabbed.transform.SetParent(rhand.transform);
-          rhand.GetComponent<MeshRenderer>().material = hand_grabbing;
-          if(rgrabbed == lgrabbed)
-          {
-            lgrabbed = null;
-            lhand.GetComponent<MeshRenderer>().material = hand_intersecting;
-          }
-        }
-      }
-    }
-    else if(rgrabbed && rtrigger_delta == -1)
-    {
-      Tool t = rgrabbed.GetComponent<Tool>();
-      if(t)
-      {
-        if(t.active.GetComponent<Touchable>().rintersect)
-        {
-          rgrabbed.transform.SetParent(t.active.transform);
-          rgrabbed.transform.localPosition = new Vector3(0f,0f,0f);
-          rgrabbed.transform.localRotation = new Vector3(0f,0f,0f);
-        }
-        else if(t.storage.GetComponent<Touchable>().rintersect)
-        {
-          rgrabbed.transform.SetParent(t.storage.transform);
-          rgrabbed.transform.localPosition = new Vector3(0f,0f,0f);
-          rgrabbed.transform.localRotation = new Vector3(0f,0f,0f);
-        }
-        else t = null;
-      }
-      if(t == null) rgrabbed.transform.SetParent(rgrabbed.GetComponent<Touchable>().og_parent);
-
-      rgrabbed = null;
-    }
-    if(rgrabbed == null)
-    {
-      rhand.GetComponent<MeshRenderer>().material = hand_empty;
-      for(int i = 0; i < grabbables.Count; i++)
-      {
-        if(grabbables[i].rintersect)
-        {
-          rhand.GetComponent<MeshRenderer>().material = hand_intersecting;
-          break;
-        }
-      }
-    }
-
-    //buttons
-    if(lgrabbed && OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger)   > trigger_threshhold) TryAct(lgrabbed);
-    if(rgrabbed && OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger) > trigger_threshhold) TryAct(rgrabbed);
-
+    TryGrab(true,  OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger),   OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger),   lhand.transform.rotation.z, ref lhtrigger, ref litrigger, ref ltwist, ref lhand, ref lgrabbed, ref rhand, ref rgrabbed); //left hand
+    TryGrab(false, OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger), OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger), rhand.transform.rotation.z, ref rhtrigger, ref ritrigger, ref rtwist, ref rhand, ref rgrabbed, ref lhand, ref lgrabbed); //right hand
   }
 
 }
