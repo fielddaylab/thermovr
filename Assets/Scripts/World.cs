@@ -17,11 +17,17 @@ public class World : MonoBehaviour
   List<Grabbable> movables;
   GameObject lgrabbed = null;
   GameObject rgrabbed = null;
-  float ltwist = 0.0f;
-  float rtwist = 0.0f;
+  float ly = 0.0f;
+  float ry = 0.0f;
 
   List<Tool> tools;
   List<Grabbable> dials;
+  GameObject dial_insulator;
+  GameObject dial_clamp;
+  GameObject dial_burner;
+  GameObject dial_coil;
+  GameObject dial_weight;
+  GameObject dial_balloon;
 
   bool lhtrigger = false;
   bool rhtrigger = false;
@@ -52,13 +58,22 @@ public class World : MonoBehaviour
     lhand.GetComponent<MeshRenderer>().material = hand_empty;
     rhand.GetComponent<MeshRenderer>().material = hand_empty;
 
+    Tool t;
     tools = new List<Tool>();
-    tools.Add(GameObject.Find("Tool_Insulator").GetComponent<Tool>());
-    tools.Add(GameObject.Find("Tool_Clamp").GetComponent<Tool>());
-    tools.Add(GameObject.Find("Tool_Burner").GetComponent<Tool>());
-    tools.Add(GameObject.Find("Tool_Coil").GetComponent<Tool>());
-    tools.Add(GameObject.Find("Tool_Weight").GetComponent<Tool>());
-    tools.Add(GameObject.Find("Tool_Balloon").GetComponent<Tool>());
+    t = GameObject.Find("Tool_Insulator").GetComponent<Tool>(); dial_insulator = t.dial; tools.Add(t);
+    t = GameObject.Find("Tool_Clamp"    ).GetComponent<Tool>(); dial_clamp     = t.dial; tools.Add(t);
+    t = GameObject.Find("Tool_Burner"   ).GetComponent<Tool>(); dial_burner    = t.dial; tools.Add(t);
+    t = GameObject.Find("Tool_Coil"     ).GetComponent<Tool>(); dial_coil      = t.dial; tools.Add(t);
+    t = GameObject.Find("Tool_Weight"   ).GetComponent<Tool>(); dial_weight    = t.dial; tools.Add(t);
+    t = GameObject.Find("Tool_Balloon"  ).GetComponent<Tool>(); dial_balloon   = t.dial; tools.Add(t);
+
+    for(int i = 0; i < tools.Count; i++)
+    {
+      t = tools[i];
+      GameObject g = t.gameObject;
+      g.transform.SetParent(t.storage.gameObject.transform);
+      g.transform.localPosition = new Vector3(0.0f,0.0f,0.0f);
+    }
 
     dials = new List<Grabbable>();
     for(int i = 0; i < tools.Count; i++) dials.Add(tools[i].dial.GetComponent<Grabbable>());
@@ -84,7 +99,7 @@ public class World : MonoBehaviour
 
   }
 
-  void TryAct(GameObject actable, float twist_val, ref float r_twist)
+  void TryAct(GameObject actable, float y_val, ref float r_y)
   {
          if(actable == TInc) thermo.inc_t();
     else if(actable == TDec) thermo.dec_t();
@@ -97,18 +112,22 @@ public class World : MonoBehaviour
       Dial d = actable.GetComponent<Dial>();
       if(d != null)
       {
-        float dtwist = r_twist-twist_val;
-        d.val = Mathf.Clamp(d.val-dtwist,0.0f,1.0f);
-        DEBUGTEXTS[0].text = twist_val.ToString();
-        DEBUGTEXTS[1].text = dtwist.ToString();
-        DEBUGTEXTS[2].text = d.val.ToString();
+        float dy = (r_y-y_val);
+        d.val = Mathf.Clamp(d.val-dy,0.0f,1.0f);
+
+        if(actable == dial_insulator) thermo.set_tp(d.val);
+        if(actable == dial_clamp)     thermo.set_vp(d.val);
+        if(actable == dial_burner)    ; //do nothing; passive
+        if(actable == dial_coil)      ; //do nothing; passive
+        if(actable == dial_weight)    thermo.set_pp(d.val);
+        if(actable == dial_balloon)   thermo.set_pp(d.val);
       }
     }
 
-    r_twist = twist_val;
+    r_y = y_val;
   }
 
-  void TryGrab(bool which, float htrigger_val, float itrigger_val, float twist_val, ref bool r_htrigger, ref bool r_itrigger, ref float r_twist, ref GameObject r_hand, ref GameObject r_grabbed, ref GameObject r_ohand, ref GameObject r_ograbbed)
+  void TryGrab(bool which, float htrigger_val, float itrigger_val, float y_val, ref bool r_htrigger, ref bool r_itrigger, ref float r_y, ref GameObject r_hand, ref GameObject r_grabbed, ref GameObject r_ohand, ref GameObject r_ograbbed)
   {
     float htrigger_threshhold = 0.1f;
     float itrigger_threshhold = 0.1f;
@@ -130,7 +149,7 @@ public class World : MonoBehaviour
     {
       itrigger_delta = 1;
       r_itrigger = true;
-      r_twist = twist_val;
+      r_y = y_val;
     }
     else if(r_itrigger && itrigger_val <= itrigger_threshhold)
     {
@@ -219,14 +238,19 @@ public class World : MonoBehaviour
       }
     }
 
-    if(r_grabbed && r_itrigger) TryAct(r_grabbed, twist_val, ref r_twist);
+    if(r_grabbed && r_itrigger) TryAct(r_grabbed, y_val, ref r_y);
   }
 
   // Update is called once per frame
   void Update()
   {
-    TryGrab(true,  OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger),   OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger),   lhand.transform.rotation.z, ref lhtrigger, ref litrigger, ref ltwist, ref lhand, ref lgrabbed, ref rhand, ref rgrabbed); //left hand
-    TryGrab(false, OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger), OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger), rhand.transform.rotation.z, ref rhtrigger, ref ritrigger, ref rtwist, ref rhand, ref rgrabbed, ref lhand, ref lgrabbed); //right hand
+    TryGrab(true,  OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger),   OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger),   lhand.transform.position.y, ref lhtrigger, ref litrigger, ref ly, ref lhand, ref lgrabbed, ref rhand, ref rgrabbed); //left hand
+    TryGrab(false, OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger), OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger), rhand.transform.position.y, ref rhtrigger, ref ritrigger, ref ry, ref rhand, ref rgrabbed, ref lhand, ref lgrabbed); //right hand
+    /*
+    DEBUGTEXTS[0].text = lhand.transform.eulerAngles.x.ToString();
+    DEBUGTEXTS[1].text = lhand.transform.eulerAngles.y.ToString();
+    DEBUGTEXTS[2].text = lhand.transform.eulerAngles.z.ToString();
+    */
   }
 
 }

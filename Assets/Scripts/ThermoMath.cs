@@ -731,6 +731,17 @@ public class ThermoMath : MonoBehaviour
     derive();
     dotransform();
   }
+  public void set_tp(double tp)
+  {
+    set_t(Lerpd(t_min,t_max,tp));
+  }
+  public void set_t(double t)
+  {
+    temperature_k = t;
+    specificvolume_q = 1.0/IF97.rhomass_Tp(temperature_k,pressure_p/1000000.0); //expects:K,MPa returns Kg/M^3
+    derive();
+    dotransform();
+  }
   public void inc_p()
   {
     pressure_p = Lerpd(pressure_p,p_max,0.01);
@@ -741,6 +752,17 @@ public class ThermoMath : MonoBehaviour
   public void dec_p()
   {
     pressure_p = Lerpd(pressure_p,p_min,0.01);
+    specificvolume_q = 1.0/IF97.rhomass_Tp(temperature_k,pressure_p/1000000.0); //expects:K,MPa returns Kg/M^3
+    derive();
+    dotransform();
+  }
+  public void set_pp(double pp)
+  {
+    set_p(Lerpd(p_min,p_max,pp));
+  }
+  public void set_p(double p)
+  {
+    pressure_p = p;
     specificvolume_q = 1.0/IF97.rhomass_Tp(temperature_k,pressure_p/1000000.0); //expects:K,MPa returns Kg/M^3
     derive();
     dotransform();
@@ -757,7 +779,17 @@ public class ThermoMath : MonoBehaviour
     derive();
     dotransform();
   }
-
+  public void set_vp(double vp)
+  {
+    set_v(Lerpd(v_min,v_max,vp));
+  }
+  public void set_v(double v)
+  {
+    specificvolume_q = v;
+    //need to figure out 3rd param!
+    derive();
+    dotransform();
+  }
 
   void derive()
   {
