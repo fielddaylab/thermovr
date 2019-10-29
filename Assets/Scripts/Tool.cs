@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Tool : MonoBehaviour
 {
+  public bool engaged = false;
   public GameObject storage;
   public GameObject active;
   public GameObject dial;

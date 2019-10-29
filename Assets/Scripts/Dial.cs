@@ -5,6 +5,7 @@ using UnityEngine;
 public class Dial : MonoBehaviour
 {
     public float val = 0.0f;
+    public GameObject tool;
     GameObject meter;
 
     // Start is called before the first frame update

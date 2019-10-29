@@ -70,6 +70,8 @@ public class World : MonoBehaviour
     for(int i = 0; i < tools.Count; i++)
     {
       t = tools[i];
+      SetVisibility(t.active,false);
+      SetVisibility(t.storage,false);
       GameObject g = t.gameObject;
       g.transform.SetParent(t.storage.gameObject.transform);
       g.transform.localPosition = new Vector3(0.0f,0.0f,0.0f);
@@ -99,6 +101,24 @@ public class World : MonoBehaviour
 
   }
 
+  void SetVisibility(GameObject g, bool v)
+  {
+    MeshRenderer[] mrs = g.GetComponentsInChildren<MeshRenderer>();
+    for(int i = 0; i < mrs.Length; i++)
+      mrs[i].enabled = v;
+  }
+
+  void ApplyDial(GameObject dial)
+  {
+    Dial d = dial.GetComponent<Dial>();
+    if(dial == dial_insulator) thermo.set_tp(d.val);
+    if(dial == dial_clamp)     thermo.set_vp(d.val);
+    if(dial == dial_burner)    ; //do nothing; passive
+    if(dial == dial_coil)      ; //do nothing; passive
+    if(dial == dial_weight)    thermo.set_pp(d.val);
+    if(dial == dial_balloon)   thermo.set_pp(d.val);
+  }
+
   void TryAct(GameObject actable, float y_val, ref float r_y)
   {
          if(actable == TInc) thermo.inc_t();
@@ -112,15 +132,11 @@ public class World : MonoBehaviour
       Dial d = actable.GetComponent<Dial>();
       if(d != null)
       {
+        Tool t = d.tool.GetComponent<Tool>();
         float dy = (r_y-y_val);
         d.val = Mathf.Clamp(d.val-dy,0.0f,1.0f);
 
-        if(actable == dial_insulator) thermo.set_tp(d.val);
-        if(actable == dial_clamp)     thermo.set_vp(d.val);
-        if(actable == dial_burner)    ; //do nothing; passive
-        if(actable == dial_coil)      ; //do nothing; passive
-        if(actable == dial_weight)    thermo.set_pp(d.val);
-        if(actable == dial_balloon)   thermo.set_pp(d.val);
+        if(t.engaged) ApplyDial(actable);
       }
     }
 
@@ -167,6 +183,8 @@ public class World : MonoBehaviour
           )
         {
           r_grabbed = movables[i].gameObject;
+          Tool t = r_grabbed.GetComponent<Tool>();
+          if(t) t.engaged = false;
           r_grabbed.transform.SetParent(r_hand.transform);
           r_hand.GetComponent<MeshRenderer>().material = hand_grabbing;
           if(r_grabbed == r_ograbbed)
@@ -198,12 +216,16 @@ public class World : MonoBehaviour
       Tool t = r_grabbed.GetComponent<Tool>();
       if(t)
       {
+        SetVisibility(t.storage,false);
+        SetVisibility(t.active,false);
         if(
            ( which && t.active.GetComponent<Grabbable>().lintersect) ||
            (!which && t.active.GetComponent<Grabbable>().rintersect)
           )
         {
           r_grabbed.transform.SetParent(t.active.transform);
+          t.engaged = true;
+          ApplyDial(t.dial);
           r_grabbed.transform.localPosition = new Vector3(0f,0f,0f);
           r_grabbed.transform.localRotation = Quaternion.identity;
         }
@@ -222,7 +244,29 @@ public class World : MonoBehaviour
 
       r_grabbed = null;
     }
-    if(r_grabbed == null)
+
+    if(r_grabbed)
+    {
+      Tool t = r_grabbed.GetComponent<Tool>();
+      if(t)
+      {
+        if(
+           ( which && t.active.GetComponent<Grabbable>().lintersect) ||
+           (!which && t.active.GetComponent<Grabbable>().rintersect)
+          )
+          SetVisibility(t.active,true);
+        else
+          SetVisibility(t.active,false);
+        if(
+           ( which && t.storage.GetComponent<Grabbable>().lintersect) ||
+           (!which && t.storage.GetComponent<Grabbable>().rintersect)
+          )
+          SetVisibility(t.storage,true);
+        else
+          SetVisibility(t.storage,false);
+      }
+    }
+    else
     {
       r_hand.GetComponent<MeshRenderer>().material = hand_empty;
       for(int i = 0; i < movables.Count; i++)
