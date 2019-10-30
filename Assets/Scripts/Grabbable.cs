@@ -8,10 +8,10 @@ public class Grabbable : MonoBehaviour
   GameObject rhand;
   Collider lhand_c;
   Collider rhand_c;
+  [System.NonSerialized]
   public Transform og_parent;
 
-  // Start is called before the first frame update
-  void Start()
+  void Awake()
   {
     lhand = GameObject.Find("LHand");
     rhand = GameObject.Find("RHand");
@@ -20,13 +20,21 @@ public class Grabbable : MonoBehaviour
     og_parent = gameObject.transform.parent;
   }
 
+  // Start is called before the first frame update
+  void Start()
+  {
+
+  }
+
   // Update is called once per frame
   void Update()
   {
 
   }
 
+  [System.NonSerialized]
   public bool lintersect = false;
+  [System.NonSerialized]
   public bool rintersect = false;
   void OnTriggerEnter(Collider c)
   {

@@ -48,16 +48,6 @@ public class ThermoMath : MonoBehaviour
   public double entropy;
   public double enthalpy;
 
-  //constraints
-  public double content_moles;
-  public double radius_m;
-  public double minstop_m;
-  public double maxstop_m;
-  public double weight_g;
-  public double lift_g;
-  public double flame_k;
-  public double coolant_k;
-
   //derived
   public double pistonheight_m;
   public double contentvolume_m3;
@@ -67,12 +57,6 @@ public class ThermoMath : MonoBehaviour
   GameObject container;
   GameObject contents;
   GameObject piston;
-  GameObject minstop;
-  GameObject maxstop;
-  GameObject flame;
-  GameObject coolant;
-  GameObject weights;
-  GameObject lifts;
 
   //mesh
   GameObject graph;
@@ -689,16 +673,6 @@ public class ThermoMath : MonoBehaviour
     specificvolume_q = 0;
     entropy = 0;
     enthalpy = 0;
-
-    //constraints
-    content_moles = 0;
-    radius_m = 0;
-    minstop_m = 0;
-    maxstop_m = 0;
-    weight_g = 0;
-    lift_g = 0;
-    flame_k = 0;
-    coolant_k = 0;
   }
 
   void findObjects()
@@ -707,16 +681,12 @@ public class ThermoMath : MonoBehaviour
     container = GameObject.Find("Container");
     contents  = GameObject.Find("Contents");
     piston    = GameObject.Find("Piston");
-    minstop   = GameObject.Find("Minstop");
-    maxstop   = GameObject.Find("Maxstop");
-    flame     = GameObject.Find("Flame");
-    coolant   = GameObject.Find("Coolant");
-    weights   = GameObject.Find("Weights");
-    lifts     = GameObject.Find("Lifts");
+
     graph     = GameObject.Find("Graph");
     state     = GameObject.Find("State");
   }
 
+  //temperature
   public void inc_t()
   {
     temperature_k = Lerpd(temperature_k,t_max,0.01);
@@ -742,6 +712,7 @@ public class ThermoMath : MonoBehaviour
     derive();
     dotransform();
   }
+  //pressure
   public void inc_p()
   {
     pressure_p = Lerpd(pressure_p,p_max,0.01);
@@ -767,6 +738,7 @@ public class ThermoMath : MonoBehaviour
     derive();
     dotransform();
   }
+  //volume
   public void inc_v()
   {
     //specificvolume_q = Lerpd(specificvolume_q,v_max,0.01);
@@ -789,6 +761,40 @@ public class ThermoMath : MonoBehaviour
     //need to figure out 3rd param!
     derive();
     dotransform();
+  }
+  //enthalpy
+  public void inc_h() //no idea what this means
+  {
+
+  }
+  public void dec_h() //no idea what this means
+  {
+
+  }
+  public void set_hp(double hp)
+  {
+
+  }
+  public void set_h(double h)
+  {
+
+  }
+  //entropy
+  public void inc_s() //no idea what this means
+  {
+
+  }
+  public void dec_s() //no idea what this means
+  {
+
+  }
+  public void set_sp(double sp)
+  {
+
+  }
+  public void set_s(double s)
+  {
+
   }
 
   void derive()

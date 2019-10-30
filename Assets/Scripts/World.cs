@@ -21,13 +21,12 @@ public class World : MonoBehaviour
   float ry = 0.0f;
 
   List<Tool> tools;
-  List<Grabbable> dials;
-  GameObject dial_insulator;
-  GameObject dial_clamp;
-  GameObject dial_burner;
-  GameObject dial_coil;
-  GameObject dial_weight;
-  GameObject dial_balloon;
+  Tool tool_insulator;
+  Tool tool_clamp;
+  Tool tool_burner;
+  Tool tool_coil;
+  Tool tool_weight;
+  Tool tool_balloon;
 
   bool lhtrigger = false;
   bool rhtrigger = false;
@@ -60,30 +59,27 @@ public class World : MonoBehaviour
 
     Tool t;
     tools = new List<Tool>();
-    t = GameObject.Find("Tool_Insulator").GetComponent<Tool>(); dial_insulator = t.dial; tools.Add(t);
-    t = GameObject.Find("Tool_Clamp"    ).GetComponent<Tool>(); dial_clamp     = t.dial; tools.Add(t);
-    t = GameObject.Find("Tool_Burner"   ).GetComponent<Tool>(); dial_burner    = t.dial; tools.Add(t);
-    t = GameObject.Find("Tool_Coil"     ).GetComponent<Tool>(); dial_coil      = t.dial; tools.Add(t);
-    t = GameObject.Find("Tool_Weight"   ).GetComponent<Tool>(); dial_weight    = t.dial; tools.Add(t);
-    t = GameObject.Find("Tool_Balloon"  ).GetComponent<Tool>(); dial_balloon   = t.dial; tools.Add(t);
+    t = GameObject.Find("Tool_Insulator").GetComponent<Tool>(); tool_insulator = t; tools.Add(t);
+    t = GameObject.Find("Tool_Clamp"    ).GetComponent<Tool>(); tool_clamp     = t; tools.Add(t);
+    t = GameObject.Find("Tool_Burner"   ).GetComponent<Tool>(); tool_burner    = t; tools.Add(t);
+    t = GameObject.Find("Tool_Coil"     ).GetComponent<Tool>(); tool_coil      = t; tools.Add(t);
+    t = GameObject.Find("Tool_Weight"   ).GetComponent<Tool>(); tool_weight    = t; tools.Add(t);
+    t = GameObject.Find("Tool_Balloon"  ).GetComponent<Tool>(); tool_balloon   = t; tools.Add(t);
 
     for(int i = 0; i < tools.Count; i++)
     {
       t = tools[i];
-      SetVisibility(t.active,VIS_AVAILABLE,false);
-      SetVisibility(t.active,VIS_SNAP,false);
-      SetVisibility(t.storage,VIS_AVAILABLE,false);
-      SetVisibility(t.storage,VIS_SNAP,false);
+      t.active_available_meshrenderer.enabled = false;
+      t.active_snap_meshrenderer.enabled = false;
+      t.storage_available_meshrenderer.enabled = false;
+      t.storage_snap_meshrenderer.enabled = false;
       GameObject g = t.gameObject;
       g.transform.SetParent(t.storage.gameObject.transform);
       g.transform.localPosition = new Vector3(0.0f,0.0f,0.0f);
     }
 
-    dials = new List<Grabbable>();
-    for(int i = 0; i < tools.Count; i++) dials.Add(tools[i].dial.GetComponent<Grabbable>());
-
     movables = new List<Grabbable>();
-    for(int i = 0; i < tools.Count; i++) movables.Add(tools[i].gameObject.GetComponent<Grabbable>()); //important that tools take priority, so they can be grabbed and removed
+    for(int i = 0; i < tools.Count; i++) movables.Add(tools[i].grabbable); //important that tools take priority, so they can be grabbed and removed
     movables.Add(GameObject.Find("Graph").GetComponent<Grabbable>());
     movables.Add(GameObject.Find("Vessel").GetComponent<Grabbable>());
 
@@ -103,29 +99,14 @@ public class World : MonoBehaviour
 
   }
 
-  int VIS_AVAILABLE = 0;
-  int VIS_SNAP = 1;
-  void SetVisibility(GameObject g, int which, bool v)
+  void ApplyTool(Tool t)
   {
-    Ghost gh = g.GetComponent<Ghost>();
-    if(!gh) return;
-    MeshRenderer r;
-    if(which == VIS_AVAILABLE)
-      r = gh.available.GetComponent<MeshRenderer>();
-    else
-      r = gh.snap.GetComponent<MeshRenderer>();
-    r.enabled = v;
-  }
-
-  void ApplyDial(GameObject dial)
-  {
-    Dial d = dial.GetComponent<Dial>();
-    if(dial == dial_insulator) thermo.set_tp(d.val);
-    if(dial == dial_clamp)     thermo.set_vp(d.val);
-    if(dial == dial_burner)    ; //do nothing; passive
-    if(dial == dial_coil)      ; //do nothing; passive
-    if(dial == dial_weight)    thermo.set_pp(d.val);
-    if(dial == dial_balloon)   thermo.set_pp(d.val);
+    if(t == tool_insulator) thermo.set_tp(t.dial_dial.val);
+    if(t == tool_clamp)     thermo.set_vp(t.dial_dial.val);
+    if(t == tool_burner)    ; //do nothing; passive
+    if(t == tool_coil)      ; //do nothing; passive
+    if(t == tool_weight)    thermo.set_pp(t.dial_dial.val);
+    if(t == tool_balloon)   thermo.set_pp(t.dial_dial.val);
   }
 
   void TryAct(GameObject actable, float y_val, ref float r_y)
@@ -145,7 +126,7 @@ public class World : MonoBehaviour
         float dy = (r_y-y_val);
         d.val = Mathf.Clamp(d.val-dy,0.0f,1.0f);
 
-        if(t.engaged) ApplyDial(actable);
+        if(t.engaged) ApplyTool(t);
       }
     }
 
@@ -198,14 +179,14 @@ public class World : MonoBehaviour
           if(r_grabbed == r_ograbbed) r_ograbbed = null;
         }
       }
-      for(int i = 0; r_grabbed == null && i < dials.Count; i++)
+      for(int i = 0; r_grabbed == null && i < tools.Count; i++)
       {
         if(
-           ( which && dials[i].lintersect) ||
-           (!which && dials[i].rintersect)
+           ( which && tools[i].dial_grabbable.lintersect) ||
+           (!which && tools[i].dial_grabbable.rintersect)
           )
         {
-          r_grabbed = dials[i].gameObject;
+          r_grabbed = tools[i].dial;
           if(r_grabbed == r_ograbbed) r_ograbbed = null;
         }
       }
@@ -216,19 +197,19 @@ public class World : MonoBehaviour
       if(t)
       {
         if(
-           ( which && t.active.GetComponent<Grabbable>().lintersect) ||
-           (!which && t.active.GetComponent<Grabbable>().rintersect)
+           ( which && t.active_grabbable.lintersect) ||
+           (!which && t.active_grabbable.rintersect)
           )
         {
           r_grabbed.transform.SetParent(t.active.transform);
           t.engaged = true;
-          ApplyDial(t.dial);
+          ApplyTool(t);
           r_grabbed.transform.localPosition = new Vector3(0f,0f,0f);
           r_grabbed.transform.localRotation = Quaternion.identity;
         }
         else if(
-           ( which && t.storage.GetComponent<Grabbable>().lintersect) ||
-           (!which && t.storage.GetComponent<Grabbable>().rintersect)
+           ( which && t.storage_grabbable.lintersect) ||
+           (!which && t.storage_grabbable.rintersect)
           )
         {
           r_grabbed.transform.SetParent(t.storage.transform);
@@ -254,41 +235,41 @@ public class World : MonoBehaviour
 
       //active
       if(
-        (lgrabbed == g && t.active.GetComponent<Grabbable>().lintersect) ||
-        (rgrabbed == g && t.active.GetComponent<Grabbable>().rintersect)
+        (lgrabbed == g && t.active_grabbable.lintersect) ||
+        (rgrabbed == g && t.active_grabbable.rintersect)
       )
       {
-        SetVisibility(t.active, VIS_AVAILABLE, false);
-        SetVisibility(t.active, VIS_SNAP,      true);
+        t.active_available_meshrenderer.enabled = false;
+        t.active_snap_meshrenderer.enabled =      true;
       }
       else if(lgrabbed == g || rgrabbed == g)
       {
-        SetVisibility(t.active, VIS_AVAILABLE, true);
-        SetVisibility(t.active, VIS_SNAP,      false);
+        t.active_available_meshrenderer.enabled = true;
+        t.active_snap_meshrenderer.enabled =      false;
       }
       else
       {
-        SetVisibility(t.active, VIS_SNAP,      false);
-        SetVisibility(t.active, VIS_AVAILABLE, false);
+        t.active_snap_meshrenderer.enabled =      false;
+        t.active_available_meshrenderer.enabled = false;
       }
       //storage
       if(
-        (lgrabbed == g && t.storage.GetComponent<Grabbable>().lintersect) ||
-        (rgrabbed == g && t.storage.GetComponent<Grabbable>().rintersect)
+        (lgrabbed == g && t.storage_grabbable.lintersect) ||
+        (rgrabbed == g && t.storage_grabbable.rintersect)
       )
       {
-        SetVisibility(t.storage, VIS_AVAILABLE, false);
-        SetVisibility(t.storage, VIS_SNAP,      true);
+        t.storage_available_meshrenderer.enabled = false;
+        t.storage_snap_meshrenderer.enabled =      true;
       }
       else if(lgrabbed == g || rgrabbed == g)
       {
-        SetVisibility(t.storage, VIS_AVAILABLE, true);
-        SetVisibility(t.storage, VIS_SNAP,      false);
+        t.storage_available_meshrenderer.enabled = true;
+        t.storage_snap_meshrenderer.enabled =      false;
       }
       else
       {
-        SetVisibility(t.storage, VIS_SNAP,      false);
-        SetVisibility(t.storage, VIS_AVAILABLE, false);
+        t.storage_snap_meshrenderer.enabled =      false;
+        t.storage_available_meshrenderer.enabled = false;
       }
     }
 
@@ -313,6 +294,12 @@ public class World : MonoBehaviour
   // Update is called once per frame
   void Update()
   {
+    //passive effects
+    float d_heat = 0;
+    if(tool_burner.engaged) d_heat += tool_burner.dial_dial.val;
+    if(tool_coil.engaged)   d_heat -= tool_coil.dial_dial.val;
+    if(d_heat != 0.0f) thermo.set_h(d_heat);
+
     TryGrab(true,  OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger),   OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger),   lhand.transform.position.y, ref lhtrigger, ref litrigger, ref ly, ref lhand, ref lgrabbed, ref rhand, ref rgrabbed); //left hand
     TryGrab(false, OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger), OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger), rhand.transform.position.y, ref rhtrigger, ref ritrigger, ref ry, ref rhand, ref rgrabbed, ref lhand, ref lgrabbed); //right hand
 
