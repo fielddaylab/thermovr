@@ -70,8 +70,10 @@ public class World : MonoBehaviour
     for(int i = 0; i < tools.Count; i++)
     {
       t = tools[i];
-      SetVisibility(t.active,false);
-      SetVisibility(t.storage,false);
+      SetVisibility(t.active,VIS_AVAILABLE,false);
+      SetVisibility(t.active,VIS_SNAP,false);
+      SetVisibility(t.storage,VIS_AVAILABLE,false);
+      SetVisibility(t.storage,VIS_SNAP,false);
       GameObject g = t.gameObject;
       g.transform.SetParent(t.storage.gameObject.transform);
       g.transform.localPosition = new Vector3(0.0f,0.0f,0.0f);
@@ -101,11 +103,18 @@ public class World : MonoBehaviour
 
   }
 
-  void SetVisibility(GameObject g, bool v)
+  int VIS_AVAILABLE = 0;
+  int VIS_SNAP = 1;
+  void SetVisibility(GameObject g, int which, bool v)
   {
-    MeshRenderer[] mrs = g.GetComponentsInChildren<MeshRenderer>();
-    for(int i = 0; i < mrs.Length; i++)
-      mrs[i].enabled = v;
+    Ghost gh = g.GetComponent<Ghost>();
+    if(!gh) return;
+    MeshRenderer r;
+    if(which == VIS_AVAILABLE)
+      r = gh.available.GetComponent<MeshRenderer>();
+    else
+      r = gh.snap.GetComponent<MeshRenderer>();
+    r.enabled = v;
   }
 
   void ApplyDial(GameObject dial)
@@ -186,12 +195,7 @@ public class World : MonoBehaviour
           Tool t = r_grabbed.GetComponent<Tool>();
           if(t) t.engaged = false;
           r_grabbed.transform.SetParent(r_hand.transform);
-          r_hand.GetComponent<MeshRenderer>().material = hand_grabbing;
-          if(r_grabbed == r_ograbbed)
-          {
-            r_ograbbed = null;
-            r_ohand.GetComponent<MeshRenderer>().material = hand_intersecting;
-          }
+          if(r_grabbed == r_ograbbed) r_ograbbed = null;
         }
       }
       for(int i = 0; r_grabbed == null && i < dials.Count; i++)
@@ -202,12 +206,7 @@ public class World : MonoBehaviour
           )
         {
           r_grabbed = dials[i].gameObject;
-          r_hand.GetComponent<MeshRenderer>().material = hand_grabbing;
-          if(r_grabbed == r_ograbbed)
-          {
-            r_ograbbed = null;
-            r_ohand.GetComponent<MeshRenderer>().material = hand_intersecting;
-          }
+          if(r_grabbed == r_ograbbed) r_ograbbed = null;
         }
       }
     }
@@ -216,8 +215,6 @@ public class World : MonoBehaviour
       Tool t = r_grabbed.GetComponent<Tool>();
       if(t)
       {
-        SetVisibility(t.storage,false);
-        SetVisibility(t.active,false);
         if(
            ( which && t.active.GetComponent<Grabbable>().lintersect) ||
            (!which && t.active.GetComponent<Grabbable>().rintersect)
@@ -245,44 +242,72 @@ public class World : MonoBehaviour
       r_grabbed = null;
     }
 
-    if(r_grabbed)
+    if(r_grabbed && r_itrigger) TryAct(r_grabbed, y_val, ref r_y);
+  }
+
+  void UpdateGrabVis()
+  {
+    for(int i = 0; i < tools.Count; i++)
     {
-      Tool t = r_grabbed.GetComponent<Tool>();
-      if(t)
+      Tool t = tools[i];
+      GameObject g = t.gameObject;
+
+      //active
+      if(
+        (lgrabbed == g && t.active.GetComponent<Grabbable>().lintersect) ||
+        (rgrabbed == g && t.active.GetComponent<Grabbable>().rintersect)
+      )
       {
-        if(
-           ( which && t.active.GetComponent<Grabbable>().lintersect) ||
-           (!which && t.active.GetComponent<Grabbable>().rintersect)
-          )
-          SetVisibility(t.active,true);
-        else
-          SetVisibility(t.active,false);
-        if(
-           ( which && t.storage.GetComponent<Grabbable>().lintersect) ||
-           (!which && t.storage.GetComponent<Grabbable>().rintersect)
-          )
-          SetVisibility(t.storage,true);
-        else
-          SetVisibility(t.storage,false);
+        SetVisibility(t.active, VIS_AVAILABLE, false);
+        SetVisibility(t.active, VIS_SNAP,      true);
       }
-    }
-    else
-    {
-      r_hand.GetComponent<MeshRenderer>().material = hand_empty;
-      for(int i = 0; i < movables.Count; i++)
+      else if(lgrabbed == g || rgrabbed == g)
       {
-        if(
-           ( which && movables[i].lintersect) ||
-           (!which && movables[i].rintersect)
-          )
-        {
-          r_hand.GetComponent<MeshRenderer>().material = hand_intersecting;
-          break;
-        }
+        SetVisibility(t.active, VIS_AVAILABLE, true);
+        SetVisibility(t.active, VIS_SNAP,      false);
+      }
+      else
+      {
+        SetVisibility(t.active, VIS_SNAP,      false);
+        SetVisibility(t.active, VIS_AVAILABLE, false);
+      }
+      //storage
+      if(
+        (lgrabbed == g && t.storage.GetComponent<Grabbable>().lintersect) ||
+        (rgrabbed == g && t.storage.GetComponent<Grabbable>().rintersect)
+      )
+      {
+        SetVisibility(t.storage, VIS_AVAILABLE, false);
+        SetVisibility(t.storage, VIS_SNAP,      true);
+      }
+      else if(lgrabbed == g || rgrabbed == g)
+      {
+        SetVisibility(t.storage, VIS_AVAILABLE, true);
+        SetVisibility(t.storage, VIS_SNAP,      false);
+      }
+      else
+      {
+        SetVisibility(t.storage, VIS_SNAP,      false);
+        SetVisibility(t.storage, VIS_AVAILABLE, false);
       }
     }
 
-    if(r_grabbed && r_itrigger) TryAct(r_grabbed, y_val, ref r_y);
+    bool lintersect = false;
+    bool rintersect = false;
+    for(int i = 0; i < movables.Count; i++)
+    {
+      Grabbable m = movables[i];
+      if(lintersect || m.lintersect) lintersect = true;
+      if(rintersect || m.rintersect) rintersect = true;
+    }
+
+         if(lgrabbed)   lhand.GetComponent<MeshRenderer>().material = hand_grabbing;
+    else if(lintersect) lhand.GetComponent<MeshRenderer>().material = hand_intersecting;
+    else                lhand.GetComponent<MeshRenderer>().material = hand_empty;
+
+         if(rgrabbed)   rhand.GetComponent<MeshRenderer>().material = hand_grabbing;
+    else if(rintersect) rhand.GetComponent<MeshRenderer>().material = hand_intersecting;
+    else                rhand.GetComponent<MeshRenderer>().material = hand_empty;
   }
 
   // Update is called once per frame
@@ -290,6 +315,8 @@ public class World : MonoBehaviour
   {
     TryGrab(true,  OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger),   OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger),   lhand.transform.position.y, ref lhtrigger, ref litrigger, ref ly, ref lhand, ref lgrabbed, ref rhand, ref rgrabbed); //left hand
     TryGrab(false, OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger), OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger), rhand.transform.position.y, ref rhtrigger, ref ritrigger, ref ry, ref rhand, ref rgrabbed, ref lhand, ref lgrabbed); //right hand
+
+    UpdateGrabVis();
     /*
     DEBUGTEXTS[0].text = lhand.transform.eulerAngles.x.ToString();
     DEBUGTEXTS[1].text = lhand.transform.eulerAngles.y.ToString();
