@@ -38,15 +38,21 @@ public class ThermoMath : MonoBehaviour
   //K
   public double t_min = IF97.get_Tmin(); // 273.15
   public double t_max = IF97.get_Tmax(); // 1073.15
+  //??
+  public double h_min = 0; //0
+  public double h_max = 1; //0
+  //??
+  public double s_min = 0; //0
+  public double s_max = 1; //0
 
   int samples = 80;
 
   //state
-  public double pressure_p;
-  public double temperature_k;
-  public double specificvolume_q;
-  public double entropy;
-  public double enthalpy;
+  public double pressure; //pascals
+  public double temperature; //kalvin
+  public double volume; //M^3/kg
+  public double entropy; //?
+  public double enthalpy; //?
 
   //derived
   public double pistonheight_m;
@@ -110,14 +116,14 @@ public class ThermoMath : MonoBehaviour
     //compare_impls();
 
     reset();
-    pressure_p = Lerpd(p_min,p_max,0.1);
-    temperature_k = Lerpd(t_min,t_max,0.9);
-    specificvolume_q = 1.0/IF97.rhomass_Tp(temperature_k,pressure_p/1000000.0);
+    pressure = Lerpd(p_min,p_max,0.1);
+    temperature = Lerpd(t_min,t_max,0.9);
+    volume = 1.0/IF97.rhomass_Tp(temperature,pressure/1000000.0);
     derive();
     /*
-    Debug.LogFormat("{0}",pressure_p);
-    Debug.LogFormat("{0}",specificvolume_q);
-    Debug.LogFormat("{0}",temperature_k);
+    Debug.LogFormat("{0}",pressure);
+    Debug.LogFormat("{0}",volume);
+    Debug.LogFormat("{0}",temperature);
     */
     dotransform();
   }
@@ -668,9 +674,9 @@ public class ThermoMath : MonoBehaviour
   void reset()
   {
     //state
-    pressure_p = 0;
-    temperature_k = 0;
-    specificvolume_q = 0;
+    pressure = 0;
+    temperature = 0;
+    volume = 0;
     entropy = 0;
     enthalpy = 0;
   }
@@ -687,114 +693,105 @@ public class ThermoMath : MonoBehaviour
   }
 
   //temperature
-  public void inc_t()
+  public double tp_get_v(double tp)
   {
-    temperature_k = Lerpd(temperature_k,t_max,0.01);
-    specificvolume_q = 1.0/IF97.rhomass_Tp(temperature_k,pressure_p/1000000.0); //expects:K,MPa returns Kg/M^3
+    return t_get_v(Lerpd(t_min,t_max,tp));
+  }
+  public double t_get_v(double t)
+  {
+    temperature = t;
+    volume = 1.0/IF97.rhomass_Tp(temperature,pressure/1000000.0); //expects:K,MPa returns Kg/M^3
     derive();
     dotransform();
+    return volume;
   }
-  public void dec_t()
+  public double tp_get_p(double tp)
   {
-    temperature_k = Lerpd(temperature_k,t_min,0.01);
-    specificvolume_q = 1.0/IF97.rhomass_Tp(temperature_k,pressure_p/1000000.0); //expects:K,MPa returns Kg/M^3
+    return t_get_p(Lerpd(t_min,t_max,tp));
+  }
+  public double t_get_p(double t)
+  {
+    temperature = t;
+    //pressure = ???;
     derive();
     dotransform();
-  }
-  public void set_tp(double tp)
-  {
-    set_t(Lerpd(t_min,t_max,tp));
-  }
-  public void set_t(double t)
-  {
-    temperature_k = t;
-    specificvolume_q = 1.0/IF97.rhomass_Tp(temperature_k,pressure_p/1000000.0); //expects:K,MPa returns Kg/M^3
-    derive();
-    dotransform();
+    return pressure;
   }
   //pressure
-  public void inc_p()
+  public double pp_get_v(double pp)
   {
-    pressure_p = Lerpd(pressure_p,p_max,0.01);
-    specificvolume_q = 1.0/IF97.rhomass_Tp(temperature_k,pressure_p/1000000.0); //expects:K,MPa returns Kg/M^3
+    return p_get_v(Lerpd(p_min,p_max,pp));
+  }
+  public double p_get_v(double p)
+  {
+    pressure = p;
+    volume = 1.0/IF97.rhomass_Tp(temperature,pressure/1000000.0); //expects:K,MPa returns Kg/M^3
     derive();
     dotransform();
+    return volume;
   }
-  public void dec_p()
+  public double pp_get_t(double pp)
   {
-    pressure_p = Lerpd(pressure_p,p_min,0.01);
-    specificvolume_q = 1.0/IF97.rhomass_Tp(temperature_k,pressure_p/1000000.0); //expects:K,MPa returns Kg/M^3
+    return p_get_t(Lerpd(p_min,p_max,pp));
+  }
+  public double p_get_t(double p)
+  {
+    pressure = p;
+    //temperature = ???;
     derive();
     dotransform();
-  }
-  public void set_pp(double pp)
-  {
-    set_p(Lerpd(p_min,p_max,pp));
-  }
-  public void set_p(double p)
-  {
-    pressure_p = p;
-    specificvolume_q = 1.0/IF97.rhomass_Tp(temperature_k,pressure_p/1000000.0); //expects:K,MPa returns Kg/M^3
-    derive();
-    dotransform();
+    return temperature;
   }
   //volume
-  public void inc_v()
+  public double vp_get_t(double vp)
   {
-    //specificvolume_q = Lerpd(specificvolume_q,v_max,0.01);
+    return v_get_t(Lerpd(v_min,v_max,vp));
+  }
+  public double v_get_t(double v)
+  {
+    volume = v;
+    //temperature = ???;
     derive();
     dotransform();
+    return temperature;
   }
-  public void dec_v()
+  public double vp_get_p(double vp)
   {
-    //specificvolume_q = Lerpd(specificvolume_q,q_min,0.01);
+    return v_get_t(Lerpd(v_min,v_max,vp));
+  }
+  public double v_get_p(double v)
+  {
+    volume = v;
+    //pressure = ???;
     derive();
     dotransform();
-  }
-  public void set_vp(double vp)
-  {
-    set_v(Lerpd(v_min,v_max,vp));
-  }
-  public void set_v(double v)
-  {
-    specificvolume_q = v;
-    //need to figure out 3rd param!
-    derive();
-    dotransform();
+    return pressure;
   }
   //enthalpy
-  public void inc_h() //no idea what this means
+  public double hp_get_t(double hp)
   {
-
+    return h_get_t(Lerpd(h_min,h_max,hp));
   }
-  public void dec_h() //no idea what this means
+  public double h_get_t(double h)
   {
-
-  }
-  public void set_hp(double hp)
-  {
-
-  }
-  public void set_h(double h)
-  {
-
+    enthalpy = h;
+    //temperature = ???;
+    derive();
+    dotransform();
+    return temperature;
   }
   //entropy
-  public void inc_s() //no idea what this means
+  public double sp_get_t(double sp)
   {
-
+    return s_get_t(Lerpd(s_min,s_max,sp));
   }
-  public void dec_s() //no idea what this means
+  public double s_get_t(double s)
   {
-
-  }
-  public void set_sp(double sp)
-  {
-
-  }
-  public void set_s(double s)
-  {
-
+    entropy = s;
+    //temperature = ???;
+    derive();
+    dotransform();
+    return temperature;
   }
 
   void derive()
@@ -805,9 +802,9 @@ public class ThermoMath : MonoBehaviour
 
   void dotransform()
   {
-    float pplot = plot(p_min,p_max,pressure_p);
-    float vplot = plot(v_min,v_max,specificvolume_q);
-    float tplot = plot(t_min,t_max,temperature_k);
+    float pplot = plot(p_min,p_max,pressure);
+    float vplot = plot(v_min,v_max,volume);
+    float tplot = plot(t_min,t_max,temperature);
     state.transform.localPosition = new Vector3(vplot,pplot,tplot);
   }
 

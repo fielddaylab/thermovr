@@ -15,6 +15,8 @@ public class World : MonoBehaviour
   public Material hand_grabbing;
 
   List<Grabbable> movables;
+  GameObject workspace;
+  GameObject handle_workspace;
   GameObject lgrabbed = null;
   GameObject rgrabbed = null;
   float ly = 0.0f;
@@ -32,14 +34,6 @@ public class World : MonoBehaviour
   bool rhtrigger = false;
   bool litrigger = false;
   bool ritrigger = false;
-
-  //buttons
-  GameObject TInc;
-  GameObject TDec;
-  GameObject PInc;
-  GameObject PDec;
-  GameObject VInc;
-  GameObject VDec;
 
   // Start is called before the first frame update
   void Start()
@@ -66,6 +60,9 @@ public class World : MonoBehaviour
     t = GameObject.Find("Tool_Weight"   ).GetComponent<Tool>(); tool_weight    = t; tools.Add(t);
     t = GameObject.Find("Tool_Balloon"  ).GetComponent<Tool>(); tool_balloon   = t; tools.Add(t);
 
+    workspace = GameObject.Find("Workspace");
+    handle_workspace = GameObject.Find("Handle_Workspace");
+
     for(int i = 0; i < tools.Count; i++)
     {
       t = tools[i];
@@ -82,41 +79,43 @@ public class World : MonoBehaviour
     for(int i = 0; i < tools.Count; i++) movables.Add(tools[i].grabbable); //important that tools take priority, so they can be grabbed and removed
     movables.Add(GameObject.Find("Graph").GetComponent<Grabbable>());
     movables.Add(GameObject.Find("Vessel").GetComponent<Grabbable>());
-
-    //buttons
-    TInc = GameObject.Find("TInc");
-    movables.Add(TInc.GetComponent<Grabbable>());
-    TDec = GameObject.Find("TDec");
-    movables.Add(TDec.GetComponent<Grabbable>());
-    PInc = GameObject.Find("PInc");
-    movables.Add(PInc.GetComponent<Grabbable>());
-    PDec = GameObject.Find("PDec");
-    movables.Add(PDec.GetComponent<Grabbable>());
-    VInc = GameObject.Find("VInc");
-    movables.Add(VInc.GetComponent<Grabbable>());
-    VDec = GameObject.Find("VDec");
-    movables.Add(VDec.GetComponent<Grabbable>());
-
   }
 
-  void ApplyTool(Tool t)
+  void TryApplyTool(Tool t)
   {
-    if(t == tool_insulator) thermo.set_tp(t.dial_dial.val);
-    if(t == tool_clamp)     thermo.set_vp(t.dial_dial.val);
-    if(t == tool_burner)    ; //do nothing; passive
-    if(t == tool_coil)      ; //do nothing; passive
-    if(t == tool_weight)    thermo.set_pp(t.dial_dial.val);
-    if(t == tool_balloon)   thermo.set_pp(t.dial_dial.val);
+    if(!t.engaged) return;
+    if(t == tool_insulator)
+    {
+      if(tool_clamp.engaged) thermo.tp_get_p(t.dial_dial.val);
+      else                   thermo.tp_get_v(t.dial_dial.val);
+    }
+    else if(t == tool_clamp)
+    {
+      if(tool_insulator.engaged) thermo.vp_get_p(t.dial_dial.val);
+      else                       thermo.vp_get_t(t.dial_dial.val);
+    }
+    else if(t == tool_weight || t == tool_balloon)
+    {
+      if(tool_clamp.engaged) return; //weight does nothing!
+      float weight = 0;
+      if(tool_weight.engaged)  weight += tool_weight.dial_dial.val;
+      if(tool_balloon.engaged) weight -= tool_balloon.dial_dial.val;
+      weight = (weight+1)/2; //normalize 0-1
+
+      if(tool_insulator.engaged) thermo.pp_get_v(weight);
+      else                       thermo.pp_get_t(weight);
+    }
+    else if(t == tool_burner) ; //do nothing; passive
+    else if(t == tool_coil)   ; //do nothing; passive
   }
 
   void TryAct(GameObject actable, float y_val, ref float r_y)
   {
-         if(actable == TInc) thermo.inc_t();
-    else if(actable == TDec) thermo.dec_t();
-    else if(actable == PInc) thermo.inc_p();
-    else if(actable == PDec) thermo.dec_p();
-    else if(actable == VInc) thermo.inc_v();
-    else if(actable == VDec) thermo.dec_v();
+    if(actable == handle_workspace)
+    {
+      float dy = (r_y-y_val);
+      workspace.transform.position = new Vector3(workspace.transform.position.x,workspace.transform.position.y-dy,workspace.transform.position.z);
+    }
     else
     {
       Dial d = actable.GetComponent<Dial>();
@@ -126,7 +125,7 @@ public class World : MonoBehaviour
         float dy = (r_y-y_val);
         d.val = Mathf.Clamp(d.val-dy,0.0f,1.0f);
 
-        if(t.engaged) ApplyTool(t);
+        TryApplyTool(t);
       }
     }
 
@@ -165,6 +164,7 @@ public class World : MonoBehaviour
 
     if(r_grabbed == null && htrigger_delta == 1)
     {
+      //first try movables
       for(int i = 0; r_grabbed == null && i < movables.Count; i++)
       {
         if(
@@ -179,14 +179,31 @@ public class World : MonoBehaviour
           if(r_grabbed == r_ograbbed) r_ograbbed = null;
         }
       }
-      for(int i = 0; r_grabbed == null && i < tools.Count; i++)
+      //then dials
+      if(r_grabbed == null)
       {
-        if(
-           ( which && tools[i].dial_grabbable.lintersect) ||
-           (!which && tools[i].dial_grabbable.rintersect)
-          )
+        for(int i = 0; i < tools.Count; i++)
         {
-          r_grabbed = tools[i].dial;
+          if(
+             ( which && tools[i].dial_grabbable.lintersect) ||
+             (!which && tools[i].dial_grabbable.rintersect)
+            )
+          {
+            r_grabbed = tools[i].dial;
+            if(r_grabbed == r_ograbbed) r_ograbbed = null;
+          }
+        }
+      }
+      //then extraaneous
+      if(r_grabbed == null)
+      {
+        Grabbable g = handle_workspace.GetComponent<Grabbable>();
+        if(
+          ( which && g.lintersect) ||
+          (!which && g.rintersect)
+        )
+        {
+          r_grabbed = handle_workspace;
           if(r_grabbed == r_ograbbed) r_ograbbed = null;
         }
       }
@@ -203,7 +220,7 @@ public class World : MonoBehaviour
         {
           r_grabbed.transform.SetParent(t.active.transform);
           t.engaged = true;
-          ApplyTool(t);
+          TryApplyTool(t);
           r_grabbed.transform.localPosition = new Vector3(0f,0f,0f);
           r_grabbed.transform.localRotation = Quaternion.identity;
         }
@@ -273,14 +290,18 @@ public class World : MonoBehaviour
       }
     }
 
+    Grabbable gr;
     bool lintersect = false;
     bool rintersect = false;
     for(int i = 0; i < movables.Count; i++)
     {
-      Grabbable m = movables[i];
-      if(lintersect || m.lintersect) lintersect = true;
-      if(rintersect || m.rintersect) rintersect = true;
+      gr = movables[i];
+      if(gr.lintersect) lintersect = true;
+      if(gr.rintersect) rintersect = true;
     }
+    gr = handle_workspace.GetComponent<Grabbable>();
+    if(gr.lintersect) lintersect = true;
+    if(gr.rintersect) rintersect = true;
 
          if(lgrabbed)   lhand.GetComponent<MeshRenderer>().material = hand_grabbing;
     else if(lintersect) lhand.GetComponent<MeshRenderer>().material = hand_intersecting;
@@ -298,7 +319,10 @@ public class World : MonoBehaviour
     float d_heat = 0;
     if(tool_burner.engaged) d_heat += tool_burner.dial_dial.val;
     if(tool_coil.engaged)   d_heat -= tool_coil.dial_dial.val;
-    if(d_heat != 0.0f) thermo.set_h(d_heat);
+    if(d_heat != 0.0f)
+    {
+      thermo.h_get_t(d_heat);
+    }
 
     TryGrab(true,  OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger),   OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger),   lhand.transform.position.y, ref lhtrigger, ref litrigger, ref ly, ref lhand, ref lgrabbed, ref rhand, ref rgrabbed); //left hand
     TryGrab(false, OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger), OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger), rhand.transform.position.y, ref rhtrigger, ref ritrigger, ref ry, ref rhand, ref rgrabbed, ref lhand, ref lgrabbed); //right hand
