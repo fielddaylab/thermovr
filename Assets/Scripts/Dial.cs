@@ -10,19 +10,20 @@ public class Dial : MonoBehaviour
 
   void Awake()
   {
-    meter = gameObject.transform.GetChild(0).gameObject;
+    meter = gameObject.transform.GetChild(1).gameObject;
   }
 
   // Start is called before the first frame update
   void Start()
   {
-
   }
 
   // Update is called once per frame
   void Update()
   {
-    meter.transform.localRotation = Quaternion.Euler(-90.0f+val*180.0f,0.0f,0.0f);
+    Vector3 lp = meter.transform.localPosition;
+    lp.z = -0.5f+val;
+    meter.transform.localPosition = lp;
   }
 
 }

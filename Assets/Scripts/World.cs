@@ -19,6 +19,8 @@ public class World : MonoBehaviour
   GameObject handle_workspace;
   GameObject lgrabbed = null;
   GameObject rgrabbed = null;
+  float lx = 0.0f;
+  float rx = 0.0f;
   float ly = 0.0f;
   float ry = 0.0f;
 
@@ -109,7 +111,7 @@ public class World : MonoBehaviour
     else if(t == tool_coil)   ; //do nothing; passive
   }
 
-  void TryAct(GameObject actable, float y_val, ref float r_y)
+  void TryAct(GameObject actable, float x_val, float y_val, ref float r_x, ref float r_y)
   {
     if(actable == handle_workspace)
     {
@@ -122,17 +124,15 @@ public class World : MonoBehaviour
       if(d != null)
       {
         Tool t = d.tool.GetComponent<Tool>();
-        float dy = (r_y-y_val);
-        d.val = Mathf.Clamp(d.val-dy,0.0f,1.0f);
+        float dx = (r_x-x_val);
+        d.val = Mathf.Clamp(d.val-dx,0.0f,1.0f);
 
         TryApplyTool(t);
       }
     }
-
-    r_y = y_val;
   }
 
-  void TryGrab(bool which, float htrigger_val, float itrigger_val, float y_val, ref bool r_htrigger, ref bool r_itrigger, ref float r_y, ref GameObject r_hand, ref GameObject r_grabbed, ref GameObject r_ohand, ref GameObject r_ograbbed)
+  void TryGrab(bool which, float htrigger_val, float itrigger_val, float x_val, float y_val, ref bool r_htrigger, ref bool r_itrigger, ref float r_x, ref float r_y, ref GameObject r_hand, ref GameObject r_grabbed, ref GameObject r_ohand, ref GameObject r_ograbbed)
   {
     float htrigger_threshhold = 0.1f;
     float itrigger_threshhold = 0.1f;
@@ -154,6 +154,7 @@ public class World : MonoBehaviour
     {
       itrigger_delta = 1;
       r_itrigger = true;
+      r_x = x_val;
       r_y = y_val;
     }
     else if(r_itrigger && itrigger_val <= itrigger_threshhold)
@@ -240,7 +241,10 @@ public class World : MonoBehaviour
       r_grabbed = null;
     }
 
-    if(r_grabbed && r_itrigger) TryAct(r_grabbed, y_val, ref r_y);
+    if(r_grabbed) TryAct(r_grabbed, x_val, y_val, ref r_x, ref r_y);
+
+    r_x = x_val;
+    r_y = y_val;
   }
 
   void UpdateGrabVis()
@@ -324,8 +328,8 @@ public class World : MonoBehaviour
       thermo.h_get_t(d_heat);
     }
 
-    TryGrab(true,  OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger),   OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger),   lhand.transform.position.y, ref lhtrigger, ref litrigger, ref ly, ref lhand, ref lgrabbed, ref rhand, ref rgrabbed); //left hand
-    TryGrab(false, OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger), OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger), rhand.transform.position.y, ref rhtrigger, ref ritrigger, ref ry, ref rhand, ref rgrabbed, ref lhand, ref lgrabbed); //right hand
+    TryGrab(true,  OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger),   OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger),   lhand.transform.position.x, lhand.transform.position.y, ref lhtrigger, ref litrigger, ref lx, ref ly, ref lhand, ref lgrabbed, ref rhand, ref rgrabbed); //left hand
+    TryGrab(false, OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger), OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger), rhand.transform.position.x, rhand.transform.position.y, ref rhtrigger, ref ritrigger, ref rx, ref ry, ref rhand, ref rgrabbed, ref lhand, ref lgrabbed); //right hand
 
     UpdateGrabVis();
     /*
