@@ -8,7 +8,9 @@ public class World : MonoBehaviour
 
   ThermoMath thermo;
   GameObject lhand;
+  MeshRenderer lhand_meshrenderer;
   GameObject rhand;
+  MeshRenderer rhand_meshrenderer;
 
   public Material hand_empty;
   public Material hand_intersecting;
@@ -19,8 +21,8 @@ public class World : MonoBehaviour
   GameObject handle_workspace;
   GameObject lgrabbed = null;
   GameObject rgrabbed = null;
-  float lx = 0.0f;
-  float rx = 0.0f;
+  float lz = 0.0f;
+  float rz = 0.0f;
   float ly = 0.0f;
   float ry = 0.0f;
 
@@ -31,6 +33,8 @@ public class World : MonoBehaviour
   Tool tool_coil;
   Tool tool_weight;
   Tool tool_balloon;
+
+  ParticleSystem flame; //special case
 
   bool lhtrigger = false;
   bool rhtrigger = false;
@@ -48,10 +52,12 @@ public class World : MonoBehaviour
     thermo = GameObject.Find("Oracle").GetComponent<ThermoMath>();
 
     lhand  = GameObject.Find("LHand");
+    lhand_meshrenderer = lhand.transform.GetChild(0).gameObject.GetComponent<MeshRenderer>();
     rhand  = GameObject.Find("RHand");
+    rhand_meshrenderer = rhand.transform.GetChild(0).gameObject.GetComponent<MeshRenderer>();
 
-    lhand.GetComponent<MeshRenderer>().material = hand_empty;
-    rhand.GetComponent<MeshRenderer>().material = hand_empty;
+    lhand_meshrenderer.material = hand_empty;
+    rhand_meshrenderer.material = hand_empty;
 
     Tool t;
     tools = new List<Tool>();
@@ -61,6 +67,8 @@ public class World : MonoBehaviour
     t = GameObject.Find("Tool_Coil"     ).GetComponent<Tool>(); tool_coil      = t; tools.Add(t);
     t = GameObject.Find("Tool_Weight"   ).GetComponent<Tool>(); tool_weight    = t; tools.Add(t);
     t = GameObject.Find("Tool_Balloon"  ).GetComponent<Tool>(); tool_balloon   = t; tools.Add(t);
+
+    flame = GameObject.Find("Flame").GetComponent<ParticleSystem>();
 
     workspace = GameObject.Find("Workspace");
     handle_workspace = GameObject.Find("Handle_Workspace");
@@ -85,20 +93,41 @@ public class World : MonoBehaviour
 
   void TryApplyTool(Tool t)
   {
-    if(!t.engaged) return;
     if(t == tool_insulator)
     {
+      //visual
+      //math
+      if(!t.engaged) return;
       if(tool_clamp.engaged) thermo.tp_get_p(t.dial_dial.val);
       else                   thermo.tp_get_v(t.dial_dial.val);
     }
     else if(t == tool_clamp)
     {
+      //visual change handled by thermomath (alters piston height)
+      //math
+      if(!t.engaged) return;
       if(tool_insulator.engaged) thermo.vp_get_p(t.dial_dial.val);
       else                       thermo.vp_get_t(t.dial_dial.val);
     }
     else if(t == tool_weight || t == tool_balloon)
     {
-      if(tool_clamp.engaged) return; //weight does nothing!
+      //visual
+      float v = 1.0f;
+           if(t == tool_weight)  v += tool_weight.dial_dial.val;
+      else if(t == tool_balloon) v += tool_balloon.dial_dial.val;
+      Vector3 scale = new Vector3(v,v,v);
+      t.gameObject.transform.localScale = scale;
+      t.active.transform.localScale = scale;
+      t.storage.transform.localScale = scale;
+      if(t == tool_balloon) //balloon scale is silly
+      {
+        v *= 0.125f;
+        scale = new Vector3(v,v,v);
+        t.gameObject.transform.localScale = scale;
+      }
+
+      //math
+      if(!t.engaged || tool_clamp.engaged) return; //weight does nothing!
       float weight = 0;
       if(tool_weight.engaged)  weight += tool_weight.dial_dial.val;
       if(tool_balloon.engaged) weight -= tool_balloon.dial_dial.val;
@@ -107,11 +136,23 @@ public class World : MonoBehaviour
       if(tool_insulator.engaged) thermo.pp_get_v(weight);
       else                       thermo.pp_get_t(weight);
     }
-    else if(t == tool_burner) ; //do nothing; passive
-    else if(t == tool_coil)   ; //do nothing; passive
+    else if(t == tool_burner)
+    {
+      //visual
+      var vel = flame.velocityOverLifetime;
+      vel.speedModifierMultiplier = Mathf.Lerp(0.1f,0.5f,t.dial_dial.val);
+      //math change happens passively- only need to update visuals
+    }
+    else if(t == tool_coil)
+    {
+      //visual
+      ;
+      //math change happens passively- only need to update visuals
+    }
+
   }
 
-  void TryAct(GameObject actable, float x_val, float y_val, ref float r_x, ref float r_y)
+  void TryAct(GameObject actable, float z_val, float y_val, ref float r_z, ref float r_y)
   {
     if(actable == handle_workspace)
     {
@@ -124,7 +165,7 @@ public class World : MonoBehaviour
       if(d != null)
       {
         Tool t = d.tool.GetComponent<Tool>();
-        float dx = (r_x-x_val);
+        float dx = (r_z-z_val);
         d.val = Mathf.Clamp(d.val-dx,0.0f,1.0f);
 
         TryApplyTool(t);
@@ -132,7 +173,7 @@ public class World : MonoBehaviour
     }
   }
 
-  void TryGrab(bool which, float htrigger_val, float itrigger_val, float x_val, float y_val, ref bool r_htrigger, ref bool r_itrigger, ref float r_x, ref float r_y, ref GameObject r_hand, ref GameObject r_grabbed, ref GameObject r_ohand, ref GameObject r_ograbbed)
+  void TryGrab(bool which, float htrigger_val, float itrigger_val, float z_val, float y_val, ref bool r_htrigger, ref bool r_itrigger, ref float r_z, ref float r_y, ref GameObject r_hand, ref GameObject r_grabbed, ref GameObject r_ohand, ref GameObject r_ograbbed)
   {
     float htrigger_threshhold = 0.1f;
     float itrigger_threshhold = 0.1f;
@@ -154,7 +195,7 @@ public class World : MonoBehaviour
     {
       itrigger_delta = 1;
       r_itrigger = true;
-      r_x = x_val;
+      r_z = z_val;
       r_y = y_val;
     }
     else if(r_itrigger && itrigger_val <= itrigger_threshhold)
@@ -241,9 +282,9 @@ public class World : MonoBehaviour
       r_grabbed = null;
     }
 
-    if(r_grabbed) TryAct(r_grabbed, x_val, y_val, ref r_x, ref r_y);
+    if(r_grabbed) TryAct(r_grabbed, z_val, y_val, ref r_z, ref r_y);
 
-    r_x = x_val;
+    r_z = z_val;
     r_y = y_val;
   }
 
@@ -303,17 +344,23 @@ public class World : MonoBehaviour
       if(gr.lintersect) lintersect = true;
       if(gr.rintersect) rintersect = true;
     }
+    for(int i = 0; i < tools.Count; i++)
+    {
+      gr = tools[i].dial_grabbable;
+      if(gr.lintersect) lintersect = true;
+      if(gr.rintersect) rintersect = true;
+    }
     gr = handle_workspace.GetComponent<Grabbable>();
     if(gr.lintersect) lintersect = true;
     if(gr.rintersect) rintersect = true;
 
-         if(lgrabbed)   lhand.GetComponent<MeshRenderer>().material = hand_grabbing;
-    else if(lintersect) lhand.GetComponent<MeshRenderer>().material = hand_intersecting;
-    else                lhand.GetComponent<MeshRenderer>().material = hand_empty;
+         if(lgrabbed)   lhand_meshrenderer.material = hand_grabbing;
+    else if(lintersect) lhand_meshrenderer.material = hand_intersecting;
+    else                lhand_meshrenderer.material = hand_empty;
 
-         if(rgrabbed)   rhand.GetComponent<MeshRenderer>().material = hand_grabbing;
-    else if(rintersect) rhand.GetComponent<MeshRenderer>().material = hand_intersecting;
-    else                rhand.GetComponent<MeshRenderer>().material = hand_empty;
+         if(rgrabbed)   rhand_meshrenderer.material = hand_grabbing;
+    else if(rintersect) rhand_meshrenderer.material = hand_intersecting;
+    else                rhand_meshrenderer.material = hand_empty;
   }
 
   // Update is called once per frame
@@ -328,8 +375,8 @@ public class World : MonoBehaviour
       thermo.h_get_t(d_heat);
     }
 
-    TryGrab(true,  OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger),   OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger),   lhand.transform.position.x, lhand.transform.position.y, ref lhtrigger, ref litrigger, ref lx, ref ly, ref lhand, ref lgrabbed, ref rhand, ref rgrabbed); //left hand
-    TryGrab(false, OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger), OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger), rhand.transform.position.x, rhand.transform.position.y, ref rhtrigger, ref ritrigger, ref rx, ref ry, ref rhand, ref rgrabbed, ref lhand, ref lgrabbed); //right hand
+    TryGrab(true,  OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger),   OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger),   lhand.transform.position.z, lhand.transform.position.y, ref lhtrigger, ref litrigger, ref lz, ref ly, ref lhand, ref lgrabbed, ref rhand, ref rgrabbed); //left hand
+    TryGrab(false, OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger), OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger), rhand.transform.position.z, rhand.transform.position.y, ref rhtrigger, ref ritrigger, ref rz, ref ry, ref rhand, ref rgrabbed, ref lhand, ref lgrabbed); //right hand
 
     UpdateGrabVis();
     /*

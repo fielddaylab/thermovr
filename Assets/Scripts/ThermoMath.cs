@@ -54,10 +54,6 @@ public class ThermoMath : MonoBehaviour
   public double entropy; //?
   public double enthalpy; //?
 
-  //derived
-  public double pistonheight_m;
-  public double contentvolume_m3;
-
   //vessel
   GameObject vessel;
   GameObject container;
@@ -119,7 +115,6 @@ public class ThermoMath : MonoBehaviour
     pressure = Lerpd(p_min,p_max,0.1);
     temperature = Lerpd(t_min,t_max,0.9);
     volume = 1.0/IF97.rhomass_Tp(temperature,pressure/1000000.0);
-    derive();
     /*
     Debug.LogFormat("{0}",pressure);
     Debug.LogFormat("{0}",volume);
@@ -559,6 +554,7 @@ public class ThermoMath : MonoBehaviour
     gameObject.transform.parent = graph.transform;
     gameObject.transform.localPosition = new Vector3(0.0f,0.0f,0.0f);
     gameObject.transform.localScale = new Vector3(1.0f,1.0f,1.0f);
+    gameObject.transform.localRotation = Quaternion.identity;
     gameObject.GetComponent<MeshFilter>().mesh = mesh;
     gameObject.GetComponent<MeshRenderer>().material = graph_material;
   }
@@ -701,7 +697,6 @@ public class ThermoMath : MonoBehaviour
   {
     temperature = t;
     volume = 1.0/IF97.rhomass_Tp(temperature,pressure/1000000.0); //expects:K,MPa returns Kg/M^3
-    derive();
     dotransform();
     return volume;
   }
@@ -713,7 +708,6 @@ public class ThermoMath : MonoBehaviour
   {
     temperature = t;
     //pressure = ???;
-    derive();
     dotransform();
     return pressure;
   }
@@ -726,7 +720,6 @@ public class ThermoMath : MonoBehaviour
   {
     pressure = p;
     volume = 1.0/IF97.rhomass_Tp(temperature,pressure/1000000.0); //expects:K,MPa returns Kg/M^3
-    derive();
     dotransform();
     return volume;
   }
@@ -738,7 +731,6 @@ public class ThermoMath : MonoBehaviour
   {
     pressure = p;
     //temperature = ???;
-    derive();
     dotransform();
     return temperature;
   }
@@ -751,7 +743,6 @@ public class ThermoMath : MonoBehaviour
   {
     volume = v;
     //temperature = ???;
-    derive();
     dotransform();
     return temperature;
   }
@@ -763,7 +754,6 @@ public class ThermoMath : MonoBehaviour
   {
     volume = v;
     //pressure = ???;
-    derive();
     dotransform();
     return pressure;
   }
@@ -776,7 +766,6 @@ public class ThermoMath : MonoBehaviour
   {
     enthalpy = h;
     //temperature = ???;
-    derive();
     dotransform();
     return temperature;
   }
@@ -789,15 +778,8 @@ public class ThermoMath : MonoBehaviour
   {
     entropy = s;
     //temperature = ???;
-    derive();
     dotransform();
     return temperature;
-  }
-
-  void derive()
-  {
-    pistonheight_m = 0;
-    contentvolume_m3 = 0;
   }
 
   void dotransform()
@@ -806,6 +788,10 @@ public class ThermoMath : MonoBehaviour
     float vplot = plot(v_min,v_max,volume);
     float tplot = plot(t_min,t_max,temperature);
     state.transform.localPosition = new Vector3(vplot,pplot,tplot);
+
+    Vector3 piston_lt = piston.transform.localPosition;
+    piston_lt.y = (float)((volume-v_min)/(v_max-v_min))/2.0f;
+    piston.transform.localPosition = piston_lt;
   }
 
   // Update is called once per frame

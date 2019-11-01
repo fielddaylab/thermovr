@@ -22,7 +22,7 @@ public class Dial : MonoBehaviour
   void Update()
   {
     Vector3 lp = meter.transform.localPosition;
-    lp.z = -0.5f+val;
+    lp.z = -0.25f+val/2.0f;
     meter.transform.localPosition = lp;
   }
 
