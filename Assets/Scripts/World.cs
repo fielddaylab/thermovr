@@ -115,16 +115,13 @@ public class World : MonoBehaviour
       float v = 1.0f;
            if(t == tool_weight)  v += tool_weight.dial_dial.val;
       else if(t == tool_balloon) v += tool_balloon.dial_dial.val;
+      if(t == tool_balloon) v *= 0.125f; //balloon scale is silly
       Vector3 scale = new Vector3(v,v,v);
       t.gameObject.transform.localScale = scale;
-      t.active.transform.localScale = scale;
-      t.storage.transform.localScale = scale;
-      if(t == tool_balloon) //balloon scale is silly
-      {
-        v *= 0.125f;
-        scale = new Vector3(v,v,v);
-        t.gameObject.transform.localScale = scale;
-      }
+      t.active_available.transform.localScale = scale;
+      t.active_snap.transform.localScale = scale;
+      t.storage_available.transform.localScale = scale;
+      t.storage_snap.transform.localScale = scale;
 
       //math
       if(!t.engaged || tool_clamp.engaged) return; //weight does nothing!
@@ -165,7 +162,7 @@ public class World : MonoBehaviour
       if(d != null)
       {
         Tool t = d.tool.GetComponent<Tool>();
-        float dx = (r_z-z_val);
+        float dx = (r_z-z_val)*2.0f;
         d.val = Mathf.Clamp(d.val-dx,0.0f,1.0f);
 
         TryApplyTool(t);
