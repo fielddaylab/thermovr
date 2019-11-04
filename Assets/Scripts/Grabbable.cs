@@ -13,8 +13,8 @@ public class Grabbable : MonoBehaviour
 
   void Awake()
   {
-    lhand = GameObject.Find("LHand");
-    rhand = GameObject.Find("RHand");
+    lhand = GameObject.Find("LeftControllerAnchor");
+    rhand = GameObject.Find("RightControllerAnchor");
     lhand_c = lhand.GetComponent<Collider>();
     rhand_c = rhand.GetComponent<Collider>();
     og_parent = gameObject.transform.parent;

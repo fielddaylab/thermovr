@@ -51,9 +51,9 @@ public class World : MonoBehaviour
 
     thermo = GameObject.Find("Oracle").GetComponent<ThermoMath>();
 
-    lhand  = GameObject.Find("LHand");
+    lhand  = GameObject.Find("LeftControllerAnchor");
     lhand_meshrenderer = lhand.transform.GetChild(0).gameObject.GetComponent<MeshRenderer>();
-    rhand  = GameObject.Find("RHand");
+    rhand  = GameObject.Find("RightControllerAnchor");
     rhand_meshrenderer = rhand.transform.GetChild(0).gameObject.GetComponent<MeshRenderer>();
 
     lhand_meshrenderer.material = hand_empty;
@@ -372,14 +372,21 @@ public class World : MonoBehaviour
       thermo.h_get_t(d_heat);
     }
 
-    TryGrab(true,  OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger),   OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger),   lhand.transform.position.z, lhand.transform.position.y, ref lhtrigger, ref litrigger, ref lz, ref ly, ref lhand, ref lgrabbed, ref rhand, ref rgrabbed); //left hand
-    TryGrab(false, OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger), OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger), rhand.transform.position.z, rhand.transform.position.y, ref rhtrigger, ref ritrigger, ref rz, ref ry, ref rhand, ref rgrabbed, ref lhand, ref lgrabbed); //right hand
+    float lhandt  = OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger);
+    float lindext = OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger);
+    float rhandt  = OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger);
+    float rindext = OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger);
+    //index compatibility
+    lhandt = lindext;
+    rhandt = rindext;
+    TryGrab(true,  lhandt, lindext, lhand.transform.position.z, lhand.transform.position.y, ref lhtrigger, ref litrigger, ref lz, ref ly, ref lhand, ref lgrabbed, ref rhand, ref rgrabbed); //left hand
+    TryGrab(false, rhandt, rindext, rhand.transform.position.z, rhand.transform.position.y, ref rhtrigger, ref ritrigger, ref rz, ref ry, ref rhand, ref rgrabbed, ref lhand, ref lgrabbed); //right hand
 
     UpdateGrabVis();
 
-    DEBUGTEXTS[0].text = OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger).ToString();
-    DEBUGTEXTS[1].text = OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger).ToString();
-    DEBUGTEXTS[2].text = "NA";
+//    DEBUGTEXTS[0].text = OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger).ToString();
+//    DEBUGTEXTS[1].text = OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger).ToString();
+//    DEBUGTEXTS[2].text = "NA";
   }
 
 }
