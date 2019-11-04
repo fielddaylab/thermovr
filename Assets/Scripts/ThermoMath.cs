@@ -45,7 +45,7 @@ public class ThermoMath : MonoBehaviour
   public double s_min = 0; //0
   public double s_max = 1; //0
 
-  int samples = 80;
+  int samples = 250;
 
   //state
   public double pressure; //pascals
@@ -183,8 +183,8 @@ public class ThermoMath : MonoBehaviour
   double Clampd(double v, double min, double max) { if(v < min) return min; if(v > max) return max; return v; } //v,min,max ordering mirrors Mathf.Clamp
 
   //sample bias- "graph density"
-  [Range(0.001f,10)]
-  public double sample_lbase = 10.0f;
+  [Range(0.001f,4)]
+  public double sample_lbase = 2.0f;
   double sample_lbase_prev = 0.0f;
   double sample(double t) { return Math.Pow(t,sample_lbase); }
 
@@ -286,7 +286,7 @@ public class ThermoMath : MonoBehaviour
       point = new Vector3(vplot,pplot,tplot);
       mesh_positions.Add(point);
     }
-    highest_y = Mathf.Lerp(highest_y,1.0f,0.1f); //extra nudge up
+    highest_y = Mathf.Lerp(highest_y,1.0f,0.01f); //extra nudge up
 
     //kill spanning triangles; gather orphans
     List<int> left_orphans = new List<int>();

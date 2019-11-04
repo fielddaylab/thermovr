@@ -376,11 +376,10 @@ public class World : MonoBehaviour
     TryGrab(false, OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger), OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger), rhand.transform.position.z, rhand.transform.position.y, ref rhtrigger, ref ritrigger, ref rz, ref ry, ref rhand, ref rgrabbed, ref lhand, ref lgrabbed); //right hand
 
     UpdateGrabVis();
-    /*
-    DEBUGTEXTS[0].text = lhand.transform.eulerAngles.x.ToString();
-    DEBUGTEXTS[1].text = lhand.transform.eulerAngles.y.ToString();
-    DEBUGTEXTS[2].text = lhand.transform.eulerAngles.z.ToString();
-    */
+
+    DEBUGTEXTS[0].text = OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger).ToString();
+    DEBUGTEXTS[1].text = OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger).ToString();
+    DEBUGTEXTS[2].text = "NA";
   }
 
 }
