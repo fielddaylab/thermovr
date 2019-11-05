@@ -252,10 +252,7 @@ public class World : MonoBehaviour
       Tool t = r_grabbed.GetComponent<Tool>();
       if(t)
       {
-        if(
-           ( which && t.active_grabbable.lintersect) ||
-           (!which && t.active_grabbable.rintersect)
-          )
+        if(t.active_ghost.tintersect)
         {
           r_grabbed.transform.SetParent(t.active.transform);
           t.engaged = true;
@@ -263,10 +260,7 @@ public class World : MonoBehaviour
           r_grabbed.transform.localPosition = new Vector3(0f,0f,0f);
           r_grabbed.transform.localRotation = Quaternion.identity;
         }
-        else if(
-           ( which && t.storage_grabbable.lintersect) ||
-           (!which && t.storage_grabbable.rintersect)
-          )
+        else if(t.storage_ghost.tintersect)
         {
           r_grabbed.transform.SetParent(t.storage.transform);
           r_grabbed.transform.localPosition = new Vector3(0f,0f,0f);
@@ -292,41 +286,35 @@ public class World : MonoBehaviour
       Tool t = tools[i];
       GameObject g = t.gameObject;
 
-      //active
-      if(
-        (lgrabbed == g && t.active_grabbable.lintersect) ||
-        (rgrabbed == g && t.active_grabbable.rintersect)
-      )
+      if(lgrabbed == g || rgrabbed == g)
       {
-        t.active_available_meshrenderer.enabled = false;
-        t.active_snap_meshrenderer.enabled =      true;
-      }
-      else if(lgrabbed == g || rgrabbed == g)
-      {
-        t.active_available_meshrenderer.enabled = true;
-        t.active_snap_meshrenderer.enabled =      false;
-      }
-      else
-      {
-        t.active_snap_meshrenderer.enabled =      false;
-        t.active_available_meshrenderer.enabled = false;
-      }
-      //storage
-      if(
-        (lgrabbed == g && t.storage_grabbable.lintersect) ||
-        (rgrabbed == g && t.storage_grabbable.rintersect)
-      )
-      {
-        t.storage_available_meshrenderer.enabled = false;
-        t.storage_snap_meshrenderer.enabled =      true;
-      }
-      else if(lgrabbed == g || rgrabbed == g)
-      {
-        t.storage_available_meshrenderer.enabled = true;
-        t.storage_snap_meshrenderer.enabled =      false;
+        //active
+        if(t.active_ghost.tintersect)
+        {
+          t.active_available_meshrenderer.enabled = false;
+          t.active_snap_meshrenderer.enabled =      true;
+        }
+        else
+        {
+          t.active_available_meshrenderer.enabled = true;
+          t.active_snap_meshrenderer.enabled =      false;
+        }
+        //storage
+        if(t.storage_ghost.tintersect)
+        {
+          t.storage_available_meshrenderer.enabled = false;
+          t.storage_snap_meshrenderer.enabled =      true;
+        }
+        else
+        {
+          t.storage_available_meshrenderer.enabled = true;
+          t.storage_snap_meshrenderer.enabled =      false;
+        }
       }
       else
       {
+        t.active_snap_meshrenderer.enabled =      false;
+        t.active_available_meshrenderer.enabled = false;
         t.storage_snap_meshrenderer.enabled =      false;
         t.storage_available_meshrenderer.enabled = false;
       }
@@ -377,8 +365,8 @@ public class World : MonoBehaviour
     float rhandt  = OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger);
     float rindext = OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger);
     //index compatibility
-    lhandt = lindext;
-    rhandt = rindext;
+    lhandt += lindext;
+    rhandt += rindext;
     TryGrab(true,  lhandt, lindext, lhand.transform.position.z, lhand.transform.position.y, ref lhtrigger, ref litrigger, ref lz, ref ly, ref lhand, ref lgrabbed, ref rhand, ref rgrabbed); //left hand
     TryGrab(false, rhandt, rindext, rhand.transform.position.z, rhand.transform.position.y, ref rhtrigger, ref ritrigger, ref rz, ref ry, ref rhand, ref rgrabbed, ref lhand, ref lgrabbed); //right hand
 
