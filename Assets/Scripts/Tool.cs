@@ -7,6 +7,8 @@ public class Tool : MonoBehaviour
   [System.NonSerialized]
   public bool engaged = false;
   [System.NonSerialized]
+  public bool stored = false;
+  [System.NonSerialized]
   public Grabbable grabbable;
 
   public GameObject storage;
@@ -61,7 +63,7 @@ public class Tool : MonoBehaviour
     active_snap = active_ghost.snap;
     active_snap_meshrenderer = active_snap.GetComponent<MeshRenderer>();
 
-    dial_dial = dial.GetComponent<Dial>();;
+    dial_dial = dial.GetComponent<Dial>();
     dial_grabbable = dial.GetComponent<Grabbable>();
   }
 
@@ -74,6 +76,17 @@ public class Tool : MonoBehaviour
   // Update is called once per frame
   void Update()
   {
+    if(!engaged && !stored && !grabbable.grabbed)
+    {
+      gameObject.transform.position = Vector3.Lerp(gameObject.transform.position,storage.transform.position,0.1f);
+      if(Vector3.Distance(gameObject.transform.position, storage.transform.position) < 0.1f)
+      {
+        gameObject.transform.SetParent(storage.transform);
+        stored = true;
+        gameObject.transform.localPosition = new Vector3(0f,0f,0f);
+        gameObject.transform.localRotation = Quaternion.identity;
+      }
+    }
 
   }
 }

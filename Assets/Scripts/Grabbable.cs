@@ -6,6 +6,7 @@ public class Grabbable : MonoBehaviour
 {
   GameObject lhand;
   GameObject rhand;
+  public bool grabbed = false;
   Collider lhand_c;
   Collider rhand_c;
   [System.NonSerialized]

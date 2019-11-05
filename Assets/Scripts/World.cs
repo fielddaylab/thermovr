@@ -82,6 +82,7 @@ public class World : MonoBehaviour
       t.storage_snap_meshrenderer.enabled = false;
       GameObject g = t.gameObject;
       g.transform.SetParent(t.storage.gameObject.transform);
+      t.stored = true;
       g.transform.localPosition = new Vector3(0.0f,0.0f,0.0f);
     }
 
@@ -212,8 +213,18 @@ public class World : MonoBehaviour
           )
         {
           r_grabbed = movables[i].gameObject;
+          movables[i].grabbed = true;
           Tool t = r_grabbed.GetComponent<Tool>();
-          if(t) t.engaged = false;
+          if(t)
+          {
+            t.engaged = false;
+            t.stored = false;
+          }
+          VisAid v = r_grabbed.GetComponent<VisAid>();
+          if(v)
+          {
+            v.stored = false;
+          }
           r_grabbed.transform.SetParent(r_hand.transform);
           if(r_grabbed == r_ograbbed) r_ograbbed = null;
         }
@@ -229,6 +240,7 @@ public class World : MonoBehaviour
             )
           {
             r_grabbed = tools[i].dial;
+            tools[i].dial_grabbable.grabbed = true;
             if(r_grabbed == r_ograbbed) r_ograbbed = null;
           }
         }
@@ -243,6 +255,7 @@ public class World : MonoBehaviour
         )
         {
           r_grabbed = handle_workspace;
+          g.grabbed = true;
           if(r_grabbed == r_ograbbed) r_ograbbed = null;
         }
       }
@@ -263,6 +276,7 @@ public class World : MonoBehaviour
         else if(t.storage_ghost.tintersect)
         {
           r_grabbed.transform.SetParent(t.storage.transform);
+          t.stored = true;
           r_grabbed.transform.localPosition = new Vector3(0f,0f,0f);
           r_grabbed.transform.localRotation = Quaternion.identity;
         }
@@ -270,6 +284,7 @@ public class World : MonoBehaviour
       }
       if(t == null) r_grabbed.transform.SetParent(r_grabbed.GetComponent<Grabbable>().og_parent); //ok to do, even with a dial
 
+      r_grabbed.GetComponent<Grabbable>().grabbed = false;
       r_grabbed = null;
     }
 
