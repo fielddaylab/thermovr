@@ -11,6 +11,8 @@ public class Tool : MonoBehaviour
   [System.NonSerialized]
   public Grabbable grabbable;
   [System.NonSerialized]
+  public BoxCollider boxcollider;
+  [System.NonSerialized]
   public Rigidbody rigidbody;
   [System.NonSerialized]
   public float t_free = 0.0f;
@@ -52,6 +54,7 @@ public class Tool : MonoBehaviour
   void Awake()
   {
     grabbable = gameObject.GetComponent<Grabbable>();
+    boxcollider = gameObject.GetComponent<BoxCollider>();
     rigidbody = gameObject.GetComponent<Rigidbody>();
 
     storage_ghost = storage.GetComponent<Ghost>();

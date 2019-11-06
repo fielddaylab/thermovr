@@ -5,7 +5,6 @@ using UnityEngine;
 public class World : MonoBehaviour
 {
   List<TextMesh> DEBUGTEXTS;
-  int layer_abyss = 0;
 
   ThermoMath thermo;
   GameObject lhand;
@@ -52,7 +51,6 @@ public class World : MonoBehaviour
   // Start is called before the first frame update
   void Start()
   {
-    layer_abyss = LayerMask.NameToLayer("ABYSS");
     DEBUGTEXTS = new List<TextMesh>();
     GameObject dtexts = GameObject.Find("DEBUGTEXTS");
     foreach(Transform child in dtexts.transform)
@@ -237,20 +235,13 @@ public class World : MonoBehaviour
             t.engaged = false;
             t.stored = false;
             t.rigidbody.isKinematic = true;
+            t.boxcollider.isTrigger = false;
           }
           VisAid v = r_grabbed.GetComponent<VisAid>();
           if(v)
           {
             v.stored = false;
             v.rigidbody.isKinematic = true;
-            if(r_grabbed == vessel)
-            {
-              for(int j = 0; j < tools.Count; j++)
-              {
-                t = tools[j];
-                if(t.engaged) t.gameObject.layer = 0;
-              }
-            }
           }
           r_grabbed.transform.SetParent(r_hand.transform);
           if(r_grabbed == r_ograbbed) r_ograbbed = null;
@@ -296,6 +287,7 @@ public class World : MonoBehaviour
         {
           r_grabbed.transform.SetParent(t.active.transform);
           t.engaged = true;
+          t.boxcollider.isTrigger = true;
           if(
             (t == tool_insulator && tool_clamp.engaged) ||
             (t == tool_clamp && tool_insulator.engaged)
@@ -305,7 +297,7 @@ public class World : MonoBehaviour
             if(t == tool_insulator) ot = tool_clamp;
             else                    ot = tool_insulator;
             ot.engaged = false;
-            ot.gameObject.layer = 0;
+            ot.boxcollider.isTrigger = false;
             ot.gameObject.transform.SetParent(ot.grabbable.og_parent);
             ot.rigidbody.isKinematic = false;
             ot.rigidbody.velocity = new Vector3(0f,0f,0f);
@@ -334,14 +326,6 @@ public class World : MonoBehaviour
         VisAid v = r_grabbed.GetComponent<VisAid>();
         if(v)
         {
-          if(r_grabbed == vessel)
-          {
-            for(int j = 0; j < tools.Count; j++)
-            {
-              t = tools[j];
-              if(t.engaged) t.gameObject.layer = layer_abyss;
-            }
-          }
           v.rigidbody.isKinematic = false;
           v.rigidbody.velocity = hand_vel;
         }
@@ -359,16 +343,6 @@ public class World : MonoBehaviour
 
   void UpdateGrabVis()
   {
-    //haaaaackkkk
-    if(vessel.GetComponent<VisAid>().takemehome)
-    {
-      for(int j = 0; j < tools.Count; j++)
-      {
-        Tool t = tools[j];
-        if(t.engaged) t.gameObject.layer = 0;
-      }
-    }
-
     for(int i = 0; i < tools.Count; i++)
     {
       Tool t = tools[i];
