@@ -8,8 +8,12 @@ public class World : MonoBehaviour
 
   ThermoMath thermo;
   GameObject lhand;
+  Vector3 lhand_pos;
+  Vector3 lhand_vel;
   MeshRenderer lhand_meshrenderer;
   GameObject rhand;
+  Vector3 rhand_pos;
+  Vector3 rhand_vel;
   MeshRenderer rhand_meshrenderer;
 
   public Material hand_empty;
@@ -52,8 +56,12 @@ public class World : MonoBehaviour
     thermo = GameObject.Find("Oracle").GetComponent<ThermoMath>();
 
     lhand  = GameObject.Find("LeftControllerAnchor");
+    lhand_pos = lhand.transform.position;
+    lhand_vel = new Vector3(0.0f,0.0f,0.0f);
     lhand_meshrenderer = lhand.transform.GetChild(0).gameObject.GetComponent<MeshRenderer>();
     rhand  = GameObject.Find("RightControllerAnchor");
+    rhand_pos = rhand.transform.position;
+    rhand_vel = new Vector3(0.0f,0.0f,0.0f);
     rhand_meshrenderer = rhand.transform.GetChild(0).gameObject.GetComponent<MeshRenderer>();
 
     lhand_meshrenderer.material = hand_empty;
@@ -171,7 +179,7 @@ public class World : MonoBehaviour
     }
   }
 
-  void TryGrab(bool which, float htrigger_val, float itrigger_val, float z_val, float y_val, ref bool r_htrigger, ref bool r_itrigger, ref float r_z, ref float r_y, ref GameObject r_hand, ref GameObject r_grabbed, ref GameObject r_ohand, ref GameObject r_ograbbed)
+  void TryGrab(bool which, float htrigger_val, float itrigger_val, float z_val, float y_val, Vector3 hand_vel, ref bool r_htrigger, ref bool r_itrigger, ref float r_z, ref float r_y, ref GameObject r_hand, ref GameObject r_grabbed, ref GameObject r_ohand, ref GameObject r_ograbbed)
   {
     float htrigger_threshhold = 0.1f;
     float itrigger_threshhold = 0.1f;
@@ -219,11 +227,13 @@ public class World : MonoBehaviour
           {
             t.engaged = false;
             t.stored = false;
+            t.rigidbody.isKinematic = true;
           }
           VisAid v = r_grabbed.GetComponent<VisAid>();
           if(v)
           {
             v.stored = false;
+            v.rigidbody.isKinematic = true;
           }
           r_grabbed.transform.SetParent(r_hand.transform);
           if(r_grabbed == r_ograbbed) r_ograbbed = null;
@@ -280,9 +290,23 @@ public class World : MonoBehaviour
           r_grabbed.transform.localPosition = new Vector3(0f,0f,0f);
           r_grabbed.transform.localRotation = Quaternion.identity;
         }
-        else t = null;
+        else
+        {
+          r_grabbed.transform.SetParent(r_grabbed.GetComponent<Grabbable>().og_parent);
+          t.rigidbody.isKinematic = false;
+          t.rigidbody.velocity = hand_vel;
+        }
       }
-      if(t == null) r_grabbed.transform.SetParent(r_grabbed.GetComponent<Grabbable>().og_parent); //ok to do, even with a dial
+      else
+      {
+        r_grabbed.transform.SetParent(r_grabbed.GetComponent<Grabbable>().og_parent); //ok to do, even with a dial
+        VisAid v = r_grabbed.GetComponent<VisAid>();
+        if(v)
+        {
+          v.rigidbody.isKinematic = false;
+          v.rigidbody.velocity = hand_vel;
+        }
+      }
 
       r_grabbed.GetComponent<Grabbable>().grabbed = false;
       r_grabbed = null;
@@ -366,6 +390,24 @@ public class World : MonoBehaviour
   // Update is called once per frame
   void Update()
   {
+    //running blended average
+    lhand_vel += (lhand.transform.position-lhand_pos)/Time.deltaTime;
+    lhand_vel *= 0.5f;
+    lhand_pos = lhand.transform.position;
+
+    rhand_vel += (rhand.transform.position-rhand_pos)/Time.deltaTime;
+    rhand_vel *= 0.5f;
+    rhand_pos = rhand.transform.position;
+
+    /*
+    //snap from delay
+    lhand_pos = Vector3.Lerp(lhand_pos,lhand.transform.position,0.01f);
+    lhand_vel = (lhand.transform.position-lhand_pos)/Time.deltaTime;
+
+    rhand_pos = Vector3.Lerp(rhand_pos,rhand.transform.position,0.01f);
+    rhand_vel = (rhand.transform.position-rhand_pos)/Time.deltaTime;
+    */
+
     //passive effects
     float d_heat = 0;
     if(tool_burner.engaged) d_heat += tool_burner.dial_dial.val;
@@ -382,14 +424,17 @@ public class World : MonoBehaviour
     //index compatibility
     lhandt += lindext;
     rhandt += rindext;
-    TryGrab(true,  lhandt, lindext, lhand.transform.position.z, lhand.transform.position.y, ref lhtrigger, ref litrigger, ref lz, ref ly, ref lhand, ref lgrabbed, ref rhand, ref rgrabbed); //left hand
-    TryGrab(false, rhandt, rindext, rhand.transform.position.z, rhand.transform.position.y, ref rhtrigger, ref ritrigger, ref rz, ref ry, ref rhand, ref rgrabbed, ref lhand, ref lgrabbed); //right hand
+    TryGrab(true,  lhandt, lindext, lhand.transform.position.z, lhand.transform.position.y, lhand_vel, ref lhtrigger, ref litrigger, ref lz, ref ly, ref lhand, ref lgrabbed, ref rhand, ref rgrabbed); //left hand
+    TryGrab(false, rhandt, rindext, rhand.transform.position.z, rhand.transform.position.y, rhand_vel, ref rhtrigger, ref ritrigger, ref rz, ref ry, ref rhand, ref rgrabbed, ref lhand, ref lgrabbed); //right hand
 
     UpdateGrabVis();
 
 //    DEBUGTEXTS[0].text = OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger).ToString();
 //    DEBUGTEXTS[1].text = OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger).ToString();
 //    DEBUGTEXTS[2].text = "NA";
+    DEBUGTEXTS[0].text = lhand_vel.x.ToString();
+    DEBUGTEXTS[1].text = lhand_vel.y.ToString();
+    DEBUGTEXTS[2].text = lhand_vel.z.ToString();
   }
 
 }

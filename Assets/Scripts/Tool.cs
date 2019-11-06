@@ -10,6 +10,10 @@ public class Tool : MonoBehaviour
   public bool stored = false;
   [System.NonSerialized]
   public Grabbable grabbable;
+  [System.NonSerialized]
+  public Rigidbody rigidbody;
+  [System.NonSerialized]
+  public float t_free = 0.0f;
 
   public GameObject storage;
   [System.NonSerialized]
@@ -48,6 +52,7 @@ public class Tool : MonoBehaviour
   void Awake()
   {
     grabbable = gameObject.GetComponent<Grabbable>();
+    rigidbody = gameObject.GetComponent<Rigidbody>();
 
     storage_ghost = storage.GetComponent<Ghost>();
     storage_grabbable = storage.GetComponent<Grabbable>();
@@ -76,8 +81,10 @@ public class Tool : MonoBehaviour
   // Update is called once per frame
   void Update()
   {
-    if(!engaged && !stored && !grabbable.grabbed)
+    t_free += Time.deltaTime;
+    if(!engaged && !stored && !grabbable.grabbed && t_free > 1.0f)
     {
+      rigidbody.isKinematic = true;
       gameObject.transform.position = Vector3.Lerp(gameObject.transform.position,storage.transform.position,0.1f);
       if(Vector3.Distance(gameObject.transform.position, storage.transform.position) < 0.1f)
       {
@@ -87,7 +94,9 @@ public class Tool : MonoBehaviour
         gameObject.transform.localRotation = Quaternion.identity;
       }
     }
-
+    else if(engaged || stored || grabbable.grabbed)
+      t_free = 0.0f;
   }
+
 }
 
