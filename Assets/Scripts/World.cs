@@ -126,6 +126,8 @@ public class World : MonoBehaviour
       else if(t == tool_balloon) v += tool_balloon.dial_dial.val;
       Vector3 scale = new Vector3(v,v,v);
       t.gameObject.transform.localScale = scale;
+      if(t == tool_balloon) v *= 0.125f;
+      scale = new Vector3(v,v,v);
       t.active_available.transform.localScale = scale;
       t.active_snap.transform.localScale = scale;
       t.storage_available.transform.localScale = scale;
@@ -278,6 +280,19 @@ public class World : MonoBehaviour
         {
           r_grabbed.transform.SetParent(t.active.transform);
           t.engaged = true;
+          if(
+            (t == tool_insulator && tool_clamp.engaged) ||
+            (t == tool_clamp && tool_insulator.engaged)
+          )
+          {
+            Tool ot;
+            if(t == tool_insulator) ot = tool_clamp;
+            else                    ot = tool_insulator;
+            ot.engaged = false;
+            ot.gameObject.transform.SetParent(ot.grabbable.og_parent);
+            ot.rigidbody.isKinematic = false;
+            ot.rigidbody.velocity = new Vector3(0f,0f,0f);
+          }
           TryApplyTool(t);
           r_grabbed.transform.localPosition = new Vector3(0f,0f,0f);
           r_grabbed.transform.localRotation = Quaternion.identity;
@@ -431,9 +446,6 @@ public class World : MonoBehaviour
 //    DEBUGTEXTS[0].text = OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger).ToString();
 //    DEBUGTEXTS[1].text = OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger).ToString();
 //    DEBUGTEXTS[2].text = "NA";
-    DEBUGTEXTS[0].text = lhand_vel.x.ToString();
-    DEBUGTEXTS[1].text = lhand_vel.y.ToString();
-    DEBUGTEXTS[2].text = lhand_vel.z.ToString();
   }
 
 }
