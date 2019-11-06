@@ -124,7 +124,6 @@ public class World : MonoBehaviour
       float v = 1.0f;
            if(t == tool_weight)  v += tool_weight.dial_dial.val;
       else if(t == tool_balloon) v += tool_balloon.dial_dial.val;
-      if(t == tool_balloon) v *= 0.125f; //balloon scale is silly
       Vector3 scale = new Vector3(v,v,v);
       t.gameObject.transform.localScale = scale;
       t.active_available.transform.localScale = scale;

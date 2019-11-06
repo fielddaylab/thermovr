@@ -86,6 +86,7 @@ public class Tool : MonoBehaviour
     {
       rigidbody.isKinematic = true;
       gameObject.transform.position = Vector3.Lerp(gameObject.transform.position,storage.transform.position,0.1f);
+      gameObject.transform.localRotation = Quaternion.Lerp(gameObject.transform.localRotation,storage.transform.localRotation,0.1f);
       if(Vector3.Distance(gameObject.transform.position, storage.transform.position) < 0.1f)
       {
         gameObject.transform.SetParent(storage.transform);

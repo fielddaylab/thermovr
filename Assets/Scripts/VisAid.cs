@@ -43,6 +43,7 @@ public class VisAid : MonoBehaviour
       rigidbody.isKinematic = true;
       Vector3 og_position = grabbable.og_parent.position+og_localPosition;
       gameObject.transform.position = Vector3.Lerp(gameObject.transform.position,og_position,0.1f);
+      gameObject.transform.localRotation = Quaternion.Lerp(gameObject.transform.localRotation,og_localRotation,0.1f);
       if(Vector3.Distance(gameObject.transform.position, og_position) < 0.1f)
       {
         stored = true;
