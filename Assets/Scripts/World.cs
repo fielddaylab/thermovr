@@ -302,6 +302,8 @@ public class World : MonoBehaviour
             ot.rigidbody.isKinematic = false;
             ot.rigidbody.velocity = new Vector3(0f,0f,0f);
           }
+               if(t == tool_insulator) t.dial_dial.val = (float)((thermo.temperature-thermo.t_min)/(thermo.t_max-thermo.t_min));
+          else if(t == tool_clamp)     t.dial_dial.val = (float)((thermo.volume     -thermo.v_min)/(thermo.v_max-thermo.v_min));
           TryApplyTool(t);
           r_grabbed.transform.localPosition = new Vector3(0f,0f,0f);
           r_grabbed.transform.localRotation = Quaternion.identity;

@@ -45,7 +45,7 @@ public class ThermoMath : MonoBehaviour
   public double s_min = 0; //0
   public double s_max = 1; //0
 
-  int samples = 250;
+  int samples = 350;
 
   //state
   public double pressure; //pascals
@@ -183,8 +183,8 @@ public class ThermoMath : MonoBehaviour
   double Clampd(double v, double min, double max) { if(v < min) return min; if(v > max) return max; return v; } //v,min,max ordering mirrors Mathf.Clamp
 
   //sample bias- "graph density"
-  [Range(0.001f,4)]
-  public double sample_lbase = 2.0f;
+  [Range(0.001f,20)]
+  public double sample_lbase = 1.6f;
   double sample_lbase_prev = 0.0f;
   double sample(double t) { return Math.Pow(t,sample_lbase); }
 
@@ -195,7 +195,7 @@ public class ThermoMath : MonoBehaviour
   float log_plot(double min, double max, double val) { return (float)((Math.Log(val,plot_lbase)-Math.Log(min,plot_lbase))/(Math.Log(max,plot_lbase)-Math.Log(min,plot_lbase))); }
 
   float plot(double min, double max, double val) { return log_plot(min,max,val); }
-  String pv(Vector3 v) { return String.Format("{0}, {1}, {2}",v.x.ToString(".################"),v.y.ToString(".################"),v.z.ToString(".################"));}
+  String pv(Vector3 v) { return String.Format("{0}, {1}, {2}",v.x.ToString(".################"),v.y.ToString(".################"),v.z.ToString(".################")); }
 
   void genMesh()
   {
@@ -546,6 +546,7 @@ public class ThermoMath : MonoBehaviour
     }
 
     Mesh mesh = new Mesh();
+    mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
     mesh.vertices = mesh_positions.ToArray();
     mesh.normals = mesh_normals.ToArray();
     mesh.triangles = mesh_triangles.ToArray();
@@ -803,10 +804,14 @@ public class ThermoMath : MonoBehaviour
     plot_lbase_prev = plot_lbase;
     if(modified)
     {
+      /*
       //delete old
       for(int i = 0; i < graph_bits.Length; i++)
         Destroy(graph_bits[i]);
       genHackMesh();
+      */
+      Destroy(GameObject.Find("graph_mesh"));
+      genMesh();
     }
   }
 
