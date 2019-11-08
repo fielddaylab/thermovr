@@ -8,13 +8,17 @@ public class World : MonoBehaviour
 
   ThermoMath thermo;
   GameObject lhand;
+  GameObject llazer;
   Vector3 lhand_pos;
   Vector3 lhand_vel;
   MeshRenderer lhand_meshrenderer;
+  MeshRenderer llazer_meshrenderer;
   GameObject rhand;
+  GameObject rlazer;
   Vector3 rhand_pos;
   Vector3 rhand_vel;
   MeshRenderer rhand_meshrenderer;
+  MeshRenderer rlazer_meshrenderer;
 
   public Material hand_empty;
   public Material hand_intersecting;
@@ -59,16 +63,22 @@ public class World : MonoBehaviour
     thermo = GameObject.Find("Oracle").GetComponent<ThermoMath>();
 
     lhand  = GameObject.Find("LeftControllerAnchor");
+    llazer  = GameObject.Find("LLazer");
     lhand_pos = lhand.transform.position;
     lhand_vel = new Vector3(0.0f,0.0f,0.0f);
     lhand_meshrenderer = lhand.transform.GetChild(0).gameObject.GetComponent<MeshRenderer>();
+    llazer_meshrenderer = llazer.transform.GetChild(0).gameObject.GetComponent<MeshRenderer>();
     rhand  = GameObject.Find("RightControllerAnchor");
+    rlazer  = GameObject.Find("RLazer");
     rhand_pos = rhand.transform.position;
     rhand_vel = new Vector3(0.0f,0.0f,0.0f);
     rhand_meshrenderer = rhand.transform.GetChild(0).gameObject.GetComponent<MeshRenderer>();
+    rlazer_meshrenderer = rlazer.transform.GetChild(0).gameObject.GetComponent<MeshRenderer>();
 
     lhand_meshrenderer.material = hand_empty;
     rhand_meshrenderer.material = hand_empty;
+    llazer_meshrenderer.material = hand_intersecting;
+    rlazer_meshrenderer.material = hand_intersecting;
 
     Tool t;
     tools = new List<Tool>();
