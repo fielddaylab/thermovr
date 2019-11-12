@@ -1139,6 +1139,14 @@ PrefabInstance:
       propertyPath: m_LocalScale.z
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 109308, guid: 126d619cf4daa52469682f85c1378b4a, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 113768, guid: 126d619cf4daa52469682f85c1378b4a, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 126d619cf4daa52469682f85c1378b4a, type: 3}
 --- !u!1 &225398834
@@ -7756,6 +7764,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tmp: {fileID: 1597925182}
+  backing: {fileID: 1421175655}
 --- !u!65 &532747759
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -7857,8 +7866,8 @@ GameObject:
   m_Component:
   - component: {fileID: 559362275}
   - component: {fileID: 559362278}
-  - component: {fileID: 559362277}
   - component: {fileID: 559362276}
+  - component: {fileID: 559362277}
   m_Layer: 0
   m_Name: Qboard
   m_TagString: Untagged
@@ -7895,6 +7904,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tmp: {fileID: 468363003}
+  backing: {fileID: 1337129352}
 --- !u!114 &559362277
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8108,6 +8118,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tmp: {fileID: 1407508561}
+  backing: {fileID: 554607874}
 --- !u!65 &590823105
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -9199,7 +9210,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 873258721}
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 0, z: 10}
+  m_LocalPosition: {x: 0, y: 0, z: 20}
   m_LocalScale: {x: 0.01, y: 20, z: 0.01}
   m_Children: []
   m_Father: {fileID: 1525614608}
@@ -10116,6 +10127,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tmp: {fileID: 1918723}
+  backing: {fileID: 334784719}
 --- !u!65 &1085492021
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -10938,6 +10950,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tmp: {fileID: 1476047379}
+  backing: {fileID: 489839526}
 --- !u!65 &1234179838
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -12761,6 +12774,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tmp: {fileID: 1032945214}
+  backing: {fileID: 2110359750}
 --- !u!65 &1511757341
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -13296,7 +13310,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1595020576}
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 0, z: 10}
+  m_LocalPosition: {x: 0, y: 0, z: 20}
   m_LocalScale: {x: 0.01, y: 20, z: 0.01}
   m_Children: []
   m_Father: {fileID: 1498643489}
@@ -15175,6 +15189,10 @@ MonoBehaviour:
   hand_empty: {fileID: 2100000, guid: a23630cc2689f7d428c589100157c502, type: 2}
   hand_intersecting: {fileID: 2100000, guid: f82e0f125f1c37847b1dcb9fd636af99, type: 2}
   hand_grabbing: {fileID: 2100000, guid: b619eec6ceb2d1e4097620d12ed5ac37, type: 2}
+  quiz_default: {fileID: 2100000, guid: cf20375753e4dab4884af6dea6f27a9c, type: 2}
+  quiz_hi: {fileID: 2100000, guid: f4aa9c4b98eb7f64fa17bac3a7627635, type: 2}
+  quiz_sel: {fileID: 2100000, guid: 4ef849f3e69020c44abdb078dbff6ecc, type: 2}
+  quiz_hisel: {fileID: 2100000, guid: 3c94870dbdbce6a4f9cd57e73e4a2814, type: 2}
 --- !u!4 &1968025936 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 400004, guid: 126d619cf4daa52469682f85c1378b4a,

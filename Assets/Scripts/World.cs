@@ -5,6 +5,14 @@ using TMPro;
 
 public class World : MonoBehaviour
 {
+  public Material hand_empty;
+  public Material hand_intersecting;
+  public Material hand_grabbing;
+  public Material quiz_default;
+  public Material quiz_hi;
+  public Material quiz_sel;
+  public Material quiz_hisel;
+
   List<TextMesh> DEBUGTEXTS;
 
   ThermoMath thermo;
@@ -20,10 +28,6 @@ public class World : MonoBehaviour
   Vector3 rhand_vel;
   MeshRenderer rhand_meshrenderer;
   MeshRenderer rlazer_meshrenderer;
-
-  public Material hand_empty;
-  public Material hand_intersecting;
-  public Material hand_grabbing;
 
   List<Grabbable> movables;
   GameObject workspace;
@@ -318,20 +322,6 @@ public class World : MonoBehaviour
           r_grabbed.transform.SetParent(t.active.transform);
           t.engaged = true;
           t.boxcollider.isTrigger = true;
-          if(
-            (t == tool_insulator && tool_clamp.engaged) ||
-            (t == tool_clamp && tool_insulator.engaged)
-          )
-          {
-            Tool ot;
-            if(t == tool_insulator) ot = tool_clamp;
-            else                    ot = tool_insulator;
-            ot.engaged = false;
-            ot.boxcollider.isTrigger = false;
-            ot.gameObject.transform.SetParent(ot.grabbable.og_parent);
-            ot.rigidbody.isKinematic = false;
-            ot.rigidbody.velocity = new Vector3(0f,0f,0f);
-          }
                if(t == tool_insulator) t.dial_dial.val = (float)((thermo.temperature-thermo.t_min)/(thermo.t_max-thermo.t_min));
           else if(t == tool_clamp)     t.dial_dial.val = (float)((thermo.volume     -thermo.v_min)/(thermo.v_max-thermo.v_min));
           TryApplyTool(t);
@@ -495,26 +485,27 @@ public class World : MonoBehaviour
     if(qboard_lazerable.rintersect) rlazer_meshrenderer.enabled = true;
     else                            rlazer_meshrenderer.enabled = false;
 
-    if(litrigger_delta == 1)
+    Quizo q;
+    for(int i = 0; i < option_quizos.Count; i++)
     {
-      for(int i = 0; i < option_quizos.Count; i++)
+      q = option_quizos[i];
+      if(
+        (litrigger_delta == 1 && q.lazerable.lintersect) ||
+        (ritrigger_delta == 1 && q.lazerable.rintersect)
+      )
       {
-        if(option_quizos[i].lazerable.lintersect)
-        {
-          if(i == qselected) qselected = -1;
-          else               qselected = i;
-        }
+        if(i == qselected) qselected = -1;
+        else               qselected = i;
       }
-    }
-    if(ritrigger_delta == 1)
-    {
-      for(int i = 0; i < option_quizos.Count; i++)
+      if(i == qselected)
       {
-        if(option_quizos[i].lazerable.rintersect)
-        {
-          if(i == qselected) qselected = -1;
-          else               qselected = i;
-        }
+        if(q.lazerable.lintersect || q.lazerable.rintersect) q.backing_meshrenderer.material = quiz_hisel;
+        else                                                 q.backing_meshrenderer.material = quiz_sel;
+      }
+      else
+      {
+        if(q.lazerable.lintersect || q.lazerable.rintersect) q.backing_meshrenderer.material = quiz_hi;
+        else                                                 q.backing_meshrenderer.material = quiz_default;
       }
     }
 
