@@ -30,6 +30,10 @@ public class World : MonoBehaviour
   GameObject handle_workspace;
   GameObject lgrabbed = null;
   GameObject rgrabbed = null;
+  int lhtrigger_delta = 0;
+  int litrigger_delta = 0;
+  int rhtrigger_delta = 0;
+  int ritrigger_delta = 0;
   float lz = 0.0f;
   float rz = 0.0f;
   float ly = 0.0f;
@@ -57,6 +61,7 @@ public class World : MonoBehaviour
   Quizo qconfirm_quizo;
   Lazerable qboard_lazerable;
   TextMeshPro qtext_tmp;
+  int qselected = -1;
 
   // Start is called before the first frame update
   void Start()
@@ -211,38 +216,38 @@ public class World : MonoBehaviour
     }
   }
 
-  void TryGrab(bool which, float htrigger_val, float itrigger_val, float z_val, float y_val, Vector3 hand_vel, ref bool r_htrigger, ref bool r_itrigger, ref float r_z, ref float r_y, ref GameObject r_hand, ref GameObject r_grabbed, ref GameObject r_ohand, ref GameObject r_ograbbed)
+  void TryGrab(bool which, float htrigger_val, float itrigger_val, float z_val, float y_val, Vector3 hand_vel, ref bool r_htrigger, ref bool r_itrigger, ref int r_htrigger_delta, ref int r_itrigger_delta, ref float r_z, ref float r_y, ref GameObject r_hand, ref GameObject r_grabbed, ref GameObject r_ohand, ref GameObject r_ograbbed)
   {
     float htrigger_threshhold = 0.1f;
     float itrigger_threshhold = 0.1f;
 
-    int htrigger_delta = 0;
+    r_htrigger_delta = 0;
     if(!r_htrigger && htrigger_val > htrigger_threshhold)
     {
-      htrigger_delta = 1;
+      r_htrigger_delta = 1;
       r_htrigger = true;
     }
     else if(r_htrigger && htrigger_val <= htrigger_threshhold)
     {
-      htrigger_delta = -1;
+      r_htrigger_delta = -1;
       r_htrigger = false;
     }
 
-    int itrigger_delta = 0;
+    r_itrigger_delta = 0;
     if(!r_itrigger && itrigger_val > itrigger_threshhold)
     {
-      itrigger_delta = 1;
+      r_itrigger_delta = 1;
       r_itrigger = true;
       r_z = z_val;
       r_y = y_val;
     }
     else if(r_itrigger && itrigger_val <= itrigger_threshhold)
     {
-      itrigger_delta = -1;
+      r_itrigger_delta = -1;
       r_itrigger = false;
     }
 
-    if(r_grabbed == null && htrigger_delta == 1)
+    if(r_grabbed == null && r_htrigger_delta == 1)
     {
       //first try movables
       for(int i = 0; r_grabbed == null && i < movables.Count; i++)
@@ -303,7 +308,7 @@ public class World : MonoBehaviour
         }
       }
     }
-    else if(r_grabbed && htrigger_delta == -1)
+    else if(r_grabbed && r_htrigger_delta == -1)
     {
       Tool t = r_grabbed.GetComponent<Tool>();
       if(t)
@@ -474,14 +479,46 @@ public class World : MonoBehaviour
     //index compatibility
     lhandt += lindext;
     rhandt += rindext;
-    TryGrab(true,  lhandt, lindext, lhand.transform.position.z, lhand.transform.position.y, lhand_vel, ref lhtrigger, ref litrigger, ref lz, ref ly, ref lhand, ref lgrabbed, ref rhand, ref rgrabbed); //left hand
-    TryGrab(false, rhandt, rindext, rhand.transform.position.z, rhand.transform.position.y, rhand_vel, ref rhtrigger, ref ritrigger, ref rz, ref ry, ref rhand, ref rgrabbed, ref lhand, ref lgrabbed); //right hand
+    TryGrab(true,  lhandt, lindext, lhand.transform.position.z, lhand.transform.position.y, lhand_vel, ref lhtrigger, ref litrigger, ref lhtrigger_delta, ref litrigger_delta, ref lz, ref ly, ref lhand, ref lgrabbed, ref rhand, ref rgrabbed); //left hand
+    TryGrab(false, rhandt, rindext, rhand.transform.position.z, rhand.transform.position.y, rhand_vel, ref rhtrigger, ref ritrigger, ref rhtrigger_delta, ref ritrigger_delta, ref rz, ref ry, ref rhand, ref rgrabbed, ref lhand, ref lgrabbed); //right hand
 
     UpdateGrabVis();
 
 //    DEBUGTEXTS[0].text = OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger).ToString();
 //    DEBUGTEXTS[1].text = OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger).ToString();
 //    DEBUGTEXTS[2].text = "NA";
+
+
+    //quiz
+    if(qboard_lazerable.lintersect) llazer_meshrenderer.enabled = true;
+    else                            llazer_meshrenderer.enabled = false;
+    if(qboard_lazerable.rintersect) rlazer_meshrenderer.enabled = true;
+    else                            rlazer_meshrenderer.enabled = false;
+
+    if(litrigger_delta == 1)
+    {
+      for(int i = 0; i < option_quizos.Count; i++)
+      {
+        if(option_quizos[i].lazerable.lintersect)
+        {
+          if(i == qselected) qselected = -1;
+          else               qselected = i;
+        }
+      }
+    }
+    if(ritrigger_delta == 1)
+    {
+      for(int i = 0; i < option_quizos.Count; i++)
+      {
+        if(option_quizos[i].lazerable.rintersect)
+        {
+          if(i == qselected) qselected = -1;
+          else               qselected = i;
+        }
+      }
+    }
+
+    DEBUGTEXTS[0].text = qselected.ToString();
   }
 
 }
