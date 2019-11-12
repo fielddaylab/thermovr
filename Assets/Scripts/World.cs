@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class World : MonoBehaviour
 {
@@ -51,6 +52,11 @@ public class World : MonoBehaviour
   bool rhtrigger = false;
   bool litrigger = false;
   bool ritrigger = false;
+
+  List<Quizo> option_quizos;
+  Quizo qconfirm_quizo;
+  Lazerable qboard_lazerable;
+  TextMeshPro qtext_tmp;
 
   // Start is called before the first frame update
   void Start()
@@ -114,6 +120,15 @@ public class World : MonoBehaviour
     for(int i = 0; i < tools.Count; i++) movables.Add(tools[i].grabbable); //important that tools take priority, so they can be grabbed and removed
     movables.Add(graph.GetComponent<Grabbable>());
     movables.Add(vessel.GetComponent<Grabbable>());
+
+    option_quizos = new List<Quizo>();
+    option_quizos.Add(GameObject.Find("QA").GetComponent<Quizo>());
+    option_quizos.Add(GameObject.Find("QB").GetComponent<Quizo>());
+    option_quizos.Add(GameObject.Find("QC").GetComponent<Quizo>());
+    option_quizos.Add(GameObject.Find("QD").GetComponent<Quizo>());
+    qconfirm_quizo = GameObject.Find("QConfirm").GetComponent<Quizo>();
+    qboard_lazerable = GameObject.Find("Qboard").GetComponent<Lazerable>();
+    qtext_tmp = GameObject.Find("Qtext").GetComponent<TextMeshPro>();
   }
 
   void TryApplyTool(Tool t)
