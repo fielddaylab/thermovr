@@ -97,12 +97,12 @@ public class World : MonoBehaviour
 
     Tool t;
     tools = new List<Tool>();
-    t = GameObject.Find("Tool_Insulator").GetComponent<Tool>(); tool_insulator = t; tools.Add(t);
-    t = GameObject.Find("Tool_Clamp"    ).GetComponent<Tool>(); tool_clamp     = t; tools.Add(t);
-    t = GameObject.Find("Tool_Burner"   ).GetComponent<Tool>(); tool_burner    = t; tools.Add(t);
-    t = GameObject.Find("Tool_Coil"     ).GetComponent<Tool>(); tool_coil      = t; tools.Add(t);
-    t = GameObject.Find("Tool_Weight"   ).GetComponent<Tool>(); tool_weight    = t; tools.Add(t);
-    t = GameObject.Find("Tool_Balloon"  ).GetComponent<Tool>(); tool_balloon   = t; tools.Add(t);
+    t = GameObject.Find("Tool_Insulator").GetComponent<Tool>(); tool_insulator = t; tools.Add(t); t.dial_dial.min_map = 0.0f; t.dial_dial.max_map = 1.0f; t.dial_dial.unit = "n";
+    t = GameObject.Find("Tool_Clamp"    ).GetComponent<Tool>(); tool_clamp     = t; tools.Add(t); t.dial_dial.min_map = 0.0f; t.dial_dial.max_map = 1.0f; t.dial_dial.unit = "h";
+    t = GameObject.Find("Tool_Burner"   ).GetComponent<Tool>(); tool_burner    = t; tools.Add(t); t.dial_dial.min_map = 0.0f; t.dial_dial.max_map = 1.0f; t.dial_dial.unit = "J/s";
+    t = GameObject.Find("Tool_Coil"     ).GetComponent<Tool>(); tool_coil      = t; tools.Add(t); t.dial_dial.min_map = 0.0f; t.dial_dial.max_map = 1.0f; t.dial_dial.unit = "J/s";
+    t = GameObject.Find("Tool_Weight"   ).GetComponent<Tool>(); tool_weight    = t; tools.Add(t); t.dial_dial.min_map = 0.0f; t.dial_dial.max_map = 1.0f; t.dial_dial.unit = "kg";
+    t = GameObject.Find("Tool_Balloon"  ).GetComponent<Tool>(); tool_balloon   = t; tools.Add(t); t.dial_dial.min_map = 0.0f; t.dial_dial.max_map = 1.0f; t.dial_dial.unit = "kg";
 
     flame = GameObject.Find("Flame").GetComponent<ParticleSystem>();
 
@@ -507,6 +507,16 @@ public class World : MonoBehaviour
         else                                                 q.backing_meshrenderer.material = quiz_default;
       }
     }
+    if(qconfirm_quizo.lazerable.lintersect || qconfirm_quizo.lazerable.rintersect)
+    {
+      if(qselected != -1) qconfirm_quizo.backing_meshrenderer.material = quiz_hisel;
+      else                qconfirm_quizo.backing_meshrenderer.material = quiz_sel;
+    }
+    else
+    {
+      if(qselected != -1) qconfirm_quizo.backing_meshrenderer.material = quiz_hi;
+      else                qconfirm_quizo.backing_meshrenderer.material = quiz_default;
+    }
 
     DEBUGTEXTS[0].text = qselected.ToString();
 
@@ -515,7 +525,7 @@ public class World : MonoBehaviour
     {
       t = tools[i];
       if(t.dial_dial.val != t.dial_dial.prev_val)
-        t.textv.SetText("{0}",t.dial_dial.val);
+        t.textv.SetText("{0:3}"+t.dial_dial.unit,(float)t.dial_dial.map);
       t.dial_dial.prev_val = t.dial_dial.val;
     }
 

@@ -836,11 +836,11 @@ public class ThermoMath : MonoBehaviour
       genMesh();
     }
 
-    if(Math.Abs(pressure    - prev_pressure)    > 0.001) text_pressure.SetText(   "P: {0}P",      (float)pressure);
-    if(Math.Abs(temperature - prev_temperature) > 0.001) text_temperature.SetText("T: {0}K",      (float)temperature);
-    if(Math.Abs(volume      - prev_volume)      > 0.001) text_volume.SetText(     "v: {0}M^3/kg", (float)volume);
-    if(Math.Abs(entropy     - prev_entropy)     > 0.001) text_entropy.SetText(    "s: {0}J",      (float)entropy);
-    if(Math.Abs(enthalpy    - prev_enthalpy)    > 0.001) text_enthalpy.SetText(   "h: {0}J",      (float)enthalpy);
+    if(Math.Abs(pressure    - prev_pressure)    > 0.001) text_pressure.SetText(   "P: {0:3}P",      (float)pressure);
+    if(Math.Abs(temperature - prev_temperature) > 0.001) text_temperature.SetText("T: {0:3}K",      (float)temperature);
+    if(Math.Abs(volume      - prev_volume)      > 0.001) text_volume.SetText(     "v: {0:3}M^3/kg", (float)volume);
+    if(Math.Abs(entropy     - prev_entropy)     > 0.001) text_entropy.SetText(    "s: {0:3}J",      (float)entropy);
+    if(Math.Abs(enthalpy    - prev_enthalpy)    > 0.001) text_enthalpy.SetText(   "h: {0:3}J",      (float)enthalpy);
 
     prev_pressure    = pressure;
     prev_temperature = temperature;
