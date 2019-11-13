@@ -12,14 +12,11 @@ public class Quizo : MonoBehaviour
   public Lazerable lazerable;
 
   [System.NonSerialized]
-  public TextContainer tc;
-  [System.NonSerialized]
   public MeshRenderer backing_meshrenderer;
 
   void Awake()
   {
     lazerable = GetComponent<Lazerable>();
-    tc = tmp.GetComponent<TextContainer>();
     backing_meshrenderer = backing.GetComponent<MeshRenderer>();
   }
 

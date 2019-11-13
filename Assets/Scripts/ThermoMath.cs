@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 class CMP : IComparer<int>
 {
@@ -53,6 +54,11 @@ public class ThermoMath : MonoBehaviour
   public double volume; //M^3/kg
   public double entropy; //?
   public double enthalpy; //?
+  double prev_pressure;
+  double prev_temperature;
+  double prev_volume;
+  double prev_entropy;
+  double prev_enthalpy;
 
   //vessel
   GameObject vessel;
@@ -66,6 +72,11 @@ public class ThermoMath : MonoBehaviour
   GameObject state;
   public Material graph_material;
   public GameObject pt_prefab;
+  TextMeshPro text_pressure;
+  TextMeshPro text_temperature;
+  TextMeshPro text_volume;
+  TextMeshPro text_entropy;
+  TextMeshPro text_enthalpy;
 
   /*
   //IF97 API
@@ -671,11 +682,16 @@ public class ThermoMath : MonoBehaviour
   void reset()
   {
     //state
-    pressure = 0;
+    pressure    = 0;
     temperature = 0;
-    volume = 0;
-    entropy = 0;
-    enthalpy = 0;
+    volume      = 0;
+    entropy     = 0;
+    enthalpy    = 0;
+    prev_pressure    = -1;
+    prev_temperature = -1;
+    prev_volume      = -1;
+    prev_entropy     = -1;
+    prev_enthalpy    = -1;
   }
 
   void findObjects()
@@ -687,6 +703,12 @@ public class ThermoMath : MonoBehaviour
 
     graph     = GameObject.Find("Graph");
     state     = GameObject.Find("State");
+
+    text_pressure    = GameObject.Find("text_pressure").GetComponent<TextMeshPro>();
+    text_temperature = GameObject.Find("text_temperature").GetComponent<TextMeshPro>();
+    text_volume      = GameObject.Find("text_volume").GetComponent<TextMeshPro>();
+    text_entropy     = GameObject.Find("text_entropy").GetComponent<TextMeshPro>();
+    text_enthalpy    = GameObject.Find("text_enthalpy").GetComponent<TextMeshPro>();
   }
 
   //temperature
@@ -813,6 +835,18 @@ public class ThermoMath : MonoBehaviour
       Destroy(GameObject.Find("graph_mesh"));
       genMesh();
     }
+
+    if(Math.Abs(pressure    - prev_pressure)    > 0.001) text_pressure.SetText(   "P: {0}P",      (float)pressure);
+    if(Math.Abs(temperature - prev_temperature) > 0.001) text_temperature.SetText("T: {0}K",      (float)temperature);
+    if(Math.Abs(volume      - prev_volume)      > 0.001) text_volume.SetText(     "v: {0}M^3/kg", (float)volume);
+    if(Math.Abs(entropy     - prev_entropy)     > 0.001) text_entropy.SetText(    "s: {0}J",      (float)entropy);
+    if(Math.Abs(enthalpy    - prev_enthalpy)    > 0.001) text_enthalpy.SetText(   "h: {0}J",      (float)enthalpy);
+
+    prev_pressure    = pressure;
+    prev_temperature = temperature;
+    prev_volume      = volume;
+    prev_entropy     = entropy;
+    prev_enthalpy    = enthalpy;
   }
 
   float cross_fv2z(Vector3 a, Vector3 b) { return (a.x*b.y)-(a.y*b.x); } //z of cross_fv3 with zs set to 0 (good for '2d pt in tri')

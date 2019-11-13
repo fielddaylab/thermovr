@@ -474,10 +474,9 @@ public class World : MonoBehaviour
 
     UpdateGrabVis();
 
-//    DEBUGTEXTS[0].text = OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger).ToString();
-//    DEBUGTEXTS[1].text = OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger).ToString();
-//    DEBUGTEXTS[2].text = "NA";
-
+//  DEBUGTEXTS[0].text = OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger).ToString();
+//  DEBUGTEXTS[1].text = OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger).ToString();
+//  DEBUGTEXTS[2].text = "NA";
 
     //quiz
     if(qboard_lazerable.lintersect) llazer_meshrenderer.enabled = true;
