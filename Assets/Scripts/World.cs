@@ -509,6 +509,16 @@ public class World : MonoBehaviour
     }
 
     DEBUGTEXTS[0].text = qselected.ToString();
+
+    Tool t;
+    for(int i = 0; i < tools.Count; i++)
+    {
+      t = tools[i];
+      if(t.dial_dial.val != t.dial_dial.prev_val)
+        t.textv.SetText("{0}",t.dial_dial.val);
+      t.dial_dial.prev_val = t.dial_dial.val;
+    }
+
   }
 
 }

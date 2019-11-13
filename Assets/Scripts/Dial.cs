@@ -1,10 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class Dial : MonoBehaviour
 {
   public float val = 0.0f;
+  [System.NonSerialized]
+  public float prev_val = 0.0f;
   public GameObject tool;
   GameObject meter;
 

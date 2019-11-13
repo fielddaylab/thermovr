@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class Tool : MonoBehaviour
 {
@@ -50,6 +51,8 @@ public class Tool : MonoBehaviour
   public Dial dial_dial;
   [System.NonSerialized]
   public Grabbable dial_grabbable;
+
+  public TextMeshPro textv;
 
   void Awake()
   {
