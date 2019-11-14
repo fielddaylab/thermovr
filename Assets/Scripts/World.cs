@@ -13,8 +13,6 @@ public class World : MonoBehaviour
   public Material quiz_sel;
   public Material quiz_hisel;
 
-  List<TextMesh> DEBUGTEXTS;
-
   ThermoMath thermo;
   GameObject lhand;
   GameObject llazer;
@@ -70,11 +68,6 @@ public class World : MonoBehaviour
   // Start is called before the first frame update
   void Start()
   {
-    DEBUGTEXTS = new List<TextMesh>();
-    GameObject dtexts = GameObject.Find("DEBUGTEXTS");
-    foreach(Transform child in dtexts.transform)
-      DEBUGTEXTS.Add(child.gameObject.GetComponent<TextMesh>());
-
     thermo = GameObject.Find("Oracle").GetComponent<ThermoMath>();
 
     lhand  = GameObject.Find("LeftControllerAnchor");
@@ -474,10 +467,6 @@ public class World : MonoBehaviour
 
     UpdateGrabVis();
 
-//  DEBUGTEXTS[0].text = OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger).ToString();
-//  DEBUGTEXTS[1].text = OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger).ToString();
-//  DEBUGTEXTS[2].text = "NA";
-
     //quiz
     if(qboard_lazerable.lintersect) llazer_meshrenderer.enabled = true;
     else                            llazer_meshrenderer.enabled = false;
@@ -507,18 +496,16 @@ public class World : MonoBehaviour
         else                                                 q.backing_meshrenderer.material = quiz_default;
       }
     }
-    if(qconfirm_quizo.lazerable.lintersect || qconfirm_quizo.lazerable.rintersect)
+    if(qselected != -1)
     {
-      if(qselected != -1) qconfirm_quizo.backing_meshrenderer.material = quiz_hisel;
-      else                qconfirm_quizo.backing_meshrenderer.material = quiz_sel;
+      if(qconfirm_quizo.lazerable.lintersect || qconfirm_quizo.lazerable.rintersect) qconfirm_quizo.backing_meshrenderer.material = quiz_hisel;
+      else                                                                           qconfirm_quizo.backing_meshrenderer.material = quiz_sel;
     }
     else
     {
-      if(qselected != -1) qconfirm_quizo.backing_meshrenderer.material = quiz_hi;
-      else                qconfirm_quizo.backing_meshrenderer.material = quiz_default;
+      if(qconfirm_quizo.lazerable.lintersect || qconfirm_quizo.lazerable.rintersect) qconfirm_quizo.backing_meshrenderer.material = quiz_hi;
+      else                                                                           qconfirm_quizo.backing_meshrenderer.material = quiz_default;
     }
-
-    DEBUGTEXTS[0].text = qselected.ToString();
 
     Tool t;
     for(int i = 0; i < tools.Count; i++)

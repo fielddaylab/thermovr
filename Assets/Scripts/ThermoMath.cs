@@ -701,8 +701,8 @@ public class ThermoMath : MonoBehaviour
     contents  = GameObject.Find("Contents");
     piston    = GameObject.Find("Piston");
 
-    graph     = GameObject.Find("Graph");
-    state     = GameObject.Find("State");
+    graph     = GameObject.Find("gmodel");
+    state     = GameObject.Find("gstate");
 
     text_pressure    = GameObject.Find("text_pressure").GetComponent<TextMeshPro>();
     text_temperature = GameObject.Find("text_temperature").GetComponent<TextMeshPro>();
@@ -836,7 +836,7 @@ public class ThermoMath : MonoBehaviour
       genMesh();
     }
 
-    if(Math.Abs(pressure    - prev_pressure)    > 0.001) text_pressure.SetText(   "P: {0:3}P",      (float)pressure);
+    if(Math.Abs(pressure    - prev_pressure)    > 0.001) text_pressure.SetText(   "P: {0:3}KP",     (float)pressure/1000.0f);
     if(Math.Abs(temperature - prev_temperature) > 0.001) text_temperature.SetText("T: {0:3}K",      (float)temperature);
     if(Math.Abs(volume      - prev_volume)      > 0.001) text_volume.SetText(     "v: {0:3}M^3/kg", (float)volume);
     if(Math.Abs(entropy     - prev_entropy)     > 0.001) text_entropy.SetText(    "s: {0:3}J",      (float)entropy);
@@ -884,9 +884,6 @@ public class ThermoMath : MonoBehaviour
       if(cross.x < 0) return -1;
       return 0;
   }
-
-
-
 
 }
 
