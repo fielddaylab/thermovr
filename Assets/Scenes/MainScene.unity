@@ -9080,6 +9080,7 @@ GameObject:
   - component: {fileID: 707956068}
   - component: {fileID: 707956071}
   - component: {fileID: 707956067}
+  - component: {fileID: 707956069}
   - component: {fileID: 707956066}
   m_Layer: 0
   m_Name: Tool_Insulator
@@ -9148,6 +9149,22 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.125, y: 0.125, z: 0.125}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &707956069
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 707956064}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6d4d39a272fa404fa6960400639491e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  t_in: 0.2
+  t_start_out: 3
+  t_end_out: 3.5
+  t_stale: 0.5
 --- !u!54 &707956071
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -10302,7 +10319,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 0fd109d475bbaba4e8e9aca4eb87bf2b, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -11086,6 +11103,7 @@ GameObject:
   - component: {fileID: 1039303043}
   - component: {fileID: 1039303046}
   - component: {fileID: 1039303042}
+  - component: {fileID: 1039303044}
   - component: {fileID: 1039303041}
   m_Layer: 0
   m_Name: Tool_Clamp
@@ -11154,6 +11172,22 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.125, y: 0.125, z: 0.125}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &1039303044
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1039303039}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6d4d39a272fa404fa6960400639491e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  t_in: 0.2
+  t_start_out: 3
+  t_end_out: 3.5
+  t_stale: 0.5
 --- !u!54 &1039303046
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -11739,6 +11773,7 @@ GameObject:
   - component: {fileID: 1124404067}
   - component: {fileID: 1124404070}
   - component: {fileID: 1124404066}
+  - component: {fileID: 1124404068}
   - component: {fileID: 1124404065}
   m_Layer: 0
   m_Name: Tool_Coil
@@ -11807,6 +11842,22 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.125, y: 0.125, z: 0.125}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &1124404068
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1124404063}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6d4d39a272fa404fa6960400639491e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  t_in: 0.2
+  t_start_out: 3
+  t_end_out: 3.5
+  t_stale: 0.5
 --- !u!54 &1124404070
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -14072,6 +14123,7 @@ GameObject:
   - component: {fileID: 1498643489}
   - component: {fileID: 1498643491}
   - component: {fileID: 1498643490}
+  - component: {fileID: 1498643492}
   m_Layer: 0
   m_Name: LLazer
   m_TagString: Untagged
@@ -14123,6 +14175,22 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.01, y: 0.01, z: 20}
   m_Center: {x: 0, y: 0, z: 10}
+--- !u!114 &1498643492
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1498643488}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6d4d39a272fa404fa6960400639491e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  t_in: 0.2
+  t_start_out: 0
+  t_end_out: 0.2
+  t_stale: 0.5
 --- !u!1 &1507200101
 GameObject:
   m_ObjectHideFlags: 0
@@ -14395,6 +14463,7 @@ GameObject:
   - component: {fileID: 1525614608}
   - component: {fileID: 1525614610}
   - component: {fileID: 1525614609}
+  - component: {fileID: 1525614611}
   m_Layer: 0
   m_Name: RLazer
   m_TagString: Untagged
@@ -14446,6 +14515,22 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.01, y: 0.01, z: 20}
   m_Center: {x: 0, y: 0, z: 10}
+--- !u!114 &1525614611
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1525614607}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6d4d39a272fa404fa6960400639491e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  t_in: 0.2
+  t_start_out: 0
+  t_end_out: 0.2
+  t_stale: 0.5
 --- !u!1 &1538327389
 GameObject:
   m_ObjectHideFlags: 0
@@ -14929,7 +15014,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 0fd109d475bbaba4e8e9aca4eb87bf2b, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -16734,6 +16819,7 @@ GameObject:
   - component: {fileID: 1862234075}
   - component: {fileID: 1862234078}
   - component: {fileID: 1862234074}
+  - component: {fileID: 1862234076}
   - component: {fileID: 1862234073}
   m_Layer: 0
   m_Name: Tool_Weight
@@ -16802,6 +16888,22 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.125, y: 0.125, z: 0.125}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &1862234076
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1862234071}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6d4d39a272fa404fa6960400639491e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  t_in: 0.2
+  t_start_out: 3
+  t_end_out: 3.5
+  t_stale: 0.5
 --- !u!54 &1862234078
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -17548,6 +17650,7 @@ GameObject:
   - component: {fileID: 1942107137}
   - component: {fileID: 1942107140}
   - component: {fileID: 1942107136}
+  - component: {fileID: 1942107138}
   - component: {fileID: 1942107135}
   m_Layer: 0
   m_Name: Tool_Burner
@@ -17617,6 +17720,22 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.125, y: 0.125, z: 0.125}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &1942107138
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1942107133}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6d4d39a272fa404fa6960400639491e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  t_in: 0.2
+  t_start_out: 3
+  t_end_out: 3.5
+  t_stale: 0.5
 --- !u!54 &1942107140
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -17892,6 +18011,7 @@ GameObject:
   - component: {fileID: 2045197142}
   - component: {fileID: 2045197145}
   - component: {fileID: 2045197141}
+  - component: {fileID: 2045197143}
   - component: {fileID: 2045197140}
   m_Layer: 0
   m_Name: Tool_Balloon
@@ -17960,6 +18080,22 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.125, y: 0.125, z: 0.125}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &2045197143
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2045197138}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6d4d39a272fa404fa6960400639491e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  t_in: 0.2
+  t_start_out: 3
+  t_end_out: 3.5
+  t_stale: 0.5
 --- !u!54 &2045197145
 Rigidbody:
   m_ObjectHideFlags: 0

@@ -57,12 +57,15 @@ public class Tool : MonoBehaviour
   public TextMeshPro textv_tmp;
   [System.NonSerialized]
   public MeshRenderer textv_meshrenderer;
-  [System.NonSerialized]
-  public Fadable text_fadable;
 
   public GameObject textl;
   [System.NonSerialized]
   public TextMeshPro textl_tmp;
+  [System.NonSerialized]
+  public MeshRenderer textl_meshrenderer;
+
+  [System.NonSerialized]
+  public Fadable text_fadable;
 
   void Awake()
   {
@@ -88,7 +91,9 @@ public class Tool : MonoBehaviour
     dial_grabbable = dial.GetComponent<Grabbable>();
 
     textv_tmp = textv.GetComponent<TextMeshPro>();
+    textv_meshrenderer = textv.GetComponent<MeshRenderer>();
     textl_tmp = textl.GetComponent<TextMeshPro>();
+    textl_meshrenderer = textl.GetComponent<MeshRenderer>();
     text_fadable = GetComponent<Fadable>();
   }
 

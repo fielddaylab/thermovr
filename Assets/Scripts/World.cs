@@ -20,6 +20,8 @@ public class World : MonoBehaviour
   Vector3 lhand_vel;
   MeshRenderer lhand_meshrenderer;
   MeshRenderer llazer_meshrenderer;
+  Fadable llazer_fadable;
+  Fadable rlazer_fadable;
   GameObject rhand;
   GameObject rlazer;
   Vector3 rhand_pos;
@@ -76,17 +78,17 @@ public class World : MonoBehaviour
     lhand_vel = new Vector3(0.0f,0.0f,0.0f);
     lhand_meshrenderer = lhand.transform.GetChild(0).gameObject.GetComponent<MeshRenderer>();
     llazer_meshrenderer = llazer.transform.GetChild(0).gameObject.GetComponent<MeshRenderer>();
+    llazer_fadable = llazer.GetComponent<Fadable>();
     rhand  = GameObject.Find("RightControllerAnchor");
     rlazer  = GameObject.Find("RLazer");
     rhand_pos = rhand.transform.position;
     rhand_vel = new Vector3(0.0f,0.0f,0.0f);
     rhand_meshrenderer = rhand.transform.GetChild(0).gameObject.GetComponent<MeshRenderer>();
     rlazer_meshrenderer = rlazer.transform.GetChild(0).gameObject.GetComponent<MeshRenderer>();
+    rlazer_fadable = rlazer.GetComponent<Fadable>();
 
     lhand_meshrenderer.material = hand_empty;
     rhand_meshrenderer.material = hand_empty;
-    llazer_meshrenderer.material = hand_intersecting;
-    rlazer_meshrenderer.material = hand_intersecting;
 
     Tool t;
     tools = new List<Tool>();
@@ -468,10 +470,31 @@ public class World : MonoBehaviour
     UpdateGrabVis();
 
     //quiz
-    if(qboard_lazerable.lintersect) llazer_meshrenderer.enabled = true;
-    else                            llazer_meshrenderer.enabled = false;
-    if(qboard_lazerable.rintersect) rlazer_meshrenderer.enabled = true;
-    else                            rlazer_meshrenderer.enabled = false;
+    if(qboard_lazerable.lintersect) llazer_fadable.set_factive(true);
+    else                            llazer_fadable.set_factive(false);
+    if(qboard_lazerable.rintersect) rlazer_fadable.set_factive(true);
+    else                            rlazer_fadable.set_factive(false);
+
+    if(!llazer_fadable.stale)
+    {
+      if(llazer_fadable.alpha == 0.0f) llazer_meshrenderer.enabled = false;
+      else
+      {
+        llazer_meshrenderer.enabled = true;
+        Color c = llazer_meshrenderer.material.color;
+        llazer_meshrenderer.material.color = new Color(c.r,c.g,c.b,llazer_fadable.alpha);
+      }
+    }
+    if(!rlazer_fadable.stale)
+    {
+      if(rlazer_fadable.alpha == 0.0f) rlazer_meshrenderer.enabled = false;
+      else
+      {
+        rlazer_meshrenderer.enabled = true;
+        Color c = rlazer_meshrenderer.material.color;
+        rlazer_meshrenderer.material.color = new Color(c.r,c.g,c.b,rlazer_fadable.alpha);
+      }
+    }
 
     Quizo q;
     for(int i = 0; i < option_quizos.Count; i++)
@@ -525,9 +548,19 @@ public class World : MonoBehaviour
       t = tools[i];
       if(!t.text_fadable.stale)
       {
-        Color32 c = new Color32(0,0,0,(byte)(t.text_fadable.alpha*255));
-        t.textv_tmp.faceColor = c;
-        t.textl_tmp.faceColor = c;
+        if(t.text_fadable.alpha == 0.0f)
+        {
+          t.textv_meshrenderer.enabled = false;
+          t.textl_meshrenderer.enabled = false;
+        }
+        else
+        {
+          t.textv_meshrenderer.enabled = true;
+          t.textl_meshrenderer.enabled = true;
+          Color32 c = new Color32(0,0,0,(byte)(t.text_fadable.alpha*255));
+          t.textv_tmp.faceColor = c;
+          t.textl_tmp.faceColor = c;
+        }
       }
     }
 

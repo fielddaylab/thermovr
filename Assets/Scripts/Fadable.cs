@@ -5,13 +5,9 @@ using UnityEngine;
 public class Fadable : MonoBehaviour
 {
   //config
-  [System.NonSerialized]
   public float t_in = 0.2f;
-  [System.NonSerialized]
   public float t_start_out = 3.0f;
-  [System.NonSerialized]
   public float t_end_out = 3.5f;
-  [System.NonSerialized]
   public float t_stale = 0.5f;
 
   //state
