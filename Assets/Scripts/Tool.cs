@@ -52,7 +52,17 @@ public class Tool : MonoBehaviour
   [System.NonSerialized]
   public Grabbable dial_grabbable;
 
-  public TextMeshPro textv;
+  public GameObject textv;
+  [System.NonSerialized]
+  public TextMeshPro textv_tmp;
+  [System.NonSerialized]
+  public MeshRenderer textv_meshrenderer;
+  [System.NonSerialized]
+  public Fadable text_fadable;
+
+  public GameObject textl;
+  [System.NonSerialized]
+  public TextMeshPro textl_tmp;
 
   void Awake()
   {
@@ -76,6 +86,10 @@ public class Tool : MonoBehaviour
 
     dial_dial = dial.GetComponent<Dial>();
     dial_grabbable = dial.GetComponent<Grabbable>();
+
+    textv_tmp = textv.GetComponent<TextMeshPro>();
+    textl_tmp = textl.GetComponent<TextMeshPro>();
+    text_fadable = GetComponent<Fadable>();
   }
 
   // Start is called before the first frame update
@@ -88,6 +102,9 @@ public class Tool : MonoBehaviour
   void Update()
   {
     t_free += Time.deltaTime;
+
+    text_fadable.set_factive(grabbable.intersect || dial_dial.examined);
+
     if(!engaged && !stored && !grabbable.grabbed && t_free > 1.0f)
     {
       rigidbody.isKinematic = true;

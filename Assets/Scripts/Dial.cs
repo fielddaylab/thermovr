@@ -17,6 +17,9 @@ public class Dial : MonoBehaviour
   [System.NonSerialized]
   public string unit = "";
   public GameObject tool;
+
+  [System.NonSerialized]
+  public bool examined = false;
   GameObject meter;
 
   void Awake()

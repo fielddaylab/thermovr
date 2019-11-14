@@ -33,16 +33,20 @@ public class Lazerable : MonoBehaviour
   public bool lintersect = false;
   [System.NonSerialized]
   public bool rintersect = false;
+  [System.NonSerialized]
+  public bool intersect = false;
   void OnTriggerEnter(Collider c)
   {
     if(c == llazer_c) lintersect = true;
     if(c == rlazer_c) rintersect = true;
+    intersect = (lintersect || rintersect);
   }
 
   void OnTriggerExit(Collider c)
   {
     if(c == llazer_c) lintersect = false;
     if(c == rlazer_c) rintersect = false;
+    intersect = (lintersect || rintersect);
   }
 
 }

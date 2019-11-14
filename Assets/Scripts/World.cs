@@ -487,24 +487,24 @@ public class World : MonoBehaviour
       }
       if(i == qselected)
       {
-        if(q.lazerable.lintersect || q.lazerable.rintersect) q.backing_meshrenderer.material = quiz_hisel;
-        else                                                 q.backing_meshrenderer.material = quiz_sel;
+        if(q.lazerable.intersect) q.backing_meshrenderer.material = quiz_hisel;
+        else                      q.backing_meshrenderer.material = quiz_sel;
       }
       else
       {
-        if(q.lazerable.lintersect || q.lazerable.rintersect) q.backing_meshrenderer.material = quiz_hi;
-        else                                                 q.backing_meshrenderer.material = quiz_default;
+        if(q.lazerable.intersect) q.backing_meshrenderer.material = quiz_hi;
+        else                      q.backing_meshrenderer.material = quiz_default;
       }
     }
     if(qselected != -1)
     {
-      if(qconfirm_quizo.lazerable.lintersect || qconfirm_quizo.lazerable.rintersect) qconfirm_quizo.backing_meshrenderer.material = quiz_hisel;
-      else                                                                           qconfirm_quizo.backing_meshrenderer.material = quiz_sel;
+      if(qconfirm_quizo.lazerable.intersect) qconfirm_quizo.backing_meshrenderer.material = quiz_hisel;
+      else                                   qconfirm_quizo.backing_meshrenderer.material = quiz_sel;
     }
     else
     {
-      if(qconfirm_quizo.lazerable.lintersect || qconfirm_quizo.lazerable.rintersect) qconfirm_quizo.backing_meshrenderer.material = quiz_hi;
-      else                                                                           qconfirm_quizo.backing_meshrenderer.material = quiz_default;
+      if(qconfirm_quizo.lazerable.intersect) qconfirm_quizo.backing_meshrenderer.material = quiz_hi;
+      else                                   qconfirm_quizo.backing_meshrenderer.material = quiz_default;
     }
 
     Tool t;
@@ -512,8 +512,23 @@ public class World : MonoBehaviour
     {
       t = tools[i];
       if(t.dial_dial.val != t.dial_dial.prev_val)
-        t.textv.SetText("{0:3}"+t.dial_dial.unit,(float)t.dial_dial.map);
+      {
+        t.textv_tmp.SetText("{0:3}"+t.dial_dial.unit,(float)t.dial_dial.map);
+        t.dial_dial.examined = true;
+      }
+      else t.dial_dial.examined = false;
       t.dial_dial.prev_val = t.dial_dial.val;
+    }
+
+    for(int i = 0; i < tools.Count; i++)
+    {
+      t = tools[i];
+      if(!t.text_fadable.stale)
+      {
+        Color32 c = new Color32(0,0,0,(byte)(t.text_fadable.alpha*255));
+        t.textv_tmp.faceColor = c;
+        t.textl_tmp.faceColor = c;
+      }
     }
 
   }

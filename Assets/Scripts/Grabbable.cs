@@ -37,16 +37,20 @@ public class Grabbable : MonoBehaviour
   public bool lintersect = false;
   [System.NonSerialized]
   public bool rintersect = false;
+  [System.NonSerialized]
+  public bool intersect = false;
   void OnTriggerEnter(Collider c)
   {
     if(c == lhand_c) lintersect = true;
     if(c == rhand_c) rintersect = true;
+    intersect = (lintersect || rintersect);
   }
 
   void OnTriggerExit(Collider c)
   {
     if(c == lhand_c) lintersect = false;
     if(c == rhand_c) rintersect = false;
+    intersect = (lintersect || rintersect);
   }
 
 }
