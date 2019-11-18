@@ -32,6 +32,7 @@ public class World : MonoBehaviour
   List<Grabbable> movables;
   GameObject workspace;
   GameObject handle_workspace;
+  Grabbable handle_workspace_grabbable;
   GameObject lgrabbed = null;
   GameObject rgrabbed = null;
   int lhtrigger_delta = 0;
@@ -52,6 +53,11 @@ public class World : MonoBehaviour
   Tool tool_balloon;
 
   ParticleSystem flame; //special case
+
+  bool halfed = false;
+  List<Halfable> halfables;
+  GameObject halfer;
+  Grabbable halfer_grabbable;
 
   GameObject vessel;
   GameObject graph;
@@ -103,6 +109,7 @@ public class World : MonoBehaviour
 
     workspace = GameObject.Find("Workspace");
     handle_workspace = GameObject.Find("Handle_Workspace");
+    handle_workspace_grabbable = handle_workspace.GetComponent<Grabbable>();
 
     for(int i = 0; i < tools.Count; i++)
     {
@@ -124,6 +131,13 @@ public class World : MonoBehaviour
     for(int i = 0; i < tools.Count; i++) movables.Add(tools[i].grabbable); //important that tools take priority, so they can be grabbed and removed
     movables.Add(graph.GetComponent<Grabbable>());
     movables.Add(vessel.GetComponent<Grabbable>());
+
+    halfer = GameObject.Find("Halfer");
+    halfer_grabbable = halfer.GetComponent<Grabbable>();
+    halfables = new List<Halfable>();
+    halfables.Add(GameObject.Find("Container").GetComponent<Halfable>());
+    halfables.Add(GameObject.Find("Piston").GetComponent<Halfable>());
+    halfables.Add(GameObject.Find("Contents").GetComponent<Halfable>());
 
     option_quizos = new List<Quizo>();
     option_quizos.Add(GameObject.Find("QA").GetComponent<Quizo>());
@@ -295,13 +309,26 @@ public class World : MonoBehaviour
       //then extraaneous
       if(r_grabbed == null)
       {
-        Grabbable g = handle_workspace.GetComponent<Grabbable>();
+        Grabbable g = handle_workspace_grabbable;
         if(
           ( which && g.lintersect) ||
           (!which && g.rintersect)
         )
         {
           r_grabbed = handle_workspace;
+          g.grabbed = true;
+          if(r_grabbed == r_ograbbed) r_ograbbed = null;
+        }
+      }
+      if(r_grabbed == null)
+      {
+        Grabbable g = halfer_grabbable;
+        if(
+          ( which && g.lintersect) ||
+          (!which && g.rintersect)
+        )
+        {
+          r_grabbed = halfer;
           g.grabbed = true;
           if(r_grabbed == r_ograbbed) r_ograbbed = null;
         }
@@ -414,7 +441,10 @@ public class World : MonoBehaviour
       if(gr.lintersect) lintersect = true;
       if(gr.rintersect) rintersect = true;
     }
-    gr = handle_workspace.GetComponent<Grabbable>();
+    gr = handle_workspace_grabbable;
+    if(gr.lintersect) lintersect = true;
+    if(gr.rintersect) rintersect = true;
+    gr = halfer_grabbable;
     if(gr.lintersect) lintersect = true;
     if(gr.rintersect) rintersect = true;
 
@@ -466,6 +496,16 @@ public class World : MonoBehaviour
     rhandt += rindext;
     TryGrab(true,  lhandt, lindext, lhand.transform.position.z, lhand.transform.position.y, lhand_vel, ref lhtrigger, ref litrigger, ref lhtrigger_delta, ref litrigger_delta, ref lz, ref ly, ref lhand, ref lgrabbed, ref rhand, ref rgrabbed); //left hand
     TryGrab(false, rhandt, rindext, rhand.transform.position.z, rhand.transform.position.y, rhand_vel, ref rhtrigger, ref ritrigger, ref rhtrigger_delta, ref ritrigger_delta, ref rz, ref ry, ref rhand, ref rgrabbed, ref lhand, ref lgrabbed); //right hand
+
+    if(
+      (litrigger_delta > 0 && halfer_grabbable.lintersect) ||
+      (ritrigger_delta > 0 && halfer_grabbable.rintersect)
+      )
+    {
+      halfed = !halfed;
+      for(int i = 0; i < halfables.Count; i++)
+        halfables[i].setHalf(halfed);
+    }
 
     UpdateGrabVis();
 
@@ -530,6 +570,7 @@ public class World : MonoBehaviour
       else                                   qconfirm_quizo.backing_meshrenderer.material = quiz_default;
     }
 
+    //tooltext
     Tool t;
     for(int i = 0; i < tools.Count; i++)
     {
@@ -563,6 +604,21 @@ public class World : MonoBehaviour
         }
       }
     }
+
+/*
+//overwrite insulator's text for debugging purposes
+{
+    Tool to = tools[0];
+    to.textv_tmp.SetText("{0}",litrigger_delta);
+    to.dial_dial.examined = true;
+    to.dial_dial.prev_val = to.dial_dial.val*-1;
+    to.textv_meshrenderer.enabled = true;
+    Color32 c = new Color32(0,0,0,255);
+    to.textv_tmp.faceColor = c;
+    to.textl_tmp.faceColor = c;
+}
+*/
+
 
   }
 
