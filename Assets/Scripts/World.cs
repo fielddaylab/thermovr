@@ -122,6 +122,7 @@ public class World : MonoBehaviour
       g.transform.SetParent(t.storage.gameObject.transform);
       t.stored = true;
       g.transform.localPosition = new Vector3(0.0f,0.0f,0.0f);
+      t.textv_tmp.SetText("{0:3}"+t.dial_dial.unit,(float)t.dial_dial.map);
     }
 
     vessel = GameObject.Find("Vessel");
