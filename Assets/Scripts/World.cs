@@ -67,6 +67,11 @@ public class World : MonoBehaviour
   bool litrigger = false;
   bool ritrigger = false;
 
+  int question = 0;
+  List<string> questions;
+  List<string> options;
+  List<int> answers;
+  List<int> givens;
   List<Quizo> option_quizos;
   Quizo qconfirm_quizo;
   Lazerable qboard_lazerable;
@@ -140,6 +145,51 @@ public class World : MonoBehaviour
     halfables.Add(GameObject.Find("Piston").GetComponent<Halfable>());
     halfables.Add(GameObject.Find("Contents").GetComponent<Halfable>());
 
+    questions = new List<string>();
+    options = new List<string>();
+    answers = new List<int>();
+    givens = new List<int>();
+
+    questions.Add("What's the q?");
+    options.Add("A. WHAAA");
+    options.Add("B. WHOO");
+    options.Add("C. bababa");
+    options.Add("D. dddddd");
+    answers.Add(2);
+    givens.Add(-1);
+
+    questions.Add("What's the q?");
+    options.Add("A. WHAAA");
+    options.Add("B. WHOO");
+    options.Add("C. bababa");
+    options.Add("D. dddddd");
+    answers.Add(2);
+    givens.Add(-1);
+
+    questions.Add("What's the q?");
+    options.Add("A. WHAAA");
+    options.Add("B. WHOO");
+    options.Add("C. bababa");
+    options.Add("D. dddddd");
+    answers.Add(2);
+    givens.Add(-1);
+
+    questions.Add("What's the q?");
+    options.Add("A. WHAAA");
+    options.Add("B. WHOO");
+    options.Add("C. bababa");
+    options.Add("D. dddddd");
+    answers.Add(2);
+    givens.Add(-1);
+
+    questions.Add("What's the q?");
+    options.Add("A. WHAAA");
+    options.Add("B. WHOO");
+    options.Add("C. bababa");
+    options.Add("D. dddddd");
+    answers.Add(2);
+    givens.Add(-1);
+
     option_quizos = new List<Quizo>();
     option_quizos.Add(GameObject.Find("QA").GetComponent<Quizo>());
     option_quizos.Add(GameObject.Find("QB").GetComponent<Quizo>());
@@ -148,6 +198,13 @@ public class World : MonoBehaviour
     qconfirm_quizo = GameObject.Find("QConfirm").GetComponent<Quizo>();
     qboard_lazerable = GameObject.Find("Qboard").GetComponent<Lazerable>();
     qtext_tmp = GameObject.Find("Qtext").GetComponent<TextMeshPro>();
+    SetQuizText();
+  }
+
+  void SetQuizText()
+  {
+    qtext_tmp.SetText(questions[question]);
+    for(int i = 0; i < 4; i++) option_quizos[i].tmp.SetText(options[question*4+i]);
   }
 
   void TryApplyTool(Tool t)
