@@ -29,6 +29,8 @@ public class World : MonoBehaviour
   MeshRenderer rhand_meshrenderer;
   MeshRenderer rlazer_meshrenderer;
 
+  Lazerable vrcenter_lazerable;
+
   List<Grabbable> movables;
   GameObject workspace;
   GameObject handle_workspace;
@@ -133,6 +135,8 @@ public class World : MonoBehaviour
     vessel = GameObject.Find("Vessel");
     graph = GameObject.Find("Graph");
 
+    vrcenter_lazerable = GameObject.Find("VRCenter").GetComponent<Lazerable>();
+
     movables = new List<Grabbable>();
     for(int i = 0; i < tools.Count; i++) movables.Add(tools[i].grabbable); //important that tools take priority, so they can be grabbed and removed
     movables.Add(graph.GetComponent<Grabbable>());
@@ -158,7 +162,7 @@ public class World : MonoBehaviour
     answers.Add(2);
     givens.Add(-1);
 
-    questions.Add("What's the q?");
+    questions.Add("What's the next q?");
     options.Add("A. WHAAA");
     options.Add("B. WHOO");
     options.Add("C. bababa");
@@ -568,10 +572,16 @@ public class World : MonoBehaviour
     UpdateGrabVis();
 
     //quiz
-    if(qboard_lazerable.lintersect) llazer_fadable.set_factive(true);
-    else                            llazer_fadable.set_factive(false);
-    if(qboard_lazerable.rintersect) rlazer_fadable.set_factive(true);
-    else                            rlazer_fadable.set_factive(false);
+    if(qboard_lazerable.lintersect || vrcenter_lazerable.lintersect) llazer_fadable.set_factive(true);
+    else                                                             llazer_fadable.set_factive(false);
+    if(qboard_lazerable.rintersect || vrcenter_lazerable.rintersect) rlazer_fadable.set_factive(true);
+    else                                                             rlazer_fadable.set_factive(false);
+
+    if(
+      (litrigger_delta == 1 && vrcenter_lazerable.lintersect) ||
+      (ritrigger_delta == 1 && vrcenter_lazerable.rintersect)
+    )
+      UnityEngine.XR.InputTracking.Recenter();
 
     if(!llazer_fadable.stale)
     {
