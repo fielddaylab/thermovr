@@ -52,13 +52,18 @@ public class ThermoMath : MonoBehaviour
   public double pressure; //pascals
   public double temperature; //kalvin
   public double volume; //M^3/kg
+  public double internalenergy; //J
   public double entropy; //?
   public double enthalpy; //?
+  public double quality; //%
   double prev_pressure;
   double prev_temperature;
   double prev_volume;
+  double prev_internalenergy;
   double prev_entropy;
   double prev_enthalpy;
+  double prev_quality;
+  public double mass = 1; //kg
 
   //vessel
   GameObject vessel;
@@ -803,6 +808,38 @@ public class ThermoMath : MonoBehaviour
     //temperature = ???;
     dotransform();
     return temperature;
+  }
+
+  public add_heat_constant_p(double j)
+  {
+    int region = 0;
+    switch(region)
+    {
+      case 0: //subcooled liquid
+      {
+        double q = j*t; //watts
+        newinternalenergy = internalenergy+(q*t/mass) - pressure*(newvolume-volume);
+        newvolume = get_volume_given(newinternalenergy,pressure);
+        //at this point, we have enough internal state to derive the rest
+      }
+      break;
+      case 1: //two-phase region
+      {
+        double q = j*t; //watts
+        newvolume = get_volume_given(newinternalenergy,pressure);
+        internalenergy = internalenergy+(q*t/mass) - pressure*(newvolume-volume);
+        //at this point, we have enough internal state to derive the rest
+      }
+      break;
+      case 2: //superheated vapor
+      {
+        double q = j*t; //watts
+        newvolume = get_volume_given(newinternalenergy,pressure);
+        internalenergy = internalenergy+(q*t/mass) - pressure*(newvolume-volume);
+        //at this point, we have enough internal state to derive the rest
+      }
+      break;
+    }
   }
 
   void dotransform()

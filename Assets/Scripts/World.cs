@@ -449,6 +449,7 @@ public class World : MonoBehaviour
 
   void UpdateGrabVis()
   {
+
     for(int i = 0; i < tools.Count; i++)
     {
       Tool t = tools[i];
@@ -522,6 +523,16 @@ public class World : MonoBehaviour
   // Update is called once per frame
   void Update()
   {
+    //passive effects
+    float d_heat = 0;
+    if(tool_burner.engaged) d_heat += tool_burner.dial_dial.val;
+    if(tool_coil.engaged)   d_heat -= tool_coil.dial_dial.val;
+    if(d_heat != 0.0f)
+    {
+      thermo.h_get_t(d_heat);
+    }
+
+
     //running blended average
     lhand_vel += (lhand.transform.position-lhand_pos)/Time.deltaTime;
     lhand_vel *= 0.5f;
@@ -539,15 +550,6 @@ public class World : MonoBehaviour
     rhand_pos = Vector3.Lerp(rhand_pos,rhand.transform.position,0.01f);
     rhand_vel = (rhand.transform.position-rhand_pos)/Time.deltaTime;
     */
-
-    //passive effects
-    float d_heat = 0;
-    if(tool_burner.engaged) d_heat += tool_burner.dial_dial.val;
-    if(tool_coil.engaged)   d_heat -= tool_coil.dial_dial.val;
-    if(d_heat != 0.0f)
-    {
-      thermo.h_get_t(d_heat);
-    }
 
     float lhandt  = OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger);
     float lindext = OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger);
@@ -686,7 +688,6 @@ public class World : MonoBehaviour
     to.textl_tmp.faceColor = c;
 }
 */
-
 
   }
 
