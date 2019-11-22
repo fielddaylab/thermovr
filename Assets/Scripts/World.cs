@@ -14,6 +14,8 @@ public class World : MonoBehaviour
   public Material quiz_hisel;
 
   ThermoMath thermo;
+  GameObject cam_offset;
+  GameObject ceye;
   GameObject lhand;
   GameObject llazer;
   Vector3 lhand_pos;
@@ -30,6 +32,7 @@ public class World : MonoBehaviour
   MeshRenderer rlazer_meshrenderer;
 
   Lazerable vrcenter_lazerable;
+  MeshRenderer vrcenter_backing_meshrenderer;
 
   List<Grabbable> movables;
   GameObject workspace;
@@ -85,6 +88,8 @@ public class World : MonoBehaviour
   {
     thermo = GameObject.Find("Oracle").GetComponent<ThermoMath>();
 
+    cam_offset = GameObject.Find("CamOffset");
+    ceye = GameObject.Find("CenterEyeAnchor");
     lhand  = GameObject.Find("LeftControllerAnchor");
     llazer  = GameObject.Find("LLazer");
     lhand_pos = lhand.transform.position;
@@ -136,6 +141,7 @@ public class World : MonoBehaviour
     graph = GameObject.Find("Graph");
 
     vrcenter_lazerable = GameObject.Find("VRCenter").GetComponent<Lazerable>();
+    vrcenter_backing_meshrenderer = GameObject.Find("VRCenter").transform.GetChild(1).GetComponent<MeshRenderer>();
 
     movables = new List<Grabbable>();
     for(int i = 0; i < tools.Count; i++) movables.Add(tools[i].grabbable); //important that tools take priority, so they can be grabbed and removed
@@ -580,10 +586,26 @@ public class World : MonoBehaviour
     else                                                             rlazer_fadable.set_factive(false);
 
     if(
-      (litrigger_delta == 1 && vrcenter_lazerable.lintersect) ||
-      (ritrigger_delta == 1 && vrcenter_lazerable.rintersect)
+      vrcenter_lazerable.lintersect ||
+      vrcenter_lazerable.rintersect
     )
-      UnityEngine.XR.InputTracking.Recenter();
+    {
+      if(
+        (litrigger_delta == 1 && vrcenter_lazerable.lintersect) ||
+        (ritrigger_delta == 1 && vrcenter_lazerable.rintersect)
+      )
+      {
+        vrcenter_backing_meshrenderer.material = quiz_hisel;
+        UnityEngine.XR.InputTracking.Recenter();
+        OVRManager.display.RecenterPose();
+        Vector3 pos = ceye.transform.localPosition*-1.0f;
+        pos.y = 0.0f;
+        cam_offset.transform.position = pos;
+
+      }
+      else vrcenter_backing_meshrenderer.material = quiz_hi;
+    }
+    else vrcenter_backing_meshrenderer.material = quiz_default;
 
     if(!llazer_fadable.stale)
     {

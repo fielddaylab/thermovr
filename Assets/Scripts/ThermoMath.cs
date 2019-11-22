@@ -810,8 +810,9 @@ public class ThermoMath : MonoBehaviour
     return temperature;
   }
 
-  public add_heat_constant_p(double j)
+  public void add_heat_constant_p(double j)
   {
+  /*
     int region = 0;
     switch(region)
     {
@@ -840,6 +841,7 @@ public class ThermoMath : MonoBehaviour
       }
       break;
     }
+  */
   }
 
   void dotransform()
