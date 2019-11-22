@@ -812,6 +812,7 @@ public class ThermoMath : MonoBehaviour
 
   public void add_heat_constant_p(double j)
   {
+    //newie = q - p(newv-oldv) + ie;
   /*
     int region = 0;
     switch(region)

@@ -56,6 +56,7 @@ public class World : MonoBehaviour
   Tool tool_coil;
   Tool tool_weight;
   Tool tool_balloon;
+  Tool tool_clipboard;
 
   ParticleSystem flame; //special case
 
@@ -116,6 +117,7 @@ public class World : MonoBehaviour
     t = GameObject.Find("Tool_Coil"     ).GetComponent<Tool>(); tool_coil      = t; tools.Add(t); t.dial_dial.min_map = 0.0f; t.dial_dial.max_map = 1.0f; t.dial_dial.unit = "J/s";
     t = GameObject.Find("Tool_Weight"   ).GetComponent<Tool>(); tool_weight    = t; tools.Add(t); t.dial_dial.min_map = 0.0f; t.dial_dial.max_map = 1.0f; t.dial_dial.unit = "kg";
     t = GameObject.Find("Tool_Balloon"  ).GetComponent<Tool>(); tool_balloon   = t; tools.Add(t); t.dial_dial.min_map = 0.0f; t.dial_dial.max_map = 1.0f; t.dial_dial.unit = "kg";
+    t = GameObject.Find("Tool_Clipboard").GetComponent<Tool>(); tool_clipboard = t; tools.Add(t); t.dial_dial.min_map = 0.0f; t.dial_dial.max_map = 1.0f; t.dial_dial.unit = "N/A";
 
     flame = GameObject.Find("Flame").GetComponent<ParticleSystem>();
 
@@ -272,6 +274,10 @@ public class World : MonoBehaviour
       //visual
       ;
       //math change happens passively- only need to update visuals
+    }
+    else if(t == tool_clipboard)
+    {
+      ; //do nothing!
     }
 
   }
@@ -601,7 +607,6 @@ public class World : MonoBehaviour
         Vector3 pos = ceye.transform.localPosition*-1.0f;
         pos.y = 0.0f;
         cam_offset.transform.position = pos;
-
       }
       else vrcenter_backing_meshrenderer.material = quiz_hi;
     }
