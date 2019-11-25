@@ -13,7 +13,7 @@ public class World : MonoBehaviour
   public Material quiz_sel;
   public Material quiz_hisel;
 
-  ThermoMath thermo;
+  ThermoState thermo;
   GameObject cam_offset;
   GameObject ceye;
   GameObject lhand;
@@ -87,7 +87,7 @@ public class World : MonoBehaviour
   // Start is called before the first frame update
   void Start()
   {
-    thermo = GameObject.Find("Oracle").GetComponent<ThermoMath>();
+    thermo = GameObject.Find("Oracle").GetComponent<ThermoState>();
 
     cam_offset = GameObject.Find("CamOffset");
     ceye = GameObject.Find("CenterEyeAnchor");
@@ -219,23 +219,24 @@ public class World : MonoBehaviour
     for(int i = 0; i < 4; i++) option_quizos[i].tmp.SetText(options[question*4+i]);
   }
 
+  /*
+  tried during:
+  - newly snapped on
+  - dial altered
+  */
   void TryApplyTool(Tool t)
   {
-    if(t == tool_insulator)
+    if(t == tool_insulator) //NO IMMEDIATE EFFECT
     {
       //visual
       //math
-      if(!t.engaged) return;
-      if(tool_clamp.engaged) thermo.tp_get_p(t.dial_dial.val);
-      else                   thermo.tp_get_v(t.dial_dial.val);
     }
     else if(t == tool_clamp)
     {
-      //visual change handled by thermomath (alters piston height)
+      //visual change handled by thermostate (alters piston height)
       //math
       if(!t.engaged) return;
-      if(tool_insulator.engaged) thermo.vp_get_p(t.dial_dial.val);
-      else                       thermo.vp_get_t(t.dial_dial.val);
+      thermo.set_volume(t.dial_dial.map);
     }
     else if(t == tool_weight || t == tool_balloon)
     {
@@ -247,29 +248,28 @@ public class World : MonoBehaviour
       t.gameObject.transform.localScale = scale;
       if(t == tool_balloon) v *= 0.125f;
       scale = new Vector3(v,v,v);
-      t.active_available.transform.localScale = scale;
-      t.active_snap.transform.localScale = scale;
+      t.active_available.transform.localScale  = scale;
+      t.active_snap.transform.localScale       = scale;
       t.storage_available.transform.localScale = scale;
-      t.storage_snap.transform.localScale = scale;
+      t.storage_snap.transform.localScale      = scale;
 
       //math
       if(!t.engaged || tool_clamp.engaged) return; //weight does nothing!
       float weight = 0;
-      if(tool_weight.engaged)  weight += tool_weight.dial_dial.val;
-      if(tool_balloon.engaged) weight -= tool_balloon.dial_dial.val;
+      if(tool_weight.engaged)  weight += tool_weight.dial_dial.map;
+      if(tool_balloon.engaged) weight -= tool_balloon.dial_dial.map;
       weight = (weight+1)/2; //normalize 0-1
 
-      if(tool_insulator.engaged) thermo.pp_get_v(weight);
-      else                       thermo.pp_get_t(weight);
+      thermo.add_weight(weight);
     }
-    else if(t == tool_burner)
+    else if(t == tool_burner) //NO IMMEDIATE EFFECT
     {
       //visual
       var vel = flame.velocityOverLifetime;
       vel.speedModifierMultiplier = Mathf.Lerp(0.1f,0.5f,t.dial_dial.val);
       //math change happens passively- only need to update visuals
     }
-    else if(t == tool_coil)
+    else if(t == tool_coil) //NO IMMEDIATE EFFECT
     {
       //visual
       ;
@@ -284,6 +284,7 @@ public class World : MonoBehaviour
 
   void TryAct(GameObject actable, float z_val, float y_val, ref float r_z, ref float r_y)
   {
+    //grabbing handle
     if(actable == handle_workspace)
     {
       float dy = (r_y-y_val);
@@ -292,6 +293,7 @@ public class World : MonoBehaviour
     else
     {
       Dial d = actable.GetComponent<Dial>();
+      //grabbing dial
       if(d != null)
       {
         Tool t = d.tool.GetComponent<Tool>();
@@ -308,6 +310,7 @@ public class World : MonoBehaviour
     float htrigger_threshhold = 0.1f;
     float itrigger_threshhold = 0.1f;
 
+    //find deltas
     r_htrigger_delta = 0;
     if(!r_htrigger && htrigger_val > htrigger_threshhold)
     {
@@ -334,6 +337,7 @@ public class World : MonoBehaviour
       r_itrigger = false;
     }
 
+    //find new grabs
     if(r_grabbed == null && r_htrigger_delta == 1)
     {
       //first try movables
@@ -408,18 +412,20 @@ public class World : MonoBehaviour
         }
       }
     }
+    //find new releases
     else if(r_grabbed && r_htrigger_delta == -1)
     {
       Tool t = r_grabbed.GetComponent<Tool>();
       if(t)
       {
+        //tool newly engaged
         if(t.active_ghost.tintersect)
         {
           r_grabbed.transform.SetParent(t.active.transform);
           t.engaged = true;
           t.boxcollider.isTrigger = true;
-               if(t == tool_insulator) t.dial_dial.val = (float)((thermo.temperature-thermo.t_min)/(thermo.t_max-thermo.t_min));
-          else if(t == tool_clamp)     t.dial_dial.val = (float)((thermo.volume     -thermo.v_min)/(thermo.v_max-thermo.v_min));
+               if(t == tool_insulator) t.dial_dial.val = (float)ThermoMath.percent_given_t(thermo.temperature);
+          else if(t == tool_clamp)     t.dial_dial.val = (float)ThermoMath.percent_given_v(thermo.volume);
           TryApplyTool(t);
           r_grabbed.transform.localPosition = new Vector3(0f,0f,0f);
           r_grabbed.transform.localRotation = Quaternion.identity;
@@ -541,7 +547,7 @@ public class World : MonoBehaviour
     if(tool_coil.engaged)   d_heat -= tool_coil.dial_dial.val;
     if(d_heat != 0.0f)
     {
-      thermo.h_get_t(d_heat);
+      //add heat
     }
 
 
