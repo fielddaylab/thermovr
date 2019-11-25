@@ -43,8 +43,12 @@ public class Fadable : MonoBehaviour
 
     t_factive   += Time.deltaTime;
     t_infactive += Time.deltaTime;
-    if(factive) t_infactive = 0.0f;
-    else        t_factive   = 0.0f;
+    if(factive)
+    {
+      if(t_infactive < t_start_out) t_factive = t_in; //don't "start fade in" if haven't started fading out
+      t_infactive = 0.0f;
+    }
+    else t_factive = 0.0f;
 
     if(factive)
     {

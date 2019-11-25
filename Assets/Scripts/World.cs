@@ -678,12 +678,13 @@ public class World : MonoBehaviour
     for(int i = 0; i < tools.Count; i++)
     {
       t = tools[i];
+      t.dial_dial.examined = false;
+      if(t.dial == lgrabbed || t.dial == rgrabbed) t.dial_dial.examined = true;
       if(t.dial_dial.val != t.dial_dial.prev_val)
       {
         t.textv_tmp.SetText("{0:3}"+t.dial_dial.unit,(float)t.dial_dial.map);
         t.dial_dial.examined = true;
       }
-      else t.dial_dial.examined = false;
       t.dial_dial.prev_val = t.dial_dial.val;
     }
 
