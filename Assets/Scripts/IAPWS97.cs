@@ -2317,13 +2317,13 @@ public static class IF97
     List<int> lamIr = new List<int>();
     List<int> lamJr = new List<int>();
     List<double> lamnr = new List<double>();
-    double T_star = 0.0;
-    double p_star = 0.0;
+    //double T_star = 0.0; //commented out because unused?
+    //double p_star = 0.0; //commented out because unused?
     double R = 0.0;
     public Region3()
     {
-      T_star = 1000;
-      p_star = 1*p_fact;
+      //T_star = 1000; //commented out because unused?
+      //p_star = 1*p_fact; //commented out because unused?
 
       for(int i = 0; i < Region3residdata.Length; ++i)
       {

@@ -111,7 +111,6 @@ public class ThermoState : MonoBehaviour
     int n_pts = samples*samples;
     int n_pts_per_group = 1000;
     int n_groups = (int)Mathf.Ceil(n_pts / n_pts_per_group);
-    float pt_size = 0.005f;
 
     Vector3[] pt_positions;
 

@@ -7,9 +7,9 @@ public class VisAid : MonoBehaviour
   [System.NonSerialized]
   public bool stored = false;
   [System.NonSerialized]
-  public Grabbable grabbable;
+  public Touchable touchable;
   [System.NonSerialized]
-  public Rigidbody rigidbody;
+  new public Rigidbody rigidbody;
   [System.NonSerialized]
   public Transform og_transform;
   [System.NonSerialized]
@@ -21,7 +21,7 @@ public class VisAid : MonoBehaviour
 
   void Awake()
   {
-    grabbable = gameObject.GetComponent<Grabbable>();
+    touchable = gameObject.GetComponent<Touchable>();
     rigidbody = gameObject.GetComponent<Rigidbody>();
     og_transform = gameObject.transform;
     og_localPosition = gameObject.transform.localPosition;
@@ -38,22 +38,22 @@ public class VisAid : MonoBehaviour
   void Update()
   {
     t_free += Time.deltaTime;
-    if(!stored && !grabbable.grabbed && t_free > 1.0f)
+    if(!stored && !touchable.grabbed && t_free > 1.0f)
     {
       rigidbody.isKinematic = true;
-      Vector3 og_position = grabbable.og_parent.position+og_localPosition;
+      Vector3 og_position = touchable.og_parent.position+og_localPosition;
       gameObject.transform.position = Vector3.Lerp(gameObject.transform.position,og_position,0.1f);
       gameObject.transform.localRotation = Quaternion.Lerp(gameObject.transform.localRotation,og_localRotation,0.1f);
       if(Vector3.Distance(gameObject.transform.position, og_position) < 0.1f)
       {
         stored = true;
-        gameObject.transform.parent = grabbable.og_parent;
+        gameObject.transform.parent = touchable.og_parent;
         //gameObject.transform.localPosition = og_localPosition;
         gameObject.transform.position = og_position;
         gameObject.transform.localRotation = og_localRotation;
       }
     }
-    else if(stored || grabbable.grabbed)
+    else if(stored || touchable.grabbed)
       t_free = 0.0f;
   }
 

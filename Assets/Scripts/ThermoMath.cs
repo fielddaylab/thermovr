@@ -83,7 +83,6 @@ public static class ThermoMath
   }
 
   static double sample_lbase = 1.6f;
-  static double sample_lbase_prev = 0.0f;
   static double sample(double t) { return Math.Pow(t,sample_lbase); }
   public static void compare_impls()
   {

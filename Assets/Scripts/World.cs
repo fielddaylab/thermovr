@@ -6,7 +6,7 @@ using TMPro;
 public class World : MonoBehaviour
 {
   public Material hand_empty;
-  public Material hand_intersecting;
+  public Material hand_touching;
   public Material hand_grabbing;
   public Material quiz_default;
   public Material quiz_hi;
@@ -34,10 +34,10 @@ public class World : MonoBehaviour
   Lazerable vrcenter_lazerable;
   MeshRenderer vrcenter_backing_meshrenderer;
 
-  List<Grabbable> movables;
+  List<Touchable> movables;
   GameObject workspace;
   GameObject handle_workspace;
-  Grabbable handle_workspace_grabbable;
+  Touchable handle_workspace_touchable;
   GameObject lgrabbed = null;
   GameObject rgrabbed = null;
   int lhtrigger_delta = 0;
@@ -63,7 +63,7 @@ public class World : MonoBehaviour
   bool halfed = false;
   List<Halfable> halfables;
   GameObject halfer;
-  Grabbable halfer_grabbable;
+  Touchable halfer_touchable;
 
   GameObject vessel;
   GameObject graph;
@@ -123,7 +123,7 @@ public class World : MonoBehaviour
 
     workspace = GameObject.Find("Workspace");
     handle_workspace = GameObject.Find("Handle_Workspace");
-    handle_workspace_grabbable = handle_workspace.GetComponent<Grabbable>();
+    handle_workspace_touchable = handle_workspace.GetComponent<Touchable>();
 
     for(int i = 0; i < tools.Count; i++)
     {
@@ -145,13 +145,13 @@ public class World : MonoBehaviour
     vrcenter_lazerable = GameObject.Find("VRCenter").GetComponent<Lazerable>();
     vrcenter_backing_meshrenderer = GameObject.Find("VRCenter").transform.GetChild(1).GetComponent<MeshRenderer>();
 
-    movables = new List<Grabbable>();
-    for(int i = 0; i < tools.Count; i++) movables.Add(tools[i].grabbable); //important that tools take priority, so they can be grabbed and removed
-    movables.Add(graph.GetComponent<Grabbable>());
-    movables.Add(vessel.GetComponent<Grabbable>());
+    movables = new List<Touchable>();
+    for(int i = 0; i < tools.Count; i++) movables.Add(tools[i].touchable); //important that tools take priority, so they can be grabbed and removed
+    movables.Add(graph.GetComponent<Touchable>());
+    movables.Add(vessel.GetComponent<Touchable>());
 
     halfer = GameObject.Find("Halfer");
-    halfer_grabbable = halfer.GetComponent<Grabbable>();
+    halfer_touchable = halfer.GetComponent<Touchable>();
     halfables = new List<Halfable>();
     halfables.Add(GameObject.Find("Container").GetComponent<Halfable>());
     halfables.Add(GameObject.Find("Piston").GetComponent<Halfable>());
@@ -344,8 +344,8 @@ public class World : MonoBehaviour
       for(int i = 0; r_grabbed == null && i < movables.Count; i++)
       {
         if(
-           ( which && movables[i].lintersect) ||
-           (!which && movables[i].rintersect)
+           ( which && movables[i].ltouch) ||
+           (!which && movables[i].rtouch)
           )
         {
           r_grabbed = movables[i].gameObject;
@@ -374,12 +374,12 @@ public class World : MonoBehaviour
         for(int i = 0; i < tools.Count; i++)
         {
           if(
-             ( which && tools[i].dial_grabbable.lintersect) ||
-             (!which && tools[i].dial_grabbable.rintersect)
+             ( which && tools[i].dial_touchable.ltouch) ||
+             (!which && tools[i].dial_touchable.rtouch)
             )
           {
             r_grabbed = tools[i].dial;
-            tools[i].dial_grabbable.grabbed = true;
+            tools[i].dial_touchable.grabbed = true;
             if(r_grabbed == r_ograbbed) r_ograbbed = null;
           }
         }
@@ -387,10 +387,10 @@ public class World : MonoBehaviour
       //then extraaneous
       if(r_grabbed == null)
       {
-        Grabbable g = handle_workspace_grabbable;
+        Touchable g = handle_workspace_touchable;
         if(
-          ( which && g.lintersect) ||
-          (!which && g.rintersect)
+          ( which && g.ltouch) ||
+          (!which && g.rtouch)
         )
         {
           r_grabbed = handle_workspace;
@@ -400,10 +400,10 @@ public class World : MonoBehaviour
       }
       if(r_grabbed == null)
       {
-        Grabbable g = halfer_grabbable;
+        Touchable g = halfer_touchable;
         if(
-          ( which && g.lintersect) ||
-          (!which && g.rintersect)
+          ( which && g.ltouch) ||
+          (!which && g.rtouch)
         )
         {
           r_grabbed = halfer;
@@ -439,14 +439,14 @@ public class World : MonoBehaviour
         }
         else
         {
-          r_grabbed.transform.SetParent(r_grabbed.GetComponent<Grabbable>().og_parent);
+          r_grabbed.transform.SetParent(r_grabbed.GetComponent<Touchable>().og_parent);
           t.rigidbody.isKinematic = false;
           t.rigidbody.velocity = hand_vel;
         }
       }
       else
       {
-        r_grabbed.transform.SetParent(r_grabbed.GetComponent<Grabbable>().og_parent); //ok to do, even with a dial
+        r_grabbed.transform.SetParent(r_grabbed.GetComponent<Touchable>().og_parent); //ok to do, even with a dial
         VisAid v = r_grabbed.GetComponent<VisAid>();
         if(v)
         {
@@ -455,7 +455,7 @@ public class World : MonoBehaviour
         }
       }
 
-      r_grabbed.GetComponent<Grabbable>().grabbed = false;
+      r_grabbed.GetComponent<Touchable>().grabbed = false;
       r_grabbed = null;
     }
 
@@ -507,35 +507,35 @@ public class World : MonoBehaviour
       }
     }
 
-    Grabbable gr;
-    bool lintersect = false;
-    bool rintersect = false;
+    Touchable gr;
+    bool ltouch = false;
+    bool rtouch = false;
     for(int i = 0; i < movables.Count; i++)
     {
       gr = movables[i];
-      if(gr.lintersect) lintersect = true;
-      if(gr.rintersect) rintersect = true;
+      if(gr.ltouch) ltouch = true;
+      if(gr.rtouch) rtouch = true;
     }
     for(int i = 0; i < tools.Count; i++)
     {
-      gr = tools[i].dial_grabbable;
-      if(gr.lintersect) lintersect = true;
-      if(gr.rintersect) rintersect = true;
+      gr = tools[i].dial_touchable;
+      if(gr.ltouch) ltouch = true;
+      if(gr.rtouch) rtouch = true;
     }
-    gr = handle_workspace_grabbable;
-    if(gr.lintersect) lintersect = true;
-    if(gr.rintersect) rintersect = true;
-    gr = halfer_grabbable;
-    if(gr.lintersect) lintersect = true;
-    if(gr.rintersect) rintersect = true;
+    gr = handle_workspace_touchable;
+    if(gr.ltouch) ltouch = true;
+    if(gr.rtouch) rtouch = true;
+    gr = halfer_touchable;
+    if(gr.ltouch) ltouch = true;
+    if(gr.rtouch) rtouch = true;
 
-         if(lgrabbed)   lhand_meshrenderer.material = hand_grabbing;
-    else if(lintersect) lhand_meshrenderer.material = hand_intersecting;
-    else                lhand_meshrenderer.material = hand_empty;
+         if(lgrabbed) lhand_meshrenderer.material = hand_grabbing;
+    else if(ltouch)   lhand_meshrenderer.material = hand_touching;
+    else              lhand_meshrenderer.material = hand_empty;
 
-         if(rgrabbed)   rhand_meshrenderer.material = hand_grabbing;
-    else if(rintersect) rhand_meshrenderer.material = hand_intersecting;
-    else                rhand_meshrenderer.material = hand_empty;
+         if(rgrabbed) rhand_meshrenderer.material = hand_grabbing;
+    else if(rtouch)   rhand_meshrenderer.material = hand_touching;
+    else              rhand_meshrenderer.material = hand_empty;
   }
 
   // Update is called once per frame
@@ -580,8 +580,8 @@ public class World : MonoBehaviour
     TryGrab(false, rhandt, rindext, rhand.transform.position.z, rhand.transform.position.y, rhand_vel, ref rhtrigger, ref ritrigger, ref rhtrigger_delta, ref ritrigger_delta, ref rz, ref ry, ref rhand, ref rgrabbed, ref lhand, ref lgrabbed); //right hand
 
     if(
-      (litrigger_delta > 0 && halfer_grabbable.lintersect) ||
-      (ritrigger_delta > 0 && halfer_grabbable.rintersect)
+      (litrigger_delta > 0 && halfer_touchable.ltouch) ||
+      (ritrigger_delta > 0 && halfer_touchable.rtouch)
       )
     {
       halfed = !halfed;
@@ -592,19 +592,19 @@ public class World : MonoBehaviour
     UpdateGrabVis();
 
     //quiz
-    if(qboard_lazerable.lintersect || vrcenter_lazerable.lintersect) llazer_fadable.set_factive(true);
+    if(qboard_lazerable.lhit || vrcenter_lazerable.lhit) llazer_fadable.set_factive(true);
     else                                                             llazer_fadable.set_factive(false);
-    if(qboard_lazerable.rintersect || vrcenter_lazerable.rintersect) rlazer_fadable.set_factive(true);
+    if(qboard_lazerable.rhit || vrcenter_lazerable.rhit) rlazer_fadable.set_factive(true);
     else                                                             rlazer_fadable.set_factive(false);
 
     if(
-      vrcenter_lazerable.lintersect ||
-      vrcenter_lazerable.rintersect
+      vrcenter_lazerable.lhit ||
+      vrcenter_lazerable.rhit
     )
     {
       if(
-        (litrigger_delta == 1 && vrcenter_lazerable.lintersect) ||
-        (ritrigger_delta == 1 && vrcenter_lazerable.rintersect)
+        (litrigger_delta == 1 && vrcenter_lazerable.lhit) ||
+        (ritrigger_delta == 1 && vrcenter_lazerable.rhit)
       )
       {
         vrcenter_backing_meshrenderer.material = quiz_hisel;
@@ -644,8 +644,8 @@ public class World : MonoBehaviour
     {
       q = option_quizos[i];
       if(
-        (litrigger_delta == 1 && q.lazerable.lintersect) ||
-        (ritrigger_delta == 1 && q.lazerable.rintersect)
+        (litrigger_delta == 1 && q.lazerable.lhit) ||
+        (ritrigger_delta == 1 && q.lazerable.rhit)
       )
       {
         if(i == qselected) qselected = -1;
@@ -653,24 +653,24 @@ public class World : MonoBehaviour
       }
       if(i == qselected)
       {
-        if(q.lazerable.intersect) q.backing_meshrenderer.material = quiz_hisel;
-        else                      q.backing_meshrenderer.material = quiz_sel;
+        if(q.lazerable.hit) q.backing_meshrenderer.material = quiz_hisel;
+        else                q.backing_meshrenderer.material = quiz_sel;
       }
       else
       {
-        if(q.lazerable.intersect) q.backing_meshrenderer.material = quiz_hi;
-        else                      q.backing_meshrenderer.material = quiz_default;
+        if(q.lazerable.hit) q.backing_meshrenderer.material = quiz_hi;
+        else                q.backing_meshrenderer.material = quiz_default;
       }
     }
     if(qselected != -1)
     {
-      if(qconfirm_quizo.lazerable.intersect) qconfirm_quizo.backing_meshrenderer.material = quiz_hisel;
-      else                                   qconfirm_quizo.backing_meshrenderer.material = quiz_sel;
+      if(qconfirm_quizo.lazerable.hit) qconfirm_quizo.backing_meshrenderer.material = quiz_hisel;
+      else                             qconfirm_quizo.backing_meshrenderer.material = quiz_sel;
     }
     else
     {
-      if(qconfirm_quizo.lazerable.intersect) qconfirm_quizo.backing_meshrenderer.material = quiz_hi;
-      else                                   qconfirm_quizo.backing_meshrenderer.material = quiz_default;
+      if(qconfirm_quizo.lazerable.hit) qconfirm_quizo.backing_meshrenderer.material = quiz_hi;
+      else                             qconfirm_quizo.backing_meshrenderer.material = quiz_default;
     }
 
     //tooltext

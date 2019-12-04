@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Grabbable : MonoBehaviour
+public class Touchable : MonoBehaviour
 {
   GameObject lhand;
   GameObject rhand;
@@ -34,23 +34,23 @@ public class Grabbable : MonoBehaviour
   }
 
   [System.NonSerialized]
-  public bool lintersect = false;
+  public bool ltouch = false;
   [System.NonSerialized]
-  public bool rintersect = false;
+  public bool rtouch = false;
   [System.NonSerialized]
-  public bool intersect = false;
+  public bool touch = false;
   void OnTriggerEnter(Collider c)
   {
-    if(c == lhand_c) lintersect = true;
-    if(c == rhand_c) rintersect = true;
-    intersect = (lintersect || rintersect);
+    if(c == lhand_c) ltouch = true;
+    if(c == rhand_c) rtouch = true;
+    touch = (ltouch || rtouch);
   }
 
   void OnTriggerExit(Collider c)
   {
-    if(c == lhand_c) lintersect = false;
-    if(c == rhand_c) rintersect = false;
-    intersect = (lintersect || rintersect);
+    if(c == lhand_c) ltouch = false;
+    if(c == rhand_c) rtouch = false;
+    touch = (ltouch || rtouch);
   }
 
 }

@@ -10,11 +10,11 @@ public class Tool : MonoBehaviour
   [System.NonSerialized]
   public bool stored = false;
   [System.NonSerialized]
-  public Grabbable grabbable;
+  public Touchable touchable;
   [System.NonSerialized]
   public BoxCollider boxcollider;
   [System.NonSerialized]
-  public Rigidbody rigidbody;
+  new public Rigidbody rigidbody;
   [System.NonSerialized]
   public float t_free = 0.0f;
 
@@ -22,7 +22,7 @@ public class Tool : MonoBehaviour
   [System.NonSerialized]
   public Ghost storage_ghost;
   [System.NonSerialized]
-  public Grabbable storage_grabbable;
+  public Touchable storage_touchable;
   [System.NonSerialized]
   public GameObject storage_available;
   [System.NonSerialized]
@@ -36,7 +36,7 @@ public class Tool : MonoBehaviour
   [System.NonSerialized]
   public Ghost active_ghost;
   [System.NonSerialized]
-  public Grabbable active_grabbable;
+  public Touchable active_touchable;
   [System.NonSerialized]
   public GameObject active_available;
   [System.NonSerialized]
@@ -50,7 +50,7 @@ public class Tool : MonoBehaviour
   [System.NonSerialized]
   public Dial dial_dial;
   [System.NonSerialized]
-  public Grabbable dial_grabbable;
+  public Touchable dial_touchable;
 
   public GameObject textv;
   [System.NonSerialized]
@@ -69,26 +69,26 @@ public class Tool : MonoBehaviour
 
   void Awake()
   {
-    grabbable = gameObject.GetComponent<Grabbable>();
+    touchable = gameObject.GetComponent<Touchable>();
     boxcollider = gameObject.GetComponent<BoxCollider>();
     rigidbody = gameObject.GetComponent<Rigidbody>();
 
     storage_ghost = storage.GetComponent<Ghost>();
-    storage_grabbable = storage.GetComponent<Grabbable>();
+    storage_touchable = storage.GetComponent<Touchable>();
     storage_available = storage_ghost.available;
     storage_available_meshrenderer = storage_available.GetComponent<MeshRenderer>();
     storage_snap = storage_ghost.snap;
     storage_snap_meshrenderer = storage_snap.GetComponent<MeshRenderer>();
 
     active_ghost = active.GetComponent<Ghost>();
-    active_grabbable = active.GetComponent<Grabbable>();
+    active_touchable = active.GetComponent<Touchable>();
     active_available = active_ghost.available;
     active_available_meshrenderer = active_available.GetComponent<MeshRenderer>();
     active_snap = active_ghost.snap;
     active_snap_meshrenderer = active_snap.GetComponent<MeshRenderer>();
 
     dial_dial = dial.GetComponent<Dial>();
-    dial_grabbable = dial.GetComponent<Grabbable>();
+    dial_touchable = dial.GetComponent<Touchable>();
 
     textv_tmp = textv.GetComponent<TextMeshPro>();
     textv_meshrenderer = textv.GetComponent<MeshRenderer>();
@@ -108,9 +108,9 @@ public class Tool : MonoBehaviour
   {
     t_free += Time.deltaTime;
 
-    text_fadable.set_factive(grabbable.intersect || dial_dial.examined);
+    text_fadable.set_factive(touchable.touch || dial_dial.examined);
 
-    if(!engaged && !stored && !grabbable.grabbed && t_free > 1.0f)
+    if(!engaged && !stored && !touchable.grabbed && t_free > 1.0f)
     {
       rigidbody.isKinematic = true;
       gameObject.transform.position = Vector3.Lerp(gameObject.transform.position,storage.transform.position,0.1f);
@@ -123,7 +123,7 @@ public class Tool : MonoBehaviour
         gameObject.transform.localRotation = Quaternion.identity;
       }
     }
-    else if(engaged || stored || grabbable.grabbed)
+    else if(engaged || stored || touchable.grabbed)
       t_free = 0.0f;
   }
 
