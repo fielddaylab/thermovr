@@ -14,7 +14,7 @@ public class Tool : MonoBehaviour
   [System.NonSerialized]
   public BoxCollider boxcollider;
   [System.NonSerialized]
-  new public Rigidbody rigidbody;
+  public Rigidbody rigidbody;
   [System.NonSerialized]
   public float t_free = 0.0f;
 

@@ -9,7 +9,7 @@ public class VisAid : MonoBehaviour
   [System.NonSerialized]
   public Touchable touchable;
   [System.NonSerialized]
-  new public Rigidbody rigidbody;
+  public Rigidbody rigidbody;
   [System.NonSerialized]
   public Transform og_transform;
   [System.NonSerialized]

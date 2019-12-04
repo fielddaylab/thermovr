@@ -18,6 +18,7 @@ public class World : MonoBehaviour
   GameObject ceye;
   GameObject lhand;
   GameObject llazer;
+  GameObject llazer_viz;
   Vector3 lhand_pos;
   Vector3 lhand_vel;
   MeshRenderer lhand_meshrenderer;
@@ -26,11 +27,13 @@ public class World : MonoBehaviour
   Fadable rlazer_fadable;
   GameObject rhand;
   GameObject rlazer;
+  GameObject rlazer_viz;
   Vector3 rhand_pos;
   Vector3 rhand_vel;
   MeshRenderer rhand_meshrenderer;
   MeshRenderer rlazer_meshrenderer;
 
+  GameObject vrcenter;
   Lazerable vrcenter_lazerable;
   MeshRenderer vrcenter_backing_meshrenderer;
 
@@ -80,6 +83,7 @@ public class World : MonoBehaviour
   List<int> givens;
   List<Quizo> option_quizos;
   Quizo qconfirm_quizo;
+  GameObject qboard;
   Lazerable qboard_lazerable;
   TextMeshPro qtext_tmp;
   int qselected = -1;
@@ -91,21 +95,33 @@ public class World : MonoBehaviour
 
     cam_offset = GameObject.Find("CamOffset");
     ceye = GameObject.Find("CenterEyeAnchor");
+
     lhand  = GameObject.Find("LeftControllerAnchor");
     llazer  = GameObject.Find("LLazer");
+    llazer_viz  = llazer.transform.GetChild(0).gameObject;
     lhand_pos = lhand.transform.position;
     lhand_vel = new Vector3(0.0f,0.0f,0.0f);
     lhand_meshrenderer = lhand.transform.GetChild(0).gameObject.GetComponent<MeshRenderer>();
     llazer_meshrenderer = llazer.transform.GetChild(0).gameObject.GetComponent<MeshRenderer>();
+    llazer_meshrenderer.enabled = false;
     llazer_fadable = llazer.GetComponent<Fadable>();
+
     rhand  = GameObject.Find("RightControllerAnchor");
     rlazer  = GameObject.Find("RLazer");
+    rlazer_viz  = rlazer.transform.GetChild(0).gameObject;
     rhand_pos = rhand.transform.position;
     rhand_vel = new Vector3(0.0f,0.0f,0.0f);
     rhand_meshrenderer = rhand.transform.GetChild(0).gameObject.GetComponent<MeshRenderer>();
     rlazer_meshrenderer = rlazer.transform.GetChild(0).gameObject.GetComponent<MeshRenderer>();
+    rlazer_meshrenderer.enabled = false;
     rlazer_fadable = rlazer.GetComponent<Fadable>();
 
+    llazer_fadable.t_in = 0.1f;
+    rlazer_fadable.t_in = 0.1f;
+    llazer_fadable.t_start_out = 0.1f;
+    rlazer_fadable.t_start_out = 0.1f;
+    llazer_fadable.t_end_out = 0.2f;
+    llazer_fadable.t_end_out = 0.2f;
     lhand_meshrenderer.material = hand_empty;
     rhand_meshrenderer.material = hand_empty;
 
@@ -142,7 +158,8 @@ public class World : MonoBehaviour
     vessel = GameObject.Find("Vessel");
     graph = GameObject.Find("Graph");
 
-    vrcenter_lazerable = GameObject.Find("VRCenter").GetComponent<Lazerable>();
+    vrcenter = GameObject.Find("VRCenter");
+    vrcenter_lazerable = vrcenter.GetComponent<Lazerable>();
     vrcenter_backing_meshrenderer = GameObject.Find("VRCenter").transform.GetChild(1).GetComponent<MeshRenderer>();
 
     movables = new List<Touchable>();
@@ -208,7 +225,8 @@ public class World : MonoBehaviour
     option_quizos.Add(GameObject.Find("QC").GetComponent<Quizo>());
     option_quizos.Add(GameObject.Find("QD").GetComponent<Quizo>());
     qconfirm_quizo = GameObject.Find("QConfirm").GetComponent<Quizo>();
-    qboard_lazerable = GameObject.Find("Qboard").GetComponent<Lazerable>();
+    qboard = GameObject.Find("Qboard");
+    qboard_lazerable = qboard.GetComponent<Lazerable>();
     qtext_tmp = GameObject.Find("Qtext").GetComponent<TextMeshPro>();
     SetQuizText();
   }
@@ -550,7 +568,6 @@ public class World : MonoBehaviour
       //add heat
     }
 
-
     //running blended average
     lhand_vel += (lhand.transform.position-lhand_pos)/Time.deltaTime;
     lhand_vel *= 0.5f;
@@ -593,14 +610,11 @@ public class World : MonoBehaviour
 
     //quiz
     if(qboard_lazerable.lhit || vrcenter_lazerable.lhit) llazer_fadable.set_factive(true);
-    else                                                             llazer_fadable.set_factive(false);
+    else                                                 llazer_fadable.set_factive(false);
     if(qboard_lazerable.rhit || vrcenter_lazerable.rhit) rlazer_fadable.set_factive(true);
-    else                                                             rlazer_fadable.set_factive(false);
+    else                                                 rlazer_fadable.set_factive(false);
 
-    if(
-      vrcenter_lazerable.lhit ||
-      vrcenter_lazerable.rhit
-    )
+    if(vrcenter_lazerable.hit)
     {
       if(
         (litrigger_delta == 1 && vrcenter_lazerable.lhit) ||
@@ -617,6 +631,23 @@ public class World : MonoBehaviour
       else vrcenter_backing_meshrenderer.material = quiz_hi;
     }
     else vrcenter_backing_meshrenderer.material = quiz_default;
+
+    if(qboard_lazerable.lhit || vrcenter_lazerable.lhit)
+    {
+      float d = 0f;
+           if(qboard_lazerable.lhit)   d = Vector3.Distance(lhand.transform.position,qboard.transform.position);
+      else if(vrcenter_lazerable.lhit) d = Vector3.Distance(lhand.transform.position,vrcenter.transform.position);
+      llazer_viz.transform.localPosition = new Vector3(llazer_viz.transform.localPosition.x,llazer_viz.transform.localPosition.y,d/2);
+      llazer_viz.transform.localScale    = new Vector3(llazer_viz.transform.localScale.x,d/2,llazer_viz.transform.localScale.z);
+    }
+    if(qboard_lazerable.rhit || vrcenter_lazerable.rhit)
+    {
+      float d = 0f;
+           if(qboard_lazerable.rhit)   d = Vector3.Distance(lhand.transform.position,qboard.transform.position);
+      else if(vrcenter_lazerable.rhit) d = Vector3.Distance(lhand.transform.position,vrcenter.transform.position);
+      rlazer_viz.transform.localPosition = new Vector3(rlazer_viz.transform.localPosition.x,rlazer_viz.transform.localPosition.y,d/2);
+      rlazer_viz.transform.localScale    = new Vector3(rlazer_viz.transform.localScale.x,d/2,rlazer_viz.transform.localScale.z);
+    }
 
     if(!llazer_fadable.stale)
     {
