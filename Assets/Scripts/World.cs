@@ -76,6 +76,7 @@ public class World : MonoBehaviour
   bool litrigger = false;
   bool ritrigger = false;
 
+  int board_mode = 0; //0- instructions, 1- challenge, 2- quiz
   int question = 0;
   List<string> questions;
   List<string> options;
@@ -83,8 +84,8 @@ public class World : MonoBehaviour
   List<int> givens;
   List<Quizo> option_quizos;
   Quizo qconfirm_quizo;
-  GameObject qboard;
-  Lazerable qboard_lazerable;
+  GameObject board;
+  Lazerable board_lazerable;
   TextMeshPro qtext_tmp;
   int qselected = -1;
 
@@ -228,8 +229,8 @@ public class World : MonoBehaviour
     option_quizos.Add(GameObject.Find("QC").GetComponent<Quizo>());
     option_quizos.Add(GameObject.Find("QD").GetComponent<Quizo>());
     qconfirm_quizo = GameObject.Find("QConfirm").GetComponent<Quizo>();
-    qboard = GameObject.Find("Qboard");
-    qboard_lazerable = qboard.GetComponent<Lazerable>();
+    board = GameObject.Find("Board");
+    board_lazerable = board.GetComponent<Lazerable>();
     qtext_tmp = GameObject.Find("Qtext").GetComponent<TextMeshPro>();
     SetQuizText();
   }
@@ -617,11 +618,11 @@ public class World : MonoBehaviour
 
     UpdateGrabVis();
 
-    //quiz
-    if(qboard_lazerable.lhit || vrcenter_lazerable.lhit) llazer_fadable.set_factive(true);
-    else                                                 llazer_fadable.set_factive(false);
-    if(qboard_lazerable.rhit || vrcenter_lazerable.rhit) rlazer_fadable.set_factive(true);
-    else                                                 rlazer_fadable.set_factive(false);
+    //board
+    if(board_lazerable.lhit || vrcenter_lazerable.lhit) llazer_fadable.set_factive(true);
+    else                                                llazer_fadable.set_factive(false);
+    if(board_lazerable.rhit || vrcenter_lazerable.rhit) rlazer_fadable.set_factive(true);
+    else                                                rlazer_fadable.set_factive(false);
 
     if(vrcenter_lazerable.hit)
     {
@@ -641,18 +642,18 @@ public class World : MonoBehaviour
     }
     else vrcenter_backing_meshrenderer.material = quiz_default;
 
-    if(qboard_lazerable.lhit || vrcenter_lazerable.lhit)
+    if(board_lazerable.lhit || vrcenter_lazerable.lhit)
     {
       float d = 0f;
-           if(qboard_lazerable.lhit)   d = Vector3.Distance(lhand.transform.position,qboard.transform.position);
+           if(board_lazerable.lhit)    d = Vector3.Distance(lhand.transform.position,board.transform.position);
       else if(vrcenter_lazerable.lhit) d = Vector3.Distance(lhand.transform.position,vrcenter.transform.position);
       llazer_viz.transform.localPosition = new Vector3(llazer_viz.transform.localPosition.x,llazer_viz.transform.localPosition.y,d/2);
       llazer_viz.transform.localScale    = new Vector3(llazer_viz.transform.localScale.x,d/2,llazer_viz.transform.localScale.z);
     }
-    if(qboard_lazerable.rhit || vrcenter_lazerable.rhit)
+    if(board_lazerable.rhit || vrcenter_lazerable.rhit)
     {
       float d = 0f;
-           if(qboard_lazerable.rhit)   d = Vector3.Distance(lhand.transform.position,qboard.transform.position);
+           if(board_lazerable.rhit)    d = Vector3.Distance(lhand.transform.position,board.transform.position);
       else if(vrcenter_lazerable.rhit) d = Vector3.Distance(lhand.transform.position,vrcenter.transform.position);
       rlazer_viz.transform.localPosition = new Vector3(rlazer_viz.transform.localPosition.x,rlazer_viz.transform.localPosition.y,d/2);
       rlazer_viz.transform.localScale    = new Vector3(rlazer_viz.transform.localScale.x,d/2,rlazer_viz.transform.localScale.z);
@@ -679,38 +680,47 @@ public class World : MonoBehaviour
       }
     }
 
-    Quizo q;
-    for(int i = 0; i < option_quizos.Count; i++)
+    switch(board_mode)
     {
-      q = option_quizos[i];
-      if(
-        (litrigger_delta == 1 && q.lazerable.lhit) ||
-        (ritrigger_delta == 1 && q.lazerable.rhit)
-      )
-      {
-        if(i == qselected) qselected = -1;
-        else               qselected = i;
-      }
-      if(i == qselected)
-      {
-        if(q.lazerable.hit) q.backing_meshrenderer.material = quiz_hisel;
-        else                q.backing_meshrenderer.material = quiz_sel;
-      }
-      else
-      {
-        if(q.lazerable.hit) q.backing_meshrenderer.material = quiz_hi;
-        else                q.backing_meshrenderer.material = quiz_default;
-      }
-    }
-    if(qselected != -1)
-    {
-      if(qconfirm_quizo.lazerable.hit) qconfirm_quizo.backing_meshrenderer.material = quiz_hisel;
-      else                             qconfirm_quizo.backing_meshrenderer.material = quiz_sel;
-    }
-    else
-    {
-      if(qconfirm_quizo.lazerable.hit) qconfirm_quizo.backing_meshrenderer.material = quiz_hi;
-      else                             qconfirm_quizo.backing_meshrenderer.material = quiz_default;
+      case 0: //instructions
+        break;
+      case 1: //challenge
+        break;
+      case 2:
+        Quizo q;
+        for(int i = 0; i < option_quizos.Count; i++)
+        {
+          q = option_quizos[i];
+          if(
+            (litrigger_delta == 1 && q.lazerable.lhit) ||
+            (ritrigger_delta == 1 && q.lazerable.rhit)
+          )
+          {
+            if(i == qselected) qselected = -1;
+            else               qselected = i;
+          }
+          if(i == qselected)
+          {
+            if(q.lazerable.hit) q.backing_meshrenderer.material = quiz_hisel;
+            else                q.backing_meshrenderer.material = quiz_sel;
+          }
+          else
+          {
+            if(q.lazerable.hit) q.backing_meshrenderer.material = quiz_hi;
+            else                q.backing_meshrenderer.material = quiz_default;
+          }
+        }
+        if(qselected != -1)
+        {
+          if(qconfirm_quizo.lazerable.hit) qconfirm_quizo.backing_meshrenderer.material = quiz_hisel;
+          else                             qconfirm_quizo.backing_meshrenderer.material = quiz_sel;
+        }
+        else
+        {
+          if(qconfirm_quizo.lazerable.hit) qconfirm_quizo.backing_meshrenderer.material = quiz_hi;
+          else                             qconfirm_quizo.backing_meshrenderer.material = quiz_default;
+        }
+        break;
     }
 
     //tooltext
