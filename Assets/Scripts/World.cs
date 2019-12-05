@@ -88,6 +88,9 @@ public class World : MonoBehaviour
   TextMeshPro qtext_tmp;
   int qselected = -1;
 
+  double applied_weight = 0;
+  double applied_heat = 0;
+
   // Start is called before the first frame update
   void Start()
   {
@@ -244,17 +247,38 @@ public class World : MonoBehaviour
   */
   void TryApplyTool(Tool t)
   {
-    if(t == tool_insulator) //NO IMMEDIATE EFFECT
+    if(t == tool_insulator)
+    {
+      applied_heat = 0;
+      if(t.engaged) return;
+      if(tool_burner.engaged) applied_heat += tool_burner.dial_dial.map;
+      if(tool_coil.engaged)   applied_heat -= tool_coil.dial_dial.map;
+    }
+    else if(t == tool_burner || t == tool_coil) //NO IMMEDIATE EFFECT
     {
       //visual
-      //math
+      if(t == tool_burner)
+      {
+        var vel = flame.velocityOverLifetime;
+        vel.speedModifierMultiplier = Mathf.Lerp(0.1f,0.5f,t.dial_dial.val);
+      }
+      else if(t == tool_coil)
+      {
+        //visually update coil
+      }
+
+      applied_heat = 0;
+      if(tool_insulator.engaged) return; //heat does nothing!
+      if(tool_burner.engaged) applied_heat += tool_burner.dial_dial.map;
+      if(tool_coil.engaged)   applied_heat -= tool_coil.dial_dial.map;
+      //math change happens passively- only need to update visuals
     }
     else if(t == tool_clamp)
     {
-      //visual change handled by thermostate (alters piston height)
-      //math
-      if(!t.engaged) return;
-      thermo.set_volume(t.dial_dial.map);
+      applied_weight = 0;
+      if(t.engaged) return;
+      if(tool_weight.engaged)  applied_weight += tool_weight.dial_dial.map;
+      if(tool_balloon.engaged) applied_weight -= tool_balloon.dial_dial.map;
     }
     else if(t == tool_weight || t == tool_balloon)
     {
@@ -272,25 +296,10 @@ public class World : MonoBehaviour
       t.storage_snap.transform.localScale      = scale;
 
       //math
-      if(!t.engaged || tool_clamp.engaged) return; //weight does nothing!
-      float weight = 0;
-      if(tool_weight.engaged)  weight += tool_weight.dial_dial.map;
-      if(tool_balloon.engaged) weight -= tool_balloon.dial_dial.map;
-      weight = (weight+1)/2; //normalize 0-1
-
-      thermo.add_weight(weight);
-    }
-    else if(t == tool_burner) //NO IMMEDIATE EFFECT
-    {
-      //visual
-      var vel = flame.velocityOverLifetime;
-      vel.speedModifierMultiplier = Mathf.Lerp(0.1f,0.5f,t.dial_dial.val);
-      //math change happens passively- only need to update visuals
-    }
-    else if(t == tool_coil) //NO IMMEDIATE EFFECT
-    {
-      //visual
-      ;
+      applied_weight = 0;
+      if(tool_clamp.engaged) return; //weight does nothing!
+      if(tool_weight.engaged)  applied_weight += tool_weight.dial_dial.map;
+      if(tool_balloon.engaged) applied_weight -= tool_balloon.dial_dial.map;
       //math change happens passively- only need to update visuals
     }
     else if(t == tool_clipboard)
@@ -375,6 +384,7 @@ public class World : MonoBehaviour
             t.stored = false;
             t.rigidbody.isKinematic = true;
             t.boxcollider.isTrigger = false;
+            TryApplyTool(t);
           }
           VisAid v = r_grabbed.GetComponent<VisAid>();
           if(v)
@@ -560,12 +570,11 @@ public class World : MonoBehaviour
   void Update()
   {
     //passive effects
-    float d_heat = 0;
-    if(tool_burner.engaged) d_heat += tool_burner.dial_dial.val;
-    if(tool_coil.engaged)   d_heat -= tool_coil.dial_dial.val;
-    if(d_heat != 0.0f)
+    if(applied_weight != 0) thermo.add_weight(applied_weight);
+    if(applied_heat   != 0)
     {
-      //add heat
+      if(tool_clamp.engaged) thermo.add_heat_constant_v(applied_heat);
+      else                   thermo.add_heat_constant_p(applied_heat);
     }
 
     //running blended average

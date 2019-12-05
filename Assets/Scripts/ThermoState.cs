@@ -49,8 +49,9 @@ public class ThermoState : MonoBehaviour
   //vessel
   GameObject vessel;
   GameObject container;
-  GameObject contents;
   GameObject piston;
+  GameObject water;
+  GameObject steam;
 
   //mesh
   GameObject graph;
@@ -595,7 +596,8 @@ public class ThermoState : MonoBehaviour
   {
     vessel    = GameObject.Find("Vessel");
     container = GameObject.Find("Container");
-    contents  = GameObject.Find("Contents");
+    water     = GameObject.Find("Water");
+    steam     = GameObject.Find("Steam");
     piston    = GameObject.Find("Piston");
 
     graph     = GameObject.Find("gmodel");
@@ -618,11 +620,6 @@ public class ThermoState : MonoBehaviour
   enthalpy; //?
   quality; //%
   */
-  public void pass_time()
-  {
-    //leak heat?
-    dotransform();
-  }
 
   public void add_heat_constant_p(double j)
   {
@@ -670,11 +667,6 @@ public class ThermoState : MonoBehaviour
     dotransform();
   }
 
-  public void set_volume(double v)
-  {
-    dotransform();
-  }
-
   void dotransform()
   {
     float pplot = plot(ThermoMath.p_min,ThermoMath.p_max,pressure);
@@ -682,6 +674,7 @@ public class ThermoState : MonoBehaviour
     float tplot = plot(ThermoMath.t_min,ThermoMath.t_max,temperature);
     state.transform.localPosition = new Vector3(vplot,pplot,tplot);
 
+    //ACTUALLY DO THIS CALCULATION
     Vector3 piston_lt = piston.transform.localPosition;
     piston_lt.y = (float)(ThermoMath.percent_given_v(volume)/2.0f);
     piston.transform.localPosition = piston_lt;
