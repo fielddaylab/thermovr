@@ -46,7 +46,7 @@ public class ThermoState : MonoBehaviour
   double prev_quality;
   public double mass = 1; //kg
   public double radius = 0.05; //M
-  public double surfacearea = Math.Pow(3.141592*radius,2.0);//M^2
+  public double surfacearea = 1.0; //Math.Pow(3.141592*radius,2.0);//M^2
 
   //vessel
   GameObject vessel;

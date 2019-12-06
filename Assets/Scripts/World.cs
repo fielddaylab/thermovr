@@ -135,9 +135,9 @@ public class World : MonoBehaviour
     t = GameObject.Find("Tool_Clamp"    ).GetComponent<Tool>(); tool_clamp     = t; tools.Add(t); t.dial_dial.min_map =  0.0f; t.dial_dial.max_map = 1.0f; t.dial_dial.unit = "h";
     t = GameObject.Find("Tool_Burner"   ).GetComponent<Tool>(); tool_burner    = t; tools.Add(t); t.dial_dial.min_map =  1.0f; t.dial_dial.max_map =  1000f*100f; t.dial_dial.unit = "J/s";
     t = GameObject.Find("Tool_Coil"     ).GetComponent<Tool>(); tool_coil      = t; tools.Add(t); t.dial_dial.min_map = -1.0f; t.dial_dial.max_map = -1000f*100f; t.dial_dial.unit = "J/s";
-    double kg_corresponding_to_10mpa = ThermoState.surfacearea*1550/*M^2->in^2*/*(10*1453.8/*MPa->psi*/)*0.453592/*lb->kg*/;
-    t = GameObject.Find("Tool_Weight"   ).GetComponent<Tool>(); tool_weight    = t; tools.Add(t); t.dial_dial.min_map =  0.0f; t.dial_dial.max_map =  kg_corresponding_to_10mpa; t.dial_dial.unit = "kg";
-    t = GameObject.Find("Tool_Balloon"  ).GetComponent<Tool>(); tool_balloon   = t; tools.Add(t); t.dial_dial.min_map =  0.0f; t.dial_dial.max_map = -kg_corresponding_to_10mpa; t.dial_dial.unit = "kg";
+    double kg_corresponding_to_10mpa = thermo.surfacearea*1550/*M^2->in^2*/*(10*1453.8/*MPa->psi*/)*0.453592/*lb->kg*/;
+    t = GameObject.Find("Tool_Weight"   ).GetComponent<Tool>(); tool_weight    = t; tools.Add(t); t.dial_dial.min_map =  0.0f; t.dial_dial.max_map =  (float)kg_corresponding_to_10mpa; t.dial_dial.unit = "kg";
+    t = GameObject.Find("Tool_Balloon"  ).GetComponent<Tool>(); tool_balloon   = t; tools.Add(t); t.dial_dial.min_map =  0.0f; t.dial_dial.max_map = -(float)kg_corresponding_to_10mpa; t.dial_dial.unit = "kg";
     t = GameObject.Find("Tool_Clipboard").GetComponent<Tool>(); tool_clipboard = t; tools.Add(t); t.dial_dial.min_map =  0.0f; t.dial_dial.max_map = 1.0f; t.dial_dial.unit = "N/A";
 
     flame = GameObject.Find("Flame").GetComponent<ParticleSystem>();
@@ -572,11 +572,11 @@ public class World : MonoBehaviour
   void Update()
   {
     //passive effects
-    if(applied_weight != 0) thermo.add_weight(applied_weight);
+    if(applied_weight != 0) thermo.add_pressure(applied_weight); //MUST CONVERT!
     if(applied_heat   != 0)
     {
-      if(tool_clamp.engaged) thermo.add_heat_constant_v(applied_heat);
-      else                   thermo.add_heat_constant_p(applied_heat);
+      if(tool_clamp.engaged) thermo.add_heat_constant_v(applied_heat); //MUST CONVERT!
+      else                   thermo.add_heat_constant_p(applied_heat); //MUST CONVERT!
     }
 
     //running blended average
