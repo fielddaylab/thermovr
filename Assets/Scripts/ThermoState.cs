@@ -45,6 +45,8 @@ public class ThermoState : MonoBehaviour
   double prev_enthalpy;
   double prev_quality;
   public double mass = 1; //kg
+  public double radius = 0.05; //M
+  public double surfacearea = Math.Pow(3.141592*radius,2.0);//M^2
 
   //vessel
   GameObject vessel;
@@ -659,11 +661,65 @@ public class ThermoState : MonoBehaviour
 
   public void add_heat_constant_v(double j)
   {
+    //newie = q - p(newv-oldv) + ie;
+  /*
+    int region = 0;
+    switch(region)
+    {
+      case 0: //subcooled liquid
+      {
+        double q = j*t; //watts
+        newinternalenergy = internalenergy+(q*t/mass) - pressure*(newvolume-volume);
+        //at this point, we have enough internal state to derive the rest
+      }
+      break;
+      case 1: //two-phase region
+      {
+        double q = j*t; //watts
+        newinternalenergy = internalenergy+(q*t/mass);
+        //at this point, we have enough internal state to derive the rest
+      }
+      break;
+      case 2: //superheated vapor
+      {
+        double q = j*t; //watts
+        newinternalenergy = internalenergy+(q*t/mass);
+        //at this point, we have enough internal state to derive the rest
+      }
+      break;
+    }
+  */
     dotransform();
   }
 
-  public void add_weight(double w)
+  public void add_pressure(double w)
   {
+  /*
+    int region = 0;
+    switch(region)
+    {
+      case 0: //subcooled liquid
+      {
+        double p = w*blah;
+        newpressure = pressure+p;
+        //at this point, we have enough internal state to derive the rest
+      }
+      break;
+      case 1: //two-phase region
+      {
+        double p = w*blah;
+        newpressure = pressure+p;
+        //at this point, we have enough internal state to derive the rest
+      }
+      break;
+      case 2: //superheated vapor
+      {
+        double p = w*blah;
+        newpressure = pressure+p;
+      }
+      break;
+    }
+  */
     dotransform();
   }
 

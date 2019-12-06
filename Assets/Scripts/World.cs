@@ -131,13 +131,14 @@ public class World : MonoBehaviour
 
     Tool t;
     tools = new List<Tool>();
-    t = GameObject.Find("Tool_Insulator").GetComponent<Tool>(); tool_insulator = t; tools.Add(t); t.dial_dial.min_map = 0.0f; t.dial_dial.max_map = 1.0f; t.dial_dial.unit = "n";
-    t = GameObject.Find("Tool_Clamp"    ).GetComponent<Tool>(); tool_clamp     = t; tools.Add(t); t.dial_dial.min_map = 0.0f; t.dial_dial.max_map = 1.0f; t.dial_dial.unit = "h";
-    t = GameObject.Find("Tool_Burner"   ).GetComponent<Tool>(); tool_burner    = t; tools.Add(t); t.dial_dial.min_map = 0.0f; t.dial_dial.max_map = 1.0f; t.dial_dial.unit = "J/s";
-    t = GameObject.Find("Tool_Coil"     ).GetComponent<Tool>(); tool_coil      = t; tools.Add(t); t.dial_dial.min_map = 0.0f; t.dial_dial.max_map = 1.0f; t.dial_dial.unit = "J/s";
-    t = GameObject.Find("Tool_Weight"   ).GetComponent<Tool>(); tool_weight    = t; tools.Add(t); t.dial_dial.min_map = 0.0f; t.dial_dial.max_map = 1.0f; t.dial_dial.unit = "kg";
-    t = GameObject.Find("Tool_Balloon"  ).GetComponent<Tool>(); tool_balloon   = t; tools.Add(t); t.dial_dial.min_map = 0.0f; t.dial_dial.max_map = 1.0f; t.dial_dial.unit = "kg";
-    t = GameObject.Find("Tool_Clipboard").GetComponent<Tool>(); tool_clipboard = t; tools.Add(t); t.dial_dial.min_map = 0.0f; t.dial_dial.max_map = 1.0f; t.dial_dial.unit = "N/A";
+    t = GameObject.Find("Tool_Insulator").GetComponent<Tool>(); tool_insulator = t; tools.Add(t); t.dial_dial.min_map =  0.0f; t.dial_dial.max_map = 1.0f; t.dial_dial.unit = "n";
+    t = GameObject.Find("Tool_Clamp"    ).GetComponent<Tool>(); tool_clamp     = t; tools.Add(t); t.dial_dial.min_map =  0.0f; t.dial_dial.max_map = 1.0f; t.dial_dial.unit = "h";
+    t = GameObject.Find("Tool_Burner"   ).GetComponent<Tool>(); tool_burner    = t; tools.Add(t); t.dial_dial.min_map =  1.0f; t.dial_dial.max_map =  1000f*100f; t.dial_dial.unit = "J/s";
+    t = GameObject.Find("Tool_Coil"     ).GetComponent<Tool>(); tool_coil      = t; tools.Add(t); t.dial_dial.min_map = -1.0f; t.dial_dial.max_map = -1000f*100f; t.dial_dial.unit = "J/s";
+    double kg_corresponding_to_10mpa = ThermoState.surfacearea*1550/*M^2->in^2*/*(10*1453.8/*MPa->psi*/)*0.453592/*lb->kg*/;
+    t = GameObject.Find("Tool_Weight"   ).GetComponent<Tool>(); tool_weight    = t; tools.Add(t); t.dial_dial.min_map =  0.0f; t.dial_dial.max_map =  kg_corresponding_to_10mpa; t.dial_dial.unit = "kg";
+    t = GameObject.Find("Tool_Balloon"  ).GetComponent<Tool>(); tool_balloon   = t; tools.Add(t); t.dial_dial.min_map =  0.0f; t.dial_dial.max_map = -kg_corresponding_to_10mpa; t.dial_dial.unit = "kg";
+    t = GameObject.Find("Tool_Clipboard").GetComponent<Tool>(); tool_clipboard = t; tools.Add(t); t.dial_dial.min_map =  0.0f; t.dial_dial.max_map = 1.0f; t.dial_dial.unit = "N/A";
 
     flame = GameObject.Find("Flame").GetComponent<ParticleSystem>();
 
@@ -508,30 +509,30 @@ public class World : MonoBehaviour
         if(t.active_ghost.tintersect)
         {
           t.active_available_meshrenderer.enabled = false;
-          t.active_snap_meshrenderer.enabled =      true;
+          t.active_snap_meshrenderer.enabled      = true;
         }
         else
         {
           t.active_available_meshrenderer.enabled = true;
-          t.active_snap_meshrenderer.enabled =      false;
+          t.active_snap_meshrenderer.enabled      = false;
         }
         //storage
         if(t.storage_ghost.tintersect)
         {
           t.storage_available_meshrenderer.enabled = false;
-          t.storage_snap_meshrenderer.enabled =      true;
+          t.storage_snap_meshrenderer.enabled      = true;
         }
         else
         {
           t.storage_available_meshrenderer.enabled = true;
-          t.storage_snap_meshrenderer.enabled =      false;
+          t.storage_snap_meshrenderer.enabled      = false;
         }
       }
       else
       {
-        t.active_snap_meshrenderer.enabled =      false;
+        t.active_snap_meshrenderer.enabled      = false;
         t.active_available_meshrenderer.enabled = false;
-        t.storage_snap_meshrenderer.enabled =      false;
+        t.storage_snap_meshrenderer.enabled      = false;
         t.storage_available_meshrenderer.enabled = false;
       }
     }
