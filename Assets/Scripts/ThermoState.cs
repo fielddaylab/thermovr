@@ -52,6 +52,7 @@ public class ThermoState : MonoBehaviour
   GameObject vessel;
   GameObject container;
   GameObject piston;
+  float piston_default_y;
   GameObject water;
   GameObject steam;
 
@@ -601,6 +602,7 @@ public class ThermoState : MonoBehaviour
     water     = GameObject.Find("Water");
     steam     = GameObject.Find("Steam");
     piston    = GameObject.Find("Piston");
+    piston_default_y = piston.transform.localPosition.y;
 
     graph     = GameObject.Find("gmodel");
     state     = GameObject.Find("gstate");
@@ -732,7 +734,7 @@ public class ThermoState : MonoBehaviour
 
     //ACTUALLY DO THIS CALCULATION
     Vector3 piston_lt = piston.transform.localPosition;
-    piston_lt.y = (float)(ThermoMath.percent_given_v(volume)/2.0f);
+    piston_lt.y = piston_default_y+(float)(ThermoMath.percent_given_v(volume)/2.0f);
     piston.transform.localPosition = piston_lt;
   }
 

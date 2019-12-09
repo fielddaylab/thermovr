@@ -290,7 +290,6 @@ public class World : MonoBehaviour
       else if(t == tool_balloon) v += tool_balloon.dial_dial.val;
       Vector3 scale = new Vector3(v,v,v);
       t.gameObject.transform.localScale = scale;
-      if(t == tool_balloon) v *= 0.125f;
       scale = new Vector3(v,v,v);
       t.active_available.transform.localScale  = scale;
       t.active_snap.transform.localScale       = scale;
