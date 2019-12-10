@@ -310,7 +310,7 @@ public class World : MonoBehaviour
 
   }
 
-  void TryAct(GameObject actable, float z_val, float y_val, ref float r_z, ref float r_y)
+  void TryAct(GameObject actable, float x_val, float y_val, ref float r_x, ref float r_y)
   {
     //grabbing handle
     if(actable == handle_workspace)
@@ -325,7 +325,7 @@ public class World : MonoBehaviour
       if(d != null)
       {
         Tool t = d.tool.GetComponent<Tool>();
-        float dx = (r_z-z_val)*2.0f;
+        float dx = (r_x-x_val)*-4.0f;
         d.val = Mathf.Clamp(d.val-dx,0.0f,1.0f);
 
         TryApplyTool(t);
@@ -333,7 +333,7 @@ public class World : MonoBehaviour
     }
   }
 
-  void TryGrab(bool which, float htrigger_val, float itrigger_val, float z_val, float y_val, Vector3 hand_vel, ref bool r_htrigger, ref bool r_itrigger, ref int r_htrigger_delta, ref int r_itrigger_delta, ref float r_z, ref float r_y, ref GameObject r_hand, ref GameObject r_grabbed, ref GameObject r_ohand, ref GameObject r_ograbbed)
+  void TryGrab(bool which, float htrigger_val, float itrigger_val, float x_val, float y_val, Vector3 hand_vel, ref bool r_htrigger, ref bool r_itrigger, ref int r_htrigger_delta, ref int r_itrigger_delta, ref float r_x, ref float r_y, ref GameObject r_hand, ref GameObject r_grabbed, ref GameObject r_ohand, ref GameObject r_ograbbed)
   {
     float htrigger_threshhold = 0.1f;
     float itrigger_threshhold = 0.1f;
@@ -356,7 +356,7 @@ public class World : MonoBehaviour
     {
       r_itrigger_delta = 1;
       r_itrigger = true;
-      r_z = z_val;
+      r_x = x_val;
       r_y = y_val;
     }
     else if(r_itrigger && itrigger_val <= itrigger_threshhold)
@@ -488,15 +488,14 @@ public class World : MonoBehaviour
       r_grabbed = null;
     }
 
-    if(r_grabbed) TryAct(r_grabbed, z_val, y_val, ref r_z, ref r_y);
+    if(r_grabbed) TryAct(r_grabbed, x_val, y_val, ref r_x, ref r_y);
 
-    r_z = z_val;
+    r_x = x_val;
     r_y = y_val;
   }
 
   void UpdateGrabVis()
   {
-
     for(int i = 0; i < tools.Count; i++)
     {
       Tool t = tools[i];
@@ -603,8 +602,8 @@ public class World : MonoBehaviour
     //index compatibility
     lhandt += lindext;
     rhandt += rindext;
-    TryGrab(true,  lhandt, lindext, lhand.transform.position.z, lhand.transform.position.y, lhand_vel, ref lhtrigger, ref litrigger, ref lhtrigger_delta, ref litrigger_delta, ref lz, ref ly, ref lhand, ref lgrabbed, ref rhand, ref rgrabbed); //left hand
-    TryGrab(false, rhandt, rindext, rhand.transform.position.z, rhand.transform.position.y, rhand_vel, ref rhtrigger, ref ritrigger, ref rhtrigger_delta, ref ritrigger_delta, ref rz, ref ry, ref rhand, ref rgrabbed, ref lhand, ref lgrabbed); //right hand
+    TryGrab(true,  lhandt, lindext, lhand.transform.position.x, lhand.transform.position.y, lhand_vel, ref lhtrigger, ref litrigger, ref lhtrigger_delta, ref litrigger_delta, ref lz, ref ly, ref lhand, ref lgrabbed, ref rhand, ref rgrabbed); //left hand
+    TryGrab(false, rhandt, rindext, rhand.transform.position.x, rhand.transform.position.y, rhand_vel, ref rhtrigger, ref ritrigger, ref rhtrigger_delta, ref ritrigger_delta, ref rz, ref ry, ref rhand, ref rgrabbed, ref lhand, ref lgrabbed); //right hand
 
     if(
       (litrigger_delta > 0 && halfer_touchable.ltouch) ||

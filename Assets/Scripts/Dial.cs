@@ -24,7 +24,7 @@ public class Dial : MonoBehaviour
 
   void Awake()
   {
-    meter = gameObject.transform.GetChild(1).gameObject;
+    meter = gameObject.transform.GetChild(0).gameObject;
   }
 
   // Start is called before the first frame update
@@ -36,7 +36,7 @@ public class Dial : MonoBehaviour
   void Update()
   {
     Vector3 lp = meter.transform.localPosition;
-    lp.z = -0.25f+val/2.0f;
+    lp.x = 0.05f-val*0.1f;
     meter.transform.localPosition = lp;
     map = min_map+(max_map-min_map)*val;
   }
