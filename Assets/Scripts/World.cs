@@ -6,8 +6,11 @@ using TMPro;
 public class World : MonoBehaviour
 {
   public Material hand_empty;
+  Material[] hand_emptys;
   public Material hand_touching;
+  Material[] hand_touchings;
   public Material hand_grabbing;
+  Material[] hand_grabbings;
   public Material quiz_default;
   public Material quiz_hi;
   public Material quiz_sel;
@@ -17,20 +20,22 @@ public class World : MonoBehaviour
   GameObject cam_offset;
   GameObject ceye;
   GameObject lhand;
+  GameObject lactualhand;
   GameObject llazer;
   GameObject llazer_viz;
   Vector3 lhand_pos;
   Vector3 lhand_vel;
-  MeshRenderer lhand_meshrenderer;
+  SkinnedMeshRenderer lhand_meshrenderer;
   MeshRenderer llazer_meshrenderer;
   Fadable llazer_fadable;
   Fadable rlazer_fadable;
   GameObject rhand;
+  GameObject ractualhand;
   GameObject rlazer;
   GameObject rlazer_viz;
   Vector3 rhand_pos;
   Vector3 rhand_vel;
-  MeshRenderer rhand_meshrenderer;
+  SkinnedMeshRenderer rhand_meshrenderer;
   MeshRenderer rlazer_meshrenderer;
 
   GameObject vrcenter;
@@ -100,22 +105,28 @@ public class World : MonoBehaviour
     cam_offset = GameObject.Find("CamOffset");
     ceye = GameObject.Find("CenterEyeAnchor");
 
+    hand_emptys    = new Material[]{hand_empty};
+    hand_touchings = new Material[]{hand_touching};
+    hand_grabbings = new Material[]{hand_grabbing};
+
     lhand  = GameObject.Find("LeftControllerAnchor");
+    lactualhand = lhand.transform.GetChild(0).gameObject;
     llazer  = GameObject.Find("LLazer");
     llazer_viz  = llazer.transform.GetChild(0).gameObject;
     lhand_pos = lhand.transform.position;
     lhand_vel = new Vector3(0.0f,0.0f,0.0f);
-    lhand_meshrenderer = lhand.transform.GetChild(0).gameObject.GetComponent<MeshRenderer>();
+    lhand_meshrenderer = GameObject.Find("hands:Lhand").GetComponent<SkinnedMeshRenderer>();
     llazer_meshrenderer = llazer.transform.GetChild(0).gameObject.GetComponent<MeshRenderer>();
     llazer_meshrenderer.enabled = false;
     llazer_fadable = llazer.GetComponent<Fadable>();
 
     rhand  = GameObject.Find("RightControllerAnchor");
+    ractualhand = rhand.transform.GetChild(0).gameObject;
     rlazer  = GameObject.Find("RLazer");
     rlazer_viz  = rlazer.transform.GetChild(0).gameObject;
     rhand_pos = rhand.transform.position;
     rhand_vel = new Vector3(0.0f,0.0f,0.0f);
-    rhand_meshrenderer = rhand.transform.GetChild(0).gameObject.GetComponent<MeshRenderer>();
+    rhand_meshrenderer = GameObject.Find("hands:Rhand").GetComponent<SkinnedMeshRenderer>();
     rlazer_meshrenderer = rlazer.transform.GetChild(0).gameObject.GetComponent<MeshRenderer>();
     rlazer_meshrenderer.enabled = false;
     rlazer_fadable = rlazer.GetComponent<Fadable>();
@@ -126,8 +137,8 @@ public class World : MonoBehaviour
     rlazer_fadable.t_start_out = 0.1f;
     llazer_fadable.t_end_out = 0.2f;
     llazer_fadable.t_end_out = 0.2f;
-    lhand_meshrenderer.material = hand_empty;
-    rhand_meshrenderer.material = hand_empty;
+    lhand_meshrenderer.materials = hand_emptys;
+    rhand_meshrenderer.materials = hand_emptys;
 
     Tool t;
     tools = new List<Tool>();
@@ -325,7 +336,7 @@ public class World : MonoBehaviour
       if(d != null)
       {
         Tool t = d.tool.GetComponent<Tool>();
-        float dx = (r_x-x_val)*-4.0f;
+        float dx = (r_x-x_val)*-6.0f;
         d.val = Mathf.Clamp(d.val-dx,0.0f,1.0f);
 
         TryApplyTool(t);
@@ -557,18 +568,24 @@ public class World : MonoBehaviour
     if(gr.ltouch) ltouch = true;
     if(gr.rtouch) rtouch = true;
 
-         if(lgrabbed) lhand_meshrenderer.material = hand_grabbing;
-    else if(ltouch)   lhand_meshrenderer.material = hand_touching;
-    else              lhand_meshrenderer.material = hand_empty;
+         if(lgrabbed) lhand_meshrenderer.materials = hand_grabbings;
+    else if(ltouch)   lhand_meshrenderer.materials = hand_touchings;
+    else              lhand_meshrenderer.materials = hand_emptys;
 
-         if(rgrabbed) rhand_meshrenderer.material = hand_grabbing;
-    else if(rtouch)   rhand_meshrenderer.material = hand_touching;
-    else              rhand_meshrenderer.material = hand_empty;
+         if(rgrabbed) rhand_meshrenderer.materials = hand_grabbings;
+    else if(rtouch)   rhand_meshrenderer.materials = hand_touchings;
+    else              rhand_meshrenderer.materials = hand_emptys;
   }
 
   // Update is called once per frame
   void Update()
   {
+    //hands keep trying to run away
+    lactualhand.transform.localPosition = new Vector3(0f,0f,0f);
+    lactualhand.transform.localRotation = Quaternion.identity;
+    ractualhand.transform.localPosition = new Vector3(0f,0f,0f);
+    ractualhand.transform.localRotation = Quaternion.identity;
+
     //passive effects
     if(applied_weight != 0) thermo.add_pressure(applied_weight); //MUST CONVERT!
     if(applied_heat   != 0)
