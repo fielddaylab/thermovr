@@ -168,6 +168,7 @@ public class World : MonoBehaviour
       g.transform.SetParent(t.storage.gameObject.transform);
       t.stored = true;
       g.transform.localPosition = new Vector3(0.0f,0.0f,0.0f);
+      g.transform.localRotation = new Vector3(0.0f,0.0f,0.0f);
       t.textv_tmp.SetText("{0:3}"+t.dial_dial.unit,(float)t.dial_dial.map);
     }
 
@@ -583,9 +584,9 @@ public class World : MonoBehaviour
   {
     //hands keep trying to run away
     lactualhand.transform.localPosition = new Vector3(0f,0f,0f);
-    lactualhand.transform.localRotation = Quaternion.identity;
+    lactualhand.transform.localEulerAngles = new Vector3(0f,0f,90f);//localRotation = Quaternion.identity;
     ractualhand.transform.localPosition = new Vector3(0f,0f,0f);
-    ractualhand.transform.localRotation = Quaternion.identity;
+    ractualhand.transform.localEulerAngles = new Vector3(0f,0f,-90f);//localRotation = Quaternion.identity;
 
     //passive effects
     if(applied_weight != 0) thermo.add_pressure(applied_weight); //MUST CONVERT!
