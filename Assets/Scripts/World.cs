@@ -168,7 +168,7 @@ public class World : MonoBehaviour
       g.transform.SetParent(t.storage.gameObject.transform);
       t.stored = true;
       g.transform.localPosition = new Vector3(0.0f,0.0f,0.0f);
-      g.transform.localRotation = new Vector3(0.0f,0.0f,0.0f);
+      g.transform.localRotation = Quaternion.identity;
       t.textv_tmp.SetText("{0:3}"+t.dial_dial.unit,(float)t.dial_dial.map);
     }
 
