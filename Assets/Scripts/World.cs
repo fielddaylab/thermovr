@@ -300,12 +300,9 @@ public class World : MonoBehaviour
            if(t == tool_weight)  v += tool_weight.dial_dial.val;
       else if(t == tool_balloon) v += tool_balloon.dial_dial.val;
       Vector3 scale = new Vector3(v,v,v);
-      t.gameObject.transform.localScale = scale;
       scale = new Vector3(v,v,v);
-      t.active_available.transform.localScale  = scale;
-      t.active_snap.transform.localScale       = scale;
-      t.storage_available.transform.localScale = scale;
-      t.storage_snap.transform.localScale      = scale;
+      t.active.transform.localScale  = scale;
+      t.storage.transform.localScale = scale;
 
       //math
       applied_weight = 0;
@@ -405,6 +402,7 @@ public class World : MonoBehaviour
             v.rigidbody.isKinematic = true;
           }
           r_grabbed.transform.SetParent(r_hand.transform);
+          r_grabbed.transform.localScale = new Vector3(1f,1f,1f);
           if(r_grabbed == r_ograbbed) r_ograbbed = null;
         }
       }
@@ -462,6 +460,7 @@ public class World : MonoBehaviour
         if(t.active_ghost.tintersect)
         {
           r_grabbed.transform.SetParent(t.active.transform);
+          r_grabbed.transform.localScale = new Vector3(1f,1f,1f);
           t.engaged = true;
           t.boxcollider.isTrigger = true;
                if(t == tool_insulator) t.dial_dial.val = (float)ThermoMath.percent_given_t(thermo.temperature);
@@ -473,6 +472,7 @@ public class World : MonoBehaviour
         else if(t.storage_ghost.tintersect)
         {
           r_grabbed.transform.SetParent(t.storage.transform);
+          r_grabbed.transform.localScale = new Vector3(1f,1f,1f);
           t.stored = true;
           r_grabbed.transform.localPosition = new Vector3(0f,0f,0f);
           r_grabbed.transform.localRotation = Quaternion.identity;
@@ -480,6 +480,7 @@ public class World : MonoBehaviour
         else
         {
           r_grabbed.transform.SetParent(r_grabbed.GetComponent<Touchable>().og_parent);
+          r_grabbed.transform.localScale = new Vector3(1f,1f,1f);
           t.rigidbody.isKinematic = false;
           t.rigidbody.velocity = hand_vel;
         }

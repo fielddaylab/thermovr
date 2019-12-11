@@ -36,7 +36,7 @@ public class ThermoState : MonoBehaviour
   public double internalenergy; //J
   public double entropy; //?
   public double enthalpy; //?
-  public double quality; //%
+  public double quality = 1; //%
   double prev_pressure;
   double prev_temperature;
   double prev_volume;
@@ -52,7 +52,11 @@ public class ThermoState : MonoBehaviour
   GameObject vessel;
   GameObject container;
   GameObject piston;
-  float piston_default_y;
+  float piston_min_y;
+  float piston_max_y;
+  GameObject contents;
+  float contents_min_h;
+  float contents_max_h;
   GameObject water;
   GameObject steam;
 
@@ -599,10 +603,14 @@ public class ThermoState : MonoBehaviour
   {
     vessel    = GameObject.Find("Vessel");
     container = GameObject.Find("Container");
+    piston    = GameObject.Find("Piston");
+    piston_min_y = piston.transform.localPosition.y;
+    piston_max_y = piston_min_y+0.1f; //experimentally derived...
+    contents = GameObject.Find("Contents");
+    contents_min_h = contents.transform.localScale.y;
+    contents_max_h = contents_min_h+0.1f; //experimentally derived...
     water     = GameObject.Find("Water");
     steam     = GameObject.Find("Steam");
-    piston    = GameObject.Find("Piston");
-    piston_default_y = piston.transform.localPosition.y;
 
     graph     = GameObject.Find("gmodel");
     state     = GameObject.Find("gstate");
@@ -733,9 +741,21 @@ public class ThermoState : MonoBehaviour
     state.transform.localPosition = new Vector3(vplot,pplot,tplot);
 
     //ACTUALLY DO THIS CALCULATION
+    float size_p = (float)ThermoMath.percent_given_v(volume);
     Vector3 piston_lt = piston.transform.localPosition;
-    piston_lt.y = piston_default_y+(float)(ThermoMath.percent_given_v(volume)/2.0f);
+    piston_lt.y = piston_min_y+size_p*(piston_max_y-piston_min_y);
     piston.transform.localPosition = piston_lt;
+
+    Vector3 contents_lt = contents.transform.localScale;
+    contents_lt.y = contents_min_h+size_p*(contents_max_h-contents_min_h);
+    contents.transform.localScale = contents_lt;
+
+    Vector3 water_lt = water.transform.localScale;
+    water_lt.y = (float)quality;
+    water.transform.localScale = water_lt;
+    Vector3 steam_lt = steam.transform.localScale;
+    steam_lt.y = 1.0f-(float)quality;
+    steam.transform.localScale = steam_lt;
   }
 
   // Update is called once per frame
