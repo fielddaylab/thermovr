@@ -6,6 +6,7 @@ public class Touchable : MonoBehaviour
 {
   GameObject lhand;
   GameObject rhand;
+  [System.NonSerialized]
   public bool grabbed = false;
   Collider lhand_c;
   Collider rhand_c;

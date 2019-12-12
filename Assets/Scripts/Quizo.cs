@@ -5,18 +5,18 @@ using TMPro;
 
 public class Quizo : MonoBehaviour
 {
+
   public TextMeshPro tmp;
   public GameObject backing;
 
   [System.NonSerialized]
-  public Lazerable lazerable;
-
+  public FingerToggleable fingertoggleable;
   [System.NonSerialized]
   public MeshRenderer backing_meshrenderer;
 
   void Awake()
   {
-    lazerable = GetComponent<Lazerable>();
+    fingertoggleable = GetComponent<FingerToggleable>();
     backing_meshrenderer = backing.GetComponent<MeshRenderer>();
   }
 
@@ -29,5 +29,6 @@ public class Quizo : MonoBehaviour
   void Update()
   {
   }
+
 }
 

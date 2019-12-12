@@ -21,25 +21,17 @@ public class World : MonoBehaviour
   GameObject ceye;
   GameObject lhand;
   GameObject lactualhand;
-  GameObject llazer;
-  GameObject llazer_viz;
   Vector3 lhand_pos;
   Vector3 lhand_vel;
   SkinnedMeshRenderer lhand_meshrenderer;
-  MeshRenderer llazer_meshrenderer;
-  Fadable llazer_fadable;
-  Fadable rlazer_fadable;
   GameObject rhand;
   GameObject ractualhand;
-  GameObject rlazer;
-  GameObject rlazer_viz;
   Vector3 rhand_pos;
   Vector3 rhand_vel;
   SkinnedMeshRenderer rhand_meshrenderer;
-  MeshRenderer rlazer_meshrenderer;
 
   GameObject vrcenter;
-  Lazerable vrcenter_lazerable;
+  Touchable vrcenter_touchable;
   MeshRenderer vrcenter_backing_meshrenderer;
 
   List<Touchable> movables;
@@ -81,7 +73,7 @@ public class World : MonoBehaviour
   bool litrigger = false;
   bool ritrigger = false;
 
-  int board_mode = 0; //0- instructions, 1- challenge, 2- quiz
+  int board_mode = 2; //0- instructions, 1- challenge, 2- quiz
   int question = 0;
   List<string> questions;
   List<string> options;
@@ -90,7 +82,6 @@ public class World : MonoBehaviour
   List<Quizo> option_quizos;
   Quizo qconfirm_quizo;
   GameObject board;
-  Lazerable board_lazerable;
   TextMeshPro qtext_tmp;
   int qselected = -1;
 
@@ -111,32 +102,16 @@ public class World : MonoBehaviour
 
     lhand  = GameObject.Find("LeftControllerAnchor");
     lactualhand = lhand.transform.GetChild(0).gameObject;
-    llazer  = GameObject.Find("LLazer");
-    llazer_viz  = llazer.transform.GetChild(0).gameObject;
     lhand_pos = lhand.transform.position;
     lhand_vel = new Vector3(0.0f,0.0f,0.0f);
     lhand_meshrenderer = GameObject.Find("hands:Lhand").GetComponent<SkinnedMeshRenderer>();
-    llazer_meshrenderer = llazer.transform.GetChild(0).gameObject.GetComponent<MeshRenderer>();
-    llazer_meshrenderer.enabled = false;
-    llazer_fadable = llazer.GetComponent<Fadable>();
 
     rhand  = GameObject.Find("RightControllerAnchor");
     ractualhand = rhand.transform.GetChild(0).gameObject;
-    rlazer  = GameObject.Find("RLazer");
-    rlazer_viz  = rlazer.transform.GetChild(0).gameObject;
     rhand_pos = rhand.transform.position;
     rhand_vel = new Vector3(0.0f,0.0f,0.0f);
     rhand_meshrenderer = GameObject.Find("hands:Rhand").GetComponent<SkinnedMeshRenderer>();
-    rlazer_meshrenderer = rlazer.transform.GetChild(0).gameObject.GetComponent<MeshRenderer>();
-    rlazer_meshrenderer.enabled = false;
-    rlazer_fadable = rlazer.GetComponent<Fadable>();
 
-    llazer_fadable.t_in = 0.1f;
-    rlazer_fadable.t_in = 0.1f;
-    llazer_fadable.t_start_out = 0.1f;
-    rlazer_fadable.t_start_out = 0.1f;
-    llazer_fadable.t_end_out = 0.2f;
-    llazer_fadable.t_end_out = 0.2f;
     lhand_meshrenderer.materials = hand_emptys;
     rhand_meshrenderer.materials = hand_emptys;
 
@@ -176,8 +151,8 @@ public class World : MonoBehaviour
     graph = GameObject.Find("Graph");
 
     vrcenter = GameObject.Find("VRCenter");
-    vrcenter_lazerable = vrcenter.GetComponent<Lazerable>();
-    vrcenter_backing_meshrenderer = GameObject.Find("VRCenter").transform.GetChild(1).GetComponent<MeshRenderer>();
+    vrcenter_touchable = vrcenter.GetComponent<Touchable>();
+    vrcenter_backing_meshrenderer = vrcenter.transform.GetChild(1).GetComponent<MeshRenderer>();
 
     movables = new List<Touchable>();
     for(int i = 0; i < tools.Count; i++) movables.Add(tools[i].touchable); //important that tools take priority, so they can be grabbed and removed
@@ -243,7 +218,6 @@ public class World : MonoBehaviour
     option_quizos.Add(GameObject.Find("QD").GetComponent<Quizo>());
     qconfirm_quizo = GameObject.Find("QConfirm").GetComponent<Quizo>();
     board = GameObject.Find("Board");
-    board_lazerable = board.GetComponent<Lazerable>();
     qtext_tmp = GameObject.Find("Qtext").GetComponent<TextMeshPro>();
     SetQuizText();
   }
@@ -334,7 +308,7 @@ public class World : MonoBehaviour
       if(d != null)
       {
         Tool t = d.tool.GetComponent<Tool>();
-        float dx = (r_x-x_val)*-6.0f;
+        float dx = (r_x-x_val)*-10.0f;
         d.val = Mathf.Clamp(d.val-dx,0.0f,1.0f);
 
         TryApplyTool(t);
@@ -505,6 +479,87 @@ public class World : MonoBehaviour
 
     r_x = x_val;
     r_y = y_val;
+
+
+    //halfer
+    if(
+      r_itrigger_delta > 0 &&
+      (
+        ( which && halfer_touchable.ltouch) ||
+        (!which && halfer_touchable.rtouch)
+      )
+    )
+    {
+      halfed = !halfed;
+      for(int i = 0; i < halfables.Count; i++)
+        halfables[i].setHalf(halfed);
+    }
+
+
+    //centerer
+    if(vrcenter_touchable.touch)
+    {
+      if(
+        r_itrigger_delta > 0 &&
+        (
+          ( which && vrcenter_touchable.ltouch) ||
+          (!which && vrcenter_touchable.rtouch)
+        )
+      )
+      {
+        vrcenter_backing_meshrenderer.material = quiz_hisel;
+        UnityEngine.XR.InputTracking.Recenter();
+        OVRManager.display.RecenterPose();
+        Vector3 pos = ceye.transform.localPosition*-1.0f;
+        pos.y = 0.0f;
+        cam_offset.transform.position = pos-cam_offset.transform.position;
+      }
+      else vrcenter_backing_meshrenderer.material = quiz_hi;
+    }
+    else vrcenter_backing_meshrenderer.material = quiz_default;
+
+    //
+    switch(board_mode)
+    {
+      case 0: //instructions
+        break;
+      case 1: //challenge
+        break;
+      case 2:
+        Quizo q;
+        for(int i = 0; i < option_quizos.Count; i++)
+        {
+          q = option_quizos[i];
+          qselected = -1;
+          if(q.fingertoggleable.on)
+          {
+            if(qselected != -1) { option_quizos[qselected].fingertoggleable.on = false; qselected = -1; }
+            qselected =  i;
+          }
+          if(qselected == i)
+          {
+            if(q.fingertoggleable.finger) q.backing_meshrenderer.material = quiz_hisel;
+            else                          q.backing_meshrenderer.material = quiz_sel;
+          }
+          else
+          {
+            if(q.fingertoggleable.finger) q.backing_meshrenderer.material = quiz_hi;
+            else                          q.backing_meshrenderer.material = quiz_default;
+          }
+        }
+        if(qselected != -1)
+        {
+          if(qconfirm_quizo.fingertoggleable.finger) qconfirm_quizo.backing_meshrenderer.material = quiz_hisel;
+          else                                       qconfirm_quizo.backing_meshrenderer.material = quiz_sel;
+        }
+        else
+        {
+          if(qconfirm_quizo.fingertoggleable.finger) qconfirm_quizo.backing_meshrenderer.material = quiz_hi;
+          else                                       qconfirm_quizo.backing_meshrenderer.material = quiz_default;
+        }
+        break;
+    }
+
   }
 
   void UpdateGrabVis()
@@ -583,9 +638,9 @@ public class World : MonoBehaviour
   void Update()
   {
     //hands keep trying to run away
-    lactualhand.transform.localPosition = new Vector3(0f,0f,0f);
+    lactualhand.transform.localPosition    = new Vector3(0f,0f,0f);
     lactualhand.transform.localEulerAngles = new Vector3(0f,0f,90f);//localRotation = Quaternion.identity;
-    ractualhand.transform.localPosition = new Vector3(0f,0f,0f);
+    ractualhand.transform.localPosition    = new Vector3(0f,0f,0f);
     ractualhand.transform.localEulerAngles = new Vector3(0f,0f,-90f);//localRotation = Quaternion.identity;
 
     //passive effects
@@ -624,122 +679,7 @@ public class World : MonoBehaviour
     TryGrab(true,  lhandt, lindext, lhand.transform.position.x, lhand.transform.position.y, lhand_vel, ref lhtrigger, ref litrigger, ref lhtrigger_delta, ref litrigger_delta, ref lz, ref ly, ref lhand, ref lgrabbed, ref rhand, ref rgrabbed); //left hand
     TryGrab(false, rhandt, rindext, rhand.transform.position.x, rhand.transform.position.y, rhand_vel, ref rhtrigger, ref ritrigger, ref rhtrigger_delta, ref ritrigger_delta, ref rz, ref ry, ref rhand, ref rgrabbed, ref lhand, ref lgrabbed); //right hand
 
-    if(
-      (litrigger_delta > 0 && halfer_touchable.ltouch) ||
-      (ritrigger_delta > 0 && halfer_touchable.rtouch)
-      )
-    {
-      halfed = !halfed;
-      for(int i = 0; i < halfables.Count; i++)
-        halfables[i].setHalf(halfed);
-    }
-
     UpdateGrabVis();
-
-    //board
-    if(board_lazerable.lhit || vrcenter_lazerable.lhit) llazer_fadable.set_factive(true);
-    else                                                llazer_fadable.set_factive(false);
-    if(board_lazerable.rhit || vrcenter_lazerable.rhit) rlazer_fadable.set_factive(true);
-    else                                                rlazer_fadable.set_factive(false);
-
-    if(vrcenter_lazerable.hit)
-    {
-      if(
-        (litrigger_delta == 1 && vrcenter_lazerable.lhit) ||
-        (ritrigger_delta == 1 && vrcenter_lazerable.rhit)
-      )
-      {
-        vrcenter_backing_meshrenderer.material = quiz_hisel;
-        UnityEngine.XR.InputTracking.Recenter();
-        OVRManager.display.RecenterPose();
-        Vector3 pos = ceye.transform.localPosition*-1.0f;
-        pos.y = 0.0f;
-        cam_offset.transform.position = pos;
-      }
-      else vrcenter_backing_meshrenderer.material = quiz_hi;
-    }
-    else vrcenter_backing_meshrenderer.material = quiz_default;
-
-    if(board_lazerable.lhit || vrcenter_lazerable.lhit)
-    {
-      float d = 0f;
-           if(board_lazerable.lhit)    d = Vector3.Distance(lhand.transform.position,board.transform.position);
-      else if(vrcenter_lazerable.lhit) d = Vector3.Distance(lhand.transform.position,vrcenter.transform.position);
-      llazer_viz.transform.localPosition = new Vector3(llazer_viz.transform.localPosition.x,llazer_viz.transform.localPosition.y,d/2);
-      llazer_viz.transform.localScale    = new Vector3(llazer_viz.transform.localScale.x,d/2,llazer_viz.transform.localScale.z);
-    }
-    if(board_lazerable.rhit || vrcenter_lazerable.rhit)
-    {
-      float d = 0f;
-           if(board_lazerable.rhit)    d = Vector3.Distance(lhand.transform.position,board.transform.position);
-      else if(vrcenter_lazerable.rhit) d = Vector3.Distance(lhand.transform.position,vrcenter.transform.position);
-      rlazer_viz.transform.localPosition = new Vector3(rlazer_viz.transform.localPosition.x,rlazer_viz.transform.localPosition.y,d/2);
-      rlazer_viz.transform.localScale    = new Vector3(rlazer_viz.transform.localScale.x,d/2,rlazer_viz.transform.localScale.z);
-    }
-
-    if(!llazer_fadable.stale)
-    {
-      if(llazer_fadable.alpha == 0.0f) llazer_meshrenderer.enabled = false;
-      else
-      {
-        llazer_meshrenderer.enabled = true;
-        Color c = llazer_meshrenderer.material.color;
-        llazer_meshrenderer.material.color = new Color(c.r,c.g,c.b,llazer_fadable.alpha);
-      }
-    }
-    if(!rlazer_fadable.stale)
-    {
-      if(rlazer_fadable.alpha == 0.0f) rlazer_meshrenderer.enabled = false;
-      else
-      {
-        rlazer_meshrenderer.enabled = true;
-        Color c = rlazer_meshrenderer.material.color;
-        rlazer_meshrenderer.material.color = new Color(c.r,c.g,c.b,rlazer_fadable.alpha);
-      }
-    }
-
-    switch(board_mode)
-    {
-      case 0: //instructions
-        break;
-      case 1: //challenge
-        break;
-      case 2:
-        Quizo q;
-        for(int i = 0; i < option_quizos.Count; i++)
-        {
-          q = option_quizos[i];
-          if(
-            (litrigger_delta == 1 && q.lazerable.lhit) ||
-            (ritrigger_delta == 1 && q.lazerable.rhit)
-          )
-          {
-            if(i == qselected) qselected = -1;
-            else               qselected = i;
-          }
-          if(i == qselected)
-          {
-            if(q.lazerable.hit) q.backing_meshrenderer.material = quiz_hisel;
-            else                q.backing_meshrenderer.material = quiz_sel;
-          }
-          else
-          {
-            if(q.lazerable.hit) q.backing_meshrenderer.material = quiz_hi;
-            else                q.backing_meshrenderer.material = quiz_default;
-          }
-        }
-        if(qselected != -1)
-        {
-          if(qconfirm_quizo.lazerable.hit) qconfirm_quizo.backing_meshrenderer.material = quiz_hisel;
-          else                             qconfirm_quizo.backing_meshrenderer.material = quiz_sel;
-        }
-        else
-        {
-          if(qconfirm_quizo.lazerable.hit) qconfirm_quizo.backing_meshrenderer.material = quiz_hi;
-          else                             qconfirm_quizo.backing_meshrenderer.material = quiz_default;
-        }
-        break;
-    }
 
     //tooltext
     Tool t;
