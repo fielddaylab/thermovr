@@ -42,7 +42,7 @@ public class FingerToggleable : MonoBehaviour
     if(c == lfinger_c) lfinger = true;
     if(c == rfinger_c) rfinger = true;
     finger = (lfinger || rfinger);
-    on = !on;
+    if(c == lfinger_c || c == rfinger_c) on = !on;
   }
 
   void OnTriggerExit(Collider c)

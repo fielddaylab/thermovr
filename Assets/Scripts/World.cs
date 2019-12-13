@@ -11,10 +11,10 @@ public class World : MonoBehaviour
   Material[] hand_touchings;
   public Material hand_grabbing;
   Material[] hand_grabbings;
-  public Material quiz_default;
-  public Material quiz_hi;
-  public Material quiz_sel;
-  public Material quiz_hisel;
+  public Material tab_default;
+  public Material tab_hi;
+  public Material tab_sel;
+  public Material tab_hisel;
 
   ThermoState thermo;
   GameObject cam_offset;
@@ -31,7 +31,7 @@ public class World : MonoBehaviour
   SkinnedMeshRenderer rhand_meshrenderer;
 
   GameObject vrcenter;
-  Touchable vrcenter_touchable;
+  FingerToggleable vrcenter_fingertoggleable;
   MeshRenderer vrcenter_backing_meshrenderer;
 
   List<Touchable> movables;
@@ -73,14 +73,18 @@ public class World : MonoBehaviour
   bool litrigger = false;
   bool ritrigger = false;
 
-  int board_mode = 2; //0- instructions, 1- challenge, 2- quiz
+  GameObject instructions_parent;
+  GameObject challenge_parent;
+  GameObject quiz_parent;
+  List<Tab> mode_tabs;
+  int board_mode = 0; //0- instructions, 1- challenge, 2- quiz
   int question = 0;
   List<string> questions;
   List<string> options;
   List<int> answers;
   List<int> givens;
-  List<Quizo> option_quizos;
-  Quizo qconfirm_quizo;
+  List<Tab> option_tabs;
+  Tab qconfirm_tab;
   GameObject board;
   TextMeshPro qtext_tmp;
   int qselected = -1;
@@ -151,7 +155,7 @@ public class World : MonoBehaviour
     graph = GameObject.Find("Graph");
 
     vrcenter = GameObject.Find("VRCenter");
-    vrcenter_touchable = vrcenter.GetComponent<Touchable>();
+    vrcenter_fingertoggleable = vrcenter.GetComponent<FingerToggleable>();
     vrcenter_backing_meshrenderer = vrcenter.transform.GetChild(1).GetComponent<MeshRenderer>();
 
     movables = new List<Touchable>();
@@ -165,6 +169,15 @@ public class World : MonoBehaviour
     halfables.Add(GameObject.Find("Container").GetComponent<Halfable>());
     halfables.Add(GameObject.Find("Piston").GetComponent<Halfable>());
     halfables.Add(GameObject.Find("Contents").GetComponent<Halfable>());
+
+    instructions_parent = GameObject.Find("Instructions");
+    challenge_parent = GameObject.Find("Challenge");
+    quiz_parent = GameObject.Find("Quiz");
+
+    mode_tabs = new List<Tab>();
+    mode_tabs.Add(GameObject.Find("ModeInstructions").GetComponent<Tab>());
+    mode_tabs.Add(GameObject.Find("ModeChallenge").GetComponent<Tab>());
+    mode_tabs.Add(GameObject.Find("ModeQuiz").GetComponent<Tab>());
 
     questions = new List<string>();
     options = new List<string>();
@@ -211,12 +224,12 @@ public class World : MonoBehaviour
     answers.Add(2);
     givens.Add(-1);
 
-    option_quizos = new List<Quizo>();
-    option_quizos.Add(GameObject.Find("QA").GetComponent<Quizo>());
-    option_quizos.Add(GameObject.Find("QB").GetComponent<Quizo>());
-    option_quizos.Add(GameObject.Find("QC").GetComponent<Quizo>());
-    option_quizos.Add(GameObject.Find("QD").GetComponent<Quizo>());
-    qconfirm_quizo = GameObject.Find("QConfirm").GetComponent<Quizo>();
+    option_tabs = new List<Tab>();
+    option_tabs.Add(GameObject.Find("QA").GetComponent<Tab>());
+    option_tabs.Add(GameObject.Find("QB").GetComponent<Tab>());
+    option_tabs.Add(GameObject.Find("QC").GetComponent<Tab>());
+    option_tabs.Add(GameObject.Find("QD").GetComponent<Tab>());
+    qconfirm_tab = GameObject.Find("QConfirm").GetComponent<Tab>();
     board = GameObject.Find("Board");
     qtext_tmp = GameObject.Find("Qtext").GetComponent<TextMeshPro>();
     SetQuizText();
@@ -225,7 +238,7 @@ public class World : MonoBehaviour
   void SetQuizText()
   {
     qtext_tmp.SetText(questions[question]);
-    for(int i = 0; i < 4; i++) option_quizos[i].tmp.SetText(options[question*4+i]);
+    for(int i = 0; i < 4; i++) option_tabs[i].tmp.SetText(options[question*4+i]);
   }
 
   /*
@@ -497,68 +510,23 @@ public class World : MonoBehaviour
 
 
     //centerer
-    if(vrcenter_touchable.touch)
+    if(vrcenter_fingertoggleable.finger)
     {
       if(
-        r_itrigger_delta > 0 &&
-        (
-          ( which && vrcenter_touchable.ltouch) ||
-          (!which && vrcenter_touchable.rtouch)
-        )
+        ( which && vrcenter_fingertoggleable.lfinger) ||
+        (!which && vrcenter_fingertoggleable.rfinger)
       )
       {
-        vrcenter_backing_meshrenderer.material = quiz_hisel;
+        vrcenter_backing_meshrenderer.material = tab_hisel;
         UnityEngine.XR.InputTracking.Recenter();
         OVRManager.display.RecenterPose();
-        Vector3 pos = ceye.transform.localPosition*-1.0f;
+        Vector3 pos = cam_offset.transform.localPosition-(cam_offset.transform.localPosition+ceye.transform.localPosition);
         pos.y = 0.0f;
-        cam_offset.transform.position = pos-cam_offset.transform.position;
+        cam_offset.transform.localPosition = pos;
       }
-      else vrcenter_backing_meshrenderer.material = quiz_hi;
+      else vrcenter_backing_meshrenderer.material = tab_hi;
     }
-    else vrcenter_backing_meshrenderer.material = quiz_default;
-
-    //
-    switch(board_mode)
-    {
-      case 0: //instructions
-        break;
-      case 1: //challenge
-        break;
-      case 2:
-        Quizo q;
-        for(int i = 0; i < option_quizos.Count; i++)
-        {
-          q = option_quizos[i];
-          qselected = -1;
-          if(q.fingertoggleable.on)
-          {
-            if(qselected != -1) { option_quizos[qselected].fingertoggleable.on = false; qselected = -1; }
-            qselected =  i;
-          }
-          if(qselected == i)
-          {
-            if(q.fingertoggleable.finger) q.backing_meshrenderer.material = quiz_hisel;
-            else                          q.backing_meshrenderer.material = quiz_sel;
-          }
-          else
-          {
-            if(q.fingertoggleable.finger) q.backing_meshrenderer.material = quiz_hi;
-            else                          q.backing_meshrenderer.material = quiz_default;
-          }
-        }
-        if(qselected != -1)
-        {
-          if(qconfirm_quizo.fingertoggleable.finger) qconfirm_quizo.backing_meshrenderer.material = quiz_hisel;
-          else                                       qconfirm_quizo.backing_meshrenderer.material = quiz_sel;
-        }
-        else
-        {
-          if(qconfirm_quizo.fingertoggleable.finger) qconfirm_quizo.backing_meshrenderer.material = quiz_hi;
-          else                                       qconfirm_quizo.backing_meshrenderer.material = quiz_default;
-        }
-        break;
-    }
+    else vrcenter_backing_meshrenderer.material = tab_default;
 
   }
 
@@ -634,6 +602,71 @@ public class World : MonoBehaviour
     else              rhand_meshrenderer.materials = hand_emptys;
   }
 
+  int reconcileDependentSelectables(int known, List<Tab> list)
+  {
+    int n_toggled = 0;
+    Tab t;
+    for(int i = 0; i < list.Count; i++)
+    {
+      t = list[i];
+      if(t.fingertoggleable.on) n_toggled++;
+    }
+
+    if(n_toggled <= 1)
+    {
+      known = -1;
+      for(int i = 0; i < list.Count; i++)
+      {
+        t = list[i];
+        if(t.fingertoggleable.on) known = i;
+      }
+    }
+    else //need conflict resolution!
+    {
+      known = -1;
+      for(int i = 0; i < list.Count; i++)
+      {
+        t = list[i];
+        if(t.fingertoggleable.on)
+        {
+          if(known == -1) known = i;
+          else
+          {
+            //if only t is intersecting, prefer t
+            if(t.fingertoggleable.finger && !list[known].fingertoggleable.finger)
+            {
+              list[known].fingertoggleable.on = false;
+              known = i;
+            }
+            else //prefer previous (ignore t)
+              t.fingertoggleable.on = false;
+          }
+        }
+      }
+    }
+
+    return known;
+  }
+
+  void updateSelectableVis(int known, List<Tab> list)
+  {
+    Tab t;
+    for(int i = 0; i < list.Count; i++)
+    {
+      t = list[i];
+      if(known == i)
+      {
+        if(t.fingertoggleable.finger) t.backing_meshrenderer.material = tab_hisel;
+        else                          t.backing_meshrenderer.material = tab_sel;
+      }
+      else
+      {
+        if(t.fingertoggleable.finger) t.backing_meshrenderer.material = tab_hi;
+        else                          t.backing_meshrenderer.material = tab_default;
+      }
+    }
+  }
+
   // Update is called once per frame
   void Update()
   {
@@ -680,6 +713,43 @@ public class World : MonoBehaviour
     TryGrab(false, rhandt, rindext, rhand.transform.position.x, rhand.transform.position.y, rhand_vel, ref rhtrigger, ref ritrigger, ref rhtrigger_delta, ref ritrigger_delta, ref rz, ref ry, ref rhand, ref rgrabbed, ref lhand, ref lgrabbed); //right hand
 
     UpdateGrabVis();
+
+    //clipboard
+    int old_board_mode = board_mode;
+    board_mode = reconcileDependentSelectables(board_mode, mode_tabs);
+    if(board_mode == -1) board_mode = old_board_mode;
+    updateSelectableVis(board_mode, mode_tabs);
+
+    switch(board_mode)
+    {
+      case 0: //instructions
+        if(!instructions_parent.activeSelf) instructions_parent.SetActive(true);
+        if( challenge_parent.activeSelf)    challenge_parent.SetActive(   false);
+        if( quiz_parent.activeSelf)         quiz_parent.SetActive(        false);
+        break;
+      case 1: //challenge
+        if( instructions_parent.activeSelf) instructions_parent.SetActive(false);
+        if(!challenge_parent.activeSelf)    challenge_parent.SetActive(   true);
+        if( quiz_parent.activeSelf)         quiz_parent.SetActive(        false);
+        break;
+      case 2: //quiz
+        if( instructions_parent.activeSelf) instructions_parent.SetActive(false);
+        if( challenge_parent.activeSelf)    challenge_parent.SetActive(   false);
+        if(!quiz_parent.activeSelf)         quiz_parent.SetActive(        true);
+        qselected = reconcileDependentSelectables(qselected, option_tabs);
+        updateSelectableVis(qselected, option_tabs);
+        if(qselected != -1)
+        {
+          if(qconfirm_tab.fingertoggleable.finger) qconfirm_tab.backing_meshrenderer.material = tab_hisel;
+          else                                     qconfirm_tab.backing_meshrenderer.material = tab_sel;
+        }
+        else
+        {
+          if(qconfirm_tab.fingertoggleable.finger) qconfirm_tab.backing_meshrenderer.material = tab_hi;
+          else                                     qconfirm_tab.backing_meshrenderer.material = tab_default;
+        }
+        break;
+    }
 
     //tooltext
     Tool t;
