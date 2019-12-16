@@ -1,4 +1,13 @@
-﻿using System.Collections;
+﻿/*
+DOCUMENTATION- phil, 12/16/19
+
+This class manages all the interaction in the scene.
+It relies on ThermoState to keep track of any thermodynamic-centric state, but other than that, this is responsible for everything moving about the scene.
+It should be instantiated as a game object "Oracle" at the root of the scene heirarchy.
+There are unfortunately somewhat inconsistent patterns of what variables are defined publicly via the editor inspector, and which are set in code, though I tried to err toward the latter where possible.
+*/
+
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
@@ -306,7 +315,8 @@ public class World : MonoBehaviour
 
   }
 
-  void TryAct(GameObject actable, float x_val, float y_val, ref float r_x, ref float r_y)
+  //safe to call if not interactable, as it will just do nothing
+  void TryInteractable(GameObject actable, float x_val, float y_val, ref float r_x, ref float r_y)
   {
     //grabbing handle
     if(actable == handle_workspace)
@@ -329,7 +339,8 @@ public class World : MonoBehaviour
     }
   }
 
-  void TryGrab(bool which, float htrigger_val, float itrigger_val, float x_val, float y_val, Vector3 hand_vel, ref bool r_htrigger, ref bool r_itrigger, ref int r_htrigger_delta, ref int r_itrigger_delta, ref float r_x, ref float r_y, ref GameObject r_hand, ref GameObject r_grabbed, ref GameObject r_ohand, ref GameObject r_ograbbed)
+  //"which": true -> left, false -> right
+  void TryHand(bool which, float htrigger_val, float itrigger_val, float x_val, float y_val, Vector3 hand_vel, ref bool r_htrigger, ref bool r_itrigger, ref int r_htrigger_delta, ref int r_itrigger_delta, ref float r_x, ref float r_y, ref GameObject r_hand, ref GameObject r_grabbed, ref GameObject r_ohand, ref GameObject r_ograbbed)
   {
     float htrigger_threshhold = 0.1f;
     float itrigger_threshhold = 0.1f;
@@ -488,7 +499,7 @@ public class World : MonoBehaviour
       r_grabbed = null;
     }
 
-    if(r_grabbed) TryAct(r_grabbed, x_val, y_val, ref r_x, ref r_y);
+    if(r_grabbed) TryInteractable(r_grabbed, x_val, y_val, ref r_x, ref r_y);
 
     r_x = x_val;
     r_y = y_val;
@@ -602,6 +613,7 @@ public class World : MonoBehaviour
     else              rhand_meshrenderer.materials = hand_emptys;
   }
 
+  //give it a list of fingertoggleables, and it manipulates them to act as a singularly-selectable list
   int reconcileDependentSelectables(int known, List<Tab> list)
   {
     int n_toggled = 0;
@@ -667,24 +679,23 @@ public class World : MonoBehaviour
     }
   }
 
-  // Update is called once per frame
   void Update()
   {
-    //hands keep trying to run away
+    //hands keep trying to run away- no idea why (this is a silly way to keep them still)
     lactualhand.transform.localPosition    = new Vector3(0f,0f,0f);
     lactualhand.transform.localEulerAngles = new Vector3(0f,0f,90f);//localRotation = Quaternion.identity;
     ractualhand.transform.localPosition    = new Vector3(0f,0f,0f);
     ractualhand.transform.localEulerAngles = new Vector3(0f,0f,-90f);//localRotation = Quaternion.identity;
 
     //passive effects
-    if(applied_weight != 0) thermo.add_pressure(applied_weight); //MUST CONVERT!
+    if(applied_weight != 0) thermo.add_pressure(applied_weight); //TODO: must convert weight to pressure!
     if(applied_heat   != 0)
     {
-      if(tool_clamp.engaged) thermo.add_heat_constant_v(applied_heat); //MUST CONVERT!
-      else                   thermo.add_heat_constant_p(applied_heat); //MUST CONVERT!
+      if(tool_clamp.engaged) thermo.add_heat_constant_v(applied_heat); //TODO: make sure "applied heat" is first converted to appropriate unit!
+      else                   thermo.add_heat_constant_p(applied_heat); //TODO: make sure "applied heat" is first converted to appropriate unit!
     }
 
-    //running blended average
+    //running blended average of hand velocity, for consistent "throwing"
     lhand_vel += (lhand.transform.position-lhand_pos)/Time.deltaTime;
     lhand_vel *= 0.5f;
     lhand_pos = lhand.transform.position;
@@ -693,15 +704,6 @@ public class World : MonoBehaviour
     rhand_vel *= 0.5f;
     rhand_pos = rhand.transform.position;
 
-    /*
-    //snap from delay
-    lhand_pos = Vector3.Lerp(lhand_pos,lhand.transform.position,0.01f);
-    lhand_vel = (lhand.transform.position-lhand_pos)/Time.deltaTime;
-
-    rhand_pos = Vector3.Lerp(rhand_pos,rhand.transform.position,0.01f);
-    rhand_vel = (rhand.transform.position-rhand_pos)/Time.deltaTime;
-    */
-
     float lhandt  = OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger);
     float lindext = OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger);
     float rhandt  = OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger);
@@ -709,8 +711,8 @@ public class World : MonoBehaviour
     //index compatibility
     lhandt += lindext;
     rhandt += rindext;
-    TryGrab(true,  lhandt, lindext, lhand.transform.position.x, lhand.transform.position.y, lhand_vel, ref lhtrigger, ref litrigger, ref lhtrigger_delta, ref litrigger_delta, ref lz, ref ly, ref lhand, ref lgrabbed, ref rhand, ref rgrabbed); //left hand
-    TryGrab(false, rhandt, rindext, rhand.transform.position.x, rhand.transform.position.y, rhand_vel, ref rhtrigger, ref ritrigger, ref rhtrigger_delta, ref ritrigger_delta, ref rz, ref ry, ref rhand, ref rgrabbed, ref lhand, ref lgrabbed); //right hand
+    TryHand(true,  lhandt, lindext, lhand.transform.position.x, lhand.transform.position.y, lhand_vel, ref lhtrigger, ref litrigger, ref lhtrigger_delta, ref litrigger_delta, ref lz, ref ly, ref lhand, ref lgrabbed, ref rhand, ref rgrabbed); //left hand
+    TryHand(false, rhandt, rindext, rhand.transform.position.x, rhand.transform.position.y, rhand_vel, ref rhtrigger, ref ritrigger, ref rhtrigger_delta, ref ritrigger_delta, ref rz, ref ry, ref rhand, ref rgrabbed, ref lhand, ref lgrabbed); //right hand
 
     UpdateGrabVis();
 
@@ -786,20 +788,6 @@ public class World : MonoBehaviour
         }
       }
     }
-
-/*
-//overwrite insulator's text for debugging purposes
-{
-    Tool to = tools[0];
-    to.textv_tmp.SetText("{0}",litrigger_delta);
-    to.dial_dial.examined = true;
-    to.dial_dial.prev_val = to.dial_dial.val*-1;
-    to.textv_meshrenderer.enabled = true;
-    Color32 c = new Color32(0,0,0,255);
-    to.textv_tmp.faceColor = c;
-    to.textl_tmp.faceColor = c;
-}
-*/
 
   }
 
