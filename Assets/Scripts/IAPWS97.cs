@@ -1,3 +1,5 @@
+//PORTED BY PHIL (~11/2019) FROM https://github.com/CoolProp/IF97
+
 // This compiler flag causes input/output units on the Thermodynamic Properties in IF97.h
 // to take pressure units of [MPa] and Energy units of [kJ] for comparison with IAPWS
 // table values.  If not set, the default behavior of IF97.h is to use straight SI units
@@ -94,8 +96,8 @@ public static class IF97
   const double P2bcmin = 6.54670*p_fact;         // Min Pressure [MPa] on H2b2c boundary curve; Max is Pmax
   const double S2bc  = 5.85*R_fact;              // Min Pressure [MPa] on H2b2c boundary curve; Max is Pmax
   // Bounds for Backward p(h,s), t(h,s) Determination
-  const double Smin  = 0.0;                           // Min Entropy [kJ/kg-K] for Backward p(h,s)
-  const double Smax  = 11.921054825051103*R_fact;     // Max Entropy [kJ/kg-K] for Backward p(h,s)
+  public const double Smin  = 0.0;                           // Min Entropy [kJ/kg-K] for Backward p(h,s)
+  public const double Smax  = 11.921054825051103*R_fact;     // Max Entropy [kJ/kg-K] for Backward p(h,s)
   const double STPmax  = 6.04048367171238*R_fact;     // S(Tmax,Pmax)
   const double Sgtrip  = 9.155492076509681*R_fact;    // Sat. Vapor  Entropy [kJ/kg-K] at Triple Point
   const double Sftrip  = -4.09187776773977E-7*R_fact; // Sat. Liquid Entropy [kJ/kg-K] at Triple Point
@@ -4248,7 +4250,7 @@ public static class IF97
     -3.38175262587035E4
   };
 
-  static double Hmax(double s)
+  public static double Hmax(double s)
   {
     // This function covers the top and right domain boundaries of constant Pmax and Tmax
     const double s_star = 1*R_fact;
@@ -4267,7 +4269,7 @@ public static class IF97
     }
   }
 
-  static double Hmin(double s)
+  public static double Hmin(double s)
   {
     if(s < Sgtrip) return (s - Sftrip)*(Hgtrip-Hftrip)/(Sgtrip-Sftrip) + Hftrip; // Interpolate through Region 4
     else return RegionOutput( IF97parameters.IF97_HMASS, RegionOutputBackward(Pmin,s,IF97parameters.IF97_SMASS), Pmin, IF97SatState.NONE); // Use forward equation along Pmin using T(Pmin,s) as Temperature

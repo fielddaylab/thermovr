@@ -1,13 +1,25 @@
-﻿using System;
+﻿/*
+DOCUMENTATION- phil, 12/16/19
+This is the stateful wrapper around ThermoMath.
+It represents a "current" state of water. After initialization, the state must always remain consistent.
+For this reason, the API consists of applying deltas to some assumed consistent state.
+It should be safe to assume that after any method call, the state remains consistent.
+
+This is also responsible for applying itself visually to the game objects in the scene, (ie, position of the piston, % of water/steam, etc...) including generating the 3d graph
+(^ this could be abstracted out into _another_ wrapper, but I don't see the value added [this is not a general-purpose thermomathstate class; it is built for this one VR application])
+*/
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
-class CMP : IComparer<int>
+//One-Off class used for ordering points in graphgen zipper phase
+class GRAPHPTCMP : IComparer<int>
 {
   public List<Vector3> mesh_positions;
-  public CMP(List<Vector3> _mesh_positions)
+  public GRAPHPTCMP(List<Vector3> _mesh_positions)
   {
     mesh_positions = _mesh_positions;
   }
@@ -26,17 +38,17 @@ class CMP : IComparer<int>
 
 public class ThermoState : MonoBehaviour
 {
-  //math limits ; xYz = vPt
+  //xyz corresponds to vpt (Y = "up")
   int samples = 350;
 
   //state
   public double pressure; //pascals
   public double temperature; //kalvin
   public double volume; //M^3/kg
-  public double internalenergy; //J
-  public double entropy; //?
-  public double enthalpy; //?
-  public double quality = 1; //%
+  public double internalenergy; //J/kg
+  public double entropy; //J/kgK
+  public double enthalpy; //J/kg
+  public double quality; //%
   double prev_pressure;
   double prev_temperature;
   double prev_volume;
@@ -44,9 +56,11 @@ public class ThermoState : MonoBehaviour
   double prev_entropy;
   double prev_enthalpy;
   double prev_quality;
+
+  //static properties of system
   public double mass = 1; //kg
   public double radius = 0.05; //M
-  public double surfacearea = 1.0; //Math.Pow(3.141592*radius,2.0);//M^2
+  public double surfacearea = 1.0; //Math.Pow(3.141592*radius,2.0); //M^2 //TODO: either do the math and hard code it, or figure out how to C# constexpr
 
   //vessel
   GameObject vessel;
@@ -55,22 +69,22 @@ public class ThermoState : MonoBehaviour
   float piston_min_y;
   float piston_max_y;
   GameObject contents;
-  float contents_min_h;
-  float contents_max_h;
+  float contents_min_h; //h = "height", not "enthalpy"
+  float contents_max_h; //h = "height", not "enthalpy"
   GameObject water;
   GameObject steam;
 
   //mesh
   GameObject graph;
-  GameObject[] graph_bits;
-  GameObject state;
+  GameObject state_dot;
   public Material graph_material;
-  public GameObject pt_prefab;
   TextMeshPro text_pressure;
   TextMeshPro text_temperature;
   TextMeshPro text_volume;
+  TextMeshPro text_internalenergy;
   TextMeshPro text_entropy;
   TextMeshPro text_enthalpy;
+  TextMeshPro text_quality;
 
   void Awake()
   {
@@ -80,23 +94,14 @@ public class ThermoState : MonoBehaviour
   // Start is called before the first frame update
   void Start()
   {
+    //(these are just used to detect editor deltas on a frame boundary)
     sample_lbase_prev = sample_lbase;
     plot_lbase_prev = plot_lbase;
 
     findObjects();
     genMesh();
-    //genHackMesh();
-
-    reset();
-    pressure = ThermoMath.p_given_percent(0.1);
-    temperature = ThermoMath.t_given_percent(0.9);
-    volume = ThermoMath.v_given_pt(pressure,temperature);
-    /*
-    Debug.LogFormat("{0}",pressure);
-    Debug.LogFormat("{0}",volume);
-    Debug.LogFormat("{0}",temperature);
-    */
-    dotransform();
+    reset_state();
+    transform_to_state();
   }
 
   //sample bias- "graph density"
@@ -109,13 +114,24 @@ public class ThermoState : MonoBehaviour
   [Range(0.001f,10)]
   public double plot_lbase = 10.0f;
   double plot_lbase_prev = 0.0f;
-  float log_plot(double min, double max, double val) { double lval = Math.Log(val,plot_lbase); double lmax = Math.Log(max,plot_lbase); double lmin = Math.Log(min,plot_lbase); return (float)((lval-lmin)/(lmax-lmin)); }
+  float plot(double min, double max, double val) { double lval = Math.Log(val,plot_lbase); double lmax = Math.Log(max,plot_lbase); double lmin = Math.Log(min,plot_lbase); return (float)((lval-lmin)/(lmax-lmin)); }
 
-  float plot(double min, double max, double val) { return log_plot(min,max,val); }
-  String pv(Vector3 v) { return String.Format("{0}, {1}, {2}",v.x.ToString(".################"),v.y.ToString(".################"),v.z.ToString(".################")); }
-
+  //generates points from thermomath api, and stitches them together into a mesh
+  //the "only reason" this is complex is:
+  // we generate a "biased", "zoomed" grid of the mesh looked at from one axis ("looking at yz graph").
+  // then we stitch this uniform (uniform other than bias/zoom, which can be "ignored") graph together.
+  // however, there is a region of the generated graph ("the vapor dome") which is "constant z" (so invisible to this perspective).
+  // so we detect triangles that span this "invisible" region, and cut them out of the stitching.
+  // we then generate the vapor dome points _independently_, and create a very nice mesh of the region across the "xy" plane, which by design fits right into the cutaway stitching.
+  // the final step then, is to "zip" together the two meshes.
+  // this is done by walking the sorted list of "orphaned" points (<- I could have come up with a better name for that...), which corresponds to the list of points disconnected by the cutting of the grid mesh
+  // and simultaneously walking the sorted list of the vapor dome region points, zig-zagging triangles to fill the space
+  //the good news: any complexity from the generation of the mesh is pretty well isolated to this one function
   void genMesh()
   {
+    GameObject old_gm = GameObject.Find("graph_mesh");
+    if(old_gm != null) Destroy(old_gm);
+
     int n_pts = samples*samples;
     int n_pts_per_group = 1000;
     int n_groups = (int)Mathf.Ceil(n_pts / n_pts_per_group);
@@ -205,6 +221,7 @@ public class ThermoState : MonoBehaviour
     highest_y = Mathf.Lerp(highest_y,1.0f,0.01f); //extra nudge up
 
     //kill spanning triangles; gather orphans
+    //"ladder"/"rung" terminology a bit arbitrary- attempts to keep track of each side of a "zipper" for each seam ("left" seam, "right" seam, each have own ladder/rung)
     List<int> left_orphans = new List<int>();
     List<int> right_orphans = new List<int>();
     int left_ladder_i = position_dome_region;
@@ -281,7 +298,7 @@ public class ThermoState : MonoBehaviour
     }
 
     //sort orphans
-    CMP cmp = new CMP(mesh_positions);
+    GRAPHPTCMP cmp = new GRAPHPTCMP(mesh_positions);
 
     left_orphans.Sort(cmp);
     for(int i = 1; i < left_orphans.Count; i++)
@@ -476,127 +493,25 @@ public class ThermoState : MonoBehaviour
     gameObject.GetComponent<MeshRenderer>().material = graph_material;
   }
 
-  void genHackMesh()
+  void reset_state()
   {
-    int n_pts = samples*samples;
-    int n_pts_per_group = 1000;
-    int n_groups = (int)Mathf.Ceil(n_pts / n_pts_per_group);
-    float pt_size = 0.005f;
+    //ensure consistent state
+    pressure       = ThermoMath.p_given_percent(0.1); //picked initial pressure somewhat arbitrarily
+    temperature    = ThermoMath.t_given_percent(0.9); //picked initial temperature somewhat arbitrarily
+    //from this point, the rest should be derived!
+    volume         = ThermoMath.v_given_pt(pressure,temperature);
+    internalenergy = ThermoMath.i_given_pt(pressure,temperature); //TODO:
+    entropy        = ThermoMath.s_given_pt(pressure,temperature); //TODO:
+    enthalpy       = ThermoMath.h_given_pt(pressure,temperature); //TODO:
+    quality        = ThermoMath.q_given_pt(pressure,temperature); //TODO:
 
-    Vector3[] pt_positions;
-
-//* derived v
-    //gen positions
-    pt_positions = new Vector3[n_pts];
-    for(int y = 0; y < samples; y++)
-    {
-      double pt = ((double)y/(samples-1));
-      for(int z = 0; z < samples; z++)
-      {
-        double tt = ((double)z/(samples-1));
-        double pst = sample(pt);
-        double tst = sample(tt);
-        double p = ThermoMath.p_given_percent(pst);
-        double t = ThermoMath.t_given_percent(tst);
-        double v = ThermoMath.v_given_pt(p,t);
-        //pvt in Pa, M^3/Kg, K
-
-        //Debug.LogFormat("p:{0}Pa, v:{1}M^3/Kg, t:{2}K",p,v,t);
-        float pplot = plot(ThermoMath.p_min,ThermoMath.p_max,p);
-        float vplot = plot(ThermoMath.v_min,ThermoMath.v_max,v);
-        float tplot = plot(ThermoMath.t_min,ThermoMath.t_max,t);
-
-        int i = samples*y+z;
-        pt_positions[i] = new Vector3(vplot,pplot,tplot);
-      }
-    }
-//*/
-
-/* derived p
-    //gen positions
-    pt_positions = new Vector3[n_pts];
-    for(int x = 0; x < samples; x++)
-    {
-      double vt = ((double)x/(samples-1));
-      for(int z = 0; z < samples; z++)
-      {
-        double tt = ((double)z/(samples-1));
-        double vst = sample(vt);
-        double tst = sample(tt);
-        double v = ThermoMath.v_given_percent(vst);
-        double t = ThermoMath.t_given_percent(tst);
-        double p = ThermoMath.p_given_vt(v,t);
-        //pvt in Pa, M^3/Kg, K
-        float pplot = plot(ThermoMath.p_min,ThermoMath.p_max,p);
-        float vplot = plot(ThermoMath.v_min,ThermoMath.v_max,v);
-        float tplot = plot(ThermoMath.t_min,ThermoMath.t_max,t);
-
-        int i = samples*x+z;
-        pt_positions[i] = new Vector3(vplot,pplot,tplot);
-      }
-    }
-//*/
-
-/*
-    //gen assets
-    graph_bits = new GameObject[n_groups];
-    GameObject ptfab = (GameObject)Instantiate(pt_prefab);
-    int n_pts_remaining = n_pts;
-    int n_pts_this_group = n_pts_per_group;
-    for(int i = 0; i < n_groups; i++)
-    {
-      n_pts_this_group = Mathf.Min(n_pts_per_group, n_pts_remaining);
-      CombineInstance[] combine = new CombineInstance[n_pts_this_group];
-
-      for(int j = 0; j < n_pts_this_group; j++)
-      {
-        ptfab.transform.position = pt_positions[i * n_pts_per_group + j];
-        ptfab.transform.localScale = new Vector3(pt_size, pt_size, pt_size);
-
-        combine[j].mesh = ptfab.transform.GetComponent<MeshFilter>().mesh;
-        combine[j].transform = ptfab.transform.localToWorldMatrix;
-      }
-
-      graph_bits[i] = (GameObject)Instantiate(pt_prefab);
-      graph_bits[i].transform.parent = graph.transform;
-      graph_bits[i].transform.localPosition = new Vector3(0, 0, 0);
-      graph_bits[i].transform.localRotation = Quaternion.Euler(0, 0, 0);
-      graph_bits[i].transform.localScale = new Vector3(1, 1, 1);
-      graph_bits[i].transform.GetComponent<MeshFilter>().mesh = new Mesh();
-      graph_bits[i].transform.GetComponent<MeshFilter>().mesh.CombineMeshes(combine);
-
-      n_pts_remaining -= n_pts_this_group;
-    }
-    Destroy(ptfab, 0f);
-//*/
-
-//*
-    //HACK
-    //gen assets
-    graph_bits = new GameObject[n_groups*n_pts_per_group];
-    for(int i = 0; i < n_groups*n_pts_per_group; i++)
-    {
-      graph_bits[i] = (GameObject)Instantiate(pt_prefab);
-      graph_bits[i].transform.parent = graph.transform;
-      graph_bits[i].transform.localPosition = pt_positions[i];
-      graph_bits[i].transform.localScale = new Vector3(pt_size, pt_size, pt_size);
-    }
-//*/
-  }
-
-  void reset()
-  {
-    //state
-    pressure    = 0;
-    temperature = 0;
-    volume      = 0;
-    entropy     = 0;
-    enthalpy    = 0;
-    prev_pressure    = -1;
-    prev_temperature = -1;
-    prev_volume      = -1;
-    prev_entropy     = -1;
-    prev_enthalpy    = -1;
+    prev_pressure       = -1;
+    prev_temperature    = -1;
+    prev_volume         = -1;
+    prev_internalenergy = -1;
+    prev_entropy        = -1;
+    prev_enthalpy       = -1;
+    prev_quality        = -1;
   }
 
   void findObjects()
@@ -613,27 +528,20 @@ public class ThermoState : MonoBehaviour
     steam     = GameObject.Find("Steam");
 
     graph     = GameObject.Find("gmodel");
-    state     = GameObject.Find("gstate");
+    state_dot = GameObject.Find("gstate");
 
-    text_pressure    = GameObject.Find("text_pressure").GetComponent<TextMeshPro>();
-    text_temperature = GameObject.Find("text_temperature").GetComponent<TextMeshPro>();
-    text_volume      = GameObject.Find("text_volume").GetComponent<TextMeshPro>();
-    text_entropy     = GameObject.Find("text_entropy").GetComponent<TextMeshPro>();
-    text_enthalpy    = GameObject.Find("text_enthalpy").GetComponent<TextMeshPro>();
+    text_pressure       = GameObject.Find("text_pressure").GetComponent<TextMeshPro>();
+    text_temperature    = GameObject.Find("text_temperature").GetComponent<TextMeshPro>();
+    text_volume         = GameObject.Find("text_volume").GetComponent<TextMeshPro>();
+    text_internalenergy = GameObject.Find("text_internalenergy").GetComponent<TextMeshPro>();
+    text_entropy        = GameObject.Find("text_entropy").GetComponent<TextMeshPro>();
+    text_enthalpy       = GameObject.Find("text_enthalpy").GetComponent<TextMeshPro>();
+    text_quality        = GameObject.Find("text_quality").GetComponent<TextMeshPro>();
   }
 
-  /*
-  //assume starting point consistent:
-  pressure; //pascals
-  temperature; //kalvin
-  volume; //M^3/kg
-  internalenergy; //J
-  entropy; //?
-  enthalpy; //?
-  quality; //%
-  */
+  //assume starting/ending point consistent for whole API!
 
-  public void add_heat_constant_p(double j)
+  public void add_heat_constant_p(double j) //TODO:
   {
     //newie = q - p(newv-oldv) + ie;
   /*
@@ -666,10 +574,10 @@ public class ThermoState : MonoBehaviour
       break;
     }
   */
-    dotransform();
+    transform_to_state();
   }
 
-  public void add_heat_constant_v(double j)
+  public void add_heat_constant_v(double j) //TODO:
   {
     //newie = q - p(newv-oldv) + ie;
   /*
@@ -699,10 +607,10 @@ public class ThermoState : MonoBehaviour
       break;
     }
   */
-    dotransform();
+    transform_to_state();
   }
 
-  public void add_pressure(double w)
+  public void add_pressure(double w) //TODO:
   {
   /*
     int region = 0;
@@ -730,18 +638,17 @@ public class ThermoState : MonoBehaviour
       break;
     }
   */
-    dotransform();
+    transform_to_state();
   }
 
-  void dotransform()
+  void transform_to_state()
   {
     float pplot = plot(ThermoMath.p_min,ThermoMath.p_max,pressure);
     float vplot = plot(ThermoMath.v_min,ThermoMath.v_max,volume);
     float tplot = plot(ThermoMath.t_min,ThermoMath.t_max,temperature);
-    state.transform.localPosition = new Vector3(vplot,pplot,tplot);
+    state_dot.transform.localPosition = new Vector3(vplot,pplot,tplot);
 
-    //ACTUALLY DO THIS CALCULATION
-    float size_p = (float)ThermoMath.percent_given_v(volume);
+    float size_p = (float)ThermoMath.percent_given_v(volume); //TODO: height shouldn't be based on "percent between min/max volume", but should be geometrically calculated ("what is height of cylinder w/ radius r and volume v?")
     Vector3 piston_lt = piston.transform.localPosition;
     piston_lt.y = piston_min_y+size_p*(piston_max_y-piston_min_y);
     piston.transform.localPosition = piston_lt;
@@ -761,33 +668,28 @@ public class ThermoState : MonoBehaviour
   // Update is called once per frame
   void Update()
   {
+    //detect editor graphgen modifications
     bool modified = false;
     modified = ((plot_lbase != plot_lbase_prev) || (sample_lbase != sample_lbase_prev));
     sample_lbase_prev = sample_lbase;
     plot_lbase_prev = plot_lbase;
-    if(modified)
-    {
-      /*
-      //delete old
-      for(int i = 0; i < graph_bits.Length; i++)
-        Destroy(graph_bits[i]);
-      genHackMesh();
-      */
-      Destroy(GameObject.Find("graph_mesh"));
-      genMesh();
-    }
+    if(modified) genMesh();
 
-    if(Math.Abs(pressure    - prev_pressure)    > 0.001) text_pressure.SetText(   "P: {0:3}KP",     (float)pressure/1000.0f);
-    if(Math.Abs(temperature - prev_temperature) > 0.001) text_temperature.SetText("T: {0:3}K",      (float)temperature);
-    if(Math.Abs(volume      - prev_volume)      > 0.001) text_volume.SetText(     "v: {0:3}M^3/kg", (float)volume);
-    if(Math.Abs(entropy     - prev_entropy)     > 0.001) text_entropy.SetText(    "s: {0:3}J",      (float)entropy);
-    if(Math.Abs(enthalpy    - prev_enthalpy)    > 0.001) text_enthalpy.SetText(   "h: {0:3}J",      (float)enthalpy);
+    if(Math.Abs(pressure       - prev_pressure)       > 0.001) text_pressure.SetText(      "P: {0:3}KP",     (float)pressure/1000.0f);
+    if(Math.Abs(temperature    - prev_temperature)    > 0.001) text_temperature.SetText(   "T: {0:3}K",      (float)temperature);
+    if(Math.Abs(volume         - prev_volume)         > 0.001) text_volume.SetText(        "v: {0:3}M^3/kg", (float)volume);
+    if(Math.Abs(internalenergy - prev_internalenergy) > 0.001) text_internalenergy.SetText("i: {0:3}J/kg",   (float)internalenergy);
+    if(Math.Abs(entropy        - prev_entropy)        > 0.001) text_entropy.SetText(       "s: {0:3}J/KgK",  (float)entropy);
+    if(Math.Abs(enthalpy       - prev_enthalpy)       > 0.001) text_enthalpy.SetText(      "h: {0:3}J/kg",   (float)enthalpy);
+    if(Math.Abs(quality        - prev_quality)        > 0.001) text_quality.SetText(       "q: {0:3}%",      (float)quality);
 
-    prev_pressure    = pressure;
-    prev_temperature = temperature;
-    prev_volume      = volume;
-    prev_entropy     = entropy;
-    prev_enthalpy    = enthalpy;
+    prev_pressure       = pressure;
+    prev_temperature    = temperature;
+    prev_volume         = volume;
+    prev_internalenergy = internalenergy;
+    prev_entropy        = entropy;
+    prev_enthalpy       = enthalpy;
+    prev_quality        = quality;
   }
 
 }
