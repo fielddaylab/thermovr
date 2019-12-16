@@ -1,3 +1,10 @@
+/*
+DOCUMENTATION- phil, 12/16/19 [intended to be a description as of a point in time, NOT nec a prescription for how it should be evolved- feel free to uproot]
+
+This component gets added to objects which 1. are not "Tool"s, yet 2. still act as "visual aids", generally characterised as:
+"things that can be stored, grabbed, moved around, and if left disengaged, will fly back to their stored position"
+*/
+
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -50,6 +57,7 @@ public class VisAid : MonoBehaviour
         gameObject.transform.parent = touchable.og_parent;
         //gameObject.transform.localPosition = og_localPosition;
         gameObject.transform.position = og_position;
+        gameObject.transform.localScale = new Vector3(1f,1f,1f);
         gameObject.transform.localRotation = og_localRotation;
       }
     }

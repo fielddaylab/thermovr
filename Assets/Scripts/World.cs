@@ -65,7 +65,6 @@ public class World : MonoBehaviour
   Tool tool_coil;
   Tool tool_weight;
   Tool tool_balloon;
-  Tool tool_clipboard;
 
   ParticleSystem flame; //special case
 
@@ -137,7 +136,6 @@ public class World : MonoBehaviour
     double kg_corresponding_to_10mpa = thermo.surfacearea*1550/*M^2->in^2*/*(10*1453.8/*MPa->psi*/)*0.453592/*lb->kg*/;
     t = GameObject.Find("Tool_Weight"   ).GetComponent<Tool>(); tool_weight    = t; tools.Add(t); t.dial_dial.min_map =  0.0f; t.dial_dial.max_map =  (float)kg_corresponding_to_10mpa; t.dial_dial.unit = "kg";
     t = GameObject.Find("Tool_Balloon"  ).GetComponent<Tool>(); tool_balloon   = t; tools.Add(t); t.dial_dial.min_map =  0.0f; t.dial_dial.max_map = -(float)kg_corresponding_to_10mpa; t.dial_dial.unit = "kg";
-    t = GameObject.Find("Tool_Clipboard").GetComponent<Tool>(); tool_clipboard = t; tools.Add(t); t.dial_dial.min_map =  0.0f; t.dial_dial.max_map = 1.0f; t.dial_dial.unit = "N/A";
 
     flame = GameObject.Find("Flame").GetComponent<ParticleSystem>();
 
@@ -156,6 +154,7 @@ public class World : MonoBehaviour
       g.transform.SetParent(t.storage.gameObject.transform);
       t.stored = true;
       g.transform.localPosition = new Vector3(0.0f,0.0f,0.0f);
+      g.transform.localScale = new Vector3(1.0f,1.0f,1.0f);
       g.transform.localRotation = Quaternion.identity;
       t.textv_tmp.SetText("{0:3}"+t.dial_dial.unit,(float)t.dial_dial.map);
     }
@@ -299,7 +298,7 @@ public class World : MonoBehaviour
       Vector3 scale = new Vector3(v,v,v);
       scale = new Vector3(v,v,v);
       t.active.transform.localScale  = scale;
-      t.storage.transform.localScale = scale;
+      t.storage.transform.localScale = scale*0.5f; //hardcoded yikes
 
       //math
       applied_weight = 0;
@@ -307,10 +306,6 @@ public class World : MonoBehaviour
       if(tool_weight.engaged)  applied_weight += tool_weight.dial_dial.map;
       if(tool_balloon.engaged) applied_weight -= tool_balloon.dial_dial.map;
       //math change happens passively- only need to update visuals
-    }
-    else if(t == tool_clipboard)
-    {
-      ; //do nothing!
     }
 
   }

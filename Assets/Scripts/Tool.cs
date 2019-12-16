@@ -1,4 +1,10 @@
-﻿using System.Collections;
+﻿/*
+DOCUMENTATION- phil, 12/16/19 [intended to be a description as of a point in time, NOT nec a prescription for how it should be evolved- feel free to uproot]
+
+The various tools which can be variably engaged to the container, thrown, or stored.
+*/
+
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
@@ -120,6 +126,7 @@ public class Tool : MonoBehaviour
         gameObject.transform.SetParent(storage.transform);
         stored = true;
         gameObject.transform.localPosition = new Vector3(0f,0f,0f);
+        gameObject.transform.localScale = new Vector3(1f,1f,1f);
         gameObject.transform.localRotation = Quaternion.identity;
       }
     }
