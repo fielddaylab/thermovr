@@ -75,6 +75,7 @@ public class World : MonoBehaviour
 
   GameObject vessel;
   GameObject graph;
+  GameObject clipboard;
 
   bool lhtrigger = false;
   bool rhtrigger = false;
@@ -161,6 +162,7 @@ public class World : MonoBehaviour
 
     vessel = GameObject.Find("Vessel");
     graph = GameObject.Find("Graph");
+    clipboard = GameObject.Find("Clipboard");
 
     vrcenter = GameObject.Find("VRCenter");
     vrcenter_fingertoggleable = vrcenter.GetComponent<FingerToggleable>();
@@ -170,6 +172,7 @@ public class World : MonoBehaviour
     for(int i = 0; i < tools.Count; i++) movables.Add(tools[i].touchable); //important that tools take priority, so they can be grabbed and removed
     movables.Add(graph.GetComponent<Touchable>());
     movables.Add(vessel.GetComponent<Touchable>());
+    movables.Add(clipboard.GetComponent<Touchable>());
 
     halfer = GameObject.Find("Halfer");
     halfer_touchable = halfer.GetComponent<Touchable>();
