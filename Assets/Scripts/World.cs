@@ -177,9 +177,9 @@ public class World : MonoBehaviour
     halfer = GameObject.Find("Halfer");
     halfer_touchable = halfer.GetComponent<Touchable>();
     halfables = new List<Halfable>();
-    halfables.Add(GameObject.Find("Container").GetComponent<Halfable>());
-    halfables.Add(GameObject.Find("Piston").GetComponent<Halfable>());
-    halfables.Add(GameObject.Find("Contents").GetComponent<Halfable>());
+    halfables.Add(GameObject.Find("Container"     ).GetComponent<Halfable>());
+    halfables.Add(GameObject.Find("Tool_Insulator").GetComponent<Halfable>());
+    halfables.Add(GameObject.Find("Tool_Coil"     ).GetComponent<Halfable>());
 
     instructions_parent = GameObject.Find("Instructions");
     challenge_parent = GameObject.Find("Challenge");
@@ -446,6 +446,11 @@ public class World : MonoBehaviour
           if(r_grabbed == r_ograbbed) r_ograbbed = null;
         }
       }
+      if(r_grabbed != null) //newly grabbed
+      {
+        Halfable h = r_grabbed.GetComponent<Halfable>();
+        if(h != null) h.setHalf(false); //nothing should be halfed while being grabbed
+      }
     }
     //find new releases
     else if(r_grabbed && r_htrigger_delta == -1)
@@ -465,6 +470,8 @@ public class World : MonoBehaviour
           TryApplyTool(t);
           r_grabbed.transform.localPosition = new Vector3(0f,0f,0f);
           r_grabbed.transform.localRotation = Quaternion.identity;
+          Halfable h = r_grabbed.GetComponent<Halfable>();
+          if(h != null) h.setHalf(halfed); //conform to half-ness while engaged
         }
         else if(t.storage_ghost.tintersect)
         {
@@ -515,8 +522,10 @@ public class World : MonoBehaviour
       halfed = !halfed;
       for(int i = 0; i < halfables.Count; i++)
         halfables[i].setHalf(halfed);
+      //special case, only halfed when engaged
+      if(!tool_coil.engaged) tool_coil.gameObject.GetComponent<Halfable>().setHalf(false);
+      if(!tool_insulator.engaged) tool_insulator.gameObject.GetComponent<Halfable>().setHalf(false);
     }
-
 
     //centerer
     if(vrcenter_fingertoggleable.finger)

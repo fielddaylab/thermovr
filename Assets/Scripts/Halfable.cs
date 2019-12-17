@@ -35,6 +35,7 @@ public class Halfable : MonoBehaviour
     full_meshrenderer = full.GetComponent<MeshRenderer>();
     half_meshrenderer = half.GetComponent<MeshRenderer>();
     half_meshrenderer.enabled = false;
+    halved = false;
   }
 
   // Update is called once per frame
