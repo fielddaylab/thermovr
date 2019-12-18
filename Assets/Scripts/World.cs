@@ -75,7 +75,11 @@ public class World : MonoBehaviour
 
   GameObject vessel;
   GameObject graph;
+  GameObject state_dot;
+  GameObject challenge_dot;
   GameObject clipboard;
+
+  ChallengeBall challenge_ball_collide;
 
   bool lhtrigger = false;
   bool rhtrigger = false;
@@ -86,7 +90,7 @@ public class World : MonoBehaviour
   GameObject challenge_parent;
   GameObject quiz_parent;
   List<Tab> mode_tabs;
-  int board_mode = 0; //0- instructions, 1- challenge, 2- quiz
+  int board_mode = 0; //0- instructions, 1- challenge, 2- quiz, 3- congrats
   int question = 0;
   List<string> questions;
   List<string> options;
@@ -163,7 +167,11 @@ public class World : MonoBehaviour
 
     vessel = GameObject.Find("Vessel");
     graph = GameObject.Find("Graph");
+    state_dot = GameObject.Find("gstate");
+    challenge_dot = GameObject.Find("cstate");
     clipboard = GameObject.Find("Clipboard");
+
+    challenge_ball_collide = challenge_dot.GetComponent<ChallengeBall>();
 
     vrcenter = GameObject.Find("VRCenter");
     vrcenter_fingertoggleable = vrcenter.GetComponent<FingerToggleable>();
@@ -245,12 +253,21 @@ public class World : MonoBehaviour
     board = GameObject.Find("Board");
     qtext_tmp = GameObject.Find("Qtext").GetComponent<TextMeshPro>();
     SetQuizText();
+    SetChallengeBall();
   }
 
   void SetQuizText()
   {
     qtext_tmp.SetText(questions[question]);
     for(int i = 0; i < 4; i++) option_tabs[i].tmp.SetText(options[question*4+i]);
+  }
+
+  void SetChallengeBall()
+  {
+    double volume      = ThermoMath.v_given_percent(Mathf.Random());
+    double temperature = ThermoMath.t_given_percent(Mathf.Random());
+    double pressure    = p_given_vt(volume, temperature);
+    challenge_dot.transform.localPosition = thermo.plot(pressure, volume, temperature);
   }
 
   /*
@@ -777,6 +794,9 @@ public class World : MonoBehaviour
           if(qconfirm_tab.fingertoggleable.finger) qconfirm_tab.backing_meshrenderer.material = tab_hi;
           else                                     qconfirm_tab.backing_meshrenderer.material = tab_default;
         }
+        break;
+      case 3: //congratulations
+        board_mode = 2; //immediately return back to quiz until this section is actually implemented
         break;
     }
 

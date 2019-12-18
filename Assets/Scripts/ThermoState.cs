@@ -114,7 +114,15 @@ public class ThermoState : MonoBehaviour
   [Range(0.001f,10)]
   public double plot_lbase = 10.0f;
   double plot_lbase_prev = 0.0f;
-  float plot(double min, double max, double val) { double lval = Math.Log(val,plot_lbase); double lmax = Math.Log(max,plot_lbase); double lmin = Math.Log(min,plot_lbase); return (float)((lval-lmin)/(lmax-lmin)); }
+  public float plot_dimension(double min, double max, double val) { double lval = Math.Log(val,plot_lbase); double lmax = Math.Log(max,plot_lbase); double lmin = Math.Log(min,plot_lbase); return (float)((lval-lmin)/(lmax-lmin)); }
+
+  public Vector3 plot(double pressure, double volume, double temperature)
+  {
+    float pplot = plot_dimension(ThermoMath.p_min,ThermoMath.p_max,pressure);
+    float vplot = plot_dimension(ThermoMath.v_min,ThermoMath.v_max,volume);
+    float tplot = plot_dimension(ThermoMath.t_min,ThermoMath.t_max,temperature);
+    return new Vector3(vplot,pplot,tplot);
+  }
 
   //generates points from thermomath api, and stitches them together into a mesh
   //the "only reason" this is complex is:
@@ -154,12 +162,8 @@ public class ThermoState : MonoBehaviour
         //pvt in Pa, M^3/Kg, K
 
         //Debug.LogFormat("p:{0}Pa, v:{1}M^3/Kg, t:{2}K",p,v,t);
-        float pplot = plot(ThermoMath.p_min,ThermoMath.p_max,p);
-        float vplot = plot(ThermoMath.v_min,ThermoMath.v_max,v);
-        float tplot = plot(ThermoMath.t_min,ThermoMath.t_max,t);
-
         int i = samples*y+z;
-        pt_positions[i] = new Vector3(vplot,pplot,tplot);
+        pt_positions[i] = plot(p,v,t);
       }
     }
 
@@ -200,21 +204,21 @@ public class ThermoState : MonoBehaviour
       //pvt in Pa, M^3/Kg, K
 
       //Debug.LogFormat("p:{0}Pa, v:{1}M^3/Kg, t:{2}K",p,v,t);
-      float pplot = plot(ThermoMath.p_min,ThermoMath.p_max,p);
+      float pplot = plot_dimension(ThermoMath.p_min,ThermoMath.p_max,p);
       if(pplot > highest_y) { highest_y = pplot; highest_y_i = mesh_positions.Count; }
-      float tplot = plot(ThermoMath.t_min,ThermoMath.t_max,t);
+      float tplot = plot_dimension(ThermoMath.t_min,ThermoMath.t_max,t);
 
       double v;
       float vplot;
       Vector3 point;
 
       v = ThermoMath.vliq_given_p(p);
-      vplot = plot(ThermoMath.v_min,ThermoMath.v_max,v);
+      vplot = plot_dimension(ThermoMath.v_min,ThermoMath.v_max,v);
       point = new Vector3(vplot,pplot,tplot);
       mesh_positions.Add(point);
 
       v = ThermoMath.vvap_given_p(p);
-      vplot = plot(ThermoMath.v_min,ThermoMath.v_max,v);
+      vplot = plot_dimension(ThermoMath.v_min,ThermoMath.v_max,v);
       point = new Vector3(vplot,pplot,tplot);
       mesh_positions.Add(point);
     }
@@ -643,10 +647,7 @@ public class ThermoState : MonoBehaviour
 
   void transform_to_state()
   {
-    float pplot = plot(ThermoMath.p_min,ThermoMath.p_max,pressure);
-    float vplot = plot(ThermoMath.v_min,ThermoMath.v_max,volume);
-    float tplot = plot(ThermoMath.t_min,ThermoMath.t_max,temperature);
-    state_dot.transform.localPosition = new Vector3(vplot,pplot,tplot);
+    state_dot.transform.localPosition = plot(pressure,volume,temperature);
 
     float size_p = (float)ThermoMath.percent_given_v(volume); //TODO: height shouldn't be based on "percent between min/max volume", but should be geometrically calculated ("what is height of cylinder w/ radius r and volume v?")
     Vector3 piston_lt = piston.transform.localPosition;
