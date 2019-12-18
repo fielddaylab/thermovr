@@ -264,9 +264,9 @@ public class World : MonoBehaviour
 
   void SetChallengeBall()
   {
-    double volume      = ThermoMath.v_given_percent(Mathf.Random());
-    double temperature = ThermoMath.t_given_percent(Mathf.Random());
-    double pressure    = p_given_vt(volume, temperature);
+    double volume      = ThermoMath.v_given_percent(Random.Range(0.1f,0.9f));
+    double temperature = ThermoMath.t_given_percent(Random.Range(0.1f,0.9f));
+    double pressure    = ThermoMath.p_given_vt(volume, temperature);
     challenge_dot.transform.localPosition = thermo.plot(pressure, volume, temperature);
   }
 
