@@ -60,6 +60,7 @@ public class Tool : MonoBehaviour
   [System.NonSerialized]
   public Touchable dial_touchable;
 
+  public GameObject text;
   public GameObject textv;
   [System.NonSerialized]
   public TextMeshPro textv_tmp;

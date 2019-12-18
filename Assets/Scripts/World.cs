@@ -157,8 +157,7 @@ public class World : MonoBehaviour
       g.transform.localPosition = new Vector3(0f,0f,0f);
       g.transform.localScale = new Vector3(1f,1f,1f);
       g.transform.localRotation = Quaternion.identity;
-      t.textl.transform.localScale = new Vector3(1f,1f,1f);
-      t.textv.transform.localScale = new Vector3(1f,1f,1f);
+      t.text.transform.localScale = new Vector3(1f,1f,1f);
       t.textv_tmp.SetText("{0:3}"+t.dial_dial.unit,(float)t.dial_dial.map);
     }
 
@@ -306,21 +305,13 @@ public class World : MonoBehaviour
       scale = new Vector3(v,v,v);
       invscale = new Vector3(1f/v,1f/v,1f/v);
       t.active.transform.localScale = scale;
-      if(t.engaged)
-      {
-        t.textl.transform.localScale = invscale;
-        t.textv.transform.localScale = invscale;
-      }
+      if(t.engaged) t.text.transform.localScale = invscale;
 
       v *= 0.5f; //default scale of stored balloon/weight. hardcoded yikes
       scale = new Vector3(v,v,v);
       invscale = new Vector3(1f/v,1f/v,1f/v);
       t.storage.transform.localScale = scale;
-      if(t.stored)
-      {
-        t.textl.transform.localScale = invscale;
-        t.textv.transform.localScale = invscale;
-      }
+      if(t.stored) t.text.transform.localScale = invscale;
 
       //math
       applied_weight = 0;
@@ -410,8 +401,7 @@ public class World : MonoBehaviour
             t.engaged = false;
             t.stored = false;
             r_grabbed.transform.localScale = new Vector3(1f,1f,1f);
-            t.textl.transform.localScale = new Vector3(1f,1f,1f);
-            t.textv.transform.localScale = new Vector3(1f,1f,1f);
+            t.text.transform.localScale = new Vector3(1f,1f,1f);
             t.rigidbody.isKinematic = true;
             t.boxcollider.isTrigger = false;
             TryApplyTool(t);
@@ -493,8 +483,7 @@ public class World : MonoBehaviour
           r_grabbed.transform.localScale = new Vector3(1f,1f,1f);
           float v = t.active.transform.localScale.x; //can grab any dimension
           Vector3 invscale = new Vector3(1f/v,1f/v,1f/v);
-          t.textl.transform.localScale = invscale;
-          t.textv.transform.localScale = invscale;
+          t.text.transform.localScale = invscale;
           Halfable h = r_grabbed.GetComponent<Halfable>();
           if(h != null) h.setHalf(halfed); //conform to half-ness while engaged
         }
@@ -508,16 +497,14 @@ public class World : MonoBehaviour
           r_grabbed.transform.localScale = new Vector3(1f,1f,1f);
           float v = t.storage.transform.localScale.x; //can grab any dimension
           Vector3 invscale = new Vector3(1f/v,1f/v,1f/v);
-          t.textl.transform.localScale = invscale;
-          t.textv.transform.localScale = invscale;
+          t.text.transform.localScale = invscale;
         }
         //tool released
         else
         {
           r_grabbed.transform.SetParent(r_grabbed.GetComponent<Touchable>().og_parent);
           r_grabbed.transform.localScale = new Vector3(1f,1f,1f);
-          t.textl.transform.localScale = new Vector3(1f,1f,1f);
-          t.textv.transform.localScale = new Vector3(1f,1f,1f);
+          t.text.transform.localScale = new Vector3(1f,1f,1f);
           t.rigidbody.isKinematic = false;
           t.rigidbody.velocity = hand_vel;
         }
