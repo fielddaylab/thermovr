@@ -24,6 +24,8 @@ public class Tool : MonoBehaviour
   [System.NonSerialized]
   public float t_free = 0.0f;
 
+  public GameObject mesh;
+
   public GameObject storage;
   [System.NonSerialized]
   public Ghost storage_ghost;

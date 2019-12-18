@@ -53,10 +53,10 @@ public class World : MonoBehaviour
   int litrigger_delta = 0;
   int rhtrigger_delta = 0;
   int ritrigger_delta = 0;
-  float lz = 0.0f;
-  float rz = 0.0f;
-  float ly = 0.0f;
-  float ry = 0.0f;
+  float lz = 0f;
+  float rz = 0f;
+  float ly = 0f;
+  float ry = 0f;
 
   List<Tool> tools;
   Tool tool_insulator;
@@ -116,13 +116,13 @@ public class World : MonoBehaviour
     lhand  = GameObject.Find("LeftControllerAnchor");
     lactualhand = lhand.transform.GetChild(0).gameObject;
     lhand_pos = lhand.transform.position;
-    lhand_vel = new Vector3(0.0f,0.0f,0.0f);
+    lhand_vel = new Vector3(0f,0f,0f);
     lhand_meshrenderer = GameObject.Find("hands:Lhand").GetComponent<SkinnedMeshRenderer>();
 
     rhand  = GameObject.Find("RightControllerAnchor");
     ractualhand = rhand.transform.GetChild(0).gameObject;
     rhand_pos = rhand.transform.position;
-    rhand_vel = new Vector3(0.0f,0.0f,0.0f);
+    rhand_vel = new Vector3(0f,0f,0f);
     rhand_meshrenderer = GameObject.Find("hands:Rhand").GetComponent<SkinnedMeshRenderer>();
 
     lhand_meshrenderer.materials = hand_emptys;
@@ -130,13 +130,13 @@ public class World : MonoBehaviour
 
     Tool t;
     tools = new List<Tool>();
-    t = GameObject.Find("Tool_Insulator").GetComponent<Tool>(); tool_insulator = t; tools.Add(t); t.dial_dial.min_map =  0.0f; t.dial_dial.max_map = 1.0f; t.dial_dial.unit = "n";
-    t = GameObject.Find("Tool_Clamp"    ).GetComponent<Tool>(); tool_clamp     = t; tools.Add(t); t.dial_dial.min_map =  0.0f; t.dial_dial.max_map = 1.0f; t.dial_dial.unit = "h";
-    t = GameObject.Find("Tool_Burner"   ).GetComponent<Tool>(); tool_burner    = t; tools.Add(t); t.dial_dial.min_map =  1.0f; t.dial_dial.max_map =  1000f*100f; t.dial_dial.unit = "J/s";
-    t = GameObject.Find("Tool_Coil"     ).GetComponent<Tool>(); tool_coil      = t; tools.Add(t); t.dial_dial.min_map = -1.0f; t.dial_dial.max_map = -1000f*100f; t.dial_dial.unit = "J/s";
+    t = GameObject.Find("Tool_Insulator").GetComponent<Tool>(); tool_insulator = t; tools.Add(t); t.dial_dial.min_map =  0f; t.dial_dial.max_map = 1f; t.dial_dial.unit = "n";
+    t = GameObject.Find("Tool_Clamp"    ).GetComponent<Tool>(); tool_clamp     = t; tools.Add(t); t.dial_dial.min_map =  0f; t.dial_dial.max_map = 1f; t.dial_dial.unit = "h";
+    t = GameObject.Find("Tool_Burner"   ).GetComponent<Tool>(); tool_burner    = t; tools.Add(t); t.dial_dial.min_map =  1f; t.dial_dial.max_map =  1000f*100f; t.dial_dial.unit = "J/s";
+    t = GameObject.Find("Tool_Coil"     ).GetComponent<Tool>(); tool_coil      = t; tools.Add(t); t.dial_dial.min_map = -1f; t.dial_dial.max_map = -1000f*100f; t.dial_dial.unit = "J/s";
     double kg_corresponding_to_10mpa = thermo.surfacearea*1550/*M^2->in^2*/*(10*1453.8/*MPa->psi*/)*0.453592/*lb->kg*/;
-    t = GameObject.Find("Tool_Weight"   ).GetComponent<Tool>(); tool_weight    = t; tools.Add(t); t.dial_dial.min_map =  0.0f; t.dial_dial.max_map =  (float)kg_corresponding_to_10mpa; t.dial_dial.unit = "kg";
-    t = GameObject.Find("Tool_Balloon"  ).GetComponent<Tool>(); tool_balloon   = t; tools.Add(t); t.dial_dial.min_map =  0.0f; t.dial_dial.max_map = -(float)kg_corresponding_to_10mpa; t.dial_dial.unit = "kg";
+    t = GameObject.Find("Tool_Weight"   ).GetComponent<Tool>(); tool_weight    = t; tools.Add(t); t.dial_dial.min_map =  0f; t.dial_dial.max_map =  (float)kg_corresponding_to_10mpa; t.dial_dial.unit = "kg";
+    t = GameObject.Find("Tool_Balloon"  ).GetComponent<Tool>(); tool_balloon   = t; tools.Add(t); t.dial_dial.min_map =  0f; t.dial_dial.max_map = -(float)kg_corresponding_to_10mpa; t.dial_dial.unit = "kg";
 
     flame = GameObject.Find("Flame").GetComponent<ParticleSystem>();
 
@@ -154,9 +154,11 @@ public class World : MonoBehaviour
       GameObject g = t.gameObject;
       g.transform.SetParent(t.storage.gameObject.transform);
       t.stored = true;
-      g.transform.localPosition = new Vector3(0.0f,0.0f,0.0f);
-      g.transform.localScale = new Vector3(1.0f,1.0f,1.0f);
+      g.transform.localPosition = new Vector3(0f,0f,0f);
+      g.transform.localScale = new Vector3(1f,1f,1f);
       g.transform.localRotation = Quaternion.identity;
+      t.textl.transform.localScale = new Vector3(1f,1f,1f);
+      t.textv.transform.localScale = new Vector3(1f,1f,1f);
       t.textv_tmp.SetText("{0:3}"+t.dial_dial.unit,(float)t.dial_dial.map);
     }
 
@@ -295,13 +297,30 @@ public class World : MonoBehaviour
     else if(t == tool_weight || t == tool_balloon)
     {
       //visual
-      float v = 1.0f;
+      float v = 1f;
            if(t == tool_weight)  v += tool_weight.dial_dial.val;
       else if(t == tool_balloon) v += tool_balloon.dial_dial.val;
-      Vector3 scale = new Vector3(v,v,v);
+      Vector3 scale;
+      Vector3 invscale;
+
       scale = new Vector3(v,v,v);
-      t.active.transform.localScale  = scale;
-      t.storage.transform.localScale = scale*0.5f; //hardcoded yikes
+      invscale = new Vector3(1f/v,1f/v,1f/v);
+      t.active.transform.localScale = scale;
+      if(t.engaged)
+      {
+        t.textl.transform.localScale = invscale;
+        t.textv.transform.localScale = invscale;
+      }
+
+      v *= 0.5f; //default scale of stored balloon/weight. hardcoded yikes
+      scale = new Vector3(v,v,v);
+      invscale = new Vector3(1f/v,1f/v,1f/v);
+      t.storage.transform.localScale = scale;
+      if(t.stored)
+      {
+        t.textl.transform.localScale = invscale;
+        t.textv.transform.localScale = invscale;
+      }
 
       //math
       applied_weight = 0;
@@ -329,8 +348,8 @@ public class World : MonoBehaviour
       if(d != null)
       {
         Tool t = d.tool.GetComponent<Tool>();
-        float dx = (r_x-x_val)*-10.0f;
-        d.val = Mathf.Clamp(d.val-dx,0.0f,1.0f);
+        float dx = (r_x-x_val)*-10f;
+        d.val = Mathf.Clamp(d.val-dx,0f,1f);
 
         TryApplyTool(t);
       }
@@ -382,12 +401,17 @@ public class World : MonoBehaviour
           )
         {
           r_grabbed = movables[i].gameObject;
+          r_grabbed.transform.SetParent(r_hand.transform);
+          if(r_grabbed == r_ograbbed) r_ograbbed = null;
           movables[i].grabbed = true;
           Tool t = r_grabbed.GetComponent<Tool>();
           if(t)
           {
             t.engaged = false;
             t.stored = false;
+            r_grabbed.transform.localScale = new Vector3(1f,1f,1f);
+            t.textl.transform.localScale = new Vector3(1f,1f,1f);
+            t.textv.transform.localScale = new Vector3(1f,1f,1f);
             t.rigidbody.isKinematic = true;
             t.boxcollider.isTrigger = false;
             TryApplyTool(t);
@@ -398,9 +422,6 @@ public class World : MonoBehaviour
             v.stored = false;
             v.rigidbody.isKinematic = true;
           }
-          r_grabbed.transform.SetParent(r_hand.transform);
-          r_grabbed.transform.localScale = new Vector3(1f,1f,1f);
-          if(r_grabbed == r_ograbbed) r_ograbbed = null;
         }
       }
       //then dials
@@ -462,7 +483,6 @@ public class World : MonoBehaviour
         if(t.active_ghost.tintersect)
         {
           r_grabbed.transform.SetParent(t.active.transform);
-          r_grabbed.transform.localScale = new Vector3(1f,1f,1f);
           t.engaged = true;
           t.boxcollider.isTrigger = true;
                if(t == tool_insulator) t.dial_dial.val = (float)ThermoMath.percent_given_t(thermo.temperature);
@@ -470,21 +490,34 @@ public class World : MonoBehaviour
           TryApplyTool(t);
           r_grabbed.transform.localPosition = new Vector3(0f,0f,0f);
           r_grabbed.transform.localRotation = Quaternion.identity;
+          r_grabbed.transform.localScale = new Vector3(1f,1f,1f);
+          float v = t.active.transform.localScale.x; //can grab any dimension
+          Vector3 invscale = new Vector3(1f/v,1f/v,1f/v);
+          t.textl.transform.localScale = invscale;
+          t.textv.transform.localScale = invscale;
           Halfable h = r_grabbed.GetComponent<Halfable>();
           if(h != null) h.setHalf(halfed); //conform to half-ness while engaged
         }
+        //tool newly stored
         else if(t.storage_ghost.tintersect)
         {
           r_grabbed.transform.SetParent(t.storage.transform);
-          r_grabbed.transform.localScale = new Vector3(1f,1f,1f);
           t.stored = true;
           r_grabbed.transform.localPosition = new Vector3(0f,0f,0f);
           r_grabbed.transform.localRotation = Quaternion.identity;
+          r_grabbed.transform.localScale = new Vector3(1f,1f,1f);
+          float v = t.storage.transform.localScale.x; //can grab any dimension
+          Vector3 invscale = new Vector3(1f/v,1f/v,1f/v);
+          t.textl.transform.localScale = invscale;
+          t.textv.transform.localScale = invscale;
         }
+        //tool released
         else
         {
           r_grabbed.transform.SetParent(r_grabbed.GetComponent<Touchable>().og_parent);
           r_grabbed.transform.localScale = new Vector3(1f,1f,1f);
+          t.textl.transform.localScale = new Vector3(1f,1f,1f);
+          t.textv.transform.localScale = new Vector3(1f,1f,1f);
           t.rigidbody.isKinematic = false;
           t.rigidbody.velocity = hand_vel;
         }
@@ -539,7 +572,7 @@ public class World : MonoBehaviour
         UnityEngine.XR.InputTracking.Recenter();
         OVRManager.display.RecenterPose();
         Vector3 pos = cam_offset.transform.localPosition-(cam_offset.transform.localPosition+ceye.transform.localPosition);
-        pos.y = 0.0f;
+        pos.y = 0f;
         cam_offset.transform.localPosition = pos;
       }
       else vrcenter_backing_meshrenderer.material = tab_hi;
@@ -780,7 +813,7 @@ public class World : MonoBehaviour
       t = tools[i];
       if(!t.text_fadable.stale)
       {
-        if(t.text_fadable.alpha == 0.0f)
+        if(t.text_fadable.alpha == 0f)
         {
           t.textv_meshrenderer.enabled = false;
           t.textl_meshrenderer.enabled = false;
