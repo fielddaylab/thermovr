@@ -182,7 +182,6 @@ public class World : MonoBehaviour
     movables = new List<Touchable>();
     for(int i = 0; i < tools.Count; i++) movables.Add(tools[i].touchable); //important that tools take priority, so they can be grabbed and removed
     movables.Add(graph.GetComponent<Touchable>());
-    movables.Add(vessel.GetComponent<Touchable>());
     movables.Add(clipboard.GetComponent<Touchable>());
 
     halfer = GameObject.Find("Halfer");
