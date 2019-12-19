@@ -131,6 +131,9 @@ public class Tool : MonoBehaviour
         gameObject.transform.localPosition = new Vector3(0f,0f,0f);
         gameObject.transform.localScale = new Vector3(1f,1f,1f);
         gameObject.transform.localRotation = Quaternion.identity;
+        float v = storage.transform.localScale.x; //can grab any dimension
+        Vector3 invscale = new Vector3(1f/v,1f/v,1f/v);
+        text.transform.localScale = invscale;
       }
     }
     else if(engaged || stored || touchable.grabbed)

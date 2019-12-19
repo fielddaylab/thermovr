@@ -161,7 +161,9 @@ public class World : MonoBehaviour
       g.transform.localPosition = new Vector3(0f,0f,0f);
       g.transform.localScale = new Vector3(1f,1f,1f);
       g.transform.localRotation = Quaternion.identity;
-      t.text.transform.localScale = new Vector3(1f,1f,1f);
+      float v = t.storage.transform.localScale.x; //can grab any dimension
+      Vector3 invscale = new Vector3(1f/v,1f/v,1f/v);
+      t.text.transform.localScale = invscale;
       t.textv_tmp.SetText("{0:3}"+t.dial_dial.unit,(float)t.dial_dial.map);
     }
 
@@ -723,8 +725,12 @@ public class World : MonoBehaviour
     }
   }
 
+  float hack_timer = 0f;
   void Update()
   {
+    hack_timer += Time.deltaTime;
+    while(hack_timer > 100f) hack_timer -= 100f;
+
     //hands keep trying to run away- no idea why (this is a silly way to keep them still)
     lactualhand.transform.localPosition    = new Vector3(0f,0f,0f);
     lactualhand.transform.localEulerAngles = new Vector3(0f,0f,90f);//localRotation = Quaternion.identity;
@@ -753,6 +759,10 @@ public class World : MonoBehaviour
     float rhandt  = OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger);
     float rindext = OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger);
     //index compatibility
+    if(OVRInput.Get(OVRInput.Button.One,OVRInput.Controller.LTouch)) lhandt = 1.0f;
+    if(OVRInput.Get(OVRInput.Button.One,OVRInput.Controller.RTouch)) rhandt = 1.0f;
+    // update 12/19/19- ovr just doesn't recognize index input. so hacking a timed squeeze/release for testing
+    if((int)hack_timer%2 == 1) { lhandt = 1f; rhandt = 1f; }
     lhandt += lindext;
     rhandt += rindext;
     TryHand(true,  lhandt, lindext, lhand.transform.position.x, lhand.transform.position.y, lhand_vel, ref lhtrigger, ref litrigger, ref lhtrigger_delta, ref litrigger_delta, ref lz, ref ly, ref lhand, ref lgrabbed, ref rhand, ref rgrabbed); //left hand
