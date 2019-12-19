@@ -336,7 +336,7 @@ public class World : MonoBehaviour
       t.active.transform.localScale = scale;
       if(t.engaged) t.text.transform.localScale = invscale;
 
-      v *= 0.5f; //default scale of stored balloon/weight. hardcoded yikes
+      v *= t.default_storage_scale;
       scale = new Vector3(v,v,v);
       invscale = new Vector3(1f/v,1f/v,1f/v);
       t.storage.transform.localScale = scale;

@@ -28,6 +28,8 @@ public class Tool : MonoBehaviour
 
   public GameObject storage;
   [System.NonSerialized]
+  public float default_storage_scale;
+  [System.NonSerialized]
   public Ghost storage_ghost;
   [System.NonSerialized]
   public Touchable storage_touchable;
@@ -82,6 +84,7 @@ public class Tool : MonoBehaviour
     boxcollider = gameObject.GetComponent<BoxCollider>();
     rigidbody = gameObject.GetComponent<Rigidbody>();
 
+    default_storage_scale = storage.transform.localScale.x; //could grab any dimension
     storage_ghost = storage.GetComponent<Ghost>();
     storage_touchable = storage.GetComponent<Touchable>();
     storage_available = storage_ghost.available;
