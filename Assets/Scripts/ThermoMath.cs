@@ -155,13 +155,13 @@ public static class ThermoMath
   public static double h_given_percent(   double t) { return Lerpd(h_min,h_max,t); }
   public static double q_given_percent(   double t) { return t; } //q already is a percent
 
-  public static double percent_given_p(   double p) { return p-p_min/(p_max-p_min); }
-  public static double percent_given_psat(double psat) { return psat-psat_min/(psat_max-psat_min); }
-  public static double percent_given_v(   double v) { return v-v_min/(v_max-v_min); }
-  public static double percent_given_t(   double t) { return t-t_min/(t_max-t_min); }
-  public static double percent_given_i(   double i) { return i-i_min/(i_max-i_min); }
-  public static double percent_given_s(   double s) { return s-s_min/(s_max-s_min); }
-  public static double percent_given_h(   double h) { return h-h_min/(h_max-h_min); }
+  public static double percent_given_p(   double p) { return (p-p_min)/(p_max-p_min); }
+  public static double percent_given_psat(double psat) { return (psat-psat_min)/(psat_max-psat_min); }
+  public static double percent_given_v(   double v) { return (v-v_min)/(v_max-v_min); }
+  public static double percent_given_t(   double t) { return (t-t_min)/(t_max-t_min); }
+  public static double percent_given_i(   double i) { return (i-i_min)/(i_max-i_min); }
+  public static double percent_given_s(   double s) { return (s-s_min)/(s_max-s_min); }
+  public static double percent_given_h(   double h) { return (h-h_min)/(h_max-h_min); }
   public static double percent_given_q(   double q) { return q; } //q already is a percent
 
   //rule of naming for consistency: prefer lexical ordering "p < v < t", ie "p_given_vt" rather than "p_given_tv"

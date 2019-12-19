@@ -255,6 +255,7 @@ public class World : MonoBehaviour
     qtext_tmp = GameObject.Find("Qtext").GetComponent<TextMeshPro>();
     SetQuizText();
     SetChallengeBall();
+    SetAllHalfed(true);
   }
 
   void SetQuizText()
@@ -269,6 +270,16 @@ public class World : MonoBehaviour
     double temperature = ThermoMath.t_given_percent(Random.Range(0.1f,0.9f));
     double pressure    = ThermoMath.p_given_vt(volume, temperature);
     challenge_dot.transform.localPosition = thermo.plot(pressure, volume, temperature);
+  }
+
+  void SetAllHalfed(bool h)
+  {
+    halfed = h;
+    for(int i = 0; i < halfables.Count; i++)
+      halfables[i].setHalf(halfed);
+    //special case, only halfed when engaged
+    if(!tool_coil.engaged) tool_coil.gameObject.GetComponent<Halfable>().setHalf(false);
+    if(!tool_insulator.engaged) tool_insulator.gameObject.GetComponent<Halfable>().setHalf(false);
   }
 
   /*
@@ -556,14 +567,7 @@ public class World : MonoBehaviour
         (!which && halfer_touchable.rtouch)
       )
     )
-    {
-      halfed = !halfed;
-      for(int i = 0; i < halfables.Count; i++)
-        halfables[i].setHalf(halfed);
-      //special case, only halfed when engaged
-      if(!tool_coil.engaged) tool_coil.gameObject.GetComponent<Halfable>().setHalf(false);
-      if(!tool_insulator.engaged) tool_insulator.gameObject.GetComponent<Halfable>().setHalf(false);
-    }
+      SetAllHalfed(!halfed);
 
     //centerer
     if(vrcenter_fingertoggleable.finger)
@@ -736,6 +740,9 @@ public class World : MonoBehaviour
     ractualhand.transform.localPosition    = new Vector3(0f,0f,0f);
     ractualhand.transform.localEulerAngles = new Vector3(0f,0f,-90f);//localRotation = Quaternion.identity;
 
+    //debug hack!
+    thermo.add_pressure(0f); //TODO: remove
+
     //passive effects
     if(applied_weight != 0) thermo.add_pressure(applied_weight); //TODO: must convert weight to pressure!
     if(applied_heat   != 0)
@@ -761,7 +768,7 @@ public class World : MonoBehaviour
     if(OVRInput.Get(OVRInput.Button.One,OVRInput.Controller.LTouch)) lhandt = 1.0f;
     if(OVRInput.Get(OVRInput.Button.One,OVRInput.Controller.RTouch)) rhandt = 1.0f;
     // update 12/19/19- ovr just doesn't recognize index input. so hacking a timed squeeze/release for testing
-    if((int)hack_timer%2 == 1) { lhandt = 1f; rhandt = 1f; }
+    if((int)hack_timer%2 == 1) { lindext = 1f; rindext = 1f; }
     lhandt += lindext;
     rhandt += rindext;
     TryHand(true,  lhandt, lindext, lhand.transform.position.x, lhand.transform.position.y, lhand_vel, ref lhtrigger, ref litrigger, ref lhtrigger_delta, ref litrigger_delta, ref lz, ref ly, ref lhand, ref lgrabbed, ref rhand, ref rgrabbed); //left hand

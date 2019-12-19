@@ -545,6 +545,44 @@ public class ThermoState : MonoBehaviour
 
   //assume starting/ending point consistent for whole API!
 
+  //used for debugging- just "move" in some "random" direction that still results in a consistent state
+  //(allows testing connections when underlying math is not yet implemented)
+  public void random_iterate()
+  {
+    int dimension = (int)UnityEngine.Random.Range(0f,3.999f);
+    double min_p = 0.0001;
+    double max_p = 0.15;
+    double delta;
+    double deltarange = 0.01;
+    switch(dimension)
+    {
+      case 0: //pressure
+        delta = ThermoMath.p_given_percent(deltarange*2)-ThermoMath.p_given_percent(deltarange);
+        pressure += (double)UnityEngine.Random.Range(-1f,1f)*delta;
+        if(pressure < ThermoMath.p_given_percent(min_p) || pressure > ThermoMath.p_given_percent(max_p)) pressure = ThermoMath.p_given_percent(min_p);
+        break;
+      case 1: //volume
+        delta = ThermoMath.v_given_percent(deltarange*2)-ThermoMath.v_given_percent(deltarange);
+        volume += (double)UnityEngine.Random.Range(-1f,1f)*delta;
+        if(volume < ThermoMath.v_given_percent(min_p) || volume > ThermoMath.v_given_percent(max_p)) volume = ThermoMath.v_given_percent(min_p);
+        break;
+      case 2: //temperature
+        delta = ThermoMath.t_given_percent(deltarange*2)-ThermoMath.t_given_percent(deltarange);
+        temperature += (double)UnityEngine.Random.Range(-1f,1f)*delta;
+        if(temperature < ThermoMath.t_given_percent(min_p) || temperature > ThermoMath.t_given_percent(max_p)) temperature = ThermoMath.t_given_percent(min_p);
+        break;
+      case 3: //quality
+        delta = deltarange;
+        quality += (double)UnityEngine.Random.Range(-1f,1f)*delta;
+        quality = (double)Mathf.Clamp((float)quality,0f,1f);
+        break;
+    }
+
+    if(System.Double.IsNaN(pressure))    pressure    = ThermoMath.p_given_percent(min_p);
+    if(System.Double.IsNaN(volume))      volume      = ThermoMath.v_given_percent(min_p);
+    if(System.Double.IsNaN(temperature)) temperature = ThermoMath.t_given_percent(min_p);
+  }
+
   public void add_heat_constant_p(double j) //TODO:
   {
     //newie = q - p(newv-oldv) + ie;
@@ -578,6 +616,8 @@ public class ThermoState : MonoBehaviour
       break;
     }
   */
+
+    random_iterate(); //TODO: remove! onlyu used for debugging! remove after you've actually implemented math!
     transform_to_state();
   }
 
@@ -611,6 +651,8 @@ public class ThermoState : MonoBehaviour
       break;
     }
   */
+
+    random_iterate(); //TODO: remove! onlyu used for debugging! remove after you've actually implemented math!
     transform_to_state();
   }
 
@@ -642,6 +684,8 @@ public class ThermoState : MonoBehaviour
       break;
     }
   */
+
+    random_iterate(); //TODO: remove! onlyu used for debugging! remove after you've actually implemented math!
     transform_to_state();
   }
 
