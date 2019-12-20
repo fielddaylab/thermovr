@@ -202,46 +202,46 @@ public class World : MonoBehaviour
 
     questions = new List<string>();
     options = new List<string>();
-    answers = new List<int>();
-    givens = new List<int>();
+    answers = new List<int>(); //the correct answer
+    givens = new List<int>(); //the recorded answer given by the user (default -1)
 
-    questions.Add("What's the q?");
-    options.Add("A. WHAAA");
-    options.Add("B. WHOO");
-    options.Add("C. bababa");
-    options.Add("D. dddddd");
+    questions.Add("Here is an example question- in what region is the water?");
+    options.Add("A. Solid");
+    options.Add("B. Liquid");
+    options.Add("C. Vapor");
+    options.Add("D. Two Phase");
     answers.Add(2);
     givens.Add(-1);
 
-    questions.Add("What's the next q?");
-    options.Add("A. WHAAA");
-    options.Add("B. WHOO");
-    options.Add("C. bababa");
-    options.Add("D. dddddd");
+    questions.Add("Here is an example question- in what region is the water?");
+    options.Add("A. Solid");
+    options.Add("B. Liquid");
+    options.Add("C. Vapor");
+    options.Add("D. Two Phase");
     answers.Add(2);
     givens.Add(-1);
 
-    questions.Add("What's the q?");
-    options.Add("A. WHAAA");
-    options.Add("B. WHOO");
-    options.Add("C. bababa");
-    options.Add("D. dddddd");
+    questions.Add("Here is an example question- in what region is the water?");
+    options.Add("A. Solid");
+    options.Add("B. Liquid");
+    options.Add("C. Vapor");
+    options.Add("D. Two Phase");
     answers.Add(2);
     givens.Add(-1);
 
-    questions.Add("What's the q?");
-    options.Add("A. WHAAA");
-    options.Add("B. WHOO");
-    options.Add("C. bababa");
-    options.Add("D. dddddd");
+    questions.Add("Here is an example question- in what region is the water?");
+    options.Add("A. Solid");
+    options.Add("B. Liquid");
+    options.Add("C. Vapor");
+    options.Add("D. Two Phase");
     answers.Add(2);
     givens.Add(-1);
 
-    questions.Add("What's the q?");
-    options.Add("A. WHAAA");
-    options.Add("B. WHOO");
-    options.Add("C. bababa");
-    options.Add("D. dddddd");
+    questions.Add("Here is an example question- in what region is the water?");
+    options.Add("A. Solid");
+    options.Add("B. Liquid");
+    options.Add("C. Vapor");
+    options.Add("D. Two Phase");
     answers.Add(2);
     givens.Add(-1);
 
