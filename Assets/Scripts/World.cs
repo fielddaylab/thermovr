@@ -715,16 +715,8 @@ public class World : MonoBehaviour
     for(int i = 0; i < list.Count; i++)
     {
       t = list[i];
-      if(known == i)
-      {
-        if(t.fingertoggleable.finger) t.backing_meshrenderer.material = tab_hisel;
-        else                          t.backing_meshrenderer.material = tab_sel;
-      }
-      else
-      {
-        if(t.fingertoggleable.finger) t.backing_meshrenderer.material = tab_hi;
-        else                          t.backing_meshrenderer.material = tab_default;
-      }
+      if(known == i) t.backing_meshrenderer.material = tab_sel;
+      else           t.backing_meshrenderer.material = tab_default;
     }
   }
 
