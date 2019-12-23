@@ -107,13 +107,13 @@ public class ThermoState : MonoBehaviour
   //sample bias- "graph density"
   [Range(0.001f,20)]
   public double sample_lbase = 1.6f;
-  double sample_lbase_prev = 0.0f;
+  double sample_lbase_prev = 0f;
   double sample(double t) { return Math.Pow(t,sample_lbase); }
 
   //plot bias- "graph zoom"
   [Range(0.001f,10)]
-  public double plot_lbase = 10.0f;
-  double plot_lbase_prev = 0.0f;
+  public double plot_lbase = 10f;
+  double plot_lbase_prev = 0f;
   public float plot_dimension(double min, double max, double val) { double lval = Math.Log(val,plot_lbase); double lmax = Math.Log(max,plot_lbase); double lmin = Math.Log(min,plot_lbase); return (float)((lval-lmin)/(lmax-lmin)); }
 
   public Vector3 plot(double pressure, double volume, double temperature)
@@ -193,7 +193,7 @@ public class ThermoState : MonoBehaviour
 
     int concentrated_samples = samples*2;
     int position_dome_region = mesh_positions.Count;
-    float highest_y = 0.0f;
+    float highest_y = 0f;
     int highest_y_i = 0;
     for(int y = 0; y < concentrated_samples; y++)
     {
@@ -222,7 +222,7 @@ public class ThermoState : MonoBehaviour
       point = new Vector3(vplot,pplot,tplot);
       mesh_positions.Add(point);
     }
-    highest_y = Mathf.Lerp(highest_y,1.0f,0.01f); //extra nudge up
+    highest_y = Mathf.Lerp(highest_y,1f,0.01f); //extra nudge up
 
     //kill spanning triangles; gather orphans
     //"ladder"/"rung" terminology a bit arbitrary- attempts to keep track of each side of a "zipper" for each seam ("left" seam, "right" seam, each have own ladder/rung)
@@ -246,7 +246,7 @@ public class ThermoState : MonoBehaviour
       if((left_rung.y  < a.y || left_rung.y  < b.y || left_rung.y  < c.y) && left_ladder_i+4  < mesh_positions.Count) { left_ladder_i  += 2; left_ladder  = mesh_positions[left_ladder_i];  left_rung  = mesh_positions[left_ladder_i+2];  }
       if((right_rung.y < a.y || right_rung.y < b.y || right_rung.y < c.y) && right_ladder_i+4 < mesh_positions.Count) { right_ladder_i += 2; right_ladder = mesh_positions[right_ladder_i]; right_rung = mesh_positions[right_ladder_i+2]; }
 
-      float x_cmp = (left_ladder.x+right_ladder.x)/2.0f;
+      float x_cmp = (left_ladder.x+right_ladder.x)/2f;
       if(
         (a.y < highest_y || b.y < highest_y || c.y < highest_y) &&
         (a.x < x_cmp || b.x < x_cmp || c.x < x_cmp) &&
@@ -490,8 +490,8 @@ public class ThermoState : MonoBehaviour
 
     GameObject gameObject = new GameObject("graph_mesh", typeof(MeshFilter), typeof(MeshRenderer));
     gameObject.transform.parent = graph.transform;
-    gameObject.transform.localPosition = new Vector3(0.0f,0.0f,0.0f);
-    gameObject.transform.localScale = new Vector3(1.0f,1.0f,1.0f);
+    gameObject.transform.localPosition = new Vector3(0f,0f,0f);
+    gameObject.transform.localScale = new Vector3(1f,1f,1f);
     gameObject.transform.localRotation = Quaternion.identity;
     gameObject.GetComponent<MeshFilter>().mesh = mesh;
     gameObject.GetComponent<MeshRenderer>().material = graph_material;
@@ -706,8 +706,8 @@ public class ThermoState : MonoBehaviour
     water_lt.y = (float)quality;
     water.transform.localScale = water_lt;
     Vector3 steam_lt = steam.transform.localScale;
-    steam_lt.y = 1.0f-(float)quality;
-    steam.transform.localScale = steam_lt;
+    steam_lt.y = 1f-(float)quality;
+    steam.transform.localScale = -1f*steam_lt;
   }
 
   // Update is called once per frame
@@ -720,7 +720,7 @@ public class ThermoState : MonoBehaviour
     plot_lbase_prev = plot_lbase;
     if(modified) genMesh();
 
-    if(Math.Abs(pressure       - prev_pressure)       > 0.001) text_pressure.SetText(      "P: {0:3}KP",     (float)pressure/1000.0f);
+    if(Math.Abs(pressure       - prev_pressure)       > 0.001) text_pressure.SetText(      "P: {0:3}KP",     (float)pressure/1000f);
     if(Math.Abs(temperature    - prev_temperature)    > 0.001) text_temperature.SetText(   "T: {0:3}K",      (float)temperature);
     if(Math.Abs(volume         - prev_volume)         > 0.001) text_volume.SetText(        "v: {0:3}M^3/kg", (float)volume);
     if(Math.Abs(internalenergy - prev_internalenergy) > 0.001) text_internalenergy.SetText("i: {0:3}J/kg",   (float)internalenergy);
