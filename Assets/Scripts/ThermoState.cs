@@ -625,9 +625,9 @@ public class ThermoState : MonoBehaviour
     transform_to_state();
   }
 
-  public void add_pressure_insulated(double p, bool insulated) //TODO: get region, implement iteration
+  public void add_pressure_insulated(double p, bool insulated) //TODO: implement iteration
   {
-    int region = 0; //TODO: get region
+    int region = ThermoMath.region_given_pvt(pressure,volume,temperature);
     switch(region)
     {
       case 0: //subcooled liquid

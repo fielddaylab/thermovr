@@ -144,6 +144,23 @@ public static class ThermoMath
 
   static double Lerpd(double a, double b, double t) { return (b-a)*t+a; }
 
+  public static int region_given_pvt(double p, double v, double t)
+  {
+    IF97.IF97REGIONS r = IF97.RegionDetermination_TP(t, p);
+    switch(r)
+    {
+      case IF97.IF97REGIONS.REGION_1: //liquid
+        return 0; //subcooled liquid
+      case IF97.IF97REGIONS.REGION_2: //vapor
+        return 2; //superheated vapor
+      case IF97.IF97REGIONS.REGION_3:
+      case IF97.IF97REGIONS.REGION_4: //two-phase
+      case IF97.IF97REGIONS.REGION_5:
+        return 1; //two-phase
+    }
+    return -1;
+  }
+
   //helpers to easily generate values "randomly", ensuring we're within the range we care about- NOT PHYSICALLY BASED
   //"percent" = "percent between min value and max value across given dimension"
   public static double p_given_percent(   double t) { return Lerpd(p_min,p_max,t); }

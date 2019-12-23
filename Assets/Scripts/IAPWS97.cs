@@ -3933,7 +3933,7 @@ public static class IF97
   /**************************    General      *******************************/
   /********************************************************************************/
 
-  enum IF97REGIONS
+  public enum IF97REGIONS
   {
     REGION_1,
     REGION_2,
@@ -3952,7 +3952,7 @@ public static class IF97
     BACK_4
   };
 
-  static IF97REGIONS RegionDetermination_TP(double T, double p)
+  public static IF97REGIONS RegionDetermination_TP(double T, double p)
   {
     if(T > Text)
     {
