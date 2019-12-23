@@ -53,7 +53,7 @@ public static class ThermoMath
   pressure = p
   specificvolume = v
   temperature = t
-  internalenergy = i (<- thermodynamics calls this "Q", but that's what we use for "quality". so I'm using "i")
+  internalenergy = u
   entropy = s
   enthalpy = h
   quality = q
@@ -72,8 +72,8 @@ public static class ThermoMath
   public static double t_min; // 273.15
   public static double t_max; // 1073.15
   //J/kg
-  public static double i_min; //0 //TODO: add actual value as comment for quick reference
-  public static double i_max; //0 //TODO: add actual value as comment for quick reference
+  public static double u_min; //0 //TODO: add actual value as comment for quick reference
+  public static double u_max; //0 //TODO: add actual value as comment for quick reference
   //J/kgK
   public static double s_min; //0 //TODO: add actual value as comment for quick reference
   public static double s_max; //0 //TODO: add actual value as comment for quick reference
@@ -101,8 +101,8 @@ public static class ThermoMath
     t_min = IF97.get_Tmin(); // 273.15
     t_max = IF97.get_Tmax(); // 1073.15
     //J/kg
-    i_min = 0; //TODO:find actual min
-    i_max = 1; //TODO:find actual max
+    u_min = 0; //TODO:find actual min
+    u_max = 1; //TODO:find actual max
     //J/kgK
     s_min = IF97.Smin; //TODO: add actual value as comment for quick reference
     s_max = IF97.Smax; //TODO: add actual value as comment for quick reference
@@ -150,7 +150,7 @@ public static class ThermoMath
   public static double psat_given_percent(double t) { return Lerpd(psat_min,psat_max,t); }
   public static double v_given_percent(   double t) { return Lerpd(v_min,v_max,t); }
   public static double t_given_percent(   double t) { return Lerpd(t_min,t_max,t); }
-  public static double i_given_percent(   double t) { return Lerpd(i_min,i_max,t); }
+  public static double u_given_percent(   double t) { return Lerpd(u_min,u_max,t); }
   public static double s_given_percent(   double t) { return Lerpd(s_min,s_max,t); }
   public static double h_given_percent(   double t) { return Lerpd(h_min,h_max,t); }
   public static double q_given_percent(   double t) { return t; } //q already is a percent
@@ -159,26 +159,36 @@ public static class ThermoMath
   public static double percent_given_psat(double psat) { return (psat-psat_min)/(psat_max-psat_min); }
   public static double percent_given_v(   double v) { return (v-v_min)/(v_max-v_min); }
   public static double percent_given_t(   double t) { return (t-t_min)/(t_max-t_min); }
-  public static double percent_given_i(   double i) { return (i-i_min)/(i_max-i_min); }
+  public static double percent_given_u(   double u) { return (u-u_min)/(u_max-u_min); }
   public static double percent_given_s(   double s) { return (s-s_min)/(s_max-s_min); }
   public static double percent_given_h(   double h) { return (h-h_min)/(h_max-h_min); }
   public static double percent_given_q(   double q) { return q; } //q already is a percent
 
-  //rule of naming for consistency: prefer lexical ordering "p < v < t", ie "p_given_vt" rather than "p_given_tv"
+  //rule of naming for consistency: prefer lexical ordering "p < v < t < u < s < h < q", ie "p_given_vt" rather than "p_given_tv"
 
   public static double p_given_vt(double v, double t)
   {
     return IAPWS95.IAPWS95_pressure(1.0/v,t)*1000.0; //expects:Kg/M^3,K returns KPa
   }
 
-  public static double v_given_pt(double p, double t)
+  public static double p_given_vu(double v, double u) //CONFIRMED NEEDED!
+  {
+    return p_given_percent(0.5); //TODO:
+  }
+
+  public static double v_given_pt(double p, double t) //CONFIRMED NEEDED!
   {
     return 1.0/IF97.rhomass_Tp(t,p/1000000.0); //expects:K,MPa returns Kg/M^3
   }
 
-  public static double t_given_pv(double p, double v)
+  public static double t_given_pv(double p, double v) //CONFIRMED NEEDED!
   {
-    return t_given_percent(0.5); //bogus implementation!
+    return t_given_percent(0.5); //TODO:
+  }
+
+  public static double t_given_pu(double p, double u) //CONFIRMED NEEDED!
+  {
+    return t_given_percent(0.5); //TODO:
   }
 
   public static double tsat_given_p(double p)
@@ -196,9 +206,14 @@ public static class ThermoMath
     return 1.0/IF97.rhovap_p(p/1000000.0); //expects:MPa returns Kg/M^3
   }
 
-  public static double i_given_pt(double p, double t)
+  public static double v_given_pu(double p, double u) //CONFIRMED NEEDED!
   {
-    return i_given_percent(0.5); //TODO:
+    return v_given_percent(0.5); //TODO:
+  }
+
+  public static double u_given_pt(double p, double t) //CONFIRMED NEEDED!
+  {
+    return u_given_percent(0.5); //TODO:
   }
 
   public static double s_given_pt(double p, double t)
@@ -206,7 +221,17 @@ public static class ThermoMath
     return s_given_percent(0.5); //TODO:
   }
 
+  public static double s_given_pu(double p, double u) //CONFIRMED NEEDED!
+  {
+    return s_given_percent(0.5); //TODO:
+  }
+
   public static double h_given_pt(double p, double t)
+  {
+    return h_given_percent(0.5); //TODO:
+  }
+
+  public static double h_given_pu(double p, double u) //CONFIRMED NEEDED!
   {
     return h_given_percent(0.5); //TODO:
   }

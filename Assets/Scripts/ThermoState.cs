@@ -60,7 +60,9 @@ public class ThermoState : MonoBehaviour
   //static properties of system
   public double mass = 1; //kg
   public double radius = 0.05; //M
-  public double surfacearea = 1.0; //Math.Pow(3.141592*radius,2.0); //M^2 //TODO: either do the math and hard code it, or figure out how to C# constexpr
+  //public double surfacearea = Math.Pow(3.141592*radius,2.0); //M^2 //hardcoded answer below
+  public double surfacearea = 0.024674011; //M^2 //hardcoded answer to eqn above
+  public double surfacearea_insqr = 38.2447935395871; //in^2 //hardcoded conversion from m^2 to in^2
 
   //vessel
   GameObject vessel;
@@ -504,7 +506,7 @@ public class ThermoState : MonoBehaviour
     temperature    = ThermoMath.t_given_percent(0.9); //picked initial temperature somewhat arbitrarily
     //from this point, the rest should be derived!
     volume         = ThermoMath.v_given_pt(pressure,temperature);
-    internalenergy = ThermoMath.i_given_pt(pressure,temperature); //TODO:
+    internalenergy = ThermoMath.u_given_pt(pressure,temperature); //TODO:
     entropy        = ThermoMath.s_given_pt(pressure,temperature); //TODO:
     enthalpy       = ThermoMath.h_given_pt(pressure,temperature); //TODO:
     quality        = ThermoMath.q_given_pt(pressure,temperature); //TODO:
@@ -545,7 +547,8 @@ public class ThermoState : MonoBehaviour
 
   //assume starting/ending point consistent for whole API!
 
-  //used for debugging- just "move" in some "random" direction that still results in a consistent state
+  //TODO: Remove this whole function ("random_iterate") and all calls to it when math actually completed
+  //used for debugging- just "move" in some "random" direction
   //(allows testing connections when underlying math is not yet implemented)
   public void random_iterate()
   {
@@ -583,109 +586,105 @@ public class ThermoState : MonoBehaviour
     if(System.Double.IsNaN(temperature)) temperature = ThermoMath.t_given_percent(min_p);
   }
 
-  public void add_heat_constant_p(double j) //TODO:
+  public void add_heat_constant_p(double j) //TODO: implement iteration step
   {
-    //newie = q - p(newv-oldv) + ie;
-  /*
-    int region = 0;
-    switch(region)
-    {
-      case 0: //subcooled liquid
-      {
-        double q = j*t; //watts
-        newinternalenergy = internalenergy+(q*t/mass) - pressure*(newvolume-volume);
-        newvolume = get_volume_given(newinternalenergy,pressure);
-        //at this point, we have enough internal state to derive the rest
-      }
-      break;
-      case 1: //two-phase region
-      {
-        double q = j*t; //watts
-        newvolume = get_volume_given(newinternalenergy,pressure);
-        internalenergy = internalenergy+(q*t/mass) - pressure*(newvolume-volume);
-        //at this point, we have enough internal state to derive the rest
-      }
-      break;
-      case 2: //superheated vapor
-      {
-        double q = j*t; //watts
-        newvolume = get_volume_given(newinternalenergy,pressure);
-        internalenergy = internalenergy+(q*t/mass) - pressure*(newvolume-volume);
-        //at this point, we have enough internal state to derive the rest
-      }
-      break;
-    }
-  */
+    //no difference between regions
 
-    random_iterate(); //TODO: remove! onlyu used for debugging! remove after you've actually implemented math!
+    //default guess
+    double new_v = volume;
+    double new_u = internalenergy;
+    //ITERATE TO SOLVE
+    {
+      new_v = ThermoMath.v_given_pu(pressure,new_u);
+      new_u = internalenergy+(j/mass) - pressure*(new_v-volume);
+    }
+
+    //at this point, we have enough internal state to derive the rest
+    volume = new_v;
+    internalenergy = new_u;
+    temperature = ThermoMath.t_given_pv(pressure, volume);
+    enthalpy = ThermoMath.h_given_pu(pressure,internalenergy);
+    entropy = ThermoMath.s_given_pu(pressure, internalenergy);
+
     transform_to_state();
   }
 
-  public void add_heat_constant_v(double j) //TODO:
+  public void add_heat_constant_v(double j)
   {
-    //newie = q - p(newv-oldv) + ie;
-  /*
-    int region = 0;
-    switch(region)
-    {
-      case 0: //subcooled liquid
-      {
-        double q = j*t; //watts
-        newinternalenergy = internalenergy+(q*t/mass) - pressure*(newvolume-volume);
-        //at this point, we have enough internal state to derive the rest
-      }
-      break;
-      case 1: //two-phase region
-      {
-        double q = j*t; //watts
-        newinternalenergy = internalenergy+(q*t/mass);
-        //at this point, we have enough internal state to derive the rest
-      }
-      break;
-      case 2: //superheated vapor
-      {
-        double q = j*t; //watts
-        newinternalenergy = internalenergy+(q*t/mass);
-        //at this point, we have enough internal state to derive the rest
-      }
-      break;
-    }
-  */
+    //no difference between regions
 
-    random_iterate(); //TODO: remove! onlyu used for debugging! remove after you've actually implemented math!
+    double new_u = internalenergy+(j/mass);
+
+    //at this point, we have enough internal state to derive the rest
+    internalenergy = new_u;
+    pressure = ThermoMath.p_given_vu(volume, internalenergy);
+    temperature = ThermoMath.t_given_pv(pressure, volume);
+    enthalpy = ThermoMath.h_given_pu(pressure,internalenergy);
+    entropy = ThermoMath.s_given_pu(pressure, internalenergy);
+
     transform_to_state();
   }
 
-  public void add_pressure(double w) //TODO:
+  public void add_pressure_insulated(double p, bool insulated) //TODO: get region, implement iteration
   {
-  /*
-    int region = 0;
+    int region = 0; //TODO: get region
     switch(region)
     {
       case 0: //subcooled liquid
       {
-        double p = w*blah;
-        newpressure = pressure+p;
+        //default guess
+        double new_t = temperature;
+        double new_u = internalenergy;
+
+        double new_p = pressure+p; //no significant change to other variables!
+        //TODO: ITERATE TO SOLVE
+        {
+        new_t = ThermoMath.t_given_pu(new_p, new_u);
+        new_u = ThermoMath.u_given_pt(new_p, new_t);
+        }
+
         //at this point, we have enough internal state to derive the rest
+        pressure = new_p;
+        temperature = new_t;
+        internalenergy = new_u;
+        volume = ThermoMath.v_given_pt(pressure, temperature);
+        enthalpy = ThermoMath.h_given_pu(pressure,internalenergy);
+        entropy = ThermoMath.s_given_pu(pressure, internalenergy);
       }
       break;
       case 1: //two-phase region
       {
-        double p = w*blah;
-        newpressure = pressure+p;
-        //at this point, we have enough internal state to derive the rest
+        //IGNORE BECAUSE UNSURE HOW TO CALCULATE!
       }
       break;
       case 2: //superheated vapor
       {
-        double p = w*blah;
-        newpressure = pressure+p;
+        //default guess
+        double new_u = internalenergy;
+        double new_v = volume;
+
+        double new_p = pressure+p; //no significant change to other variables!
+        //TODO: ITERATE TO SOLVE
+        {
+          //new_u = internalenergy-pressure*volume^k/(k-1)*(volume^(1-k)-new_v^(1-k)); //variable insulation //TODO: if you want to implement variable insulation, change "insulated" from bool to float, then use this eqn (and obv alter the calling functions to pass in variable)
+          if(insulated)
+            new_u = internalenergy; //unchanged? I got this by subbing k = 1 (sets eqn to u-p*inf*0, which I interpreted as equal to u-p*0, ie, just u)
+          else
+            new_u = internalenergy-pressure*(volume-new_v); //seems coherent?
+          new_v = ThermoMath.v_given_pu(new_p, new_u);
+        }
+
+        //at this point, we have enough internal state to derive the rest
+        pressure = new_p;
+        volume = new_v;
+        internalenergy = new_u;
+        temperature = ThermoMath.t_given_pu(pressure, internalenergy);
+        enthalpy = ThermoMath.h_given_pu(pressure,internalenergy);
+        entropy = ThermoMath.s_given_pu(pressure, internalenergy);
       }
       break;
     }
-  */
 
-    random_iterate(); //TODO: remove! onlyu used for debugging! remove after you've actually implemented math!
     transform_to_state();
   }
 

@@ -733,11 +733,17 @@ public class World : MonoBehaviour
     ractualhand.transform.localEulerAngles = new Vector3(0f,0f,-90f);//localRotation = Quaternion.identity;
 
     //passive effects
-    if(applied_weight != 0) thermo.add_pressure(applied_weight); //TODO: must convert weight to pressure!
+    if(applied_weight != 0)
+    {
+      double weight_pressure = applied_weight/thermo.surfacearea_insqr; //psi
+      weight_pressure *= 6894.76; //conversion from psi to pascal
+      thermo.add_pressure_insulated(weight_pressure,tool_insulator.engaged);
+    }
     if(applied_heat   != 0)
     {
-      if(tool_clamp.engaged) thermo.add_heat_constant_v(applied_heat); //TODO: make sure "applied heat" is first converted to appropriate unit!
-      else                   thermo.add_heat_constant_p(applied_heat); //TODO: make sure "applied heat" is first converted to appropriate unit!
+      double heat_joules = applied_heat*(double)Time.deltaTime;
+      if(tool_clamp.engaged) thermo.add_heat_constant_v(heat_joules);
+      else                   thermo.add_heat_constant_p(heat_joules);
     }
 
     //running blended average of hand velocity, for consistent "throwing"
