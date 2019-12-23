@@ -42,13 +42,13 @@ public class ThermoState : MonoBehaviour
   int samples = 350;
 
   //state
-  public double pressure; //pascals
-  public double temperature; //kalvin
-  public double volume; //M^3/kg
-  public double internalenergy; //J/kg
-  public double entropy; //J/kgK
-  public double enthalpy; //J/kg
-  public double quality; //%
+  public double pressure;       //p //pascals
+  public double temperature;    //t //kalvin
+  public double volume;         //v //M^3/kg
+  public double internalenergy; //u //J/kg
+  public double entropy;        //s //J/kgK
+  public double enthalpy;       //h //J/kg
+  public double quality;        //q //%
   double prev_pressure;
   double prev_temperature;
   double prev_volume;
