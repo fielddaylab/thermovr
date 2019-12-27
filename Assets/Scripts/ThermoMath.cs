@@ -10,6 +10,11 @@ This class should be "pure math". The only state should be for caching/performan
 Current implementations ported/used:
 IF97 (IAPWS97.cs) https://github.com/CoolProp/IF97
 IAPWS95 (IAPWS95.cs) https://code.google.com/archive/p/proph2o/downloads
+
+
+Note- phil, 12/27/19
+I have only implemented functions that were determined to be NEEDED to implement ThermoState.cs
+Many other derivations are possible, either directly, or via iterative guessing (see "iterate_x_given_x_verify_x" examples)
 */
 
 using System;
@@ -56,15 +61,15 @@ public static class ThermoMath
   internalenergy = u
   entropy = s
   enthalpy = h
-  quality = q
+  quality = x
   */
 
   //Pa
   public static double p_min; // 611.213
   public static double p_max; // 100000000
   //Pa
-  public static double psat_min; //TODO: add actual value as comment for quick reference
-  public static double psat_max; //TODO: add actual value as comment for quick reference
+  public static double psat_min; //TODO: comment actual value for quick reference
+  public static double psat_max; //TODO: comment actual value for quick reference
   //M^3/kg
   public static double v_min;  // 0.0003
   public static double v_max; // 1000
@@ -72,17 +77,17 @@ public static class ThermoMath
   public static double t_min; // 273.15
   public static double t_max; // 1073.15
   //J/kg
-  public static double u_min; //0 //TODO: add actual value as comment for quick reference
-  public static double u_max; //0 //TODO: add actual value as comment for quick reference
+  public static double u_min; //TODO: comment actual value for quick reference
+  public static double u_max; //TODO: comment actual value for quick reference
   //J/kgK
-  public static double s_min; //0 //TODO: add actual value as comment for quick reference
-  public static double s_max; //0 //TODO: add actual value as comment for quick reference
+  public static double s_min; //TODO: comment actual value for quick reference
+  public static double s_max; //TODO: comment actual value for quick reference
   //J/kg
-  public static double h_min; //0 //TODO: add actual value as comment for quick reference
-  public static double h_max; //0 //TODO: add actual value as comment for quick reference
+  public static double h_min; //TODO: comment actual value for quick reference
+  public static double h_max; //TODO: comment actual value for quick reference
   //%
-  public static double q_min; //0
-  public static double q_max; //1
+  public static double x_min; //0
+  public static double x_max; //1
 
   public static void Init()
   {
@@ -92,8 +97,8 @@ public static class ThermoMath
     p_min = IF97.get_Pmin()*1000000.0; // 611.213
     p_max = IF97.get_Pmax()*1000000.0; // 100000000
     //Pa
-    psat_min = IF97.get_ptrip()*1000000.0; //TODO: add actual value as comment for quick reference
-    psat_max = IF97.get_pcrit()*1000000.0; //TODO: add actual value as comment for quick reference
+    psat_min = IF97.get_ptrip()*1000000.0; //TODO: comment actual value for quick reference
+    psat_max = IF97.get_pcrit()*1000000.0; //TODO: comment actual value for quick reference
     //M^3/kg
     v_min = 1.0/3000;  // 0.0003
     v_max = 1.0/0.001; // 1000
@@ -104,8 +109,8 @@ public static class ThermoMath
     u_min = 0; //TODO:find actual min
     u_max = 1; //TODO:find actual max
     //J/kgK
-    s_min = IF97.Smin; //TODO: add actual value as comment for quick reference
-    s_max = IF97.Smax; //TODO: add actual value as comment for quick reference
+    s_min = IF97.Smin; //TODO: comment actual value for quick reference
+    s_max = IF97.Smax; //TODO: comment actual value for quick reference
     //J/kg
     h_min = IF97.Hmin(s_min); //TODO: unsure if this is correct calculation!
     h_max = IF97.Hmax(s_max); //TODO: unsure if this is correct calculation!
@@ -170,7 +175,7 @@ public static class ThermoMath
   public static double u_given_percent(   double t) { return Lerpd(u_min,u_max,t); }
   public static double s_given_percent(   double t) { return Lerpd(s_min,s_max,t); }
   public static double h_given_percent(   double t) { return Lerpd(h_min,h_max,t); }
-  public static double q_given_percent(   double t) { return t; } //q already is a percent
+  public static double x_given_percent(   double t) { return t; } //x already is a percent
 
   public static double percent_given_p(   double p) { return (p-p_min)/(p_max-p_min); }
   public static double percent_given_psat(double psat) { return (psat-psat_min)/(psat_max-psat_min); }
@@ -179,18 +184,29 @@ public static class ThermoMath
   public static double percent_given_u(   double u) { return (u-u_min)/(u_max-u_min); }
   public static double percent_given_s(   double s) { return (s-s_min)/(s_max-s_min); }
   public static double percent_given_h(   double h) { return (h-h_min)/(h_max-h_min); }
-  public static double percent_given_q(   double q) { return q; } //q already is a percent
+  public static double percent_given_x(   double x) { return x; } //x already is a percent
 
   //rule of naming for consistency: prefer lexical ordering "p < v < t < u < s < h < q", ie "p_given_vt" rather than "p_given_tv"
+  //note- where it says "UNIT CONVERSION UNTESTED", that measn I haven't yet verified that it performs the correct translation of units between APIs (ie, one may be expecting KPa, and another just Pa). I have learned to not trust the documentation of either API (IAPWS95 or IF97)
 
   public static double p_given_vt(double v, double t)
   {
     return IAPWS95.IAPWS95_pressure(1.0/v,t)*1000.0; //expects:Kg/M^3,K returns KPa
   }
 
-  public static double v_given_pt(double p, double t)//*//*
+  public static double v_given_pt(double p, double t) //DO NOT USE IN VAPOR DOME
   {
     return 1.0/IF97.rhomass_Tp(t,p/1000000.0); //expects:K,MPa returns Kg/M^3
+  }
+
+  public static double v_given_ph(double p, double h)
+  {
+    return 1.0/IF97.rhomass_phmass(p/1000000.0,h); //UNIT CONVERSION UNTESTED!
+  }
+
+  public static double t_given_ph(double p, double h)
+  {
+    return IF97.T_phmass(p/1000000.0,h); //UNIT CONVERSION UNTESTED!
   }
 
   public static double tsat_given_p(double p)
@@ -208,12 +224,7 @@ public static class ThermoMath
     return 1.0/IF97.rhovap_p(p/1000000.0); //expects:MPa returns Kg/M^3
   }
 
-  public static double v_given_pu(double p, double u)//*
-  {
-    return v_given_percent(0.5); //TODO:
-  }
-
-  public static double u_given_pt(double p, double t)
+  public static double u_given_pt(double p, double t) //DO NOT USE IN VAPOR DOME
   {
     return IF97.umass_Tp(t, p/1000000.0); //UNIT CONVERSION UNTESTED!
   }
@@ -233,5 +244,65 @@ public static class ThermoMath
     return IAPWS95.IAPWS95_enthalpy(1f/v,t)*1000f; //UNIT CONVERSION UNTESTED!
   }
 
+  public static double x_given_pv(double p, double v) //ONLY USE IN VAPOR DOME
+  {
+    //f means saturated liquid,
+    //g means saturated gas
+    double vf = IF97.cvliq_p(p/1000000.0);
+    double vg = IF97.cvvap_p(p/1000000.0);
+    return (v-vf)/(vg-vf);
+  }
+
+  public static double iterate_t_given_p_verify_u(double t, double p, double u) //t = "first guess"
+  {
+    int MAX_ITERS = 100;     //TODO: define intentionally
+    double MAX_DELTA = 0.01; //TODO: define intentionally
+    double step = 0.01;      //TODO: define intentionally
+    double guess = t;
+    double mark = u;
+    double delta = Math.Abs(u_given_pt(p,guess)-mark);
+    for(int i = 0; i < MAX_ITERS || delta < MAX_DELTA; i++)
+    {
+      double delta_a = Math.Abs(u_given_pt(p,guess+ step     )-mark);
+      double delta_b = Math.Abs(u_given_pt(p,guess-(step/2.0))-mark);
+      if(delta_a < delta_b)
+      {
+        delta = delta_a;
+      }
+      else
+      {
+        delta = delta_b;
+        step = step/-2.0;
+      }
+      guess += step;
+    }
+    return guess;
+  }
+
+  public static double iterate_t_given_v_verify_u(double t, double v, double u)
+  {
+    int MAX_ITERS = 100;      //TODO: define intentionally
+    double MAX_DELTA = 0.01;  //TODO: define intentionally
+    double step = 0.01;       //TODO: define intentionally
+    double guess = t;
+    double mark = u;
+    double delta = u_given_vt(v,guess)-mark;
+    for(int i = 0; i < MAX_ITERS || delta < MAX_DELTA; i++)
+    {
+      double delta_a = Math.Abs(u_given_vt(v,guess+ step     )-mark);
+      double delta_b = Math.Abs(u_given_vt(v,guess-(step/2.0))-mark);
+      if(delta_a < delta_b)
+      {
+        delta = delta_a;
+      }
+      else
+      {
+        delta = delta_b;
+        step = step/-2.0;
+      }
+      guess += step;
+    }
+    return guess;
+  }
 }
 

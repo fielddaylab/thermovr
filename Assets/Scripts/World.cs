@@ -737,7 +737,10 @@ public class World : MonoBehaviour
     {
       double weight_pressure = applied_weight/thermo.surfacearea_insqr; //psi
       weight_pressure *= 6894.76; //conversion from psi to pascal
-      thermo.add_pressure_insulated(weight_pressure,tool_insulator.engaged);
+      if(tool_insulator.engaged)
+        thermo.add_pressure_insulated(weight_pressure);
+      else
+        thermo.add_pressure_uninsulated(weight_pressure);
     }
     if(applied_heat   != 0)
     {

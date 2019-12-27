@@ -48,7 +48,7 @@ public class ThermoState : MonoBehaviour
   public double internalenergy; //u //J/kg
   public double entropy;        //s //J/kgK
   public double enthalpy;       //h //J/kg
-  public double quality;        //q //%
+  public double quality;        //x //%
   double prev_pressure;
   double prev_temperature;
   double prev_volume;
@@ -549,99 +549,29 @@ public class ThermoState : MonoBehaviour
 
   public void add_heat_constant_p(double j)
   {
-    int region = ThermoMath.region_given_pvt(pressure,volume,temperature);
-
-    //default guess
-    double new_u = internalenergy + j;
-    double new_v = volume;
-    double new_t = temperature;
-
-    switch(region)
-    {
-      case 1: //two-phase region
-      {
-        //(the scenario is "in the two-phase region, we add heat with constant pressure")
-        //temperature doesn't change!
-        //TODO: how do we find volume?
-        //TODO: how do we find quality? [ONLY RELEVANT FOR 2-PHASE REGION!]
-      }
-      break;
-      case 0: //subcooled liquid
-      case 2: //superheated vapor
-      {
-        {
-          //iterative process to find GUESS from MARK
-          int MAX_ITERS = 100;
-          double MAX_DELTA = 0.01;
-          double step = 0.01;
-          double guess = new_t;
-          double mark = new_u;
-          double delta = Math.Abs(ThermoMath.u_given_pt(pressure,guess)-mark);
-          for(int i = 0; i < MAX_ITERS || delta < MAX_DELTA; i++)
-          {
-            double delta_a = Math.Abs(ThermoMath.u_given_pt(pressure,guess+ step     )-mark);
-            double delta_b = Math.Abs(ThermoMath.u_given_pt(pressure,guess-(step/2.0))-mark);
-            if(delta_a < delta_b)
-            {
-              delta = delta_a;
-            }
-            else
-            {
-              delta = delta_b;
-              step = step/-2.0;
-            }
-            guess += step;
-          }
-          new_t = guess;
-        }
-        new_v = ThermoMath.v_given_pt(pressure,new_t);
-      }
-      break;
-    }
+    double new_h = enthalpy + j;
 
     //at this point, we have enough internal state to derive the rest
-    volume = new_v;
-    internalenergy = new_u;
-    temperature = new_t;
-    enthalpy = ThermoMath.h_given_vt(volume,temperature);
+    enthalpy = new_h;
+    volume = ThermoMath.v_given_ph(pressure, new_h);
+    temperature = ThermoMath.t_given_ph(pressure, new_h);
     entropy = ThermoMath.s_given_vt(volume,temperature);
+    internalenergy = ThermoMath.u_given_vt(volume, temperature);
+    int region = ThermoMath.region_given_pvt(pressure,volume,temperature);
+    switch(region)
+    {
+      case 0: quality = 1;                                       break; //subcooled liquid
+      case 1: quality = ThermoMath.x_given_pv(pressure, volume); break; //two-phase region
+      case 2: quality = 0;                                       break; //superheated vapor
+    }
 
     transform_to_state();
   }
 
   public void add_heat_constant_v(double j)
   {
-    //no difference between regions
-    double new_t = temperature;
-    double new_u = internalenergy;
-
-    new_u = internalenergy+(j/mass);
-
-    {
-      //iterative process to find GUESS from MARK
-      int MAX_ITERS = 100;
-      double MAX_DELTA = 0.01;
-      double step = 0.01;
-      double guess = new_t;
-      double mark = new_u;
-      double delta = ThermoMath.u_given_vt(volume,guess)-mark;
-      for(int i = 0; i < MAX_ITERS || delta < MAX_DELTA; i++)
-      {
-        double delta_a = Math.Abs(ThermoMath.u_given_vt(volume,guess+ step     )-mark);
-        double delta_b = Math.Abs(ThermoMath.u_given_vt(volume,guess-(step/2.0))-mark);
-        if(delta_a < delta_b)
-        {
-          delta = delta_a;
-        }
-        else
-        {
-          delta = delta_b;
-          step = step/-2.0;
-        }
-        guess += step;
-      }
-      new_t = guess;
-    }
+    double new_u = internalenergy+j;
+    double new_t = ThermoMath.iterate_t_given_v_verify_u(temperature,volume,new_u);
 
     //at this point, we have enough internal state to derive the rest
     internalenergy = new_u;
@@ -649,12 +579,55 @@ public class ThermoState : MonoBehaviour
     pressure = ThermoMath.p_given_vt(volume,temperature);
     enthalpy = ThermoMath.h_given_vt(volume,temperature);
     entropy = ThermoMath.s_given_vt(volume,temperature);
-    //TODO: how do we find quality? [ONLY RELEVANT FOR 2-PHASE REGION!]
+
+    int region = ThermoMath.region_given_pvt(pressure,volume,temperature);
+    switch(region)
+    {
+      case 0: quality = 1;                                       break; //subcooled liquid
+      case 1: quality = ThermoMath.x_given_pv(pressure, volume); break; //two-phase region
+      case 2: quality = 0;                                       break; //superheated vapor
+    }
 
     transform_to_state();
   }
 
-  public void add_pressure_insulated(double p, bool insulated) //possibility for expansion: change "insulated" from a bool to a float, implementing variable levels of insulation
+  public void add_pressure_uninsulated(double p)
+  {
+    int region = ThermoMath.region_given_pvt(pressure,volume,temperature);
+
+    switch(region)
+    {
+      case 0: //subcooled liquid
+      case 1: //two-phase region
+      {
+        //AVOID THESE SCENARIOS
+        return;
+      }
+      break;
+      case 2: //superheated vapor
+      {
+        double new_p = pressure+p;
+        //default guess
+        double new_u = internalenergy;
+        double new_v = volume;
+
+        //already done!
+        new_v = ThermoMath.v_given_pt(new_p,temperature);
+        new_u = internalenergy - pressure*volume*Math.Log(new_v/volume);
+        //at this point, we have enough internal state to derive the rest
+        pressure = new_p;
+        volume = new_v;
+        internalenergy = new_u;
+        enthalpy = ThermoMath.h_given_vt(volume,temperature);
+        entropy = ThermoMath.s_given_vt(volume,temperature);
+      }
+      break;
+    }
+
+    transform_to_state();
+  }
+
+  public void add_pressure_insulated(double p)
   {
     int region = ThermoMath.region_given_pvt(pressure,volume,temperature);
     double new_p = pressure+p;
@@ -662,21 +635,9 @@ public class ThermoState : MonoBehaviour
     switch(region)
     {
       case 0: //subcooled liquid
-      {
-        //at this point, we have enough internal state to derive the rest
-        pressure = new_p;
-        //temperature/internalenergy insignificantly changed
-        volume = ThermoMath.v_given_pt(pressure,temperature);
-        enthalpy = ThermoMath.h_given_vt(volume,temperature);
-        entropy = ThermoMath.s_given_vt(volume,temperature);
-      }
-      break;
       case 1: //two-phase region
       {
-        //IGNORE BECAUSE UNSURE HOW TO CALCULATE!
-        pressure = new_p;
-        //TODO: STUB WITH SOMETHING FUNCTIONAL!
-        //TODO: how do we find quality? [ONLY RELEVANT FOR 2-PHASE REGION!]
+        //AVOID THESE SCENARIOS
       }
       break;
       case 2: //superheated vapor
@@ -688,47 +649,9 @@ public class ThermoState : MonoBehaviour
 
         {
           double k = 1.27;
-          if(insulated)
-          {
-            new_u = internalenergy-((new_p*new_v-pressure*volume)/(1-k));
-
-            {
-              //iterative process to find GUESS from MARK
-              int MAX_ITERS = 100;
-              double MAX_DELTA = 0.01;
-              double step = 0.01;
-              double guess = new_t;
-              double mark = new_u;
-              double delta = Math.Abs(ThermoMath.u_given_pt(pressure,guess)-mark);
-              for(int i = 0; i < MAX_ITERS || delta < MAX_DELTA; i++)
-              {
-                double delta_a = Math.Abs(ThermoMath.u_given_pt(pressure,guess+ step     )-mark);
-                double delta_b = Math.Abs(ThermoMath.u_given_pt(pressure,guess-(step/2.0))-mark);
-                if(delta_a < delta_b)
-                {
-                  delta = delta_a;
-                }
-                else
-                {
-                  delta = delta_b;
-                  step = step/-2.0;
-                }
-                guess += step;
-              }
-              new_t = guess;
-            }
-
-            new_v = ThermoMath.v_given_pt(new_p, new_t);
-          }
-          else
-          {
-            //TODO: SOLUTION 5 GOES HERE!
-            new_u = internalenergy-pressure*(volume-new_v); //PROBABLY INCORRECT!
-            //?
-            //?
-            //?
-            //?
-          }
+          new_u = internalenergy-((new_p*new_v-pressure*volume)/(1-k));
+          new_t = ThermoMath.iterate_t_given_p_verify_u(temperature,pressure,new_u);
+          new_v = ThermoMath.v_given_pt(new_p, new_t);
         }
 
         //at this point, we have enough internal state to derive the rest
@@ -783,7 +706,7 @@ public class ThermoState : MonoBehaviour
     if(Math.Abs(internalenergy - prev_internalenergy) > 0.001) text_internalenergy.SetText("i: {0:3}J/kg",   (float)internalenergy);
     if(Math.Abs(entropy        - prev_entropy)        > 0.001) text_entropy.SetText(       "s: {0:3}J/KgK",  (float)entropy);
     if(Math.Abs(enthalpy       - prev_enthalpy)       > 0.001) text_enthalpy.SetText(      "h: {0:3}J/kg",   (float)enthalpy);
-    if(Math.Abs(quality        - prev_quality)        > 0.001) text_quality.SetText(       "q: {0:3}%",      (float)quality);
+    if(Math.Abs(quality        - prev_quality)        > 0.001) text_quality.SetText(       "x: {0:3}%",      (float)quality);
 
     prev_pressure       = pressure;
     prev_temperature    = temperature;
