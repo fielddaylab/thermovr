@@ -138,7 +138,7 @@ public class World : MonoBehaviour
     t = GameObject.Find("Tool_Clamp"    ).GetComponent<Tool>(); tool_clamp     = t; tools.Add(t); t.dial_dial.min_map =  0f; t.dial_dial.max_map = 1f; t.dial_dial.unit = "h";
     t = GameObject.Find("Tool_Burner"   ).GetComponent<Tool>(); tool_burner    = t; tools.Add(t); t.dial_dial.min_map =  1f; t.dial_dial.max_map =  1000f*100f; t.dial_dial.unit = "J/s";
     t = GameObject.Find("Tool_Coil"     ).GetComponent<Tool>(); tool_coil      = t; tools.Add(t); t.dial_dial.min_map = -1f; t.dial_dial.max_map = -1000f*100f; t.dial_dial.unit = "J/s";
-    double kg_corresponding_to_10mpa = thermo.surfacearea*1550/*M^2->in^2*/*(10*1453.8/*MPa->psi*/)*0.453592/*lb->kg*/;
+    double kg_corresponding_to_10mpa = thermo.surfacearea_insqr*(10*1453.8/*MPa->psi*/)*0.453592/*lb->kg*/;
     t = GameObject.Find("Tool_Weight"   ).GetComponent<Tool>(); tool_weight    = t; tools.Add(t); t.dial_dial.min_map =  0f; t.dial_dial.max_map =  (float)kg_corresponding_to_10mpa; t.dial_dial.unit = "kg";
     t = GameObject.Find("Tool_Balloon"  ).GetComponent<Tool>(); tool_balloon   = t; tools.Add(t); t.dial_dial.min_map =  0f; t.dial_dial.max_map = -(float)kg_corresponding_to_10mpa; t.dial_dial.unit = "kg";
 
@@ -285,16 +285,15 @@ public class World : MonoBehaviour
   /*
   tried during:
   - newly snapped on
+  - newly taken off
   - dial altered
   */
-  void TryApplyTool(Tool t)
+  void UpdateApplyTool(Tool t) //alters "applied_x"
   {
     if(t == tool_insulator)
     {
-      applied_heat = 0;
-      if(t.engaged) return;
-      if(tool_burner.engaged) applied_heat += tool_burner.dial_dial.map;
-      if(tool_coil.engaged)   applied_heat -= tool_coil.dial_dial.map;
+      //do nothing
+      return;
     }
     else if(t == tool_burner || t == tool_coil) //NO IMMEDIATE EFFECT
     {
@@ -306,19 +305,16 @@ public class World : MonoBehaviour
       }
       else if(t == tool_coil)
       {
-        //visually update coil
+        //TODO: coil visuals?
       }
 
       applied_heat = 0;
-      if(tool_insulator.engaged) return; //heat does nothing!
       if(tool_burner.engaged) applied_heat += tool_burner.dial_dial.map;
       if(tool_coil.engaged)   applied_heat -= tool_coil.dial_dial.map;
-      //math change happens passively- only need to update visuals
     }
     else if(t == tool_clamp)
     {
       applied_weight = 0;
-      if(t.engaged) return;
       if(tool_weight.engaged)  applied_weight += tool_weight.dial_dial.map;
       if(tool_balloon.engaged) applied_weight -= tool_balloon.dial_dial.map;
     }
@@ -344,10 +340,8 @@ public class World : MonoBehaviour
 
       //math
       applied_weight = 0;
-      if(tool_clamp.engaged) return; //weight does nothing!
       if(tool_weight.engaged)  applied_weight += tool_weight.dial_dial.map;
       if(tool_balloon.engaged) applied_weight -= tool_balloon.dial_dial.map;
-      //math change happens passively- only need to update visuals
     }
 
   }
@@ -371,7 +365,7 @@ public class World : MonoBehaviour
         float dx = (r_x-x_val)*-10f;
         d.val = Mathf.Clamp(d.val-dx,0f,1f);
 
-        TryApplyTool(t);
+        UpdateApplyTool(t);
       }
     }
   }
@@ -415,7 +409,7 @@ public class World : MonoBehaviour
       //first try movables
       for(int i = 0; r_grabbed == null && i < movables.Count; i++)
       {
-        if(
+        if( //object newly grabbed
            ( which && movables[i].ltouch) ||
            (!which && movables[i].rtouch)
           )
@@ -425,7 +419,7 @@ public class World : MonoBehaviour
           if(r_grabbed == r_ograbbed) r_ograbbed = null;
           movables[i].grabbed = true;
           Tool t = r_grabbed.GetComponent<Tool>();
-          if(t)
+          if(t) //newly grabbed object is a tool
           {
             t.engaged = false;
             t.stored = false;
@@ -433,10 +427,10 @@ public class World : MonoBehaviour
             t.text.transform.localScale = new Vector3(1f,1f,1f);
             t.rigidbody.isKinematic = true;
             t.boxcollider.isTrigger = false;
-            TryApplyTool(t);
+            UpdateApplyTool(t);
           }
           VisAid v = r_grabbed.GetComponent<VisAid>();
-          if(v)
+          if(v) //newly grabbed object is a visaid
           {
             v.stored = false;
             v.rigidbody.isKinematic = true;
@@ -448,7 +442,7 @@ public class World : MonoBehaviour
       {
         for(int i = 0; i < tools.Count; i++)
         {
-          if(
+          if( //dial newly grabbed
              ( which && tools[i].dial_touchable.ltouch) ||
              (!which && tools[i].dial_touchable.rtouch)
             )
@@ -459,11 +453,12 @@ public class World : MonoBehaviour
           }
         }
       }
+
       //then extraaneous
-      if(r_grabbed == null)
+      if(r_grabbed == null) //still not holding anything
       {
         Touchable g = handle_workspace_touchable;
-        if(
+        if( //handle newly grabbed
           ( which && g.ltouch) ||
           (!which && g.rtouch)
         )
@@ -473,10 +468,11 @@ public class World : MonoBehaviour
           if(r_grabbed == r_ograbbed) r_ograbbed = null;
         }
       }
-      if(r_grabbed == null)
+
+      if(r_grabbed == null) //still not holding anything
       {
         Touchable g = halfer_touchable;
-        if(
+        if( //halfing button newly grabbed
           ( which && g.ltouch) ||
           (!which && g.rtouch)
         )
@@ -484,29 +480,30 @@ public class World : MonoBehaviour
           r_grabbed = halfer;
           g.grabbed = true;
           if(r_grabbed == r_ograbbed) r_ograbbed = null;
+          SetAllHalfed(!halfed);
         }
       }
-      if(r_grabbed != null) //newly grabbed
+
+      if(r_grabbed != null) //something newly grabbed
       {
         Halfable h = r_grabbed.GetComponent<Halfable>();
         if(h != null) h.setHalf(false); //nothing should be halfed while being grabbed
       }
     }
     //find new releases
-    else if(r_grabbed && r_htrigger_delta == -1)
+    else if(r_grabbed && r_htrigger_delta == -1) //something newly released
     {
       Tool t = r_grabbed.GetComponent<Tool>();
-      if(t)
+      if(t) //tool newly released
       {
-        //tool newly engaged
-        if(t.active_ghost.tintersect)
+        if(t.active_ghost.tintersect) //tool released making it active
         {
           r_grabbed.transform.SetParent(t.active.transform);
           t.engaged = true;
           t.boxcollider.isTrigger = true;
                if(t == tool_insulator) t.dial_dial.val = (float)ThermoMath.percent_given_t(thermo.temperature);
           else if(t == tool_clamp)     t.dial_dial.val = (float)ThermoMath.percent_given_v(thermo.volume);
-          TryApplyTool(t);
+          UpdateApplyTool(t);
           r_grabbed.transform.localPosition = new Vector3(0f,0f,0f);
           r_grabbed.transform.localRotation = Quaternion.identity;
           r_grabbed.transform.localScale = new Vector3(1f,1f,1f);
@@ -516,8 +513,7 @@ public class World : MonoBehaviour
           Halfable h = r_grabbed.GetComponent<Halfable>();
           if(h != null) h.setHalf(halfed); //conform to half-ness while engaged
         }
-        //tool newly stored
-        else if(t.storage_ghost.tintersect)
+        else if(t.storage_ghost.tintersect) //tool released making it stored
         {
           r_grabbed.transform.SetParent(t.storage.transform);
           t.stored = true;
@@ -528,8 +524,7 @@ public class World : MonoBehaviour
           Vector3 invscale = new Vector3(1f/v,1f/v,1f/v);
           t.text.transform.localScale = invscale;
         }
-        //tool released
-        else
+        else //tool released nowhere special
         {
           r_grabbed.transform.SetParent(r_grabbed.GetComponent<Touchable>().og_parent);
           r_grabbed.transform.localScale = new Vector3(1f,1f,1f);
@@ -538,11 +533,11 @@ public class World : MonoBehaviour
           t.rigidbody.velocity = hand_vel;
         }
       }
-      else
+      else //newly released object is NOT a tool
       {
         r_grabbed.transform.SetParent(r_grabbed.GetComponent<Touchable>().og_parent); //ok to do, even with a dial
         VisAid v = r_grabbed.GetComponent<VisAid>();
-        if(v)
+        if(v) //visaid newly released
         {
           v.rigidbody.isKinematic = false;
           v.rigidbody.velocity = hand_vel;
@@ -558,25 +553,14 @@ public class World : MonoBehaviour
     r_x = x_val;
     r_y = y_val;
 
-
-    //halfer
-    if(
-      r_itrigger_delta > 0 &&
-      (
-        ( which && halfer_touchable.ltouch) ||
-        (!which && halfer_touchable.rtouch)
-      )
-    )
-      SetAllHalfed(!halfed);
-
     //centerer
-    if(vrcenter_fingertoggleable.finger)
+    if(vrcenter_fingertoggleable.finger) //finger hitting vrcenter object
     {
-      if(
+      if( //we're currently checking the correct hand
         ( which && vrcenter_fingertoggleable.lfinger) ||
         (!which && vrcenter_fingertoggleable.rfinger)
       )
-      {
+      { //reset center position
         vrcenter_backing_meshrenderer.material = tab_hisel;
         UnityEngine.XR.InputTracking.Recenter();
         OVRManager.display.RecenterPose();
@@ -720,36 +704,30 @@ public class World : MonoBehaviour
     }
   }
 
-  float hack_timer = 0f;
   void Update()
   {
-    hack_timer += Time.deltaTime;
-    while(hack_timer > 100f) hack_timer -= 100f;
-
     //hands keep trying to run away- no idea why (this is a silly way to keep them still)
     lactualhand.transform.localPosition    = new Vector3(0f,0f,0f);
-    lactualhand.transform.localEulerAngles = new Vector3(0f,0f,90f);//localRotation = Quaternion.identity;
+    lactualhand.transform.localEulerAngles = new Vector3(0f,0f,90f);
     ractualhand.transform.localPosition    = new Vector3(0f,0f,0f);
-    ractualhand.transform.localEulerAngles = new Vector3(0f,0f,-90f);//localRotation = Quaternion.identity;
+    ractualhand.transform.localEulerAngles = new Vector3(0f,0f,-90f);
 
-    //passive effects
-    if(applied_weight != 0)
+    //apply thermo
+    if(!tool_clamp.engaged && applied_weight != 0) //TODO: apply DELTAS iterating toward a TARGET, otherwise, ONLY APPLY as weight changed
     {
       double weight_pressure = applied_weight/thermo.surfacearea_insqr; //psi
       weight_pressure *= 6894.76; //conversion from psi to pascal
-      if(tool_insulator.engaged)
-        thermo.add_pressure_insulated(weight_pressure);
-      else
-        thermo.add_pressure_uninsulated(weight_pressure);
+      if(tool_insulator.engaged) thermo.add_pressure_insulated(weight_pressure);
+      else                       thermo.add_pressure_uninsulated(weight_pressure);
     }
-    if(applied_heat   != 0)
+    if(tool_insulator.engaged && applied_heat != 0) //yes, "engaged" is correct. if insulator NOT engaged, then any heat added IMMEDIATELY dissipates
     {
       double heat_joules = applied_heat*(double)Time.deltaTime;
       if(tool_clamp.engaged) thermo.add_heat_constant_v(heat_joules);
       else                   thermo.add_heat_constant_p(heat_joules);
     }
 
-    //running blended average of hand velocity, for consistent "throwing"
+    //running blended average of hand velocity (transfers this velocity on "release object" for consistent "throwing")
     lhand_vel += (lhand.transform.position-lhand_pos)/Time.deltaTime;
     lhand_vel *= 0.5f;
     lhand_pos = lhand.transform.position;
@@ -758,6 +736,7 @@ public class World : MonoBehaviour
     rhand_vel *= 0.5f;
     rhand_pos = rhand.transform.position;
 
+    //input
     float lhandt  = OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger);
     float lindext = OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger);
     float rhandt  = OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger);
@@ -765,10 +744,9 @@ public class World : MonoBehaviour
     //index compatibility
     if(OVRInput.Get(OVRInput.Button.One,OVRInput.Controller.LTouch)) lhandt = 1.0f;
     if(OVRInput.Get(OVRInput.Button.One,OVRInput.Controller.RTouch)) rhandt = 1.0f;
-    // update 12/19/19- ovr just doesn't recognize index input. so hacking a timed squeeze/release for testing
-    //if((int)hack_timer%2 == 1) { lindext = 1f; rindext = 1f; }
     lhandt += lindext;
     rhandt += rindext;
+    //test effect of hands one at a time ("true" == "left hand", "false" == "right hand")
     TryHand(true,  lhandt, lindext, lhand.transform.position.x, lhand.transform.position.y, lhand_vel, ref lhtrigger, ref litrigger, ref lhtrigger_delta, ref litrigger_delta, ref lz, ref ly, ref lhand, ref lgrabbed, ref rhand, ref rgrabbed); //left hand
     TryHand(false, rhandt, rindext, rhand.transform.position.x, rhand.transform.position.y, rhand_vel, ref rhtrigger, ref ritrigger, ref rhtrigger_delta, ref ritrigger_delta, ref rz, ref ry, ref rhand, ref rgrabbed, ref lhand, ref lgrabbed); //right hand
 
