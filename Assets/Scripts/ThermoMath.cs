@@ -188,29 +188,14 @@ public static class ThermoMath
     return IAPWS95.IAPWS95_pressure(1.0/v,t)*1000.0; //expects:Kg/M^3,K returns KPa
   }
 
-  public static double p_given_vu(double v, double u) //CONFIRMED NEEDED!
-  {
-    return p_given_percent(0.5); //TODO:
-  }
-
-  public static double v_given_pt(double p, double t) //CONFIRMED NEEDED!
+  public static double v_given_pt(double p, double t)//*//*
   {
     return 1.0/IF97.rhomass_Tp(t,p/1000000.0); //expects:K,MPa returns Kg/M^3
   }
 
-  public static double t_given_pv(double p, double v) //CONFIRMED NEEDED!
-  {
-    return t_given_percent(0.5); //TODO:
-  }
-
-  public static double t_given_pu(double p, double u) //CONFIRMED NEEDED!
-  {
-    return t_given_percent(0.5); //TODO:
-  }
-
   public static double tsat_given_p(double p)
   {
-    return IF97.Tsat97(p/1000000.0);
+    return IF97.Tsat97(p/1000000.0); //UNIT CONVERSION UNTESTED!
   }
 
   public static double vliq_given_p(double p)
@@ -223,41 +208,30 @@ public static class ThermoMath
     return 1.0/IF97.rhovap_p(p/1000000.0); //expects:MPa returns Kg/M^3
   }
 
-  public static double v_given_pu(double p, double u) //CONFIRMED NEEDED!
+  public static double v_given_pu(double p, double u)//*
   {
     return v_given_percent(0.5); //TODO:
   }
 
-  public static double u_given_pt(double p, double t) //CONFIRMED NEEDED!
+  public static double u_given_pt(double p, double t)
   {
-    return u_given_percent(0.5); //TODO:
+    return IF97.umass_Tp(t, p/1000000.0); //UNIT CONVERSION UNTESTED!
   }
 
-  public static double s_given_pt(double p, double t)
+  public static double u_given_vt(double v, double t)
   {
-    return s_given_percent(0.5); //TODO:
+    return IAPWS95.IAPWS95_internal_energy(1f/v,t); //UNIT CONVERSION UNTESTED!
   }
 
-  public static double s_given_pu(double p, double u) //CONFIRMED NEEDED!
+  public static double s_given_vt(double v, double t)
   {
-    return s_given_percent(0.5); //TODO:
+    return IAPWS95.IAPWS95_entropy(1f/v,t)*1000f; //UNIT CONVERSION UNTESTED!
   }
 
-  public static double h_given_pt(double p, double t)
+  public static double h_given_vt(double v, double t)
   {
-    return h_given_percent(0.5); //TODO:
+    return IAPWS95.IAPWS95_enthalpy(1f/v,t)*1000f; //UNIT CONVERSION UNTESTED!
   }
-
-  public static double h_given_pu(double p, double u) //CONFIRMED NEEDED!
-  {
-    return h_given_percent(0.5); //TODO:
-  }
-
-  public static double q_given_pt(double p, double t)
-  {
-    return q_given_percent(0.5); //TODO:
-  }
-
 
 }
 

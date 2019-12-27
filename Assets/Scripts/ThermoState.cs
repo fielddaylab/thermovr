@@ -503,13 +503,13 @@ public class ThermoState : MonoBehaviour
   {
     //ensure consistent state
     pressure       = ThermoMath.p_given_percent(0.1); //picked initial pressure somewhat arbitrarily
-    temperature    = ThermoMath.t_given_percent(0.9); //picked initial temperature somewhat arbitrarily
+    temperature    = ThermoMath.t_given_percent(0.1); //picked initial temperature somewhat arbitrarily
     //from this point, the rest should be derived!
     volume         = ThermoMath.v_given_pt(pressure,temperature);
-    internalenergy = ThermoMath.u_given_pt(pressure,temperature); //TODO:
-    entropy        = ThermoMath.s_given_pt(pressure,temperature); //TODO:
-    enthalpy       = ThermoMath.h_given_pt(pressure,temperature); //TODO:
-    quality        = ThermoMath.q_given_pt(pressure,temperature); //TODO:
+    internalenergy = ThermoMath.u_given_pt(pressure,temperature);
+    enthalpy       = ThermoMath.h_given_vt(volume,temperature);
+    entropy        = ThermoMath.s_given_vt(volume,temperature);
+    quality        = 0;
 
     prev_pressure       = -1;
     prev_temperature    = -1;
@@ -547,64 +547,64 @@ public class ThermoState : MonoBehaviour
 
   //assume starting/ending point consistent for whole API!
 
-  //TODO: Remove this whole function ("random_iterate") and all calls to it when math actually completed
-  //used for debugging- just "move" in some "random" direction
-  //(allows testing connections when underlying math is not yet implemented)
-  public void random_iterate()
+  public void add_heat_constant_p(double j)
   {
-    int dimension = (int)UnityEngine.Random.Range(0f,3.999f);
-    double min_p = 0.0001;
-    double max_p = 0.15;
-    double delta;
-    double deltarange = 0.01;
-    switch(dimension)
-    {
-      case 0: //pressure
-        delta = ThermoMath.p_given_percent(deltarange*2)-ThermoMath.p_given_percent(deltarange);
-        pressure += (double)UnityEngine.Random.Range(-1f,1f)*delta;
-        if(pressure < ThermoMath.p_given_percent(min_p) || pressure > ThermoMath.p_given_percent(max_p)) pressure = ThermoMath.p_given_percent(min_p);
-        break;
-      case 1: //volume
-        delta = ThermoMath.v_given_percent(deltarange*2)-ThermoMath.v_given_percent(deltarange);
-        volume += (double)UnityEngine.Random.Range(-1f,1f)*delta;
-        if(volume < ThermoMath.v_given_percent(min_p) || volume > ThermoMath.v_given_percent(max_p)) volume = ThermoMath.v_given_percent(min_p);
-        break;
-      case 2: //temperature
-        delta = ThermoMath.t_given_percent(deltarange*2)-ThermoMath.t_given_percent(deltarange);
-        temperature += (double)UnityEngine.Random.Range(-1f,1f)*delta;
-        if(temperature < ThermoMath.t_given_percent(min_p) || temperature > ThermoMath.t_given_percent(max_p)) temperature = ThermoMath.t_given_percent(min_p);
-        break;
-      case 3: //quality
-        delta = deltarange;
-        quality += (double)UnityEngine.Random.Range(-1f,1f)*delta;
-        quality = (double)Mathf.Clamp((float)quality,0f,1f);
-        break;
-    }
-
-    if(System.Double.IsNaN(pressure))    pressure    = ThermoMath.p_given_percent(min_p);
-    if(System.Double.IsNaN(volume))      volume      = ThermoMath.v_given_percent(min_p);
-    if(System.Double.IsNaN(temperature)) temperature = ThermoMath.t_given_percent(min_p);
-  }
-
-  public void add_heat_constant_p(double j) //TODO: implement iteration step
-  {
-    //no difference between regions
+    int region = ThermoMath.region_given_pvt(pressure,volume,temperature);
 
     //default guess
+    double new_u = internalenergy + j;
     double new_v = volume;
-    double new_u = internalenergy;
-    //ITERATE TO SOLVE
+    double new_t = temperature;
+
+    switch(region)
     {
-      new_v = ThermoMath.v_given_pu(pressure,new_u);
-      new_u = internalenergy+(j/mass) - pressure*(new_v-volume);
+      case 1: //two-phase region
+      {
+        //(the scenario is "in the two-phase region, we add heat with constant pressure")
+        //temperature doesn't change!
+        //TODO: how do we find volume?
+        //TODO: how do we find quality? [ONLY RELEVANT FOR 2-PHASE REGION!]
+      }
+      break;
+      case 0: //subcooled liquid
+      case 2: //superheated vapor
+      {
+        {
+          //iterative process to find GUESS from MARK
+          int MAX_ITERS = 100;
+          double MAX_DELTA = 0.01;
+          double step = 0.01;
+          double guess = new_t;
+          double mark = new_u;
+          double delta = Math.Abs(ThermoMath.u_given_pt(pressure,guess)-mark);
+          for(int i = 0; i < MAX_ITERS || delta < MAX_DELTA; i++)
+          {
+            double delta_a = Math.Abs(ThermoMath.u_given_pt(pressure,guess+ step     )-mark);
+            double delta_b = Math.Abs(ThermoMath.u_given_pt(pressure,guess-(step/2.0))-mark);
+            if(delta_a < delta_b)
+            {
+              delta = delta_a;
+            }
+            else
+            {
+              delta = delta_b;
+              step = step/-2.0;
+            }
+            guess += step;
+          }
+          new_t = guess;
+        }
+        new_v = ThermoMath.v_given_pt(pressure,new_t);
+      }
+      break;
     }
 
     //at this point, we have enough internal state to derive the rest
     volume = new_v;
     internalenergy = new_u;
-    temperature = ThermoMath.t_given_pv(pressure, volume);
-    enthalpy = ThermoMath.h_given_pu(pressure,internalenergy);
-    entropy = ThermoMath.s_given_pu(pressure, internalenergy);
+    temperature = new_t;
+    enthalpy = ThermoMath.h_given_vt(volume,temperature);
+    entropy = ThermoMath.s_given_vt(volume,temperature);
 
     transform_to_state();
   }
@@ -612,75 +612,132 @@ public class ThermoState : MonoBehaviour
   public void add_heat_constant_v(double j)
   {
     //no difference between regions
+    double new_t = temperature;
+    double new_u = internalenergy;
 
-    double new_u = internalenergy+(j/mass);
+    new_u = internalenergy+(j/mass);
+
+    {
+      //iterative process to find GUESS from MARK
+      int MAX_ITERS = 100;
+      double MAX_DELTA = 0.01;
+      double step = 0.01;
+      double guess = new_t;
+      double mark = new_u;
+      double delta = ThermoMath.u_given_vt(volume,guess)-mark;
+      for(int i = 0; i < MAX_ITERS || delta < MAX_DELTA; i++)
+      {
+        double delta_a = Math.Abs(ThermoMath.u_given_vt(volume,guess+ step     )-mark);
+        double delta_b = Math.Abs(ThermoMath.u_given_vt(volume,guess-(step/2.0))-mark);
+        if(delta_a < delta_b)
+        {
+          delta = delta_a;
+        }
+        else
+        {
+          delta = delta_b;
+          step = step/-2.0;
+        }
+        guess += step;
+      }
+      new_t = guess;
+    }
 
     //at this point, we have enough internal state to derive the rest
     internalenergy = new_u;
-    pressure = ThermoMath.p_given_vu(volume, internalenergy);
-    temperature = ThermoMath.t_given_pv(pressure, volume);
-    enthalpy = ThermoMath.h_given_pu(pressure,internalenergy);
-    entropy = ThermoMath.s_given_pu(pressure, internalenergy);
+    temperature = new_t;
+    pressure = ThermoMath.p_given_vt(volume,temperature);
+    enthalpy = ThermoMath.h_given_vt(volume,temperature);
+    entropy = ThermoMath.s_given_vt(volume,temperature);
+    //TODO: how do we find quality? [ONLY RELEVANT FOR 2-PHASE REGION!]
 
     transform_to_state();
   }
 
-  public void add_pressure_insulated(double p, bool insulated) //TODO: implement iteration
+  public void add_pressure_insulated(double p, bool insulated) //possibility for expansion: change "insulated" from a bool to a float, implementing variable levels of insulation
   {
     int region = ThermoMath.region_given_pvt(pressure,volume,temperature);
+    double new_p = pressure+p;
+
     switch(region)
     {
       case 0: //subcooled liquid
       {
-        //default guess
-        double new_t = temperature;
-        double new_u = internalenergy;
-
-        double new_p = pressure+p; //no significant change to other variables!
-        //TODO: ITERATE TO SOLVE
-        {
-        new_t = ThermoMath.t_given_pu(new_p, new_u);
-        new_u = ThermoMath.u_given_pt(new_p, new_t);
-        }
-
         //at this point, we have enough internal state to derive the rest
         pressure = new_p;
-        temperature = new_t;
-        internalenergy = new_u;
-        volume = ThermoMath.v_given_pt(pressure, temperature);
-        enthalpy = ThermoMath.h_given_pu(pressure,internalenergy);
-        entropy = ThermoMath.s_given_pu(pressure, internalenergy);
+        //temperature/internalenergy insignificantly changed
+        volume = ThermoMath.v_given_pt(pressure,temperature);
+        enthalpy = ThermoMath.h_given_vt(volume,temperature);
+        entropy = ThermoMath.s_given_vt(volume,temperature);
       }
       break;
       case 1: //two-phase region
       {
         //IGNORE BECAUSE UNSURE HOW TO CALCULATE!
+        pressure = new_p;
+        //TODO: STUB WITH SOMETHING FUNCTIONAL!
+        //TODO: how do we find quality? [ONLY RELEVANT FOR 2-PHASE REGION!]
       }
       break;
       case 2: //superheated vapor
       {
         //default guess
+        double new_t = temperature;
         double new_u = internalenergy;
         double new_v = volume;
 
-        double new_p = pressure+p; //no significant change to other variables!
-        //TODO: ITERATE TO SOLVE
         {
-          //new_u = internalenergy-pressure*volume^k/(k-1)*(volume^(1-k)-new_v^(1-k)); //variable insulation //TODO: if you want to implement variable insulation, change "insulated" from bool to float, then use this eqn (and obv alter the calling functions to pass in variable)
+          double k = 1.27;
           if(insulated)
-            new_u = internalenergy; //unchanged? I got this by subbing k = 1 (sets eqn to u-p*inf*0, which I interpreted as equal to u-p*0, ie, just u)
+          {
+            new_u = internalenergy-((new_p*new_v-pressure*volume)/(1-k));
+
+            {
+              //iterative process to find GUESS from MARK
+              int MAX_ITERS = 100;
+              double MAX_DELTA = 0.01;
+              double step = 0.01;
+              double guess = new_t;
+              double mark = new_u;
+              double delta = Math.Abs(ThermoMath.u_given_pt(pressure,guess)-mark);
+              for(int i = 0; i < MAX_ITERS || delta < MAX_DELTA; i++)
+              {
+                double delta_a = Math.Abs(ThermoMath.u_given_pt(pressure,guess+ step     )-mark);
+                double delta_b = Math.Abs(ThermoMath.u_given_pt(pressure,guess-(step/2.0))-mark);
+                if(delta_a < delta_b)
+                {
+                  delta = delta_a;
+                }
+                else
+                {
+                  delta = delta_b;
+                  step = step/-2.0;
+                }
+                guess += step;
+              }
+              new_t = guess;
+            }
+
+            new_v = ThermoMath.v_given_pt(new_p, new_t);
+          }
           else
-            new_u = internalenergy-pressure*(volume-new_v); //seems coherent?
-          new_v = ThermoMath.v_given_pu(new_p, new_u);
+          {
+            //TODO: SOLUTION 5 GOES HERE!
+            new_u = internalenergy-pressure*(volume-new_v); //PROBABLY INCORRECT!
+            //?
+            //?
+            //?
+            //?
+          }
         }
 
         //at this point, we have enough internal state to derive the rest
         pressure = new_p;
         volume = new_v;
+        temperature = new_t;
         internalenergy = new_u;
-        temperature = ThermoMath.t_given_pu(pressure, internalenergy);
-        enthalpy = ThermoMath.h_given_pu(pressure,internalenergy);
-        entropy = ThermoMath.s_given_pu(pressure, internalenergy);
+        enthalpy = ThermoMath.h_given_vt(volume,temperature);
+        entropy = ThermoMath.s_given_vt(volume,temperature);
       }
       break;
     }
@@ -692,7 +749,8 @@ public class ThermoState : MonoBehaviour
   {
     state_dot.transform.localPosition = plot(pressure,volume,temperature);
 
-    float size_p = (float)ThermoMath.percent_given_v(volume); //TODO: height shouldn't be based on "percent between min/max volume", but should be geometrically calculated ("what is height of cylinder w/ radius r and volume v?")
+    float height =  (float)(volume/surfacearea); //M
+    float size_p = height/((float)radius*2f); //"max height" is approx 2x diameter, so this sets size_p to essentially "%_contents_size"
     Vector3 piston_lt = piston.transform.localPosition;
     piston_lt.y = piston_min_y+size_p*(piston_max_y-piston_min_y);
     piston.transform.localPosition = piston_lt;
