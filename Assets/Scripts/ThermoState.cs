@@ -43,7 +43,7 @@ public class ThermoState : MonoBehaviour
 
   //state
   public double pressure;       //p //pascals
-  public double temperature;    //t //kalvin
+  public double temperature;    //t //kelvin
   public double volume;         //v //M^3/kg
   public double internalenergy; //u //J/kg
   public double entropy;        //s //J/kgK
@@ -560,9 +560,9 @@ public class ThermoState : MonoBehaviour
     int region = ThermoMath.region_given_pvt(pressure,volume,temperature);
     switch(region)
     {
-      case 0: quality = 1;                                       break; //subcooled liquid
+      case 0: quality = 0;                                       break; //subcooled liquid
       case 1: quality = ThermoMath.x_given_pv(pressure, volume); break; //two-phase region
-      case 2: quality = 0;                                       break; //superheated vapor
+      case 2: quality = 1;                                       break; //superheated vapor
     }
 
     transform_to_state();
@@ -583,9 +583,9 @@ public class ThermoState : MonoBehaviour
     int region = ThermoMath.region_given_pvt(pressure,volume,temperature);
     switch(region)
     {
-      case 0: quality = 1;                                       break; //subcooled liquid
+      case 0: quality = 0;                                       break; //subcooled liquid
       case 1: quality = ThermoMath.x_given_pv(pressure, volume); break; //two-phase region
-      case 2: quality = 0;                                       break; //superheated vapor
+      case 2: quality = 1;                                       break; //superheated vapor
     }
 
     transform_to_state();
@@ -613,7 +613,7 @@ public class ThermoState : MonoBehaviour
 
         //already done!
         new_v = ThermoMath.v_given_pt(new_p,temperature);
-        new_u = internalenergy - pressure*volume*Math.Log(new_v/volume);
+        new_u = ThermoMath.u_given_pt(new_p,temperature);
         //at this point, we have enough internal state to derive the rest
         pressure = new_p;
         volume = new_v;
@@ -647,12 +647,10 @@ public class ThermoState : MonoBehaviour
         double new_u = internalenergy;
         double new_v = volume;
 
-        {
-          double k = 1.27;
-          new_u = internalenergy-((new_p*new_v-pressure*volume)/(1-k));
-          new_t = ThermoMath.iterate_t_given_p_verify_u(temperature,pressure,new_u);
-          new_v = ThermoMath.v_given_pt(new_p, new_t);
-        }
+        double k = 1.27;
+        new_v = volume*Math.Pow(pressure/new_p,1.0/k);
+        new_u = internalenergy-((new_p*new_v-pressure*volume)/(1-k));
+        new_t = ThermoMath.iterate_t_given_p_verify_u(temperature,pressure,new_u);
 
         //at this point, we have enough internal state to derive the rest
         pressure = new_p;
