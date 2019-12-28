@@ -9,6 +9,8 @@ do
 - figure out how to handle "x out of range" style errors
 - need icons on sliders!
 
+-implement "stops" instead of "clamp": would need to give lower stop and upper stop their own dial, and DISALLOW moving the dial beyond where the piston is, even if it wouldn't _necessariliy_ be problematic (that is, the piston can only be _moved_ via pressure, and the stops would NOT be allowed to contribute ANY pressure)
+
 reference points:
 - critical point
 - triple line

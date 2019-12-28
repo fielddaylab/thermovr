@@ -549,7 +549,7 @@ public class ThermoState : MonoBehaviour
 
   public void add_heat_constant_p(double j)
   {
-    double new_h = enthalpy + j;
+    double new_h = enthalpy+j;
 
     //at this point, we have enough internal state to derive the rest
     enthalpy = new_h;
@@ -594,6 +594,7 @@ public class ThermoState : MonoBehaviour
   public void add_pressure_uninsulated(double p)
   {
     int region = ThermoMath.region_given_pvt(pressure,volume,temperature);
+    double new_p = pressure+p;
 
     switch(region)
     {
@@ -606,7 +607,6 @@ public class ThermoState : MonoBehaviour
       break;
       case 2: //superheated vapor
       {
-        double new_p = pressure+p;
         //default guess
         double new_u = internalenergy;
         double new_v = volume;
