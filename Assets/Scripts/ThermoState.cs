@@ -536,7 +536,8 @@ public class ThermoState : MonoBehaviour
     if(Double.IsNaN(quality))        quality        = prev_quality;
     if(region == -1)                 region         = prev_region;
 
-    //FOR DEBUGGING [COMMENT OUT IN PROD]
+    //DEBUGGING! [COMMENT OUT IN PROD]
+    /*
     double npressure       = Clampd(pressure,       ThermoMath.p_min,ThermoMath.p_max);
     double nvolume         = Clampd(volume,         ThermoMath.v_min,ThermoMath.v_max);
     double ntemperature    = Clampd(temperature,    ThermoMath.t_min,ThermoMath.t_max);
@@ -552,6 +553,7 @@ public class ThermoState : MonoBehaviour
     if(nentropy        != entropy)        Debug.LogFormat("entropy!        {0} clamped to {1}",entropy,nentropy);
     if(nenthalpy       != enthalpy)       Debug.LogFormat("enthalpy!       {0} clamped to {1}",enthalpy,nenthalpy);
     if(nquality        != quality)        Debug.LogFormat("quality!        {0} clamped to {1}",quality,nquality);
+    */
     //END DEBUGGING
 
     pressure       = Clampd(pressure,       ThermoMath.p_min,ThermoMath.p_max);
@@ -588,6 +590,17 @@ public class ThermoState : MonoBehaviour
     text_quality        = GameObject.Find("text_quality").GetComponent<TextMeshPro>();
   }
 
+  public void debug_deltas()
+  {
+    Debug.LogFormat("pressure {0} changed to {1} (delta {2})",prev_pressure,pressure,pressure-prev_pressure);
+    Debug.LogFormat("temperature {0} changed to {1} (delta {2})",prev_temperature,temperature,temperature-prev_temperature);
+    Debug.LogFormat("volume {0} changed to {1} (delta {2})",prev_volume,volume,volume-prev_volume);
+    Debug.LogFormat("internalenergy {0} changed to {1} (delta {2})",prev_internalenergy,internalenergy,internalenergy-prev_internalenergy);
+    Debug.LogFormat("entropy {0} changed to {1} (delta {2})",prev_entropy,entropy,entropy-prev_entropy);
+    Debug.LogFormat("enthalpy {0} changed to {1} (delta {2})",prev_enthalpy,enthalpy,enthalpy-prev_enthalpy);
+    Debug.LogFormat("quality {0} changed to {1} (delta {2})",prev_quality,quality,quality-prev_quality);
+  }
+
   //assume starting/ending point consistent for whole API!
 
   public void add_heat_constant_p(double j)
@@ -612,6 +625,34 @@ public class ThermoState : MonoBehaviour
       }
     }
     catch(Exception e) {}
+
+    //DEBUGGING!
+    /*
+    repro:
+    - water should be init to "room temp"
+    - add burner
+    - add thermal sleeve
+    - crank up burner to max (so it doesn't take forever)
+    - as soon as state passes into two-phase region, entropy goes negative?
+    - (internalenergy also negative, bc derived from entropy)
+    - why? who knows.
+    */
+    if(entropy < 0 && prev_entropy > 0)
+    {
+      Debug.LogFormat("add_heat_constant_p({0})",j);
+      debug_deltas();
+      /*
+      add_heat_constant_p(849.628080637543)
+      pressure       101325              changed to 101325             (delta 0)
+      temperature    373.071338963376    changed to 373.124300000481   (delta 0.0529610371048079)
+      volume         0.00104339388081545 changed to 0.0015024098312424 (delta 0.000459015950426946)
+      internalenergy 418.72549774911     changed to -35856.7948514049  (delta -36275.520349154)
+      entropy        1306.31369618511    changed to -92181.2747321785  (delta -93487.5884283636)
+      enthalpy       418760.430956022    changed to 419610.059036659   (delta 849.628080637543)
+      quality        0                   changed to 0                  (delta 0)
+      */
+    }
+    //END DEBUGGING
 
     clamp_state();
     visualize_state();

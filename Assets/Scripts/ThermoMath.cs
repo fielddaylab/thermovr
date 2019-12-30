@@ -145,7 +145,7 @@ public static class ThermoMath
     //s_min = IF97.Smin; //TODO: comment actual value for quick reference //I don't think this is correct
     //s_max = IF97.Smax; //11.9210548250511 //I don't think this is correct...
     s_min = 0.0; //TODO: actually find something coherent
-    s_max = 99999999.0; //TODO: actually find something coherent
+    s_max = 999999999999.0; //TODO: actually find something coherent
     s_neutral = 294.322;
     s_smallstep = 0.0; //TODO: find
 
