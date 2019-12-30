@@ -103,8 +103,8 @@ public class World : MonoBehaviour
   TextMeshPro qtext_tmp;
   int qselected = -1;
 
-  double applied_weight = 0;
   double applied_heat = 0;
+  double applied_weight = 0;
 
   // Start is called before the first frame update
   void Start()
@@ -752,12 +752,22 @@ public class World : MonoBehaviour
     ractualhand.transform.localEulerAngles = new Vector3(0f,0f,-90f);
 
     //apply thermo
-    if(!tool_clamp.engaged && applied_weight != 0) //TODO: apply DELTAS iterating toward a TARGET, otherwise, ONLY APPLY as weight changed
+    if(!tool_clamp.engaged)
     {
+      double psi_to_pascal = 6894.76;
+      double neutral_pressure = 14.6959; //~1atm in psi
       double weight_pressure = applied_weight/thermo.surfacearea_insqr; //psi
-      weight_pressure *= 6894.76; //conversion from psi to pascal
-      if(tool_insulator.engaged) thermo.add_pressure_insulated(weight_pressure);
-      else                       thermo.add_pressure_uninsulated(weight_pressure);
+      weight_pressure += neutral_pressure;
+      weight_pressure *= psi_to_pascal; //conversion from psi to pascal
+
+      //treat "applied_weight" as target, and iterate toward it, rather than applying it additively
+      //(technically, "should" add_pressure(...) with every delta of weight on the piston, but that would result in very jumpy nonsense movements. iterating toward a target smooths it out)
+      double delta_pressure = (weight_pressure-thermo.pressure)*0.01; //1% of difference
+      if(System.Math.Abs(delta_pressure) > 1)
+      {
+        if(tool_insulator.engaged) thermo.add_pressure_insulated(delta_pressure);
+        else                       thermo.add_pressure_uninsulated(delta_pressure);
+      }
     }
     if(tool_insulator.engaged && applied_heat != 0) //yes, "engaged" is correct. if insulator NOT engaged, then any heat added IMMEDIATELY dissipates
     {

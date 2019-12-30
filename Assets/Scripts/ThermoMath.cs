@@ -64,30 +64,50 @@ public static class ThermoMath
   quality = x
   */
 
+  /*
+  min/max = the total range expected by the simulation
+  neutral = "room temperature, 1 atm, 1kg water"
+  smallstep = a "small step" in the given range (useful for cache invalidation threshhold)
+  */
+
   //Pa
-  public static double p_min; // 611.213
-  public static double p_max; // 100000000
+  public static double p_min;
+  public static double p_max;
+  public static double p_neutral;
+  public static double p_smallstep;
   //Pa
-  public static double psat_min; //TODO: comment actual value for quick reference
-  public static double psat_max; //TODO: comment actual value for quick reference
+  public static double psat_min;
+  public static double psat_max;
   //M^3/kg
-  public static double v_min;  // 0.0003
-  public static double v_max; // 1000
+  public static double v_min;
+  public static double v_max;
+  public static double v_neutral;
+  public static double v_smallstep;
   //K
-  public static double t_min; // 273.15
-  public static double t_max; // 1073.15
+  public static double t_min;
+  public static double t_max;
+  public static double t_neutral;
+  public static double t_smallstep;
   //J/kg
-  public static double u_min; //TODO: comment actual value for quick reference
-  public static double u_max; //TODO: comment actual value for quick reference
+  public static double u_min;
+  public static double u_max;
+  public static double u_neutral;
+  public static double u_smallstep;
   //J/kgK
-  public static double s_min; //TODO: comment actual value for quick reference
-  public static double s_max; //TODO: comment actual value for quick reference
+  public static double s_min;
+  public static double s_max;
+  public static double s_neutral;
+  public static double s_smallstep;
   //J/kg
-  public static double h_min; //TODO: comment actual value for quick reference
-  public static double h_max; //TODO: comment actual value for quick reference
+  public static double h_min;
+  public static double h_max;
+  public static double h_neutral;
+  public static double h_smallstep;
   //%
-  public static double x_min; //0
-  public static double x_max; //1
+  public static double x_min;
+  public static double x_max;
+  public static double x_neutral;
+  public static double x_smallstep;
 
   public static void Init()
   {
@@ -96,24 +116,53 @@ public static class ThermoMath
     //Pa
     p_min = IF97.get_Pmin()*1000000.0; // 611.213
     p_max = IF97.get_Pmax()*1000000.0; // 100000000
+    p_neutral = 101325.0;
+    p_smallstep = 1.0;
+
     //Pa
     psat_min = IF97.get_ptrip()*1000000.0; //TODO: comment actual value for quick reference
     psat_max = IF97.get_pcrit()*1000000.0; //TODO: comment actual value for quick reference
+
     //M^3/kg
     v_min = 1.0/3000;  // 0.0003
     v_max = 1.0/0.001; // 1000
+    v_neutral = 0.001;
+    v_smallstep = 0.00001;
+
     //K
     t_min = IF97.get_Tmin(); // 273.15
     t_max = IF97.get_Tmax(); // 1073.15
+    t_neutral = 293.0;
+    t_smallstep = 0.001;
+
     //J/kg
     u_min = 0; //TODO:find actual min
     u_max = 9999999999; //TODO:find actual max
+    u_neutral = 83.28;
+    u_smallstep = 0.0; //TODO: find
+
     //J/kgK
-    s_min = IF97.Smin; //TODO: comment actual value for quick reference
-    s_max = IF97.Smax; //TODO: comment actual value for quick reference
+    //s_min = IF97.Smin; //TODO: comment actual value for quick reference //I don't think this is correct
+    //s_max = IF97.Smax; //11.9210548250511 //I don't think this is correct...
+    s_min = 0.0; //TODO: actually find something coherent
+    s_max = 99999999.0; //TODO: actually find something coherent
+    s_neutral = 294.322;
+    s_smallstep = 0.0; //TODO: find
+
     //J/kg
-    h_min = IF97.Hmin(s_min); //TODO: unsure if this is correct calculation!
-    h_max = IF97.Hmax(s_max); //TODO: unsure if this is correct calculation!
+    //h_? = ; //experimentally derived- room temp water 
+    //h_min = IF97.Hmin(s_min); //TODO: I don't think this is correct...
+    //h_max = IF97.Hmax(s_max); //4171.65498424024 given s_max 11.9... //TODO: I don't think this is correct...
+    h_min = 4171.0; //just messing around to get it to not trigger clamp //TODO: actually come up with something coherent
+    h_max = 9999999.0; //TODO: actually come up with something coherent
+    h_neutral = 83377.0;
+    h_smallstep = 0.0; //TODO: find
+
+    //%
+    x_min = 0.0;
+    x_max = 1.0;
+    x_neutral = 0;
+    x_smallstep = 0.001;
 
     //DEBUG INFO:
     //IF97.print_tables();
@@ -156,19 +205,19 @@ public static class ThermoMath
     switch(r)
     {
       case IF97.IF97REGIONS.REGION_1: //liquid
-        Debug.Log("1"); //subcooled liquid
+        //Debug.Log("1"); //subcooled liquid
         break;
       case IF97.IF97REGIONS.REGION_2: //vapor
-        Debug.Log("2"); //superheated vapor
+        //Debug.Log("2"); //superheated vapor
         break;
       case IF97.IF97REGIONS.REGION_3:
-        Debug.Log("3"); //superheated vapor
+        //Debug.Log("3"); //superheated vapor
         break;
       case IF97.IF97REGIONS.REGION_4: //two-phase
-        Debug.Log("4"); //superheated vapor
+        //Debug.Log("4"); //superheated vapor
         break;
       case IF97.IF97REGIONS.REGION_5:
-        Debug.Log("5"); //superheated vapor
+        //Debug.Log("5"); //superheated vapor
         break;
     }
 

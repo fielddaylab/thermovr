@@ -504,14 +504,14 @@ public class ThermoState : MonoBehaviour
   void reset_state()
   {
     //ensure consistent state
-    pressure       = ThermoMath.p_given_percent(0.01); //picked initial pressure somewhat arbitrarily
-    temperature    = ThermoMath.t_given_percent(0.1); //picked initial temperature somewhat arbitrarily
+    pressure       = ThermoMath.p_neutral;
+    temperature    = ThermoMath.t_neutral;
     //from this point, the rest should be derived!
     volume         = ThermoMath.v_given_pt(pressure,temperature);
     internalenergy = ThermoMath.u_given_pt(pressure,temperature);
     enthalpy       = ThermoMath.h_given_vt(volume,temperature);
     entropy        = ThermoMath.s_given_vt(volume,temperature);
-    quality        = 0;
+    quality        = ThermoMath.x_neutral;
     region         = ThermoMath.region_given_pvt(pressure,volume,temperature);
 
     prev_pressure       = -1;
@@ -535,6 +535,24 @@ public class ThermoState : MonoBehaviour
     if(Double.IsNaN(enthalpy))       enthalpy       = prev_enthalpy;
     if(Double.IsNaN(quality))        quality        = prev_quality;
     if(region == -1)                 region         = prev_region;
+
+    //FOR DEBUGGING [COMMENT OUT IN PROD]
+    double npressure       = Clampd(pressure,       ThermoMath.p_min,ThermoMath.p_max);
+    double nvolume         = Clampd(volume,         ThermoMath.v_min,ThermoMath.v_max);
+    double ntemperature    = Clampd(temperature,    ThermoMath.t_min,ThermoMath.t_max);
+    double ninternalenergy = Clampd(internalenergy, ThermoMath.u_min,ThermoMath.u_max);
+    double nentropy        = Clampd(entropy,        ThermoMath.s_min,ThermoMath.s_max);
+    double nenthalpy       = Clampd(enthalpy,       ThermoMath.h_min,ThermoMath.h_max);
+    double nquality        = Clampd(quality,        ThermoMath.x_min,ThermoMath.x_max);
+
+    if(npressure       != pressure)       Debug.LogFormat("pressure!       {0} clamped to {1}",pressure,npressure);
+    if(nvolume         != volume)         Debug.LogFormat("volume!         {0} clamped to {1}",volume,nvolume);
+    if(ntemperature    != temperature)    Debug.LogFormat("temperature!    {0} clamped to {1}",temperature,ntemperature);
+    if(ninternalenergy != internalenergy) Debug.LogFormat("internalenergy! {0} clamped to {1}",internalenergy,ninternalenergy);
+    if(nentropy        != entropy)        Debug.LogFormat("entropy!        {0} clamped to {1}",entropy,nentropy);
+    if(nenthalpy       != enthalpy)       Debug.LogFormat("enthalpy!       {0} clamped to {1}",enthalpy,nenthalpy);
+    if(nquality        != quality)        Debug.LogFormat("quality!        {0} clamped to {1}",quality,nquality);
+    //END DEBUGGING
 
     pressure       = Clampd(pressure,       ThermoMath.p_min,ThermoMath.p_max);
     volume         = Clampd(volume,         ThermoMath.v_min,ThermoMath.v_max);
@@ -744,13 +762,13 @@ public class ThermoState : MonoBehaviour
     plot_lbase_prev = plot_lbase;
     if(modified) genMesh();
 
-    if(Math.Abs(pressure       - prev_pressure)       > 0.001) text_pressure.SetText(      "P: {0:3}KP",     (float)pressure/1000f);
-    if(Math.Abs(temperature    - prev_temperature)    > 0.001) text_temperature.SetText(   "T: {0:3}K",      (float)temperature);
-    if(Math.Abs(volume         - prev_volume)         > 0.001) text_volume.SetText(        "v: {0:3}M^3/kg", (float)volume);
-    if(Math.Abs(internalenergy - prev_internalenergy) > 0.001) text_internalenergy.SetText("i: {0:3}J/kg",   (float)internalenergy);
-    if(Math.Abs(entropy        - prev_entropy)        > 0.001) text_entropy.SetText(       "s: {0:3}J/KgK",  (float)entropy);
-    if(Math.Abs(enthalpy       - prev_enthalpy)       > 0.001) text_enthalpy.SetText(      "h: {0:3}J/kg",   (float)enthalpy);
-    if(Math.Abs(quality        - prev_quality)        > 0.001) text_quality.SetText(       "x: {0:3}%",      (float)quality);
+    if(Math.Abs(pressure       - prev_pressure)       > ThermoMath.p_smallstep) text_pressure.SetText(      "P: {0:3}KP",     (float)pressure/1000f);
+    if(Math.Abs(temperature    - prev_temperature)    > ThermoMath.t_smallstep) text_temperature.SetText(   "T: {0:3}K",      (float)temperature);
+    if(Math.Abs(volume         - prev_volume)         > ThermoMath.v_smallstep) text_volume.SetText(        "v: {0:3}M^3/kg", (float)volume);
+    if(Math.Abs(internalenergy - prev_internalenergy) > ThermoMath.u_smallstep) text_internalenergy.SetText("u: {0:3}J/kg",   (float)internalenergy);
+    if(Math.Abs(entropy        - prev_entropy)        > ThermoMath.s_smallstep) text_entropy.SetText(       "s: {0:3}J/KgK",  (float)entropy);
+    if(Math.Abs(enthalpy       - prev_enthalpy)       > ThermoMath.h_smallstep) text_enthalpy.SetText(      "h: {0:3}J/kg",   (float)enthalpy);
+    if(Math.Abs(quality        - prev_quality)        > ThermoMath.x_smallstep) text_quality.SetText(       "x: {0:3}%",      (float)quality);
 
     prev_pressure       = pressure;
     prev_temperature    = temperature;
