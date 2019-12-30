@@ -149,9 +149,10 @@ public static class ThermoMath
 
   static double Lerpd(double a, double b, double t) { return (b-a)*t+a; }
 
+  //region: 0 subcooled liquid, 1 two-phase, 2 superheated vapor
   public static int region_given_pvt(double p, double v, double t)
   {
-    IF97.IF97REGIONS r = IF97.RegionDetermination_TP(t, p);
+    IF97.IF97REGIONS r = IF97.RegionDetermination_TP(t, p/1000000.0);
     switch(r)
     {
       case IF97.IF97REGIONS.REGION_1: //liquid

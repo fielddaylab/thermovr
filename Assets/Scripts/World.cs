@@ -283,10 +283,62 @@ public class World : MonoBehaviour
     if(!tool_insulator.engaged) tool_insulator.gameObject.GetComponent<Halfable>().setHalf(false);
   }
 
+  Vector3 popVector()
+  {
+    return new Vector3(Random.Range(-1f,1f),1f,Random.Range(-1f,1f));
+  }
+
+  void ActivateTool(Tool t)
+  {
+    GameObject o = t.gameObject;
+    o.transform.SetParent(t.active.transform);
+    t.touchable.grabbed = false;
+    t.engaged = true;
+    t.stored = false;
+    t.boxcollider.isTrigger = true;
+         if(t == tool_insulator) t.dial_dial.val = (float)ThermoMath.percent_given_t(thermo.temperature);
+    else if(t == tool_clamp)     t.dial_dial.val = (float)ThermoMath.percent_given_v(thermo.volume);
+    UpdateApplyTool(t);
+    o.transform.localPosition = new Vector3(0f,0f,0f);
+    o.transform.localRotation = Quaternion.identity;
+    o.transform.localScale = new Vector3(1f,1f,1f);
+    float v = t.active.transform.localScale.x; //can grab any dimension
+    Vector3 invscale = new Vector3(1f/v,1f/v,1f/v);
+    t.text.transform.localScale = invscale;
+    Halfable h = o.GetComponent<Halfable>();
+    if(h != null) h.setHalf(halfed); //conform to half-ness while engaged
+  }
+  void StoreTool(Tool t)
+  {
+    GameObject o = t.gameObject;
+    o.transform.SetParent(t.storage.transform);
+    t.touchable.grabbed = false;
+    t.engaged = false;
+    t.stored = true;
+    o.transform.localPosition = new Vector3(0f,0f,0f);
+    o.transform.localRotation = Quaternion.identity;
+    o.transform.localScale = new Vector3(1f,1f,1f);
+    float v = t.storage.transform.localScale.x; //can grab any dimension
+    Vector3 invscale = new Vector3(1f/v,1f/v,1f/v);
+    t.text.transform.localScale = invscale;
+  }
+  void DetachTool(Tool t, Vector3 vel)
+  {
+    GameObject o = t.gameObject;
+    o.transform.SetParent(t.touchable.og_parent);
+    t.touchable.grabbed = false;
+    t.engaged = false;
+    t.stored = false;
+    o.transform.localScale = new Vector3(1f,1f,1f);
+    t.text.transform.localScale = new Vector3(1f,1f,1f);
+    t.rigidbody.isKinematic = false;
+    t.rigidbody.velocity = vel;
+  }
+
   /*
   tried during:
+  - newly grabbed
   - newly snapped on
-  - newly taken off
   - dial altered
   */
   void UpdateApplyTool(Tool t) //alters "applied_x"
@@ -296,9 +348,14 @@ public class World : MonoBehaviour
       //do nothing
       return;
     }
-    else if(t == tool_burner || t == tool_coil) //NO IMMEDIATE EFFECT
+    else if(t == tool_burner || t == tool_coil)
     {
-      //visual
+      if(tool_burner.engaged && tool_coil.engaged)
+      {
+        DetachTool(tool_coil,popVector());
+        DetachTool(tool_burner,popVector());
+      }
+
       if(t == tool_burner)
       {
         var vel = flame.velocityOverLifetime;
@@ -321,7 +378,12 @@ public class World : MonoBehaviour
     }
     else if(t == tool_weight || t == tool_balloon)
     {
-      //visual
+      if(tool_weight.engaged && tool_balloon.engaged)
+      {
+             if(t == tool_weight)  DetachTool(tool_balloon,popVector());
+        else if(t == tool_balloon) DetachTool(tool_weight,popVector());
+      }
+
       float v = 1f;
            if(t == tool_weight)  v += tool_weight.dial_dial.val;
       else if(t == tool_balloon) v += tool_balloon.dial_dial.val;
@@ -499,39 +561,15 @@ public class World : MonoBehaviour
       {
         if(t.active_ghost.tintersect) //tool released making it active
         {
-          r_grabbed.transform.SetParent(t.active.transform);
-          t.engaged = true;
-          t.boxcollider.isTrigger = true;
-               if(t == tool_insulator) t.dial_dial.val = (float)ThermoMath.percent_given_t(thermo.temperature);
-          else if(t == tool_clamp)     t.dial_dial.val = (float)ThermoMath.percent_given_v(thermo.volume);
-          UpdateApplyTool(t);
-          r_grabbed.transform.localPosition = new Vector3(0f,0f,0f);
-          r_grabbed.transform.localRotation = Quaternion.identity;
-          r_grabbed.transform.localScale = new Vector3(1f,1f,1f);
-          float v = t.active.transform.localScale.x; //can grab any dimension
-          Vector3 invscale = new Vector3(1f/v,1f/v,1f/v);
-          t.text.transform.localScale = invscale;
-          Halfable h = r_grabbed.GetComponent<Halfable>();
-          if(h != null) h.setHalf(halfed); //conform to half-ness while engaged
+          ActivateTool(t);
         }
         else if(t.storage_ghost.tintersect) //tool released making it stored
         {
-          r_grabbed.transform.SetParent(t.storage.transform);
-          t.stored = true;
-          r_grabbed.transform.localPosition = new Vector3(0f,0f,0f);
-          r_grabbed.transform.localRotation = Quaternion.identity;
-          r_grabbed.transform.localScale = new Vector3(1f,1f,1f);
-          float v = t.storage.transform.localScale.x; //can grab any dimension
-          Vector3 invscale = new Vector3(1f/v,1f/v,1f/v);
-          t.text.transform.localScale = invscale;
+          StoreTool(t);
         }
         else //tool released nowhere special
         {
-          r_grabbed.transform.SetParent(r_grabbed.GetComponent<Touchable>().og_parent);
-          r_grabbed.transform.localScale = new Vector3(1f,1f,1f);
-          t.text.transform.localScale = new Vector3(1f,1f,1f);
-          t.rigidbody.isKinematic = false;
-          t.rigidbody.velocity = hand_vel;
+          DetachTool(t,hand_vel);
         }
       }
       else //newly released object is NOT a tool

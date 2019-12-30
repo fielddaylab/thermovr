@@ -49,6 +49,7 @@ public class ThermoState : MonoBehaviour
   public double entropy;        //s //J/kgK
   public double enthalpy;       //h //J/kg
   public double quality;        //x //%
+  public int region;            //0 subcooled liquid, 1 two-phase, 2 superheated vapor
   double prev_pressure;
   double prev_temperature;
   double prev_volume;
@@ -56,6 +57,7 @@ public class ThermoState : MonoBehaviour
   double prev_entropy;
   double prev_enthalpy;
   double prev_quality;
+  int prev_region;
 
   //static properties of system
   public double mass = 1; //kg
@@ -510,6 +512,7 @@ public class ThermoState : MonoBehaviour
     enthalpy       = ThermoMath.h_given_vt(volume,temperature);
     entropy        = ThermoMath.s_given_vt(volume,temperature);
     quality        = 0;
+    region         = ThermoMath.region_given_pvt(pressure,volume,temperature);
 
     prev_pressure       = -1;
     prev_temperature    = -1;
@@ -518,6 +521,7 @@ public class ThermoState : MonoBehaviour
     prev_entropy        = -1;
     prev_enthalpy       = -1;
     prev_quality        = -1;
+    prev_region         = -1;
   }
 
   void findObjects()
@@ -557,7 +561,8 @@ public class ThermoState : MonoBehaviour
     temperature = ThermoMath.t_given_ph(pressure, new_h);
     entropy = ThermoMath.s_given_vt(volume,temperature);
     internalenergy = ThermoMath.u_given_vt(volume, temperature);
-    int region = ThermoMath.region_given_pvt(pressure,volume,temperature);
+
+    region = ThermoMath.region_given_pvt(pressure,volume,temperature);
     switch(region)
     {
       case 0: quality = 0;                                       break; //subcooled liquid
@@ -580,7 +585,7 @@ public class ThermoState : MonoBehaviour
     enthalpy = ThermoMath.h_given_vt(volume,temperature);
     entropy = ThermoMath.s_given_vt(volume,temperature);
 
-    int region = ThermoMath.region_given_pvt(pressure,volume,temperature);
+    region = ThermoMath.region_given_pvt(pressure,volume,temperature);
     switch(region)
     {
       case 0: quality = 0;                                       break; //subcooled liquid
@@ -593,7 +598,6 @@ public class ThermoState : MonoBehaviour
 
   public void add_pressure_uninsulated(double p)
   {
-    int region = ThermoMath.region_given_pvt(pressure,volume,temperature);
     double new_p = pressure+p;
 
     switch(region)
@@ -620,6 +624,7 @@ public class ThermoState : MonoBehaviour
         internalenergy = new_u;
         enthalpy = ThermoMath.h_given_vt(volume,temperature);
         entropy = ThermoMath.s_given_vt(volume,temperature);
+        region = ThermoMath.region_given_pvt(pressure,volume,temperature);
       }
       break;
     }
@@ -629,7 +634,6 @@ public class ThermoState : MonoBehaviour
 
   public void add_pressure_insulated(double p)
   {
-    int region = ThermoMath.region_given_pvt(pressure,volume,temperature);
     double new_p = pressure+p;
 
     switch(region)
@@ -659,6 +663,7 @@ public class ThermoState : MonoBehaviour
         internalenergy = new_u;
         enthalpy = ThermoMath.h_given_vt(volume,temperature);
         entropy = ThermoMath.s_given_vt(volume,temperature);
+        region = ThermoMath.region_given_pvt(pressure,volume,temperature);
       }
       break;
     }
