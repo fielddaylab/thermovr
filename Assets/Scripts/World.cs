@@ -352,8 +352,8 @@ public class World : MonoBehaviour
     {
       if(tool_burner.engaged && tool_coil.engaged)
       {
-        DetachTool(tool_coil,popVector());
-        DetachTool(tool_burner,popVector());
+        if(t == tool_burner) DetachTool(tool_coil,popVector());
+        if(t == tool_coil)   DetachTool(tool_burner,popVector());
       }
 
       if(t == tool_burner)
@@ -368,13 +368,13 @@ public class World : MonoBehaviour
 
       applied_heat = 0;
       if(tool_burner.engaged) applied_heat += tool_burner.dial_dial.map;
-      if(tool_coil.engaged)   applied_heat -= tool_coil.dial_dial.map;
+      if(tool_coil.engaged)   applied_heat += tool_coil.dial_dial.map;
     }
     else if(t == tool_clamp)
     {
       applied_weight = 0;
       if(tool_weight.engaged)  applied_weight += tool_weight.dial_dial.map;
-      if(tool_balloon.engaged) applied_weight -= tool_balloon.dial_dial.map;
+      if(tool_balloon.engaged) applied_weight += tool_balloon.dial_dial.map;
     }
     else if(t == tool_weight || t == tool_balloon)
     {
@@ -404,7 +404,7 @@ public class World : MonoBehaviour
       //math
       applied_weight = 0;
       if(tool_weight.engaged)  applied_weight += tool_weight.dial_dial.map;
-      if(tool_balloon.engaged) applied_weight -= tool_balloon.dial_dial.map;
+      if(tool_balloon.engaged) applied_weight += tool_balloon.dial_dial.map;
     }
 
   }

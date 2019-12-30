@@ -107,7 +107,7 @@ public static class ThermoMath
     t_max = IF97.get_Tmax(); // 1073.15
     //J/kg
     u_min = 0; //TODO:find actual min
-    u_max = 1; //TODO:find actual max
+    u_max = 9999999999; //TODO:find actual max
     //J/kgK
     s_min = IF97.Smin; //TODO: comment actual value for quick reference
     s_max = IF97.Smax; //TODO: comment actual value for quick reference
@@ -153,6 +153,25 @@ public static class ThermoMath
   public static int region_given_pvt(double p, double v, double t)
   {
     IF97.IF97REGIONS r = IF97.RegionDetermination_TP(t, p/1000000.0);
+    switch(r)
+    {
+      case IF97.IF97REGIONS.REGION_1: //liquid
+        Debug.Log("1"); //subcooled liquid
+        break;
+      case IF97.IF97REGIONS.REGION_2: //vapor
+        Debug.Log("2"); //superheated vapor
+        break;
+      case IF97.IF97REGIONS.REGION_3:
+        Debug.Log("3"); //superheated vapor
+        break;
+      case IF97.IF97REGIONS.REGION_4: //two-phase
+        Debug.Log("4"); //superheated vapor
+        break;
+      case IF97.IF97REGIONS.REGION_5:
+        Debug.Log("5"); //superheated vapor
+        break;
+    }
+
     switch(r)
     {
       case IF97.IF97REGIONS.REGION_1: //liquid
@@ -202,12 +221,12 @@ public static class ThermoMath
 
   public static double v_given_ph(double p, double h)
   {
-    return 1.0/IF97.rhomass_phmass(p/1000000.0,h); //UNIT CONVERSION UNTESTED!
+    return 1.0/IF97.rhomass_phmass(p/1000000.0,h/1000.0); //UNIT CONVERSION UNTESTED!
   }
 
   public static double t_given_ph(double p, double h)
   {
-    return IF97.T_phmass(p/1000000.0,h); //UNIT CONVERSION UNTESTED!
+    return IF97.T_phmass(p/1000000.0,h/1000.0); //UNIT CONVERSION UNTESTED!
   }
 
   public static double tsat_given_p(double p)

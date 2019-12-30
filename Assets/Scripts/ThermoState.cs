@@ -105,7 +105,7 @@ public class ThermoState : MonoBehaviour
     findObjects();
     genMesh();
     reset_state();
-    transform_to_state();
+    visualize_state();
   }
 
   //sample bias- "graph density"
@@ -504,7 +504,7 @@ public class ThermoState : MonoBehaviour
   void reset_state()
   {
     //ensure consistent state
-    pressure       = ThermoMath.p_given_percent(0.1); //picked initial pressure somewhat arbitrarily
+    pressure       = ThermoMath.p_given_percent(0.01); //picked initial pressure somewhat arbitrarily
     temperature    = ThermoMath.t_given_percent(0.1); //picked initial temperature somewhat arbitrarily
     //from this point, the rest should be derived!
     volume         = ThermoMath.v_given_pt(pressure,temperature);
@@ -522,6 +522,27 @@ public class ThermoState : MonoBehaviour
     prev_enthalpy       = -1;
     prev_quality        = -1;
     prev_region         = -1;
+  }
+
+  double Clampd(double v, double min, double max) { if(v < min) return min;  if(v > max) return max; return v; }
+  void clamp_state()
+  {
+    if(Double.IsNaN(pressure))       pressure       = prev_pressure;
+    if(Double.IsNaN(temperature))    temperature    = prev_temperature;
+    if(Double.IsNaN(volume))         volume         = prev_volume;
+    if(Double.IsNaN(internalenergy)) internalenergy = prev_internalenergy;
+    if(Double.IsNaN(entropy))        entropy        = prev_entropy;
+    if(Double.IsNaN(enthalpy))       enthalpy       = prev_enthalpy;
+    if(Double.IsNaN(quality))        quality        = prev_quality;
+    if(region == -1)                 region         = prev_region;
+
+    pressure       = Clampd(pressure,       ThermoMath.p_min,ThermoMath.p_max);
+    volume         = Clampd(volume,         ThermoMath.v_min,ThermoMath.v_max);
+    temperature    = Clampd(temperature,    ThermoMath.t_min,ThermoMath.t_max);
+    internalenergy = Clampd(internalenergy, ThermoMath.u_min,ThermoMath.u_max);
+    entropy        = Clampd(entropy,        ThermoMath.s_min,ThermoMath.s_max);
+    enthalpy       = Clampd(enthalpy,       ThermoMath.h_min,ThermoMath.h_max);
+    quality        = Clampd(quality,        ThermoMath.x_min,ThermoMath.x_max);
   }
 
   void findObjects()
@@ -553,125 +574,145 @@ public class ThermoState : MonoBehaviour
 
   public void add_heat_constant_p(double j)
   {
-    double new_h = enthalpy+j;
-
-    //at this point, we have enough internal state to derive the rest
-    enthalpy = new_h;
-    volume = ThermoMath.v_given_ph(pressure, new_h);
-    temperature = ThermoMath.t_given_ph(pressure, new_h);
-    entropy = ThermoMath.s_given_vt(volume,temperature);
-    internalenergy = ThermoMath.u_given_vt(volume, temperature);
-
-    region = ThermoMath.region_given_pvt(pressure,volume,temperature);
-    switch(region)
+    try
     {
-      case 0: quality = 0;                                       break; //subcooled liquid
-      case 1: quality = ThermoMath.x_given_pv(pressure, volume); break; //two-phase region
-      case 2: quality = 1;                                       break; //superheated vapor
-    }
+      double new_h = enthalpy+j;
 
-    transform_to_state();
+      //at this point, we have enough internal state to derive the rest
+      enthalpy = new_h;
+      volume = ThermoMath.v_given_ph(pressure, new_h);
+      temperature = ThermoMath.t_given_ph(pressure, new_h);
+      entropy = ThermoMath.s_given_vt(volume,temperature);
+      internalenergy = ThermoMath.u_given_vt(volume, temperature);
+
+      region = ThermoMath.region_given_pvt(pressure,volume,temperature);
+      switch(region)
+      {
+        case 0: quality = 0;                                       break; //subcooled liquid
+        case 1: quality = ThermoMath.x_given_pv(pressure, volume); break; //two-phase region
+        case 2: quality = 1;                                       break; //superheated vapor
+      }
+    }
+    catch(Exception e) {}
+
+    clamp_state();
+    visualize_state();
   }
 
   public void add_heat_constant_v(double j)
   {
-    double new_u = internalenergy+j;
-    double new_t = ThermoMath.iterate_t_given_v_verify_u(temperature,volume,new_u);
-
-    //at this point, we have enough internal state to derive the rest
-    internalenergy = new_u;
-    temperature = new_t;
-    pressure = ThermoMath.p_given_vt(volume,temperature);
-    enthalpy = ThermoMath.h_given_vt(volume,temperature);
-    entropy = ThermoMath.s_given_vt(volume,temperature);
-
-    region = ThermoMath.region_given_pvt(pressure,volume,temperature);
-    switch(region)
+    try
     {
-      case 0: quality = 0;                                       break; //subcooled liquid
-      case 1: quality = ThermoMath.x_given_pv(pressure, volume); break; //two-phase region
-      case 2: quality = 1;                                       break; //superheated vapor
-    }
+      double new_u = internalenergy+j;
+      double new_t = ThermoMath.iterate_t_given_v_verify_u(temperature,volume,new_u);
 
-    transform_to_state();
+      //at this point, we have enough internal state to derive the rest
+      internalenergy = new_u;
+      temperature = new_t;
+      pressure = ThermoMath.p_given_vt(volume,temperature);
+      enthalpy = ThermoMath.h_given_vt(volume,temperature);
+      entropy = ThermoMath.s_given_vt(volume,temperature);
+
+      region = ThermoMath.region_given_pvt(pressure,volume,temperature);
+      switch(region)
+      {
+        case 0: quality = 0;                                       break; //subcooled liquid
+        case 1: quality = ThermoMath.x_given_pv(pressure, volume); break; //two-phase region
+        case 2: quality = 1;                                       break; //superheated vapor
+      }
+    }
+    catch(Exception e) {}
+
+    clamp_state();
+    visualize_state();
   }
 
   public void add_pressure_uninsulated(double p)
   {
-    double new_p = pressure+p;
-
-    switch(region)
+    try
     {
-      case 0: //subcooled liquid
-      case 1: //two-phase region
-      {
-        //AVOID THESE SCENARIOS
-        return;
-      }
-      break;
-      case 2: //superheated vapor
-      {
-        //default guess
-        double new_u = internalenergy;
-        double new_v = volume;
+      double new_p = pressure+p;
 
-        //already done!
-        new_v = ThermoMath.v_given_pt(new_p,temperature);
-        new_u = ThermoMath.u_given_pt(new_p,temperature);
-        //at this point, we have enough internal state to derive the rest
-        pressure = new_p;
-        volume = new_v;
-        internalenergy = new_u;
-        enthalpy = ThermoMath.h_given_vt(volume,temperature);
-        entropy = ThermoMath.s_given_vt(volume,temperature);
-        region = ThermoMath.region_given_pvt(pressure,volume,temperature);
+      switch(region)
+      {
+        case 0: //subcooled liquid
+        case 1: //two-phase region
+        {
+          //AVOID THESE SCENARIOS
+          return;
+        }
+        break;
+        case 2: //superheated vapor
+        {
+          //default guess
+          double new_u = internalenergy;
+          double new_v = volume;
+
+          //already done!
+          new_v = ThermoMath.v_given_pt(new_p,temperature);
+          new_u = ThermoMath.u_given_pt(new_p,temperature);
+          //at this point, we have enough internal state to derive the rest
+          pressure = new_p;
+          volume = new_v;
+          internalenergy = new_u;
+          enthalpy = ThermoMath.h_given_vt(volume,temperature);
+          entropy = ThermoMath.s_given_vt(volume,temperature);
+          region = ThermoMath.region_given_pvt(pressure,volume,temperature);
+        }
+        break;
       }
-      break;
     }
+    catch(Exception e) {}
 
-    transform_to_state();
+    clamp_state();
+    visualize_state();
   }
 
   public void add_pressure_insulated(double p)
   {
-    double new_p = pressure+p;
-
-    switch(region)
+    try
     {
-      case 0: //subcooled liquid
-      case 1: //two-phase region
-      {
-        //AVOID THESE SCENARIOS
-      }
-      break;
-      case 2: //superheated vapor
-      {
-        //default guess
-        double new_t = temperature;
-        double new_u = internalenergy;
-        double new_v = volume;
+      double new_p = pressure+p;
 
-        double k = 1.27;
-        new_v = volume*Math.Pow(pressure/new_p,1.0/k);
-        new_u = internalenergy-((new_p*new_v-pressure*volume)/(1-k));
-        new_t = ThermoMath.iterate_t_given_p_verify_u(temperature,pressure,new_u);
+      switch(region)
+      {
+        case 0: //subcooled liquid
+        case 1: //two-phase region
+        {
+          //AVOID THESE SCENARIOS
+        }
+        break;
+        case 2: //superheated vapor
+        {
+          //default guess
+          double new_t = temperature;
+          double new_u = internalenergy;
+          double new_v = volume;
 
-        //at this point, we have enough internal state to derive the rest
-        pressure = new_p;
-        volume = new_v;
-        temperature = new_t;
-        internalenergy = new_u;
-        enthalpy = ThermoMath.h_given_vt(volume,temperature);
-        entropy = ThermoMath.s_given_vt(volume,temperature);
-        region = ThermoMath.region_given_pvt(pressure,volume,temperature);
+          double k = 1.27;
+          new_v = volume*Math.Pow(pressure/new_p,1.0/k);
+          new_u = internalenergy-((new_p*new_v-pressure*volume)/(1-k));
+          new_t = ThermoMath.iterate_t_given_p_verify_u(temperature,pressure,new_u);
+
+          //at this point, we have enough internal state to derive the rest
+          pressure = new_p;
+          volume = new_v;
+          temperature = new_t;
+          internalenergy = new_u;
+          enthalpy = ThermoMath.h_given_vt(volume,temperature);
+          entropy = ThermoMath.s_given_vt(volume,temperature);
+          region = ThermoMath.region_given_pvt(pressure,volume,temperature);
+        }
+        break;
       }
-      break;
     }
+    catch(Exception e) {}
 
-    transform_to_state();
+    clamp_state();
+    visualize_state();
   }
 
-  void transform_to_state()
+  void visualize_state()
   {
     state_dot.transform.localPosition = plot(pressure,volume,temperature);
 
