@@ -681,10 +681,10 @@ public class ThermoState : MonoBehaviour
     contents.transform.localScale = contents_lt;
 
     Vector3 water_lt = water.transform.localScale;
-    water_lt.y = (float)quality;
+    water_lt.y = 1f-(float)quality;
     water.transform.localScale = water_lt;
     Vector3 steam_lt = steam.transform.localScale;
-    steam_lt.y = 1f-(float)quality;
+    steam_lt.y = (float)quality;
     steam.transform.localScale = -1f*steam_lt;
   }
 

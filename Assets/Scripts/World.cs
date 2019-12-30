@@ -98,6 +98,7 @@ public class World : MonoBehaviour
   List<int> givens;
   List<Tab> option_tabs;
   Tab qconfirm_tab;
+  bool qconfirmed = false;
   GameObject board;
   TextMeshPro qtext_tmp;
   int qselected = -1;
@@ -769,6 +770,12 @@ public class World : MonoBehaviour
         if( instructions_parent.activeSelf) instructions_parent.SetActive(false);
         if(!challenge_parent.activeSelf)    challenge_parent.SetActive(   true);
         if( quiz_parent.activeSelf)         quiz_parent.SetActive(        false);
+
+        if(challenge_ball_collide.win)
+        {
+          challenge_ball_collide.win = false;
+          SetChallengeBall();
+        }
         break;
       case 2: //quiz
         if( instructions_parent.activeSelf) instructions_parent.SetActive(false);
@@ -776,15 +783,29 @@ public class World : MonoBehaviour
         if(!quiz_parent.activeSelf)         quiz_parent.SetActive(        true);
         qselected = reconcileDependentSelectables(qselected, option_tabs);
         updateSelectableVis(qselected, option_tabs);
-        if(qselected != -1)
+        if(qselected != -1) //answer selected, can be confirmed
         {
-          if(qconfirm_tab.fingertoggleable.finger) qconfirm_tab.backing_meshrenderer.material = tab_hisel;
-          else                                     qconfirm_tab.backing_meshrenderer.material = tab_sel;
+          if(qconfirm_tab.fingertoggleable.finger) qconfirm_tab.backing_meshrenderer.material = tab_hisel; //touching
+          else                                     qconfirm_tab.backing_meshrenderer.material = tab_sel;   //not touching
+
+          if(!qconfirmed && qconfirm_tab.fingertoggleable.finger) //newly hit
+          {
+            qconfirmed = true;
+            if(qselected == answers[question])
+              ; //correct
+            else
+              ; //incorrect
+            givens[question] = qselected;
+            question++;
+            SetQuizText();
+          }
         }
-        else
+        else //no answer selected- can't confirm
         {
-          if(qconfirm_tab.fingertoggleable.finger) qconfirm_tab.backing_meshrenderer.material = tab_hi;
-          else                                     qconfirm_tab.backing_meshrenderer.material = tab_default;
+          if(qconfirm_tab.fingertoggleable.finger) qconfirm_tab.backing_meshrenderer.material = tab_hi;      //touching
+          else                                     qconfirm_tab.backing_meshrenderer.material = tab_default; //not touching
+
+          qconfirmed = false;
         }
         break;
       case 3: //congratulations
