@@ -188,9 +188,9 @@ public static class ThermoMath
     //f means saturated liquid,
     //g means saturated gas
     double vf = 1.0/IF97.rholiq_p(p/1000000.0);
-    if(v < vf) return liq;
+    if(v <= vf) return liq;
     double vg = 1.0/IF97.rhovap_p(p/1000000.0);
-    if(v > vg) return vapor;
+    if(v >= vg) return vapor;
     return two;
   }
   /*
