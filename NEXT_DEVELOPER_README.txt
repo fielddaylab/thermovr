@@ -39,7 +39,7 @@ The specified black-box thermo implementation (IAPWS) actually has multiple spec
 - the rest (given they are possible) are able to be approximated from our available subset iteratively (see ThermoMath.cs)
 - (fortunately we do not NEED every possible X_given_YZ)
 
-The processes specified DO NOT correspond to the previously stated outcomes.
+The processes specified above ("add heat with free floating piston", etc..) DO NOT correspond to the stated outcomes ("temp increases keeping p constant").
 - "adding heat" does NOT mean "increasing temperature" at all ("heat" != "temperature")
 - "adding pressure" does NOT imply that "temperature stays the same" (primarily relevant in the vapor dome)
 

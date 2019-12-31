@@ -1,12 +1,12 @@
 todo
-- "correct!" feedback for quiz/challenge
+- "correct answer!" feedback for quiz/challenge
 - ensure "new challenge" isn't already colliding with state ball
 - quiz questions based on john pdf (T < Tcrit? what region? etc...)
+- get coherent min/max values for all state variables
 - bias tool dials (1/2 range should be "low", 1/2 range should be "high"- given logarithmic differences in perception/effect, it currently (linear scale) feels like 90% of slider range is "large"
 - appropriate tool visualizations (eg, max burner should be INFERNO, max weight should be ELEPHANT, etc...)
+- container needs to be waaay taller...
 - DISABLE BALLOON/WEIGHT DELTAS WHEN NOT IN SUPERHEATEDVAPOR REGION!
-- "add pressure"/"remove pressure" are NOT persistent- they are relative to an absolute (ie, if I have a 50lb weight, and increase the weight to 55lb, then we've "add_pressure"'d 5lbs, once). should probably implement where "set weight" is actually a "target pressure", and the game adds/removes pressure to meet the target over time?
-- figure out how to handle "x out of range" style errors
 - need icons on sliders!
 - implement "stops" instead of "clamp": would need to give lower stop and upper stop their own dial, and DISALLOW moving the dial beyond where the piston is, even if it wouldn't _necessariliy_ be problematic (that is, the piston can only be _moved_ via pressure, and the stops would NOT be allowed to contribute ANY pressure)
 
@@ -15,4 +15,6 @@ reference points (would be nice to visualize):
 - triple line
 
 - hilight the thing you're touching (as opposed to the hands)
+
+CAN CERTAINLY DO QUICK:
 - swap/size clamp model when active

@@ -10,6 +10,7 @@ This is also responsible for applying itself visually to the game objects in the
 */
 
 using System;
+using System.IO;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -38,10 +39,13 @@ class GRAPHPTCMP : IComparer<int>
 
 public class ThermoState : MonoBehaviour
 {
-  //xyz corresponds to vpt (Y = "up")
+  bool debug_write = false;
+  StreamWriter debug_file;
+
   int samples = 350;
 
   //state
+  //xyz corresponds to vpt (Y = "up")
   public double pressure;       //p //pascals
   public double temperature;    //t //kelvin
   public double volume;         //v //M^3/kg
@@ -89,6 +93,7 @@ public class ThermoState : MonoBehaviour
   TextMeshPro text_entropy;
   TextMeshPro text_enthalpy;
   TextMeshPro text_quality;
+  TextMeshPro text_region;
 
   void Awake()
   {
@@ -98,6 +103,8 @@ public class ThermoState : MonoBehaviour
   // Start is called before the first frame update
   void Start()
   {
+    if(debug_write) debug_file = File.CreateText("debug.txt");
+
     //(these are just used to detect editor deltas on a frame boundary)
     sample_lbase_prev = sample_lbase;
     plot_lbase_prev = plot_lbase;
@@ -556,6 +563,25 @@ public class ThermoState : MonoBehaviour
     */
     //END DEBUGGING
 
+    //TODO: do this! should fix many errors!
+    //snap to known region using region-stable perspectives
+    if(prev_region != region)
+    { //make sure new state snapped to new region!
+      switch(region)
+      {
+        case 0:  //subcooled liquid
+          //use P,T to fix the rest
+          break;
+        case 1:  //two-phase region
+          //use P,V to fix the rest
+          //temperature = ThermoMath.t_given_pv();
+          break;
+        case 2:  //superheated vapor
+          //use P,T to fix the rest
+          break;
+      }
+    }
+
     pressure       = Clampd(pressure,       ThermoMath.p_min,ThermoMath.p_max);
     volume         = Clampd(volume,         ThermoMath.v_min,ThermoMath.v_max);
     temperature    = Clampd(temperature,    ThermoMath.t_min,ThermoMath.t_max);
@@ -588,17 +614,19 @@ public class ThermoState : MonoBehaviour
     text_entropy        = GameObject.Find("text_entropy").GetComponent<TextMeshPro>();
     text_enthalpy       = GameObject.Find("text_enthalpy").GetComponent<TextMeshPro>();
     text_quality        = GameObject.Find("text_quality").GetComponent<TextMeshPro>();
+    text_region         = GameObject.Find("text_region").GetComponent<TextMeshPro>();
   }
 
   public void debug_deltas()
   {
-    Debug.LogFormat("pressure {0} changed to {1} (delta {2})",prev_pressure,pressure,pressure-prev_pressure);
-    Debug.LogFormat("temperature {0} changed to {1} (delta {2})",prev_temperature,temperature,temperature-prev_temperature);
-    Debug.LogFormat("volume {0} changed to {1} (delta {2})",prev_volume,volume,volume-prev_volume);
-    Debug.LogFormat("internalenergy {0} changed to {1} (delta {2})",prev_internalenergy,internalenergy,internalenergy-prev_internalenergy);
-    Debug.LogFormat("entropy {0} changed to {1} (delta {2})",prev_entropy,entropy,entropy-prev_entropy);
-    Debug.LogFormat("enthalpy {0} changed to {1} (delta {2})",prev_enthalpy,enthalpy,enthalpy-prev_enthalpy);
-    Debug.LogFormat("quality {0} changed to {1} (delta {2})",prev_quality,quality,quality-prev_quality);
+    if(!debug_write) return;
+    debug_file.WriteLine("pressure {0} changed to {1} (delta {2})",prev_pressure,pressure,pressure-prev_pressure);
+    debug_file.WriteLine("temperature {0} changed to {1} (delta {2})",prev_temperature,temperature,temperature-prev_temperature);
+    debug_file.WriteLine("volume {0} changed to {1} (delta {2})",prev_volume,volume,volume-prev_volume);
+    debug_file.WriteLine("internalenergy {0} changed to {1} (delta {2})",prev_internalenergy,internalenergy,internalenergy-prev_internalenergy);
+    debug_file.WriteLine("entropy {0} changed to {1} (delta {2})",prev_entropy,entropy,entropy-prev_entropy);
+    debug_file.WriteLine("enthalpy {0} changed to {1} (delta {2})",prev_enthalpy,enthalpy,enthalpy-prev_enthalpy);
+    debug_file.WriteLine("quality {0} changed to {1} (delta {2})",prev_quality,quality,quality-prev_quality);
   }
 
   //assume starting/ending point consistent for whole API!
@@ -608,13 +636,29 @@ public class ThermoState : MonoBehaviour
     try
     {
       double new_h = enthalpy+j;
-
-      //at this point, we have enough internal state to derive the rest
-      enthalpy = new_h;
-      volume = ThermoMath.v_given_ph(pressure, new_h);
-      temperature = ThermoMath.t_given_ph(pressure, new_h);
-      entropy = ThermoMath.s_given_vt(volume,temperature);
-      internalenergy = ThermoMath.u_given_vt(volume, temperature);
+      
+      switch(region)
+      {
+        case 1:
+          double new_x = ThermoMath.x_given_ph(pressure,new_h);
+          //at this point, we have enough internal state to derive the rest
+          enthalpy = new_h;
+          quality = new_x;
+          volume = ThermoMath.v_given_px(pressure,new_x);
+          temperature = ThermoMath.tsat_given_p(pressure);
+          entropy = ThermoMath.s_given_px(pressure,new_x);
+          internalenergy = ThermoMath.u_given_px(pressure,new_x);
+          break;
+        case 0:
+        case 2:
+          //at this point, we have enough internal state to derive the rest
+          enthalpy = new_h;
+          volume = ThermoMath.v_given_ph(pressure, new_h);
+          temperature = ThermoMath.t_given_ph(pressure, new_h);
+          entropy = ThermoMath.s_given_vt(volume,temperature);
+          internalenergy = ThermoMath.u_given_vt(volume, temperature);
+          break;
+      }
 
       region = ThermoMath.region_given_pvt(pressure,volume,temperature);
       switch(region)
@@ -626,33 +670,11 @@ public class ThermoState : MonoBehaviour
     }
     catch(Exception e) {}
 
-    //DEBUGGING!
-    /*
-    repro:
-    - water should be init to "room temp"
-    - add burner
-    - add thermal sleeve
-    - crank up burner to max (so it doesn't take forever)
-    - as soon as state passes into two-phase region, entropy goes negative?
-    - (internalenergy also negative, bc derived from entropy)
-    - why? who knows.
-    */
-    if(entropy < 0 && prev_entropy > 0)
+    if(debug_write)
     {
-      Debug.LogFormat("add_heat_constant_p({0})",j);
+      debug_file.WriteLine("add_heat_constant_p({0})",j);
       debug_deltas();
-      /*
-      add_heat_constant_p(849.628080637543)
-      pressure       101325              changed to 101325             (delta 0)
-      temperature    373.071338963376    changed to 373.124300000481   (delta 0.0529610371048079)
-      volume         0.00104339388081545 changed to 0.0015024098312424 (delta 0.000459015950426946)
-      internalenergy 418.72549774911     changed to -35856.7948514049  (delta -36275.520349154)
-      entropy        1306.31369618511    changed to -92181.2747321785  (delta -93487.5884283636)
-      enthalpy       418760.430956022    changed to 419610.059036659   (delta 849.628080637543)
-      quality        0                   changed to 0                  (delta 0)
-      */
     }
-    //END DEBUGGING
 
     clamp_state();
     visualize_state();
@@ -809,7 +831,8 @@ public class ThermoState : MonoBehaviour
     if(Math.Abs(internalenergy - prev_internalenergy) > ThermoMath.u_smallstep) text_internalenergy.SetText("u: {0:3}J/kg",   (float)internalenergy);
     if(Math.Abs(entropy        - prev_entropy)        > ThermoMath.s_smallstep) text_entropy.SetText(       "s: {0:3}J/KgK",  (float)entropy);
     if(Math.Abs(enthalpy       - prev_enthalpy)       > ThermoMath.h_smallstep) text_enthalpy.SetText(      "h: {0:3}J/kg",   (float)enthalpy);
-    if(Math.Abs(quality        - prev_quality)        > ThermoMath.x_smallstep) text_quality.SetText(       "x: {0:3}%",      (float)quality);
+    if(Math.Abs(quality        - prev_quality)        > ThermoMath.x_smallstep) text_quality.SetText(       "x: {0:3}%",      (float)(quality*100.0));
+    if(region != prev_region)                                                   text_region.SetText(        "region: {0}",    region);                                       
 
     prev_pressure       = pressure;
     prev_temperature    = temperature;

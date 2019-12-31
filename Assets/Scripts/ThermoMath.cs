@@ -25,36 +25,6 @@ using UnityEngine;
 public static class ThermoMath
 {
   /*
-  //IF97 API
-  public static double rhomass_Tp(double T, double p)     // Get the mass density [kg/m^3] as a function of T [K] and p [Pa]
-  public static double hmass_Tp(double T, double p)       // Get the mass enthalpy [J/kg] as a function of T [K] and p [Pa]
-  public static double smass_Tp(double T, double p)       // Get the mass entropy [J/kg/K] as a function of T [K] and p [Pa]
-  public static double umass_Tp(double T, double p)       // Get the mass internal energy [J/kg] as a function of T [K] and p [Pa]
-  public static double cpmass_Tp(double T, double p)      // Get the mass constant-pressure specific heat [J/kg/K] as a function of T [K] and p [Pa]
-  public static double cvmass_Tp(double T, double p)      // Get the mass constant-volume specific heat [J/kg/K] as a function of T [K] and p [Pa]
-  public static double speed_sound_Tp(double T, double p) // Get the speed of sound [m/s] as a function of T [K] and p [Pa]
-  public static double drhodp_Tp(double T, double p)      // Get the [d(rho)/d(p)]T [kg/mï¿½/Pa] as a function of T [K] and p [Pa]
-  //IF97 Paper verified units:
-  rhomass_Tp(T,p) | 1.0/rhomass_Tp(300, 3) = 0.00100215 | p:MPa, v:M^3/Kg, T:K | expects:K,MPa returns Kg/M^3
-  */
-
-  /*
-  //IAPWS95 API
-  public static double IAPWS95_pressure(double rho, double T);                                   //Input: rho in kg/m3, T in K, Output: Pa
-  public static double IAPWS95_internal_energy(double rho, double T);                            //Input: rho in kg/m3, T in K, Output: Pa
-  public static double IAPWS95_entropy(double rho, double T);                                    //Input: rho in kg/m3, T in K, Output: kJ/kg-K
-  public static double IAPWS95_enthalpy(double rho, double T);                                   //Input: rho in kg/m3, T in K, Output: kJ/kg
-  public static double IAPWS95_isochoric_heat_capacity(double rho, double T);                    //Input: rho in kg/m3, T in K, Output: kJ/kg-K
-  public static double IAPWS95_isobaric_heat_capacity(double rho, double T);                     //Input: rho in kg/m3, T in K, Output: kJ/kg-K
-  public static double IAPWS95_speed_of_sound(double rho, double T);                             //Input: rho in kg/m3, T in K, Output: m/s
-  public static double IAPWS95_joule_thompson_coefficient(double rho, double T);                 //Input: rho in kg/m3, T in K
-  public static double IAPWS95_isothermal_throttling_coefficient(double rho, double T);          //Input: rho in kg/m3, T in K
-  public static double IAPWS95_isentropic_temperature_pressure_coefficent(double rho, double T); //Input: rho in kg/m3, T in K
-  //IAPWS95 Paper verified units:
-  IAPWS95_pressure(rho, T) | IAPWS95_pressure(999.887406, 275.0)/1000 = 0.0006982125 | p:MPa, v:Kg/M^3, t:K | expects:Kg/M^3,K returns KPa
-  */
-
-  /*
   pressure = p
   specificvolume = v
   temperature = t
@@ -65,7 +35,7 @@ public static class ThermoMath
   */
 
   /*
-  min/max = the total range expected by the simulation
+  max-min = the total range expected by the simulation
   neutral = "room temperature, 1 atm, 1kg water"
   smallstep = a "small step" in the given range (useful for cache invalidation threshhold)
   */
@@ -136,8 +106,8 @@ public static class ThermoMath
     t_smallstep = 0.001;
 
     //J/kg
-    u_min = 0; //TODO:find actual min
-    u_max = 9999999999; //TODO:find actual max
+    u_min = 0.0; //TODO:find actual min
+    u_max =  9999999999; //TODO:find actual max
     u_neutral = 83.28;
     u_smallstep = 0.0; //TODO: find
 
@@ -145,7 +115,7 @@ public static class ThermoMath
     //s_min = IF97.Smin; //TODO: comment actual value for quick reference //I don't think this is correct
     //s_max = IF97.Smax; //11.9210548250511 //I don't think this is correct...
     s_min = 0.0; //TODO: actually find something coherent
-    s_max = 999999999999.0; //TODO: actually find something coherent
+    s_max =  999999999999.0; //TODO: actually find something coherent
     s_neutral = 294.322;
     s_smallstep = 0.0; //TODO: find
 
@@ -153,8 +123,8 @@ public static class ThermoMath
     //h_? = ; //experimentally derived- room temp water 
     //h_min = IF97.Hmin(s_min); //TODO: I don't think this is correct...
     //h_max = IF97.Hmax(s_max); //4171.65498424024 given s_max 11.9... //TODO: I don't think this is correct...
-    h_min = 4171.0; //just messing around to get it to not trigger clamp //TODO: actually come up with something coherent
-    h_max = 9999999.0; //TODO: actually come up with something coherent
+    h_min = 0.0; //TODO: actually come up with something coherent
+    h_max =  9999999.0; //TODO: actually come up with something coherent
     h_neutral = 83377.0;
     h_smallstep = 0.0; //TODO: find
 
@@ -162,7 +132,7 @@ public static class ThermoMath
     x_min = 0.0;
     x_max = 1.0;
     x_neutral = 0;
-    x_smallstep = 0.001;
+    x_smallstep = 0.00001;
 
     //DEBUG INFO:
     //IF97.print_tables();
@@ -198,38 +168,77 @@ public static class ThermoMath
 
   static double Lerpd(double a, double b, double t) { return (b-a)*t+a; }
 
+  //a bunch of options for getting region here- still need to figure out most reliable
   //region: 0 subcooled liquid, 1 two-phase, 2 superheated vapor
+  public static int region_given_pvt(double p, double v, double t)
+  {
+    int liq = 0;
+    int two = 1;
+    int vapor = 2;
+
+    //broad check w/ t
+    if(t-t_smallstep > IF97.Tsat97(p/1000000.0)) return vapor;
+    if(t+t_smallstep < IF97.Tsat97(p/1000000.0)) return liq;
+
+    //broad check w/ p - unneeded
+    //if(p-p_smallstep > IF97.psat97(t)) return liq;
+    //if(p+p_smallstep < IF97.psat97(t)) return vapor;
+
+    //fine check w/ v
+    //f means saturated liquid,
+    //g means saturated gas
+    double vf = 1.0/IF97.rholiq_p(p/1000000.0);
+    if(v < vf) return liq;
+    double vg = 1.0/IF97.rhovap_p(p/1000000.0);
+    if(v > vg) return vapor;
+    return two;
+  }
+  /*
   public static int region_given_pvt(double p, double v, double t)
   {
     IF97.IF97REGIONS r = IF97.RegionDetermination_TP(t, p/1000000.0);
     switch(r)
     {
-      case IF97.IF97REGIONS.REGION_1: //liquid
-        //Debug.Log("1"); //subcooled liquid
-        break;
-      case IF97.IF97REGIONS.REGION_2: //vapor
-        //Debug.Log("2"); //superheated vapor
-        break;
-      case IF97.IF97REGIONS.REGION_3:
-        //Debug.Log("3"); //superheated vapor
-        break;
-      case IF97.IF97REGIONS.REGION_4: //two-phase
-        //Debug.Log("4"); //superheated vapor
-        break;
-      case IF97.IF97REGIONS.REGION_5:
-        //Debug.Log("5"); //superheated vapor
-        break;
+      case 1: //liquid
+        return 0; //subcooled liquid
+      case 2: //vapor
+        return 2; //superheated vapor
+      case 3:
+      case 4: //two-phase
+      case 5:
+        return 1; //two-phase
     }
-
+    return -1;
+  }
+  */
+  public static int region_given_ph(double p, double h)
+  {
+    int r = IF97.Region_ph(p/1000000.0, h/1000.0); 
     switch(r)
     {
-      case IF97.IF97REGIONS.REGION_1: //liquid
+      case 1: //liquid
         return 0; //subcooled liquid
-      case IF97.IF97REGIONS.REGION_2: //vapor
+      case 2: //vapor
         return 2; //superheated vapor
-      case IF97.IF97REGIONS.REGION_3:
-      case IF97.IF97REGIONS.REGION_4: //two-phase
-      case IF97.IF97REGIONS.REGION_5:
+      case 3:
+      case 4: //two-phase
+      case 5:
+        return 1; //two-phase
+    }
+    return -1;
+  }
+  public static int region_given_ps(double p, double s)
+  {
+    int r = IF97.Region_ps(p/1000000.0, s/1000.0);
+    switch(r)
+    {
+      case 1: //liquid
+        return 0; //subcooled liquid
+      case 2: //vapor
+        return 2; //superheated vapor
+      case 3:
+      case 4: //two-phase
+      case 5:
         return 1; //two-phase
     }
     return -1;
@@ -273,6 +282,11 @@ public static class ThermoMath
     return 1.0/IF97.rhomass_phmass(p/1000000.0,h/1000.0); //UNIT CONVERSION UNTESTED!
   }
 
+  public static double v_given_px(double p,double x) //ONLY USE IN VAPOR DOME
+  {
+    return 1.0/IF97.rhomass_pQ(p/1000000.0,x); //UNIT CONVERSION UNTESTED!
+  }
+
   public static double t_given_ph(double p, double h)
   {
     return IF97.T_phmass(p/1000000.0,h/1000.0); //UNIT CONVERSION UNTESTED!
@@ -295,17 +309,27 @@ public static class ThermoMath
 
   public static double u_given_pt(double p, double t) //DO NOT USE IN VAPOR DOME
   {
-    return IF97.umass_Tp(t, p/1000000.0); //UNIT CONVERSION UNTESTED!
+    return IF97.umass_Tp(t, p/1000000.0)*1000f; //UNIT CONVERSION UNTESTED!
   }
 
   public static double u_given_vt(double v, double t)
   {
-    return IAPWS95.IAPWS95_internal_energy(1f/v,t); //UNIT CONVERSION UNTESTED!
+    return IAPWS95.IAPWS95_internal_energy(1f/v,t)*1000f; //UNIT CONVERSION UNTESTED!
+  }
+
+  public static double u_given_px(double p, double x)
+  {
+    return IF97.umass_pQ(p/1000000.0,x)*1000f; //UNIT CONVERSION UNTESTED!
   }
 
   public static double s_given_vt(double v, double t)
   {
     return IAPWS95.IAPWS95_entropy(1f/v,t)*1000f; //UNIT CONVERSION UNTESTED!
+  }
+
+  public static double s_given_px(double p, double x)
+  {
+    return IF97.smass_pQ(p/1000000.0,x)*1000f; //UNIT CONVERSION UNTESTED!
   }
 
   public static double h_given_vt(double v, double t)
@@ -317,16 +341,21 @@ public static class ThermoMath
   {
     //f means saturated liquid,
     //g means saturated gas
-    double vf = IF97.cvliq_p(p/1000000.0);
-    double vg = IF97.cvvap_p(p/1000000.0);
-    return (v-vf)/(vg-vf);
+    double vf = 1.0/IF97.rholiq_p(p/1000000.0);
+    double vg = 1.0/IF97.rhovap_p(p/1000000.0);
+    return (v-vf)/(vg-vf); //UNIT CONVERSION UNTESTED!
   }
 
-  public static double iterate_t_given_p_verify_u(double t, double p, double u) //t = "first guess"
+  public static double x_given_ph(double p, double h) //ONLY USE IN VAPOR DOME
   {
-    int MAX_ITERS = 100;     //TODO: define intentionally
-    double MAX_DELTA = 0.01; //TODO: define intentionally
-    double step = 0.01;      //TODO: define intentionally
+    return IF97.Q_phmass(p/1000000.0,h/1000.0); //UNIT CONVERSION UNTESTED!
+  }
+
+  public static double iterate_t_given_p_verify_u(double t, double p, double u) //t = first guess
+  {
+    int MAX_ITERS = 100;     //max # of iterations before giving up //TODO: define intentionally
+    double MAX_DELTA = 0.01; //acceptible solution error //TODO: define intentionally
+    double step = 0.01;      //size of first step (shrinks every time it overshoots) //TODO: define intentionally
     double guess = t;
     double mark = u;
     double delta = Math.Abs(u_given_pt(p,guess)-mark);
@@ -348,11 +377,11 @@ public static class ThermoMath
     return guess;
   }
 
-  public static double iterate_t_given_v_verify_u(double t, double v, double u)
+  public static double iterate_t_given_v_verify_u(double t, double v, double u) //t = first guess
   {
-    int MAX_ITERS = 100;      //TODO: define intentionally
-    double MAX_DELTA = 0.01;  //TODO: define intentionally
-    double step = 0.01;       //TODO: define intentionally
+    int MAX_ITERS = 100;     //max # of iterations before giving up //TODO: define intentionally
+    double MAX_DELTA = 0.01; //acceptible solution error //TODO: define intentionally
+    double step = 0.01;      //size of first step (shrinks every time it overshoots) //TODO: define intentionally
     double guess = t;
     double mark = u;
     double delta = u_given_vt(v,guess)-mark;
