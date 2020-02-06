@@ -86,6 +86,7 @@ public class ThermoState : MonoBehaviour
   GameObject graph;
   GameObject state_dot;
   public Material graph_material;
+  public Material graph_material_lit;
   TextMeshPro text_pressure;
   TextMeshPro text_temperature;
   TextMeshPro text_volume;
@@ -499,13 +500,17 @@ public class ThermoState : MonoBehaviour
     mesh.normals = mesh_normals.ToArray();
     mesh.triangles = mesh_triangles.ToArray();
 
-    GameObject gameObject = new GameObject("graph_mesh", typeof(MeshFilter), typeof(MeshRenderer));
-    gameObject.transform.parent = graph.transform;
-    gameObject.transform.localPosition = new Vector3(0f,0f,0f);
-    gameObject.transform.localScale = new Vector3(1f,1f,1f);
-    gameObject.transform.localRotation = Quaternion.identity;
-    gameObject.GetComponent<MeshFilter>().mesh = mesh;
-    gameObject.GetComponent<MeshRenderer>().material = graph_material;
+    GameObject graphObject = new GameObject("graph_mesh", typeof(MeshFilter), typeof(MeshRenderer), typeof(Lightable));
+    graphObject.transform.parent = graph.transform;
+    graphObject.transform.localPosition = new Vector3(0f,0f,0f);
+    graphObject.transform.localScale = new Vector3(1f,1f,1f);
+    graphObject.transform.localRotation = Quaternion.identity;
+    graphObject.GetComponent<MeshFilter>().mesh = mesh;
+    graphObject.GetComponent<MeshRenderer>().material = graph_material;
+    var lightable = graphObject.GetComponent<Lightable>();
+    lightable.use_custom_mats = true;
+    lightable.base_mat = graph_material;
+    lightable.lit_mat  = graph_material_lit;
   }
 
   void reset_state()
