@@ -20,10 +20,12 @@ Many other derivations are possible, either directly, or via iterative guessing 
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public static class ThermoMath
 {
+  private const int MAX_MILLISECOND = 50;
   /*
   pressure = p
   specificvolume = v
@@ -269,138 +271,550 @@ public static class ThermoMath
 
   public static double p_given_vt(double v, double t)
   {
-    return IAPWS95.IAPWS95_pressure(1.0/v,t)*1000.0; //expects:Kg/M^3,K returns KPa
+    double ret_val;
+    try
+    {
+      var task = Task.Run(() =>
+      {
+        ret_val = IAPWS95.IAPWS95_pressure(1.0 / v, t) * 1000.0; //expects:Kg/M^3,K returns KPa
+        return ret_val;
+      });
+      if (!task.Wait(MAX_MILLISECOND))
+      {
+        Debug.Log( String.Format("Did not complete p_given_vt in {0} msec, returning {1}", MAX_MILLISECOND, ThermoMath.p_neutral) );
+        return ThermoMath.p_neutral;
+      }
+      else
+      {
+        //Debug.Log("Successfully completed p_given_vt");
+        return task.Result;
+      }
+    }
+    catch (Exception ex)
+    {
+      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, p_neutral) );
+      return p_neutral;
+    }
+    //return IAPWS95.IAPWS95_pressure(1.0/v,t)*1000.0; //expects:Kg/M^3,K returns KPa
   }
 
   public static double v_given_pt(double p, double t) //DO NOT USE IN VAPOR DOME
   {
-    return 1.0/IF97.rhomass_Tp(t,p/1000000.0); //expects:K,MPa returns Kg/M^3
+    double ret_val;
+    try
+    {
+      var task = Task.Run(() =>
+      {
+        ret_val = 1.0/IF97.rhomass_Tp(t,p/1000000.0); //expects:K,MPa returns Kg/M^3
+        return ret_val;
+      });
+      if (!task.Wait(MAX_MILLISECOND))
+      {
+        Debug.Log( String.Format("Did not complete v_given_pt in {0} msec, returning {1}", MAX_MILLISECOND, v_neutral) );
+        return v_neutral;
+      }
+      else
+      {
+        //Debug.Log("Successfully completed v_given_pt");
+        return task.Result;
+      }
+    }
+    catch (Exception ex)
+    {
+      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, v_neutral) );
+      return v_neutral;
+    }
+    //return 1.0/IF97.rhomass_Tp(t,p/1000000.0); //expects:K,MPa returns Kg/M^3
   }
 
   public static double v_given_ph(double p, double h)
   {
-    return 1.0/IF97.rhomass_phmass(p/1000000.0,h/1000.0); //UNIT CONVERSION UNTESTED!
+    double ret_val;
+    try
+    {
+      var task = Task.Run(() =>
+      {
+        ret_val = 1.0/IF97.rhomass_phmass(p/1000000.0,h/1000.0); //UNIT CONVERSION UNTESTED!
+        return ret_val;
+      });
+      if (!task.Wait(MAX_MILLISECOND))
+      {
+        Debug.Log( String.Format("Did not complete v_given_ph in {0} msec, returning {1}", MAX_MILLISECOND, v_neutral) );
+        return v_neutral;
+      }
+      else
+      {
+        return task.Result;
+      }
+    }
+    catch (Exception ex)
+    {
+      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, v_neutral) );
+      return v_neutral;
+    }
+    //return 1.0/IF97.rhomass_phmass(p/1000000.0,h/1000.0); //UNIT CONVERSION UNTESTED!
   }
 
   public static double v_given_px(double p,double x) //ONLY USE IN VAPOR DOME
   {
-    return 1.0/IF97.rhomass_pQ(p/1000000.0,x); //UNIT CONVERSION UNTESTED!
+    double ret_val;
+    try
+    {
+      var task = Task.Run(() =>
+      {
+        ret_val = 1.0/IF97.rhomass_pQ(p/1000000.0,x); //UNIT CONVERSION UNTESTED!
+        return ret_val;
+      });
+      if (!task.Wait(MAX_MILLISECOND))
+      {
+        Debug.Log( String.Format("Did not complete v_given_px in {0} msec, returning {1}", MAX_MILLISECOND, v_neutral) );
+        return v_neutral;
+      }
+      else
+      {
+        return task.Result;
+      }
+    }
+    catch (Exception ex)
+    {
+      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, v_neutral) );
+      return v_neutral;
+    }
+    //return 1.0/IF97.rhomass_pQ(p/1000000.0,x); //UNIT CONVERSION UNTESTED!
   }
 
   public static double t_given_ph(double p, double h)
   {
-    return IF97.T_phmass(p/1000000.0,h/1000.0); //UNIT CONVERSION UNTESTED!
+    double ret_val;
+    try
+    {
+      var task = Task.Run(() =>
+      {
+        ret_val = IF97.T_phmass(p/1000000.0,h/1000.0); //UNIT CONVERSION UNTESTED!
+        return ret_val;
+      });
+      if (!task.Wait(MAX_MILLISECOND))
+      {
+        Debug.Log( String.Format("Did not complete t_given_ph in {0} msec, returning {1}", MAX_MILLISECOND, t_neutral) );
+        return t_neutral;
+      }
+      else
+      {
+        return task.Result;
+      }
+    }
+    catch (Exception ex)
+    {
+      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, t_neutral) );
+      return t_neutral;
+    }
+    //return IF97.T_phmass(p/1000000.0,h/1000.0); //UNIT CONVERSION UNTESTED!
   }
 
   public static double tsat_given_p(double p)
   {
-    return IF97.Tsat97(p/1000000.0); //UNIT CONVERSION UNTESTED!
+    double ret_val;
+    try
+    {
+      var task = Task.Run(() =>
+      {
+        ret_val = IF97.Tsat97(p/1000000.0); //UNIT CONVERSION UNTESTED!
+        return ret_val;
+      });
+      if (!task.Wait(MAX_MILLISECOND))
+      {
+        Debug.Log( String.Format("Did not complete tsat_given_p in {0} msec, returning {1}", MAX_MILLISECOND, t_neutral) );
+        return t_neutral;
+      }
+      else
+      {
+        return task.Result;
+      }
+    }
+    catch (Exception ex)
+    {
+      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, t_neutral) );
+      return t_neutral;
+    }
+    //return IF97.Tsat97(p/1000000.0); //UNIT CONVERSION UNTESTED!
   }
 
   public static double vliq_given_p(double p)
   {
-    return 1.0/IF97.rholiq_p(p/1000000.0); //expects:MPa returns Kg/M^3
+    double ret_val;
+    try
+    {
+      var task = Task.Run(() =>
+      {
+        ret_val = 1.0/IF97.rholiq_p(p/1000000.0); //expects:MPa returns Kg/M^3
+        return ret_val;
+      });
+      if (!task.Wait(MAX_MILLISECOND))
+      {
+        Debug.Log( String.Format("Did not complete vliq_given_p in {0} msec, returning {1}", MAX_MILLISECOND, v_neutral) );
+        return v_neutral;
+      }
+      else
+      {
+        return task.Result;
+      }
+    }
+    catch (Exception ex)
+    {
+      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, v_neutral) );
+      return v_neutral;
+    }
+    //return 1.0/IF97.rholiq_p(p/1000000.0); //expects:MPa returns Kg/M^3
   }
 
   public static double vvap_given_p(double p)
   {
-    return 1.0/IF97.rhovap_p(p/1000000.0); //expects:MPa returns Kg/M^3
+    double ret_val;
+    try
+    {
+      var task = Task.Run(() =>
+      {
+        ret_val = 1.0/IF97.rhovap_p(p/1000000.0); //expects:MPa returns Kg/M^3
+        return ret_val;
+      });
+      if (!task.Wait(MAX_MILLISECOND))
+      {
+        Debug.Log( String.Format("Did not complete vvap_given_p in {0} msec, returning {1}", MAX_MILLISECOND, v_neutral) );
+        return v_neutral;
+      }
+      else
+      {
+        return task.Result;
+      }
+    }
+    catch (Exception ex)
+    {
+      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, v_neutral) );
+      return v_neutral;
+    }
+    //return 1.0/IF97.rhovap_p(p/1000000.0); //expects:MPa returns Kg/M^3
   }
 
   public static double u_given_pt(double p, double t) //DO NOT USE IN VAPOR DOME
   {
-    return IF97.umass_Tp(t, p/1000000.0)*1000f; //UNIT CONVERSION UNTESTED!
+    double ret_val;
+    try
+    {
+      var task = Task.Run(() =>
+      {
+        ret_val = IF97.umass_Tp(t, p/1000000.0)*1000f; //UNIT CONVERSION UNTESTED!
+        return ret_val;
+      });
+      if (!task.Wait(MAX_MILLISECOND))
+      {
+        Debug.Log( String.Format("Did not complete u_given_pt in {0} msec, returning {1}", MAX_MILLISECOND, u_neutral) );
+        return u_neutral;
+      }
+      else
+      {
+        return task.Result;
+      }
+    }
+    catch (Exception ex)
+    {
+      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, u_neutral) );
+      return u_neutral;
+    }
+    //return IF97.umass_Tp(t, p/1000000.0)*1000f; //UNIT CONVERSION UNTESTED!
   }
 
   public static double u_given_vt(double v, double t)
   {
-    return IAPWS95.IAPWS95_internal_energy(1f/v,t)*1000f; //UNIT CONVERSION UNTESTED!
+    double ret_val;
+    try
+    {
+      var task = Task.Run(() =>
+      {
+        ret_val = IAPWS95.IAPWS95_internal_energy(1f/v,t)*1000f; //UNIT CONVERSION UNTESTED!
+        return ret_val;
+      });
+      if (!task.Wait(MAX_MILLISECOND))
+      {
+        Debug.Log( String.Format("Did not complete u_given_vt in {0} msec, returning {1}", MAX_MILLISECOND, u_neutral) );
+        return u_neutral;
+      }
+      else
+      {
+        return task.Result;
+      }
+    }
+    catch (Exception ex)
+    {
+      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, u_neutral) );
+      return u_neutral;
+    }
+    //return IAPWS95.IAPWS95_internal_energy(1f/v,t)*1000f; //UNIT CONVERSION UNTESTED!
   }
 
   public static double u_given_px(double p, double x)
   {
-    return IF97.umass_pQ(p/1000000.0,x)*1000f; //UNIT CONVERSION UNTESTED!
+    double ret_val;
+    try
+    {
+      var task = Task.Run(() =>
+      {
+        ret_val = IF97.umass_pQ(p/1000000.0,x)*1000f; //UNIT CONVERSION UNTESTED!
+        return ret_val;
+      });
+      if (!task.Wait(MAX_MILLISECOND))
+      {
+        Debug.Log( String.Format("Did not complete u_given_px in {0} msec, returning {1}", MAX_MILLISECOND, u_neutral) );
+        return u_neutral;
+      }
+      else
+      {
+        return task.Result;
+      }
+    }
+    catch (Exception ex)
+    {
+      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, u_neutral) );
+      return u_neutral;
+    }
+    //return IF97.umass_pQ(p/1000000.0,x)*1000f; //UNIT CONVERSION UNTESTED!
   }
 
   public static double s_given_vt(double v, double t)
   {
-    return IAPWS95.IAPWS95_entropy(1f/v,t)*1000f; //UNIT CONVERSION UNTESTED!
+    double ret_val;
+    try
+    {
+      var task = Task.Run(() =>
+      {
+        ret_val = IAPWS95.IAPWS95_entropy(1f/v,t)*1000f; //UNIT CONVERSION UNTESTED!
+        return ret_val;
+      });
+      if (!task.Wait(MAX_MILLISECOND))
+      {
+        Debug.Log( String.Format("Did not complete s_given_vt in {0} msec, returning {1}", MAX_MILLISECOND, s_neutral) );
+        return s_neutral;
+      }
+      else
+      {
+        return task.Result;
+      }
+    }
+    catch (Exception ex)
+    {
+      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, s_neutral) );
+      return s_neutral;
+    }
+    //return IAPWS95.IAPWS95_entropy(1f/v,t)*1000f; //UNIT CONVERSION UNTESTED!
   }
 
   public static double s_given_px(double p, double x)
   {
-    return IF97.smass_pQ(p/1000000.0,x)*1000f; //UNIT CONVERSION UNTESTED!
+    double ret_val;
+    try
+    {
+      var task = Task.Run(() =>
+      {
+        ret_val = IF97.smass_pQ(p/1000000.0,x)*1000f; //UNIT CONVERSION UNTESTED!
+        return ret_val;
+      });
+      if (!task.Wait(MAX_MILLISECOND))
+      {
+        Debug.Log( String.Format("Did not complete s_given_px in {0} msec, returning {1}", MAX_MILLISECOND, s_neutral) );
+        return s_neutral;
+      }
+      else
+      {
+        return task.Result;
+      }
+    }
+    catch (Exception ex)
+    {
+      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, s_neutral) );
+      return s_neutral;
+    }
+    //return IF97.smass_pQ(p/1000000.0,x)*1000f; //UNIT CONVERSION UNTESTED!
   }
 
   public static double h_given_vt(double v, double t)
   {
-    return IAPWS95.IAPWS95_enthalpy(1f/v,t)*1000f; //UNIT CONVERSION UNTESTED!
+    double ret_val;
+    try
+    {
+      var task = Task.Run(() =>
+      {
+        ret_val = IAPWS95.IAPWS95_enthalpy(1f/v,t)*1000f; //UNIT CONVERSION UNTESTED!
+        return ret_val;
+      });
+      if (!task.Wait(MAX_MILLISECOND))
+      {
+        Debug.Log( String.Format("Did not complete h_given_vt in {0} msec, returning {1}", MAX_MILLISECOND, h_neutral) );
+        return h_neutral;
+      }
+      else
+      {
+        return task.Result;
+      }
+    }
+    catch (Exception ex)
+    {
+      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, h_neutral) );
+      return h_neutral;
+    }
+    //return IAPWS95.IAPWS95_enthalpy(1f/v,t)*1000f; //UNIT CONVERSION UNTESTED!
   }
 
   public static double x_given_pv(double p, double v) //ONLY USE IN VAPOR DOME
   {
-    //f means saturated liquid,
-    //g means saturated gas
-    double vf = 1.0/IF97.rholiq_p(p/1000000.0);
-    double vg = 1.0/IF97.rhovap_p(p/1000000.0);
-    return (v-vf)/(vg-vf); //UNIT CONVERSION UNTESTED!
+    double ret_val;
+    try
+    {
+      var task = Task.Run(() =>
+      {
+        //f means saturated liquid,
+        //g means saturated gas
+        double vf = 1.0/IF97.rholiq_p(p/1000000.0);
+        double vg = 1.0/IF97.rhovap_p(p/1000000.0);
+        ret_val = (v-vf)/(vg-vf); //UNIT CONVERSION UNTESTED!
+        return ret_val;
+      });
+      if (!task.Wait(MAX_MILLISECOND))
+      {
+        Debug.Log( String.Format("Did not complete x_given_pv in {0} msec, returning {1}", MAX_MILLISECOND, x_neutral) );
+        return x_neutral;
+      }
+      else
+      {
+        return task.Result;
+      }
+    }
+    catch (Exception ex)
+    {
+      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, x_neutral) );
+      return x_neutral;
+    }
+    //return (v-vf)/(vg-vf); //UNIT CONVERSION UNTESTED!
   }
 
   public static double x_given_ph(double p, double h) //ONLY USE IN VAPOR DOME
   {
-    return IF97.Q_phmass(p/1000000.0,h/1000.0); //UNIT CONVERSION UNTESTED!
+    double ret_val;
+    try
+    {
+      var task = Task.Run(() =>
+      {
+        ret_val = IF97.Q_phmass(p/1000000.0,h/1000.0); //UNIT CONVERSION UNTESTED!
+        return ret_val;
+      });
+      if (!task.Wait(MAX_MILLISECOND))
+      {
+        Debug.Log( String.Format("Did not complete x_given_ph in {0} msec, returning {1}", MAX_MILLISECOND, x_neutral) );
+        return x_neutral;
+      }
+      else
+      {
+        return task.Result;
+      }
+    }
+    catch (Exception ex)
+    {
+      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, x_neutral) );
+      return x_neutral;
+    }
+    //return IF97.Q_phmass(p/1000000.0,h/1000.0); //UNIT CONVERSION UNTESTED!
   }
 
   public static double iterate_t_given_p_verify_u(double t, double p, double u) //t = first guess
   {
-    int MAX_ITERS = 100;     //max # of iterations before giving up //TODO: define intentionally
-    double MAX_DELTA = 0.01; //acceptible solution error //TODO: define intentionally
-    double step = 0.01;      //size of first step (shrinks every time it overshoots) //TODO: define intentionally
-    double guess = t;
-    double mark = u;
-    double delta = Math.Abs(u_given_pt(p,guess)-mark);
-    for(int i = 0; i < MAX_ITERS || delta < MAX_DELTA; i++)
+    try
     {
-      double delta_a = Math.Abs(u_given_pt(p,guess+ step     )-mark);
-      double delta_b = Math.Abs(u_given_pt(p,guess-(step/2.0))-mark);
-      if(delta_a < delta_b)
+      var task = Task.Run(() =>
       {
-        delta = delta_a;
+        int MAX_ITERS = 100;     //max # of iterations before giving up //TODO: define intentionally
+        double MAX_DELTA = 0.01; //acceptible solution error //TODO: define intentionally
+        double step = 0.01;      //size of first step (shrinks every time it overshoots) //TODO: define intentionally
+        double guess = t;
+        double mark = u;
+        double delta = Math.Abs(u_given_pt(p,guess)-mark);
+        for(int i = 0; i < MAX_ITERS && delta < MAX_DELTA; i++)
+        {
+          double delta_a = Math.Abs(u_given_pt(p,guess+ step     )-mark);
+          double delta_b = Math.Abs(u_given_pt(p,guess-(step/2.0))-mark);
+          if(delta_a < delta_b)
+          {
+            delta = delta_a;
+          }
+          else
+          {
+            delta = delta_b;
+            step = step/-2.0;
+          }
+          guess += step;
+        }
+        return guess;
+      });
+      if (!task.Wait(MAX_MILLISECOND))
+      {
+        Debug.Log( String.Format("Did not complete iterate_t_given_p_verify_u in {0} msec, returning initial guess {1}", MAX_MILLISECOND, t) );
+        return t;
       }
       else
       {
-        delta = delta_b;
-        step = step/-2.0;
+        //Debug.Log("Successfully completed iterate_t_given_p_verify_u");
+        return task.Result;
       }
-      guess += step;
     }
-    return guess;
+    catch (Exception ex)
+    {
+      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, t_neutral) );
+      return t_neutral;
+    }
   }
 
   public static double iterate_t_given_v_verify_u(double t, double v, double u) //t = first guess
   {
-    int MAX_ITERS = 100;     //max # of iterations before giving up //TODO: define intentionally
-    double MAX_DELTA = 0.01; //acceptible solution error //TODO: define intentionally
-    double step = 0.01;      //size of first step (shrinks every time it overshoots) //TODO: define intentionally
-    double guess = t;
-    double mark = u;
-    double delta = u_given_vt(v,guess)-mark;
-    for(int i = 0; i < MAX_ITERS || delta < MAX_DELTA; i++)
+    try
     {
-      double delta_a = Math.Abs(u_given_vt(v,guess+ step     )-mark);
-      double delta_b = Math.Abs(u_given_vt(v,guess-(step/2.0))-mark);
-      if(delta_a < delta_b)
+      var task = Task.Run(() =>
       {
-        delta = delta_a;
+        int MAX_ITERS = 100;     //max # of iterations before giving up //TODO: define intentionally
+        double MAX_DELTA = 0.01; //acceptible solution error //TODO: define intentionally
+        double step = 0.01;      //size of first step (shrinks every time it overshoots) //TODO: define intentionally
+        double guess = t;
+        double mark = u;
+        double delta = u_given_vt(v,guess)-mark;
+        for(int i = 0; i < MAX_ITERS && delta < MAX_DELTA; i++)
+        {
+          double delta_a = Math.Abs(u_given_vt(v,guess+ step     )-mark);
+          double delta_b = Math.Abs(u_given_vt(v,guess-(step/2.0))-mark);
+          if(delta_a < delta_b)
+          {
+            delta = delta_a;
+          }
+          else
+          {
+            delta = delta_b;
+            step = step/-2.0;
+          }
+          guess += step;
+        }
+        return guess;
+      });
+      if (!task.Wait(50))
+      {
+        Debug.Log( String.Format("Did not complete iterate_t_given_v_verify_u in {0} sec, returning initial guess {1}", MAX_MILLISECOND, t) );
+        return t;
       }
       else
       {
-        delta = delta_b;
-        step = step/-2.0;
+        //Debug.Log("Successfully completed iterate_t_given_v_verify_u");
+        return task.Result;
       }
-      guess += step;
     }
-    return guess;
+    catch (Exception ex)
+    {
+      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, t_neutral) );
+      return t_neutral;
+    }
   }
 }
 
