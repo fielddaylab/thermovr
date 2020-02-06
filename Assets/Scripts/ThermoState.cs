@@ -608,10 +608,10 @@ public class ThermoState : MonoBehaviour
     piston    = GameObject.Find("Piston");
     piston_min_y = piston.transform.localPosition.y;
     piston_max_y = piston_min_y+0.1f; //experimentally derived...
-    contents = GameObject.Find("Contents");
+    contents = GameObject.Find("Steam_Scale");
     contents_min_h = contents.transform.localScale.y;
     contents_max_h = contents_min_h+0.1f; //experimentally derived...
-    water     = GameObject.Find("Water");
+    water     = GameObject.Find("Water_Scale");
     steam     = GameObject.Find("Steam");
 
     graph     = GameObject.Find("gmodel");
@@ -820,9 +820,10 @@ public class ThermoState : MonoBehaviour
     Vector3 water_lt = water.transform.localScale;
     water_lt.y = 1f-(float)quality;
     water.transform.localScale = water_lt;
-    Vector3 steam_lt = steam.transform.localScale;
-    steam_lt.y = (float)quality;
-    steam.transform.localScale = -1f*steam_lt;
+    //Vector3 steam_lt = steam.transform.localScale;
+    //steam_lt.y = (float)quality;
+    //steam.transform.localScale = -1f*steam_lt;
+    //Debug.Log(String.Format("Water scale: {0}, water scale lossy: {3}, child scale: {1}, steam scale: {2}", water.transform.localScale, water.GetComponentInChildren<MeshRenderer>().gameObject.transform.lossyScale, steam.transform.localScale, water.transform.lossyScale));
   }
 
   // Update is called once per frame
