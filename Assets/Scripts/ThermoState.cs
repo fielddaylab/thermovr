@@ -116,6 +116,11 @@ public class ThermoState : MonoBehaviour
     visualize_state();
   }
 
+  public void Reset()
+  {
+    this.reset_state();
+  }
+
   //sample bias- "graph density"
   [Range(0.001f,20)]
   public double sample_lbase = 1.6f;

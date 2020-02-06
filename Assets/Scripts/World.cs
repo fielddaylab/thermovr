@@ -72,6 +72,8 @@ public class World : MonoBehaviour
   List<Halfable> halfables;
   GameObject halfer;
   Touchable halfer_touchable;
+  GameObject reset;
+  Touchable reset_touchable;
 
   GameObject vessel;
   GameObject graph;
@@ -187,6 +189,8 @@ public class World : MonoBehaviour
 
     halfer = GameObject.Find("Halfer");
     halfer_touchable = halfer.GetComponent<Touchable>();
+    reset = GameObject.Find("Reset");
+    reset_touchable = reset.GetComponent<Touchable>();
     halfables = new List<Halfable>();
     halfables.Add(GameObject.Find("Container"     ).GetComponent<Halfable>());
     halfables.Add(GameObject.Find("Tool_Insulator").GetComponent<Halfable>());
@@ -532,18 +536,33 @@ public class World : MonoBehaviour
         }
       }
 
-      if(r_grabbed == null) //still not holding anything
+      if (r_grabbed == null) //still not holding anything
       {
         Touchable g = halfer_touchable;
-        if( //halfing button newly grabbed
-          ( which && g.ltouch) ||
+        if ( //halfing button newly grabbed
+          (which && g.ltouch) ||
           (!which && g.rtouch)
         )
         {
           r_grabbed = halfer;
-          g.grabbed = true;
-          if(r_grabbed == r_ograbbed) r_ograbbed = null;
+          g.touch = true;
+          if (r_grabbed == r_ograbbed) r_ograbbed = null;
           SetAllHalfed(!halfed);
+        }
+      }
+
+      if (r_grabbed == null) //still not holding anything
+      {
+        Touchable g = reset_touchable;
+        if( //reset button newly grabbed
+          ( which && g.ltouch) ||
+          (!which && g.rtouch)
+        )
+        {
+          r_grabbed = reset;
+          g.touch = true;
+          if(r_grabbed == r_ograbbed) r_ograbbed = null;
+          thermo.Reset();
         }
       }
 
@@ -672,9 +691,12 @@ public class World : MonoBehaviour
     gr = handle_workspace_touchable;
     if(gr.ltouch) ltouch = true;
     if(gr.rtouch) rtouch = true;
-    gr = halfer_touchable;
-    if(gr.ltouch) ltouch = true;
-    if(gr.rtouch) rtouch = true;
+    Touchable press_gr = halfer_touchable;
+    if(press_gr.ltouch) ltouch = true;
+    if(press_gr.rtouch) rtouch = true;
+    press_gr = reset_touchable;
+    if(press_gr.ltouch) ltouch = true;
+    if(press_gr.rtouch) rtouch = true;
 
          if(lgrabbed) lhand_meshrenderer.materials = hand_grabbings;
     else if(ltouch)   lhand_meshrenderer.materials = hand_touchings;
