@@ -819,15 +819,29 @@ public class World : MonoBehaviour
     rhand_pos = rhand.transform.position;
 
     //input
-    float lhandt  = OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger);
-    float lindext = OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger);
-    float rhandt  = OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger);
-    float rindext = OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger);
+    //float lhandt  = OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger);
+    //float lindext = OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger);
+    //float rhandt  = OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger);
+    //float rindext = OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger);
+    float lhandt  = OVRInput.Get(OVRInput.RawAxis1D.LHandTrigger);
+    float lindext = OVRInput.Get(OVRInput.RawAxis1D.LIndexTrigger);
+    float rhandt  = OVRInput.Get(OVRInput.RawAxis1D.RHandTrigger);
+    float rindext = OVRInput.Get(OVRInput.RawAxis1D.RIndexTrigger);
     //index compatibility
-    if(OVRInput.Get(OVRInput.Button.One,OVRInput.Controller.LTouch)) lhandt = 1.0f;
-    if(OVRInput.Get(OVRInput.Button.One,OVRInput.Controller.RTouch)) rhandt = 1.0f;
+    if (OVRInput.Get(OVRInput.Button.One, OVRInput.Controller.LTouch))
+    {
+      lhandt = 1.0f;
+    }
+    if(OVRInput.Get(OVRInput.Button.One,OVRInput.Controller.RTouch))
+    {
+      rhandt = 1.0f;
+    }
     lhandt += lindext;
     rhandt += rindext;
+    if (lindext > 0.0f || rindext > 0.0f)
+    {
+      ;
+    }
     //test effect of hands one at a time ("true" == "left hand", "false" == "right hand")
     TryHand(true,  lhandt, lindext, lhand.transform.position.x, lhand.transform.position.y, lhand_vel, ref lhtrigger, ref litrigger, ref lhtrigger_delta, ref litrigger_delta, ref lz, ref ly, ref lhand, ref lgrabbed, ref rhand, ref rgrabbed); //left hand
     TryHand(false, rhandt, rindext, rhand.transform.position.x, rhand.transform.position.y, rhand_vel, ref rhtrigger, ref ritrigger, ref rhtrigger_delta, ref ritrigger_delta, ref rz, ref ry, ref rhand, ref rgrabbed, ref lhand, ref lgrabbed); //right hand
