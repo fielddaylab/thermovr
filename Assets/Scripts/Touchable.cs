@@ -4,12 +4,12 @@ using UnityEngine;
 
 public class Touchable : MonoBehaviour
 {
-  GameObject lhand;
-  GameObject rhand;
+  protected GameObject lhand;
+  protected GameObject rhand;
   [System.NonSerialized]
   public bool grabbed = false;
-  Collider lhand_c;
-  Collider rhand_c;
+  protected Collider[] lhand_c;
+  protected Collider[] rhand_c;
   [System.NonSerialized]
   public Transform og_parent;
 
@@ -17,8 +17,8 @@ public class Touchable : MonoBehaviour
   {
     lhand = GameObject.Find("LeftControllerAnchor");
     rhand = GameObject.Find("RightControllerAnchor");
-    lhand_c = lhand.GetComponent<Collider>();
-    rhand_c = rhand.GetComponent<Collider>();
+    lhand_c = lhand.GetComponentsInChildren<Collider>();
+    rhand_c = rhand.GetComponentsInChildren<Collider>();
     og_parent = gameObject.transform.parent;
   }
 
@@ -34,16 +34,27 @@ public class Touchable : MonoBehaviour
 
   }
 
+  private bool cInHandList(Collider c, bool left)
+  {
+    Collider[] list = left ? lhand_c : rhand_c;
+    foreach (Collider candidate in list)
+    {
+      if (candidate == c) return true;
+    }
+    return false;
+  }
+
   [System.NonSerialized]
   public bool ltouch = false;
   [System.NonSerialized]
   public bool rtouch = false;
   [System.NonSerialized]
   public bool touch = false;
-  void OnTriggerEnter(Collider c)
+  protected virtual void OnTriggerEnter(Collider c)
   {
-    if(c == lhand_c) ltouch = true;
-    if(c == rhand_c) rtouch = true;
+    if (cInHandList(c, true))  ltouch = true;
+    if (cInHandList(c, false)) rtouch = true;
+
     touch = (ltouch || rtouch);
 
     var light_list = gameObject.GetComponentsInChildren<Lightable>();
@@ -53,10 +64,11 @@ public class Touchable : MonoBehaviour
     }
   }
 
-  void OnTriggerExit(Collider c)
+  protected virtual void OnTriggerExit(Collider c)
   {
-    if(c == lhand_c) ltouch = false;
-    if(c == rhand_c) rtouch = false;
+    if(cInHandList(c, true))  ltouch = false;
+    if(cInHandList(c, false)) rtouch = false;
+
     touch = (ltouch || rtouch);
 
     var light_list = gameObject.GetComponentsInChildren<Lightable>();
