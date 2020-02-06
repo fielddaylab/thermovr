@@ -387,6 +387,17 @@ public class World : MonoBehaviour
     }
     else if(t == tool_clamp)
     {
+      //const float MAX_WIDTH = 2.0f;
+      //const float TOP_BASE_Y_POS = 0.049f;
+      //const float MID_BASE_Y_POS = 0.0164f;
+      //var clamp_mid = GameObject.Find("clamp_mid");
+      //var clamp_mid_mesh = clamp_mid.GetComponent<MeshFilter>().mesh;
+      //var clamp_top = GameObject.Find("clamp_mid");
+      //var clamp_top_mesh = clamp_top.GetComponent<MeshFilter>().mesh;
+      //clamp_mid.transform.localScale = new Vector3(1.0f, 1.0f + MAX_WIDTH * t.dial_dial.val, 1.0f);
+      //*clamp_mid.transform.localScale.y
+      //clamp_mid.transform.position = new Vector3(clamp_mid.transform.position.x, MID_BASE_Y_POS + clamp_mid_mesh.bounds.extents.y, clamp_mid.transform.position.z);
+      //clamp_top.transform.position = new Vector3(clamp_mid.transform.position.x, TOP_BASE_Y_POS + clamp_mid_mesh.bounds.extents.y, clamp_mid.transform.position.z);
       applied_weight = 0;
       if(tool_weight.engaged)  applied_weight += tool_weight.dial_dial.map;
       if(tool_balloon.engaged) applied_weight += tool_balloon.dial_dial.map;
