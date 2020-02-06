@@ -45,6 +45,12 @@ public class Touchable : MonoBehaviour
     if(c == lhand_c) ltouch = true;
     if(c == rhand_c) rtouch = true;
     touch = (ltouch || rtouch);
+
+    var light_list = gameObject.GetComponentsInChildren<Lightable>();
+    foreach (Lightable light in light_list)
+    {
+      light.SetLit(touch); // set to lit if touched, or unlit if not.
+    }
   }
 
   void OnTriggerExit(Collider c)
@@ -52,6 +58,12 @@ public class Touchable : MonoBehaviour
     if(c == lhand_c) ltouch = false;
     if(c == rhand_c) rtouch = false;
     touch = (ltouch || rtouch);
+
+    var light_list = gameObject.GetComponentsInChildren<Lightable>();
+    foreach (Lightable light in light_list)
+    {
+      light.SetLit(touch); // set to lit if touched, or unlit if not.
+    }
   }
 
 }
