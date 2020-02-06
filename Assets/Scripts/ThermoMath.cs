@@ -274,21 +274,8 @@ public static class ThermoMath
     double ret_val;
     try
     {
-      var task = Task.Run(() =>
-      {
-        ret_val = IAPWS95.IAPWS95_pressure(1.0 / v, t) * 1000.0; //expects:Kg/M^3,K returns KPa
-        return ret_val;
-      });
-      if (!task.Wait(MAX_MILLISECOND))
-      {
-        Debug.Log( String.Format("Did not complete p_given_vt in {0} msec, returning {1}", MAX_MILLISECOND, ThermoMath.p_neutral) );
-        return ThermoMath.p_neutral;
-      }
-      else
-      {
-        //Debug.Log("Successfully completed p_given_vt");
-        return task.Result;
-      }
+      ret_val = IAPWS95.IAPWS95_pressure(1.0 / v, t) * 1000.0; //expects:Kg/M^3,K returns KPa
+      return ret_val;
     }
     catch (Exception ex)
     {
@@ -303,21 +290,8 @@ public static class ThermoMath
     double ret_val;
     try
     {
-      var task = Task.Run(() =>
-      {
-        ret_val = 1.0/IF97.rhomass_Tp(t,p/1000000.0); //expects:K,MPa returns Kg/M^3
-        return ret_val;
-      });
-      if (!task.Wait(MAX_MILLISECOND))
-      {
-        Debug.Log( String.Format("Did not complete v_given_pt in {0} msec, returning {1}", MAX_MILLISECOND, v_neutral) );
-        return v_neutral;
-      }
-      else
-      {
-        //Debug.Log("Successfully completed v_given_pt");
-        return task.Result;
-      }
+      ret_val = 1.0/IF97.rhomass_Tp(t,p/1000000.0); //expects:K,MPa returns Kg/M^3
+      return ret_val;
     }
     catch (Exception ex)
     {
@@ -332,20 +306,8 @@ public static class ThermoMath
     double ret_val;
     try
     {
-      var task = Task.Run(() =>
-      {
-        ret_val = 1.0/IF97.rhomass_phmass(p/1000000.0,h/1000.0); //UNIT CONVERSION UNTESTED!
-        return ret_val;
-      });
-      if (!task.Wait(MAX_MILLISECOND))
-      {
-        Debug.Log( String.Format("Did not complete v_given_ph in {0} msec, returning {1}", MAX_MILLISECOND, v_neutral) );
-        return v_neutral;
-      }
-      else
-      {
-        return task.Result;
-      }
+      ret_val = 1.0/IF97.rhomass_phmass(p/1000000.0,h/1000.0); //UNIT CONVERSION UNTESTED!
+      return ret_val;
     }
     catch (Exception ex)
     {
@@ -360,20 +322,8 @@ public static class ThermoMath
     double ret_val;
     try
     {
-      var task = Task.Run(() =>
-      {
-        ret_val = 1.0/IF97.rhomass_pQ(p/1000000.0,x); //UNIT CONVERSION UNTESTED!
-        return ret_val;
-      });
-      if (!task.Wait(MAX_MILLISECOND))
-      {
-        Debug.Log( String.Format("Did not complete v_given_px in {0} msec, returning {1}", MAX_MILLISECOND, v_neutral) );
-        return v_neutral;
-      }
-      else
-      {
-        return task.Result;
-      }
+      ret_val = 1.0/IF97.rhomass_pQ(p/1000000.0,x); //UNIT CONVERSION UNTESTED!
+      return ret_val;
     }
     catch (Exception ex)
     {
@@ -388,20 +338,8 @@ public static class ThermoMath
     double ret_val;
     try
     {
-      var task = Task.Run(() =>
-      {
-        ret_val = IF97.T_phmass(p/1000000.0,h/1000.0); //UNIT CONVERSION UNTESTED!
-        return ret_val;
-      });
-      if (!task.Wait(MAX_MILLISECOND))
-      {
-        Debug.Log( String.Format("Did not complete t_given_ph in {0} msec, returning {1}", MAX_MILLISECOND, t_neutral) );
-        return t_neutral;
-      }
-      else
-      {
-        return task.Result;
-      }
+      ret_val = IF97.T_phmass(p/1000000.0,h/1000.0); //UNIT CONVERSION UNTESTED!
+      return ret_val;
     }
     catch (Exception ex)
     {
@@ -416,20 +354,8 @@ public static class ThermoMath
     double ret_val;
     try
     {
-      var task = Task.Run(() =>
-      {
-        ret_val = IF97.Tsat97(p/1000000.0); //UNIT CONVERSION UNTESTED!
-        return ret_val;
-      });
-      if (!task.Wait(MAX_MILLISECOND))
-      {
-        Debug.Log( String.Format("Did not complete tsat_given_p in {0} msec, returning {1}", MAX_MILLISECOND, t_neutral) );
-        return t_neutral;
-      }
-      else
-      {
-        return task.Result;
-      }
+      ret_val = IF97.Tsat97(p/1000000.0); //UNIT CONVERSION UNTESTED!
+      return ret_val;
     }
     catch (Exception ex)
     {
@@ -444,20 +370,8 @@ public static class ThermoMath
     double ret_val;
     try
     {
-      var task = Task.Run(() =>
-      {
-        ret_val = 1.0/IF97.rholiq_p(p/1000000.0); //expects:MPa returns Kg/M^3
-        return ret_val;
-      });
-      if (!task.Wait(MAX_MILLISECOND))
-      {
-        Debug.Log( String.Format("Did not complete vliq_given_p in {0} msec, returning {1}", MAX_MILLISECOND, v_neutral) );
-        return v_neutral;
-      }
-      else
-      {
-        return task.Result;
-      }
+      ret_val = 1.0/IF97.rholiq_p(p/1000000.0); //expects:MPa returns Kg/M^3
+      return ret_val;
     }
     catch (Exception ex)
     {
@@ -472,20 +386,8 @@ public static class ThermoMath
     double ret_val;
     try
     {
-      var task = Task.Run(() =>
-      {
-        ret_val = 1.0/IF97.rhovap_p(p/1000000.0); //expects:MPa returns Kg/M^3
-        return ret_val;
-      });
-      if (!task.Wait(MAX_MILLISECOND))
-      {
-        Debug.Log( String.Format("Did not complete vvap_given_p in {0} msec, returning {1}", MAX_MILLISECOND, v_neutral) );
-        return v_neutral;
-      }
-      else
-      {
-        return task.Result;
-      }
+      ret_val = 1.0/IF97.rhovap_p(p/1000000.0); //expects:MPa returns Kg/M^3
+      return ret_val;
     }
     catch (Exception ex)
     {
@@ -500,20 +402,8 @@ public static class ThermoMath
     double ret_val;
     try
     {
-      var task = Task.Run(() =>
-      {
-        ret_val = IF97.umass_Tp(t, p/1000000.0)*1000f; //UNIT CONVERSION UNTESTED!
-        return ret_val;
-      });
-      if (!task.Wait(MAX_MILLISECOND))
-      {
-        Debug.Log( String.Format("Did not complete u_given_pt in {0} msec, returning {1}", MAX_MILLISECOND, u_neutral) );
-        return u_neutral;
-      }
-      else
-      {
-        return task.Result;
-      }
+      ret_val = IF97.umass_Tp(t, p/1000000.0)*1000f; //UNIT CONVERSION UNTESTED!
+      return ret_val;
     }
     catch (Exception ex)
     {
@@ -528,20 +418,8 @@ public static class ThermoMath
     double ret_val;
     try
     {
-      var task = Task.Run(() =>
-      {
-        ret_val = IAPWS95.IAPWS95_internal_energy(1f/v,t)*1000f; //UNIT CONVERSION UNTESTED!
-        return ret_val;
-      });
-      if (!task.Wait(MAX_MILLISECOND))
-      {
-        Debug.Log( String.Format("Did not complete u_given_vt in {0} msec, returning {1}", MAX_MILLISECOND, u_neutral) );
-        return u_neutral;
-      }
-      else
-      {
-        return task.Result;
-      }
+      ret_val = IAPWS95.IAPWS95_internal_energy(1f/v,t)*1000f; //UNIT CONVERSION UNTESTED!
+      return ret_val;
     }
     catch (Exception ex)
     {
@@ -556,20 +434,8 @@ public static class ThermoMath
     double ret_val;
     try
     {
-      var task = Task.Run(() =>
-      {
-        ret_val = IF97.umass_pQ(p/1000000.0,x)*1000f; //UNIT CONVERSION UNTESTED!
-        return ret_val;
-      });
-      if (!task.Wait(MAX_MILLISECOND))
-      {
-        Debug.Log( String.Format("Did not complete u_given_px in {0} msec, returning {1}", MAX_MILLISECOND, u_neutral) );
-        return u_neutral;
-      }
-      else
-      {
-        return task.Result;
-      }
+      ret_val = IF97.umass_pQ(p/1000000.0,x)*1000f; //UNIT CONVERSION UNTESTED!
+      return ret_val;
     }
     catch (Exception ex)
     {
@@ -584,20 +450,8 @@ public static class ThermoMath
     double ret_val;
     try
     {
-      var task = Task.Run(() =>
-      {
-        ret_val = IAPWS95.IAPWS95_entropy(1f/v,t)*1000f; //UNIT CONVERSION UNTESTED!
-        return ret_val;
-      });
-      if (!task.Wait(MAX_MILLISECOND))
-      {
-        Debug.Log( String.Format("Did not complete s_given_vt in {0} msec, returning {1}", MAX_MILLISECOND, s_neutral) );
-        return s_neutral;
-      }
-      else
-      {
-        return task.Result;
-      }
+      ret_val = IAPWS95.IAPWS95_entropy(1f/v,t)*1000f; //UNIT CONVERSION UNTESTED!
+      return ret_val;
     }
     catch (Exception ex)
     {
@@ -612,20 +466,8 @@ public static class ThermoMath
     double ret_val;
     try
     {
-      var task = Task.Run(() =>
-      {
-        ret_val = IF97.smass_pQ(p/1000000.0,x)*1000f; //UNIT CONVERSION UNTESTED!
-        return ret_val;
-      });
-      if (!task.Wait(MAX_MILLISECOND))
-      {
-        Debug.Log( String.Format("Did not complete s_given_px in {0} msec, returning {1}", MAX_MILLISECOND, s_neutral) );
-        return s_neutral;
-      }
-      else
-      {
-        return task.Result;
-      }
+      ret_val = IF97.smass_pQ(p/1000000.0,x)*1000f; //UNIT CONVERSION UNTESTED!
+      return ret_val;
     }
     catch (Exception ex)
     {
@@ -640,20 +482,8 @@ public static class ThermoMath
     double ret_val;
     try
     {
-      var task = Task.Run(() =>
-      {
-        ret_val = IAPWS95.IAPWS95_enthalpy(1f/v,t)*1000f; //UNIT CONVERSION UNTESTED!
-        return ret_val;
-      });
-      if (!task.Wait(MAX_MILLISECOND))
-      {
-        Debug.Log( String.Format("Did not complete h_given_vt in {0} msec, returning {1}", MAX_MILLISECOND, h_neutral) );
-        return h_neutral;
-      }
-      else
-      {
-        return task.Result;
-      }
+      ret_val = IAPWS95.IAPWS95_enthalpy(1f/v,t)*1000f; //UNIT CONVERSION UNTESTED!
+      return ret_val;
     }
     catch (Exception ex)
     {
@@ -668,24 +498,12 @@ public static class ThermoMath
     double ret_val;
     try
     {
-      var task = Task.Run(() =>
-      {
-        //f means saturated liquid,
-        //g means saturated gas
-        double vf = 1.0/IF97.rholiq_p(p/1000000.0);
-        double vg = 1.0/IF97.rhovap_p(p/1000000.0);
-        ret_val = (v-vf)/(vg-vf); //UNIT CONVERSION UNTESTED!
-        return ret_val;
-      });
-      if (!task.Wait(MAX_MILLISECOND))
-      {
-        Debug.Log( String.Format("Did not complete x_given_pv in {0} msec, returning {1}", MAX_MILLISECOND, x_neutral) );
-        return x_neutral;
-      }
-      else
-      {
-        return task.Result;
-      }
+      //f means saturated liquid,
+      //g means saturated gas
+      double vf = 1.0/IF97.rholiq_p(p/1000000.0);
+      double vg = 1.0/IF97.rhovap_p(p/1000000.0);
+      ret_val = (v-vf)/(vg-vf); //UNIT CONVERSION UNTESTED!
+      return ret_val;
     }
     catch (Exception ex)
     {
@@ -700,20 +518,8 @@ public static class ThermoMath
     double ret_val;
     try
     {
-      var task = Task.Run(() =>
-      {
-        ret_val = IF97.Q_phmass(p/1000000.0,h/1000.0); //UNIT CONVERSION UNTESTED!
-        return ret_val;
-      });
-      if (!task.Wait(MAX_MILLISECOND))
-      {
-        Debug.Log( String.Format("Did not complete x_given_ph in {0} msec, returning {1}", MAX_MILLISECOND, x_neutral) );
-        return x_neutral;
-      }
-      else
-      {
-        return task.Result;
-      }
+      ret_val = IF97.Q_phmass(p/1000000.0,h/1000.0); //UNIT CONVERSION UNTESTED!
+      return ret_val;
     }
     catch (Exception ex)
     {
