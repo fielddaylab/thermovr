@@ -138,7 +138,7 @@ public class World : MonoBehaviour
     Tool t;
     tools = new List<Tool>();
     t = GameObject.Find("Tool_Insulator").GetComponent<Tool>(); tool_insulator = t; tools.Add(t); t.dial_dial.min_map =  0f; t.dial_dial.max_map = 1f; t.dial_dial.unit = "n";
-    t = GameObject.Find("Tool_Clamp"    ).GetComponent<Tool>(); tool_clamp     = t; tools.Add(t); t.dial_dial.min_map =  0f; t.dial_dial.max_map = 1f; t.dial_dial.unit = "h";
+    t = GameObject.Find("Tool_Clamp").GetComponent<Tool>(); tool_clamp     = t; tools.Add(t); t.dial_dial.min_map =  0f; t.dial_dial.max_map = 1f; t.dial_dial.unit = "h";
     t = GameObject.Find("Tool_Burner"   ).GetComponent<Tool>(); tool_burner    = t; tools.Add(t); t.dial_dial.min_map =  1f; t.dial_dial.max_map =  1000f*100f; t.dial_dial.unit = "J/s";
     t = GameObject.Find("Tool_Coil"     ).GetComponent<Tool>(); tool_coil      = t; tools.Add(t); t.dial_dial.min_map = -1f; t.dial_dial.max_map = -1000f*100f; t.dial_dial.unit = "J/s";
     double kg_corresponding_to_10mpa = thermo.surfacearea_insqr*(10*1453.8/*MPa->psi*/)*0.453592/*lb->kg*/;
@@ -300,8 +300,11 @@ public class World : MonoBehaviour
     t.engaged = true;
     t.stored = false;
     t.boxcollider.isTrigger = true;
-         if(t == tool_insulator) t.dial_dial.val = (float)ThermoMath.percent_given_t(thermo.temperature);
-    else if(t == tool_clamp)     t.dial_dial.val = (float)ThermoMath.percent_given_v(thermo.volume);
+    // Not sure the two below are ever used? We don't have dials for these tools in use.
+    //     if(t == tool_insulator) t.dial_dial.val = (float)ThermoMath.percent_given_t(thermo.temperature);
+    //else if(t == tool_clamp)     t.dial_dial.val = (float)ThermoMath.percent_given_v(thermo.volume);
+    t.dial_dial.val = 0.0f; // reset tool when we add it.
+    t.textv_tmp.SetText("{0:3}"+t.dial_dial.unit,(float)t.dial_dial.val);
     UpdateApplyTool(t);
     o.transform.localPosition = new Vector3(0f,0f,0f);
     o.transform.localRotation = Quaternion.identity;
@@ -325,6 +328,11 @@ public class World : MonoBehaviour
     float v = t.storage.transform.localScale.x; //can grab any dimension
     Vector3 invscale = new Vector3(1f/v,1f/v,1f/v);
     t.text.transform.localScale = invscale;
+    Halfable h = o.GetComponent<Halfable>();
+    if(h != null) h.setHalf(false); //Un-half when we store a tool.
+    t.dial_dial.val = 0.0f; // definitely need to reset tool when we store it.
+    t.textv_tmp.SetText("{0:3}"+t.dial_dial.unit,(float)t.dial_dial.val);
+    UpdateApplyTool(t);
   }
   void DetachTool(Tool t, Vector3 vel)
   {
@@ -337,6 +345,9 @@ public class World : MonoBehaviour
     t.text.transform.localScale = new Vector3(1f,1f,1f);
     t.rigidbody.isKinematic = false;
     t.rigidbody.velocity = vel;
+    t.dial_dial.val = 0.0f; // may as well reset tool when we remove it, too.
+    t.textv_tmp.SetText("{0:3}"+t.dial_dial.unit,(float)t.dial_dial.val);
+    UpdateApplyTool(t);
   }
 
   /*
