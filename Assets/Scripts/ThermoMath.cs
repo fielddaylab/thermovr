@@ -140,8 +140,8 @@ public static class ThermoMath
     //compare_impls();
   }
 
-  static double sample_lbase = 1.6f;
-  static double sample(double t) { return Math.Pow(t,sample_lbase); }
+  static double SAMPLE_LBASE = 1.6f;
+  static double sample(double t) { return Math.Pow(t,SAMPLE_LBASE); }
   public static void compare_impls()
   {
     int samples = 350; //match value in ThermoState to match sample points
