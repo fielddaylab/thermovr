@@ -167,7 +167,7 @@ public class World : MonoBehaviour
       float v = t.storage.transform.localScale.x; //can grab any dimension
       Vector3 invscale = new Vector3(1f/v,1f/v,1f/v);
       t.text.transform.localScale = invscale;
-      t.textv_tmp.SetText("{0:3}"+t.dial_dial.unit,(float)t.dial_dial.map);
+      t.textv_tmpro.SetText("{0:3}"+t.dial_dial.unit,(float)t.dial_dial.map);
     }
 
     vessel = GameObject.Find("Vessel");
@@ -304,7 +304,7 @@ public class World : MonoBehaviour
     //     if(t == tool_insulator) t.dial_dial.val = (float)ThermoMath.percent_given_t(thermo.temperature);
     //else if(t == tool_clamp)     t.dial_dial.val = (float)ThermoMath.percent_given_v(thermo.volume);
     t.dial_dial.val = 0.0f; // reset tool when we add it.
-    t.textv_tmp.SetText("{0:3}"+t.dial_dial.unit,(float)t.dial_dial.val);
+    t.textv_tmpro.SetText("{0:3}"+t.dial_dial.unit,(float)t.dial_dial.val);
     UpdateApplyTool(t);
     o.transform.localPosition = new Vector3(0f,0f,0f);
     o.transform.localRotation = Quaternion.identity;
@@ -331,7 +331,7 @@ public class World : MonoBehaviour
     Halfable h = o.GetComponent<Halfable>();
     if(h != null) h.setHalf(false); //Un-half when we store a tool.
     t.dial_dial.val = 0.0f; // definitely need to reset tool when we store it.
-    t.textv_tmp.SetText("{0:3}"+t.dial_dial.unit,(float)t.dial_dial.val);
+    t.textv_tmpro.SetText("{0:3}"+t.dial_dial.unit,(float)t.dial_dial.val);
     UpdateApplyTool(t);
   }
   void DetachTool(Tool t, Vector3 vel)
@@ -346,7 +346,7 @@ public class World : MonoBehaviour
     t.rigidbody.isKinematic = false;
     t.rigidbody.velocity = vel;
     t.dial_dial.val = 0.0f; // may as well reset tool when we remove it, too.
-    t.textv_tmp.SetText("{0:3}"+t.dial_dial.unit,(float)t.dial_dial.val);
+    t.textv_tmpro.SetText("{0:3}"+t.dial_dial.unit,(float)t.dial_dial.val);
     UpdateApplyTool(t);
   }
 
@@ -928,7 +928,7 @@ public class World : MonoBehaviour
       if(t.dial == lgrabbed || t.dial == rgrabbed) t.dial_dial.examined = true;
       if(t.dial_dial.val != t.dial_dial.prev_val)
       {
-        t.textv_tmp.SetText("{0:3}"+t.dial_dial.unit,(float)t.dial_dial.map);
+        t.textv_tmpro.SetText("{0:3}"+t.dial_dial.unit,(float)t.dial_dial.map);
         t.dial_dial.examined = true;
       }
       t.dial_dial.prev_val = t.dial_dial.val;
@@ -949,8 +949,8 @@ public class World : MonoBehaviour
           t.textv_meshrenderer.enabled = true;
           t.textl_meshrenderer.enabled = true;
           Color32 c = new Color32(0,0,0,(byte)(t.text_fadable.alpha*255));
-          t.textv_tmp.faceColor = c;
-          t.textl_tmp.faceColor = c;
+          t.textv_tmpro.faceColor = c;
+          t.textl_tmpro.faceColor = c;
         }
       }
     }

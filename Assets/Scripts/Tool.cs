@@ -65,13 +65,13 @@ public class Tool : MonoBehaviour
   public GameObject text;
   public GameObject textv;
   [System.NonSerialized]
-  public TextMeshPro textv_tmp;
+  public TextMeshPro textv_tmpro;
   [System.NonSerialized]
   public MeshRenderer textv_meshrenderer;
 
   public GameObject textl;
   [System.NonSerialized]
-  public TextMeshPro textl_tmp;
+  public TextMeshPro textl_tmpro;
   [System.NonSerialized]
   public MeshRenderer textl_meshrenderer;
 
@@ -102,9 +102,9 @@ public class Tool : MonoBehaviour
     dial_dial = dial.GetComponent<Dial>();
     dial_touchable = dial.GetComponent<Touchable>();
 
-    textv_tmp = textv.GetComponent<TextMeshPro>();
+    textv_tmpro = textv.GetComponent<TextMeshPro>();
     textv_meshrenderer = textv.GetComponent<MeshRenderer>();
-    textl_tmp = textl.GetComponent<TextMeshPro>();
+    textl_tmpro = textl.GetComponent<TextMeshPro>();
     textl_meshrenderer = textl.GetComponent<MeshRenderer>();
     text_fadable = GetComponent<Fadable>();
   }
