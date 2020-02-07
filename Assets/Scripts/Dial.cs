@@ -41,4 +41,10 @@ public class Dial : MonoBehaviour
     map = min_map+(max_map-min_map)*val;
   }
 
+  public void Reset()
+  {
+    val = 0.0f;
+    Update();
+  }
+
 }

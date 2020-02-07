@@ -303,7 +303,7 @@ public class World : MonoBehaviour
     // Not sure the two below are ever used? We don't have dials for these tools in use.
     //     if(t == tool_insulator) t.dial_dial.val = (float)ThermoMath.percent_given_t(thermo.temperature);
     //else if(t == tool_clamp)     t.dial_dial.val = (float)ThermoMath.percent_given_v(thermo.volume);
-    t.dial_dial.val = 0.0f; // reset tool when we add it.
+    t.dial_dial.Reset(); // reset tool when we add it.
     t.textv_tmpro.SetText("{0:3}"+t.dial_dial.unit,(float)t.dial_dial.val);
     UpdateApplyTool(t);
     o.transform.localPosition = new Vector3(0f,0f,0f);
@@ -330,7 +330,7 @@ public class World : MonoBehaviour
     t.text.transform.localScale = invscale;
     Halfable h = o.GetComponent<Halfable>();
     if(h != null) h.setHalf(false); //Un-half when we store a tool.
-    t.dial_dial.val = 0.0f; // definitely need to reset tool when we store it.
+    t.dial_dial.Reset(); // definitely need to reset tool when we store it.
     t.textv_tmpro.SetText("{0:3}"+t.dial_dial.unit,(float)t.dial_dial.val);
     UpdateApplyTool(t);
   }
@@ -345,7 +345,7 @@ public class World : MonoBehaviour
     t.text.transform.localScale = new Vector3(1f,1f,1f);
     t.rigidbody.isKinematic = false;
     t.rigidbody.velocity = vel;
-    t.dial_dial.val = 0.0f; // may as well reset tool when we remove it, too.
+    t.dial_dial.Reset(); // may as well reset tool when we remove it, too.
     t.textv_tmpro.SetText("{0:3}"+t.dial_dial.unit,(float)t.dial_dial.val);
     UpdateApplyTool(t);
   }
