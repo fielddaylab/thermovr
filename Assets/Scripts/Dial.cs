@@ -20,6 +20,8 @@ public class Dial : MonoBehaviour
 
   [System.NonSerialized]
   public bool examined = false;
+  [System.NonSerialized]
+  public bool log_scale = false; //sometimes, we want log mapping
   GameObject meter;
 
   void Awake()
@@ -47,4 +49,9 @@ public class Dial : MonoBehaviour
     Update();
   }
 
+  private float mapLinear()
+  { return min_map + (max_map - min_map) * val;  }
+
+  private float mapLog()
+  { return min_map + (max_map - min_map) * val;  }
 }
