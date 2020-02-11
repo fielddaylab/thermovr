@@ -2,6 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/**
+ * This seems to be some starting-point code for pressable buttons and things.
+ * I believe this is attached to some objects on the clipboard, for quizzes or something.
+ * - Luke
+ **/
 public class FingerToggleable : MonoBehaviour
 {
   GameObject l_finger;
