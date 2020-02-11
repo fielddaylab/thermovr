@@ -14,6 +14,7 @@ using TMPro;
 
 public class World : MonoBehaviour
 {
+  const float CONTAINER_INSULATION_COEFFICIENT = 0.1f; // Not really based on a physical material, just a way to roughly simulate imperfect insulation.
   public Material hand_empty;
   Material[] hand_emptys;
   public Material hand_touching;
@@ -813,9 +814,11 @@ public class World : MonoBehaviour
         else                       thermo.add_pressure_uninsulated(delta_pressure);
       }
     }
-    if(tool_insulator.engaged && applied_heat != 0) //yes, "engaged" is correct. if insulator NOT engaged, then any heat added IMMEDIATELY dissipates
+    //if(tool_insulator.engaged && applied_heat != 0) //yes, "engaged" is correct. if insulator NOT engaged, then any heat added IMMEDIATELY dissipates
+    if (applied_heat != 0)
     {
-      double heat_joules = applied_heat*(double)Time.deltaTime;
+      double insulation_coefficient = tool_insulator.engaged ? 1.0f : CONTAINER_INSULATION_COEFFICIENT;
+      double heat_joules = insulation_coefficient * applied_heat * (double)Time.deltaTime;
       if(tool_clamp.engaged) thermo.add_heat_constant_v(heat_joules);
       else                   thermo.add_heat_constant_p(heat_joules);
     }
