@@ -937,6 +937,24 @@ public class World : MonoBehaviour
       t.dial_dial.prev_val = t.dial_dial.val;
     }
 
+    // we did tool text above, so here I'll drop in the bit to check whether to show phase warning for balloon and weight.
+    switch (thermo.region)
+    {
+      case 0:
+      case 1:
+        tool_weight.textn.GetComponent<MeshRenderer>().enabled = true;
+        tool_weight.disabled = true;
+        tool_balloon.textn.GetComponent<MeshRenderer>().enabled = true;
+        tool_balloon.disabled = true;
+        break;
+      case 2:
+        tool_weight.textn.GetComponent<MeshRenderer>().enabled = false;
+        tool_weight.disabled = false;
+        tool_balloon.textn.GetComponent<MeshRenderer>().enabled = false;
+        tool_balloon.disabled = false;
+        break;
+    }
+
     for(int i = 0; i < tools.Count; i++)
     {
       t = tools[i];
@@ -951,7 +969,7 @@ public class World : MonoBehaviour
         {
           t.textv_meshrenderer.enabled = true;
           t.textl_meshrenderer.enabled = true;
-          Color32 c = new Color32(0,0,0,(byte)(t.text_fadable.alpha*255));
+          Color32 c = t.disabled ? new Color32(70,70,70,(byte)(t.text_fadable.alpha*255)) : new Color32(0,0,0,(byte)(t.text_fadable.alpha*255));
           t.textv_tmpro.faceColor = c;
           t.textl_tmpro.faceColor = c;
         }

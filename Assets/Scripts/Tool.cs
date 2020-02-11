@@ -75,8 +75,12 @@ public class Tool : MonoBehaviour
   [System.NonSerialized]
   public MeshRenderer textl_meshrenderer;
 
+  public GameObject textn;
+
   [System.NonSerialized]
   public Fadable text_fadable;
+  [System.NonSerialized]
+  public bool disabled;
 
   void Awake()
   {
@@ -107,6 +111,8 @@ public class Tool : MonoBehaviour
     textl_tmpro = textl.GetComponent<TextMeshPro>();
     textl_meshrenderer = textl.GetComponent<MeshRenderer>();
     text_fadable = GetComponent<Fadable>();
+
+    disabled = false;
   }
 
   // Start is called before the first frame update
