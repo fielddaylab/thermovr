@@ -25,6 +25,7 @@ public class World : MonoBehaviour
   public Material tab_hi;
   public Material tab_sel;
   public Material tab_hisel;
+  public DirectionalIndicator arrows;
 
   ThermoState thermo;
   GameObject cam_offset;
@@ -810,8 +811,14 @@ public class World : MonoBehaviour
       double delta_pressure = (weight_pressure-thermo.pressure)*0.01; //1% of difference
       if(System.Math.Abs(delta_pressure) > 1)
       {
+        arrows.FlowDirection(delta_pressure > 0.0f);
+        arrows.Go();
         if(tool_insulator.engaged) thermo.add_pressure_insulated(delta_pressure);
         else                       thermo.add_pressure_uninsulated(delta_pressure);
+      }
+      else if (arrows.running)
+      {
+        arrows.Stop();
       }
     }
     //if(tool_insulator.engaged && applied_heat != 0) //yes, "engaged" is correct. if insulator NOT engaged, then any heat added IMMEDIATELY dissipates
