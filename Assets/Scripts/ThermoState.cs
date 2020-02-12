@@ -76,10 +76,10 @@ public class ThermoState : MonoBehaviour
   GameObject piston;
   float piston_min_y;
   float piston_max_y;
-  GameObject contents;
+  GameObject steam_scale;
   float contents_min_h; //h = "height", not "enthalpy"
   float contents_max_h; //h = "height", not "enthalpy"
-  GameObject water;
+  GameObject water_scale;
   GameObject steam;
 
   //mesh
@@ -608,10 +608,10 @@ public class ThermoState : MonoBehaviour
     piston    = GameObject.Find("Piston");
     piston_min_y = piston.transform.localPosition.y;
     piston_max_y = piston_min_y+0.1f; //experimentally derived...
-    contents = GameObject.Find("Steam_Scale");
-    contents_min_h = contents.transform.localScale.y;
+    water_scale    = GameObject.Find("Water_Scale");
+    steam_scale    = GameObject.Find("Steam_Scale");
+    contents_min_h = steam_scale.transform.localScale.y;
     contents_max_h = contents_min_h+0.1f; //experimentally derived...
-    water     = GameObject.Find("Water_Scale");
     steam     = GameObject.Find("Steam");
 
     graph     = GameObject.Find("gmodel");
@@ -813,13 +813,13 @@ public class ThermoState : MonoBehaviour
     piston_lt.y = piston_min_y+size_p*(piston_max_y-piston_min_y);
     piston.transform.localPosition = piston_lt;
 
-    Vector3 contents_lt = contents.transform.localScale;
+    Vector3 contents_lt = steam_scale.transform.localScale;
     contents_lt.y = contents_min_h+size_p*(contents_max_h-contents_min_h);
-    contents.transform.localScale = contents_lt;
+    steam_scale.transform.localScale = contents_lt;
 
-    Vector3 water_lt = water.transform.localScale;
+    Vector3 water_lt = water_scale.transform.localScale;
     water_lt.y = 1f-(float)quality;
-    water.transform.localScale = water_lt;
+    water_scale.transform.localScale = water_lt;
     //Vector3 steam_lt = steam.transform.localScale;
     //steam_lt.y = (float)quality;
     //steam.transform.localScale = -1f*steam_lt;
