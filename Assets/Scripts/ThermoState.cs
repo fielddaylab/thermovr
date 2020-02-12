@@ -96,6 +96,11 @@ public class ThermoState : MonoBehaviour
   TextMeshPro text_quality;
   TextMeshPro text_region;
 
+  public Flasher error_flasher;
+  public TextMeshProUGUI error_message;
+
+  public float size_p;
+
   void Awake()
   {
     ThermoMath.Init();
@@ -114,11 +119,14 @@ public class ThermoState : MonoBehaviour
     genMesh();
     reset_state();
     visualize_state();
+
+    HideError();
   }
 
   public void Reset()
   {
     this.reset_state();
+    this.HideError();
   }
 
   //sample bias- "graph density"
@@ -139,6 +147,38 @@ public class ThermoState : MonoBehaviour
     float vplot = plot_dimension(ThermoMath.v_min,ThermoMath.v_max,volume);
     float tplot = plot_dimension(ThermoMath.t_min,ThermoMath.t_max,temperature);
     return new Vector3(vplot,pplot,tplot);
+  }
+
+  public void UpdateErrorState()
+  {
+    if (ThermoMath.got_error)
+    {
+      NotifyError();
+    }
+    else
+    {
+      HideError();
+    }
+  }
+
+  private void NotifyError()
+  {
+    if (ThermoMath.got_error)
+    {
+      error_flasher.Flash();
+      error_message.enabled = true;
+    }
+    else
+    {
+      Debug.Log("ThermoState was signaled to notify of a math state instability, but ThermoMath does not indicate an error occurred.");
+    }
+  }
+
+  private void HideError()
+  {
+    ThermoMath.got_error = false;
+    error_flasher.Stop();
+    error_message.enabled = false;
   }
 
   //generates points from thermomath api, and stitches them together into a mesh
@@ -808,7 +848,18 @@ public class ThermoState : MonoBehaviour
     state_dot.transform.localPosition = plot(pressure,volume,temperature);
 
     float height =  (float)(volume/surfacearea); //M
-    float size_p = height/((float)radius*2f); //"max height" is approx 2x diameter, so this sets size_p to essentially "%_contents_size"
+    size_p = height/((float)radius*2f); //"max height" is approx 2x diameter, so this sets size_p to essentially "%_contents_size"
+                                        // Not accurate, Phil. Max value of height here is max_volume / surfacearea = 1000 / 0.024674011 ~ 40,535.
+                                        // radius * 2 = 0.05 *2 = 0.1. max value for size_p is then over 400,000.
+                                        // In practice, I've gotten size_p as high as 3,500, which is still much bigger than 1.
+                                        // *sigh*
+                                        // I dunno what the math is *supposed* to be, but I'm just gonna take the natural log of size_p whenever it gets above 1, and call it a day.
+                                        // Actually, I'm gonna scale it down linearly, because taking the log is still putting it too high in some cases.
+    if (size_p > 1.0f )
+    {
+      size_p = 1.0f + (float)Math.Max(0.5f*Math.Log(size_p), 0.0); // clamp at 0, just to be safe.
+    }
+                                        
     Vector3 piston_lt = piston.transform.localPosition;
     piston_lt.y = piston_min_y+size_p*(piston_max_y-piston_min_y);
     piston.transform.localPosition = piston_lt;

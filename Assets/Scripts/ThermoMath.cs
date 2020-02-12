@@ -81,8 +81,14 @@ public static class ThermoMath
   public static double x_neutral;
   public static double x_smallstep;
 
+  // A sort of notifier for users of the class.
+  // Whenever an exception occurs, we set this to true.
+  // User of the class can then check and react appropriately, setting false after handling the error.
+  public static bool got_error;
+
   public static void Init()
   {
+    got_error = false;
     IF97.initRegions();
 
     //Pa
@@ -280,6 +286,7 @@ public static class ThermoMath
     catch (Exception ex)
     {
       Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, p_neutral) );
+      got_error = true;
       return p_neutral;
     }
     //return IAPWS95.IAPWS95_pressure(1.0/v,t)*1000.0; //expects:Kg/M^3,K returns KPa
@@ -296,6 +303,7 @@ public static class ThermoMath
     catch (Exception ex)
     {
       Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, v_neutral) );
+      got_error = true;
       return v_neutral;
     }
     //return 1.0/IF97.rhomass_Tp(t,p/1000000.0); //expects:K,MPa returns Kg/M^3
@@ -312,6 +320,7 @@ public static class ThermoMath
     catch (Exception ex)
     {
       Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, v_neutral) );
+      got_error = true;
       return v_neutral;
     }
     //return 1.0/IF97.rhomass_phmass(p/1000000.0,h/1000.0); //UNIT CONVERSION UNTESTED!
@@ -328,6 +337,7 @@ public static class ThermoMath
     catch (Exception ex)
     {
       Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, v_neutral) );
+      got_error = true;
       return v_neutral;
     }
     //return 1.0/IF97.rhomass_pQ(p/1000000.0,x); //UNIT CONVERSION UNTESTED!
@@ -344,6 +354,7 @@ public static class ThermoMath
     catch (Exception ex)
     {
       Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, t_neutral) );
+      got_error = true;
       return t_neutral;
     }
     //return IF97.T_phmass(p/1000000.0,h/1000.0); //UNIT CONVERSION UNTESTED!
@@ -360,6 +371,7 @@ public static class ThermoMath
     catch (Exception ex)
     {
       Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, t_neutral) );
+      got_error = true;
       return t_neutral;
     }
     //return IF97.Tsat97(p/1000000.0); //UNIT CONVERSION UNTESTED!
@@ -376,6 +388,7 @@ public static class ThermoMath
     catch (Exception ex)
     {
       Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, v_neutral) );
+      got_error = true;
       return v_neutral;
     }
     //return 1.0/IF97.rholiq_p(p/1000000.0); //expects:MPa returns Kg/M^3
@@ -392,6 +405,7 @@ public static class ThermoMath
     catch (Exception ex)
     {
       Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, v_neutral) );
+      got_error = true;
       return v_neutral;
     }
     //return 1.0/IF97.rhovap_p(p/1000000.0); //expects:MPa returns Kg/M^3
@@ -408,6 +422,7 @@ public static class ThermoMath
     catch (Exception ex)
     {
       Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, u_neutral) );
+      got_error = true;
       return u_neutral;
     }
     //return IF97.umass_Tp(t, p/1000000.0)*1000f; //UNIT CONVERSION UNTESTED!
@@ -424,6 +439,7 @@ public static class ThermoMath
     catch (Exception ex)
     {
       Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, u_neutral) );
+      got_error = true;
       return u_neutral;
     }
     //return IAPWS95.IAPWS95_internal_energy(1f/v,t)*1000f; //UNIT CONVERSION UNTESTED!
@@ -440,6 +456,7 @@ public static class ThermoMath
     catch (Exception ex)
     {
       Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, u_neutral) );
+      got_error = true;
       return u_neutral;
     }
     //return IF97.umass_pQ(p/1000000.0,x)*1000f; //UNIT CONVERSION UNTESTED!
@@ -456,6 +473,7 @@ public static class ThermoMath
     catch (Exception ex)
     {
       Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, s_neutral) );
+      got_error = true;
       return s_neutral;
     }
     //return IAPWS95.IAPWS95_entropy(1f/v,t)*1000f; //UNIT CONVERSION UNTESTED!
@@ -472,6 +490,7 @@ public static class ThermoMath
     catch (Exception ex)
     {
       Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, s_neutral) );
+      got_error = true;
       return s_neutral;
     }
     //return IF97.smass_pQ(p/1000000.0,x)*1000f; //UNIT CONVERSION UNTESTED!
@@ -488,6 +507,7 @@ public static class ThermoMath
     catch (Exception ex)
     {
       Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, h_neutral) );
+      got_error = true;
       return h_neutral;
     }
     //return IAPWS95.IAPWS95_enthalpy(1f/v,t)*1000f; //UNIT CONVERSION UNTESTED!
@@ -508,6 +528,7 @@ public static class ThermoMath
     catch (Exception ex)
     {
       Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, x_neutral) );
+      got_error = true;
       return x_neutral;
     }
     //return (v-vf)/(vg-vf); //UNIT CONVERSION UNTESTED!
@@ -524,6 +545,7 @@ public static class ThermoMath
     catch (Exception ex)
     {
       Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, x_neutral) );
+      got_error = true;
       return x_neutral;
     }
     //return IF97.Q_phmass(p/1000000.0,h/1000.0); //UNIT CONVERSION UNTESTED!
@@ -572,6 +594,7 @@ public static class ThermoMath
     catch (Exception ex)
     {
       Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, t_neutral) );
+      got_error = true;
       return t_neutral;
     }
   }
@@ -619,6 +642,7 @@ public static class ThermoMath
     catch (Exception ex)
     {
       Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, t_neutral) );
+      got_error = true;
       return t_neutral;
     }
   }
