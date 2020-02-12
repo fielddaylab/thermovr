@@ -812,9 +812,14 @@ public class World : MonoBehaviour
       double delta_pressure = (weight_pressure-thermo.pressure)*0.01; //1% of difference
       if(System.Math.Abs(delta_pressure) > 1)
       {
-        arrows.FlowDirection(delta_pressure > 0.0f);
-        arrows.Go();
-        if(tool_insulator.engaged) thermo.add_pressure_insulated(delta_pressure);
+        // we only are applying pressure added/released if we are in gas region.
+        // if this ever changes, adapt this "if" check as needed.
+        if (thermo.region == 2)
+        {
+          arrows.Go(delta_pressure > 0.0f);
+          arrows.SetFlow(delta_pressure);
+        }
+        if (tool_insulator.engaged) thermo.add_pressure_insulated(delta_pressure);
         else                       thermo.add_pressure_uninsulated(delta_pressure);
       }
       else if (arrows.running)
@@ -983,6 +988,7 @@ public class World : MonoBehaviour
         }
       }
     }
+    thermo.UpdateErrorState();
 
   }
 
