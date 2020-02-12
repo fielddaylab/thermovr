@@ -57,10 +57,13 @@ public class Touchable : MonoBehaviour
 
     touch = (ltouch || rtouch);
 
-    var light_list = gameObject.GetComponentsInChildren<Lightable>();
-    foreach (Lightable light in light_list)
+    if (touch)
     {
-      light.SetLit(touch); // set to lit if touched, or unlit if not.
+      var light_list = gameObject.GetComponentsInChildren<Lightable>();
+      foreach (Lightable light in light_list)
+      {
+        light.SetLit(touch); // set to lit if touched, or unlit if not.
+      }
     }
   }
 
@@ -71,10 +74,13 @@ public class Touchable : MonoBehaviour
 
     touch = (ltouch || rtouch);
 
-    var light_list = gameObject.GetComponentsInChildren<Lightable>();
-    foreach (Lightable light in light_list)
+    if (!touch)
     {
-      light.SetLit(touch); // set to lit if touched, or unlit if not.
+      var light_list = gameObject.GetComponentsInChildren<Lightable>();
+      foreach (Lightable light in light_list)
+      {
+        light.SetLit(touch); // set to lit if touched, or unlit if not.
+      }
     }
   }
 
