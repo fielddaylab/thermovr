@@ -463,65 +463,65 @@ public class World : MonoBehaviour
   }
 
   //"which": true -> left, false -> right
-  void TryHand(bool which, float htrigger_val, float itrigger_val, float x_val, float y_val, Vector3 hand_vel, ref bool r_htrigger, ref bool r_itrigger, ref int r_htrigger_delta, ref int r_itrigger_delta, ref float r_x, ref float r_y, ref GameObject r_hand, ref GameObject r_grabbed, ref GameObject r_ohand, ref GameObject r_ograbbed)
+  void TryHand(bool left_hand, float htrigger_val, float itrigger_val, float x_val, float y_val, Vector3 hand_vel, ref bool ref_htrigger, ref bool ref_itrigger, ref int ref_htrigger_delta, ref int ref_itrigger_delta, ref float ref_x, ref float ref_y, ref GameObject ref_hand, ref GameObject ref_grabbed, ref GameObject ref_ohand, ref GameObject ref_ograbbed)
   {
     float htrigger_threshhold = 0.1f;
     float itrigger_threshhold = 0.1f;
 
     //find deltas
-    r_htrigger_delta = 0;
-    if(!r_htrigger && htrigger_val > htrigger_threshhold)
+    ref_htrigger_delta = 0;
+    if(!ref_htrigger && htrigger_val > htrigger_threshhold)
     {
-      r_htrigger_delta = 1;
-      r_htrigger = true;
+      ref_htrigger_delta = 1;
+      ref_htrigger = true;
     }
-    else if(r_htrigger && htrigger_val <= htrigger_threshhold)
+    else if(ref_htrigger && htrigger_val <= htrigger_threshhold)
     {
-      r_htrigger_delta = -1;
-      r_htrigger = false;
+      ref_htrigger_delta = -1;
+      ref_htrigger = false;
     }
 
-    r_itrigger_delta = 0;
-    if(!r_itrigger && itrigger_val > itrigger_threshhold)
+    ref_itrigger_delta = 0;
+    if(!ref_itrigger && itrigger_val > itrigger_threshhold)
     {
-      r_itrigger_delta = 1;
-      r_itrigger = true;
-      r_x = x_val;
-      r_y = y_val;
+      ref_itrigger_delta = 1;
+      ref_itrigger = true;
+      ref_x = x_val;
+      ref_y = y_val;
     }
-    else if(r_itrigger && itrigger_val <= itrigger_threshhold)
+    else if(ref_itrigger && itrigger_val <= itrigger_threshhold)
     {
-      r_itrigger_delta = -1;
-      r_itrigger = false;
+      ref_itrigger_delta = -1;
+      ref_itrigger = false;
     }
 
     //find new grabs
-    if(r_grabbed == null && r_htrigger_delta == 1)
+    if(ref_grabbed == null && ref_htrigger_delta == 1)
     {
       //first try movables
-      for(int i = 0; r_grabbed == null && i < movables.Count; i++)
+      for(int i = 0; ref_grabbed == null && i < movables.Count; i++)
       {
         if( //object newly grabbed
-           ( which && movables[i].ltouch) ||
-           (!which && movables[i].rtouch)
+           ( left_hand && movables[i].ltouch) ||
+           (!left_hand && movables[i].rtouch)
           )
         {
-          r_grabbed = movables[i].gameObject;
-          r_grabbed.transform.SetParent(r_hand.transform);
-          if(r_grabbed == r_ograbbed) r_ograbbed = null;
+          ref_grabbed = movables[i].gameObject;
+          ref_grabbed.transform.SetParent(ref_hand.transform);
+          if(ref_grabbed == ref_ograbbed) ref_ograbbed = null;
           movables[i].grabbed = true;
-          Tool t = r_grabbed.GetComponent<Tool>();
+          Tool t = ref_grabbed.GetComponent<Tool>();
           if(t) //newly grabbed object is a tool
           {
             t.engaged = false;
             t.stored = false;
-            r_grabbed.transform.localScale = new Vector3(1f,1f,1f);
+            ref_grabbed.transform.localScale = new Vector3(1f,1f,1f);
             t.text.transform.localScale = new Vector3(1f,1f,1f);
             t.rigidbody.isKinematic = true;
             t.boxcollider.isTrigger = false;
             UpdateApplyTool(t);
           }
-          VisAid v = r_grabbed.GetComponent<VisAid>();
+          VisAid v = ref_grabbed.GetComponent<VisAid>();
           if(v) //newly grabbed object is a visaid
           {
             v.stored = false;
@@ -530,77 +530,77 @@ public class World : MonoBehaviour
         }
       }
       //then dials
-      if(r_grabbed == null)
+      if(ref_grabbed == null)
       {
         for(int i = 0; i < tools.Count; i++)
         {
           if( //dial newly grabbed
-             ( which && tools[i].dial_touchable.ltouch) ||
-             (!which && tools[i].dial_touchable.rtouch)
+             ( left_hand && tools[i].dial_touchable.ltouch) ||
+             (!left_hand && tools[i].dial_touchable.rtouch)
             )
           {
-            r_grabbed = tools[i].dial;
+            ref_grabbed = tools[i].dial;
             tools[i].dial_touchable.grabbed = true;
-            if(r_grabbed == r_ograbbed) r_ograbbed = null;
+            if(ref_grabbed == ref_ograbbed) ref_ograbbed = null;
           }
         }
       }
 
       //then extraaneous
-      if(r_grabbed == null) //still not holding anything
+      if(ref_grabbed == null) //still not holding anything
       {
         Touchable g = handle_workspace_touchable;
         if( //handle newly grabbed
-          ( which && g.ltouch) ||
-          (!which && g.rtouch)
+          ( left_hand && g.ltouch) ||
+          (!left_hand && g.rtouch)
         )
         {
-          r_grabbed = handle_workspace;
+          ref_grabbed = handle_workspace;
           g.grabbed = true;
-          if(r_grabbed == r_ograbbed) r_ograbbed = null;
+          if(ref_grabbed == ref_ograbbed) ref_ograbbed = null;
         }
       }
 
-      if (r_grabbed == null) //still not holding anything
+      if (ref_grabbed == null) //still not holding anything
       {
         Touchable g = halfer_touchable;
         if ( //halfing button newly grabbed
-          (which && g.ltouch) ||
-          (!which && g.rtouch)
+          (left_hand && g.ltouch) ||
+          (!left_hand && g.rtouch)
         )
         {
-          r_grabbed = halfer;
+          ref_grabbed = halfer;
           g.touch = true;
-          if (r_grabbed == r_ograbbed) r_ograbbed = null;
+          if (ref_grabbed == ref_ograbbed) ref_ograbbed = null;
           SetAllHalfed(!halfed);
         }
       }
 
-      if (r_grabbed == null) //still not holding anything
+      if (ref_grabbed == null) //still not holding anything
       {
         Touchable g = reset_touchable;
         if( //reset button newly grabbed
-          ( which && g.ltouch) ||
-          (!which && g.rtouch)
+          ( left_hand && g.ltouch) ||
+          (!left_hand && g.rtouch)
         )
         {
-          r_grabbed = reset;
+          ref_grabbed = reset;
           g.touch = true;
-          if(r_grabbed == r_ograbbed) r_ograbbed = null;
+          if(ref_grabbed == ref_ograbbed) ref_ograbbed = null;
           thermo.Reset();
         }
       }
 
-      if(r_grabbed != null) //something newly grabbed
+      if(ref_grabbed != null) //something newly grabbed
       {
-        Halfable h = r_grabbed.GetComponent<Halfable>();
+        Halfable h = ref_grabbed.GetComponent<Halfable>();
         if(h != null) h.setHalf(false); //nothing should be halfed while being grabbed
       }
     }
     //find new releases
-    else if(r_grabbed && r_htrigger_delta == -1) //something newly released
+    else if(ref_grabbed && ref_htrigger_delta == -1) //something newly released
     {
-      Tool t = r_grabbed.GetComponent<Tool>();
+      Tool t = ref_grabbed.GetComponent<Tool>();
       if(t) //tool newly released
       {
         if(t.active_ghost.tintersect) //tool released making it active
@@ -618,8 +618,8 @@ public class World : MonoBehaviour
       }
       else //newly released object is NOT a tool
       {
-        r_grabbed.transform.SetParent(r_grabbed.GetComponent<Touchable>().og_parent); //ok to do, even with a dial
-        VisAid v = r_grabbed.GetComponent<VisAid>();
+        ref_grabbed.transform.SetParent(ref_grabbed.GetComponent<Touchable>().og_parent); //ok to do, even with a dial
+        VisAid v = ref_grabbed.GetComponent<VisAid>();
         if(v) //visaid newly released
         {
           v.rigidbody.isKinematic = false;
@@ -627,21 +627,21 @@ public class World : MonoBehaviour
         }
       }
 
-      r_grabbed.GetComponent<Touchable>().grabbed = false;
-      r_grabbed = null;
+      ref_grabbed.GetComponent<Touchable>().grabbed = false;
+      ref_grabbed = null;
     }
 
-    if(r_grabbed) TryInteractable(r_grabbed, x_val, y_val, ref r_x, ref r_y);
+    if(ref_grabbed) TryInteractable(ref_grabbed, x_val, y_val, ref ref_x, ref ref_y);
 
-    r_x = x_val;
-    r_y = y_val;
+    ref_x = x_val;
+    ref_y = y_val;
 
     //centerer
     if(vrcenter_fingertoggleable.finger) //finger hitting vrcenter object
     {
       if( //we're currently checking the correct hand
-        ( which && vrcenter_fingertoggleable.lfinger) ||
-        (!which && vrcenter_fingertoggleable.rfinger)
+        ( left_hand && vrcenter_fingertoggleable.lfinger) ||
+        (!left_hand && vrcenter_fingertoggleable.rfinger)
       )
       { //reset center position
         vrcenter_backing_meshrenderer.material = tab_hisel;
