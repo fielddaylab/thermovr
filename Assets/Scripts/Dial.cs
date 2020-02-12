@@ -5,6 +5,8 @@ using TMPro;
 
 public class Dial : MonoBehaviour
 {
+  public int response_power; //sometimes, we want log mapping
+  [System.NonSerialized]
   public float val = 0.0f;
   [System.NonSerialized]
   public float prev_val = 0.0f;
@@ -20,8 +22,6 @@ public class Dial : MonoBehaviour
 
   [System.NonSerialized]
   public bool examined = false;
-  [System.NonSerialized]
-  public bool log_scale = false; //sometimes, we want log mapping
   GameObject meter;
 
   void Awake()
@@ -40,7 +40,8 @@ public class Dial : MonoBehaviour
     Vector3 lp = meter.transform.localPosition;
     lp.x = 0.05f-val*0.1f;
     meter.transform.localPosition = lp;
-    map = min_map+(max_map-min_map)*val;
+    //map = min_map+(max_map-min_map)*val;
+    map = response_power > 1 ? mapSharp() : mapLinear();
   }
 
   public void Reset()
@@ -52,6 +53,6 @@ public class Dial : MonoBehaviour
   private float mapLinear()
   { return min_map + (max_map - min_map) * val;  }
 
-  private float mapLog()
-  { return min_map + (max_map - min_map) * val;  }
+  private float mapSharp()
+  { return min_map + (max_map - min_map) * Mathf.Pow(val, response_power);  }
 }
