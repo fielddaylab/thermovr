@@ -1,0 +1,70 @@
+This document is meant to get future developers up and running in terms of understanding how the ThermoVR code is laid out.
+Phil's NEXT_DEVELOPER_README discusses *what* is done by the code, what the issues are, what should be fixed/changed.
+Here, we'll look at *how* and *where* things are done, with little regard for whether the "right" thing is done, in terms of accurately simulating the real world.
+
+We can roughly break the scripts into four categories:
+1) High-level code managing the bridge between simulation and UI/user interaction.
+2) Mid-level code performing the simulation
+3) Low-level math code.
+4) Lowish-level, individual scripts for individual kinds of scene objects.
+
+
+
+Category 1:
+The high level code is (for better or worse) almost exclusively in World.cs, but not *quite* exclusively there.
+World.cs has code to manage the tool objects, the dials (sliders) controlling tools, the way things change as the user interacts with objects, initiating updates to the simulation, etc. There is more there than I can really write here. I've found the most efficient way to navigate the code is just to search for key terms. Sorry, I didn't do the layout myself.
+Now, ThermoState.cs has a couple UI things in it. Specifically, it tracks generates the purple "graph" object (the massive genMesh() function), updates the text showing system state values (Update() function), and updates the position/scale of the piston and water/steam regions (visualize_state() function).
+World and ThermoState scripts are attached to the "Oracle" object in the Unity scene.
+
+
+Category 2:
+This is in ThermoState and ThermoMath.
+ThermoState, in addition to the UI stuff above, has a number of higher-level simulation functions related to updating the state of the simulation system. These are things like add_heat...(...) and add_pressure...(...), or reset_state(). ThermoState is also responsible for tracking the state (obviously), e.g. values for pressure, temperature, volume, and so forth.
+ThermoMath is a sort of "human-readable" interface for the low-level math libraries. Most of its functions are of the form a_given_bc(b, c). Basically, calculate one variable value given two others. The functions are mostly straight-forward calls to the IAPWS95 and IAPWS97 libraries, wrapped in exception handlers. ThermoState plugs in to ThermoMath, to update values when doing add_heat or add_pressure functions.
+When an exception occurs, we return a "neutral" value, which may or may not be valid given the other values, but is better than crashing directly. We also set a "got_error" flag to true, which a higher class (like ThermoState or World) should check for, to give a proper notification to the user.
+The exception stuff is my fault. But it seems to work.
+
+
+Category 3: 
+Low-level math code is essentially just IAPWS95 and IAPWS97. I've not touched these, they are ports Phil did of existing libraries. If you are on the job specifically to test/verify that the simulation math is correct, and/or are thoroughly familiar with the relevant thermodynamics math, maybe looking at this code will be useful. Otherwise, I don't think you'll get much use from reading these.
+
+
+Category 4:
+Everything else. I'll just go file-by-file and describe what it's for.
+- ChallengeBall: I think this was WIP code for implementing challenges, where students need to get current state to match a given state, visualized as a "challenge ball" on the graph.
+
+- Dial: Used to run the sliders (called dials) controlling the tool values (e.g. heat from burner). Not much going on here, other than mapping a 0-1 range of slider values to the min-max range of tool values (specified as min_map, max_map). There are two different ways to map. First, a direct, linear mapping, the default. Second, I've added a "mapSharp()" method as well. This basically raises the 0-1 value to a given power. If you were to graph the mapping, there would be a sharper-and-sharper "elbow" to the graph. This preserves the overall range, but lets us smooth the transition for lower values (at the cost of a sharper transition for higher values). I've used this on the weight and balloon sliders, because small movements at the low range have got massive effect on the state (for default pressure, at least). This helps to nullify that massive effect slightly.
+
+- DirectionalIndicator: Used for the arrows that indicate heat in/out of the system when the weight/balloon are in effect. When "running," we add offset to a texture on the arrows, which controls light emission, creating the effect of a moving band of red light, representing heat. The math is fairly simple. Constants are pretty much arbitrary, tweaked to look ok in practice.
+
+- Fadable: I haven't done anything with this code, I believe it's used to fade out text for tool values when they've remained unchanged for long enough.
+
+- FingerToggleable: This appears to be WIP code for allowing users to do a "finger press" gesture to press things on the clipboard (I think; the clipboard seems to be a mostly-abandoned WIP itself). These would be toggled when touched.
+
+- Flasher: Yeah, I probably could have found a better name. This allows us to make a button (or other object) flash on and off, going 15 frames on each. Really simple, currently only used to highlight the reset button when we detect an exception from ThermoMath.
+
+- Ghost: I think this is used for the snapping regions for tools. Just sets a flag if the paired tool intersects the ghost. What happens from there is handled in World.
+
+- Halfable: Used for objects that have full and cross-sectional "halfed" variations. e.g. the pink "insulator" object. Just toggles between active meshrenderers.
+
+- Lightable: Script to handle any object that "lights up," except for hands, which are handled separately. The objects that currently use this include tools, dials, the graph, and the workstation handle. By default, it just toggles material emission to be on or off (or more accurately, black or non-black, since black emission = no emission). However, there is also the option to use custom materials with "lit" and "unlit" variations. This option is used for what we might call "significantly concave" objects, currently just the graph. Basically, uniform light emission eliminates shadows and variations in surface shading, meaning when an object is emitting, we can only "read" the shape of the outline. This doesn't work so well for concave parts of objects. So, we use a "lit" material that just has a lighter/brighter shade of color, rather than emission.
+
+- Pressable: My own WIP code, based on FingerToggleable, but intended for buttons, which don't really toggle (like a switch), but get pressed to do a specific thing. I never got it working satisfactorially with the way things are handled in World (again, once an object gets "activated" by a press or a touch or whatever, the actual result of activation is handled in massive swathes of World code).
+
+- Tab: Presumably some WIP code for tabs on the clipboard.
+
+- Tool: Script for tools (burner, coil, balloon, weight), which tracks the storage and "active" locations of the tool, and moves the tool toward the "storage" location when it has been dropped and left sitting for a second or two.
+
+- Touchable: used to detect when an object is touched or not, and sets some flags so World knows whether the object is currently being touched. Also, lights/unlights any lightable components on the Touchable object and its children.
+
+- VisAid: I think this is the equivalent of "Tool," but for the graph and clipboard. I haven't done anything with this code, not too sure about it.
+
+Ok, so hopefully this gives you a decent overview of how the code is laid out, what the responsibilities of each class are, and where to look if you want to modify some behavior. Good luck as you get up to speed on the code!
+
+
+
+
+
+
+
+-Luke
