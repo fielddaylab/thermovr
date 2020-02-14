@@ -1,0 +1,25 @@
+This document is just intended as a quick run-down of some of the terminology used in the scene/code. Nothing there is too terrifically difficult, but it may be helpful to have a summary.
+
+The game is based around a container of water, fitted with a piston.
+
+Tools:	There are 5 tools to manipulate the system:
+	A burner to add heat, a coil to remove heat, a weight to add pressure, a balloon to reduce pressure, and a clamp to fix the volume.
+	Each tool only affects the system when it's been placed in its "active" location.
+
+Dials:	The effect of a tool is influenced by a slider on the workstation, which is referred to as a dial for some reason.
+
+Buttons: There are two buttons, one to reset the system, the other to toggle whether we see a cross-section of the container, or just the whole container
+	(which is non-transparent and thus would hide the water).
+
+Graph:	There is a graph object which shows valid states for the system in terms of temperature, volume, and pressure. A small gray sphere shows the current state.
+
+Regions: A region generally refers to a section of the graph corresponding to a state of the water.
+	We could have regions corresponding to completely frozen water, completely liquid water, completely vaporized water, and combinations of these.
+	Within the code, there are three regions of concern (involving liquids and vapors, presumably because ice isn't that interesting for the purposes of this game).
+	Namely, "Region 0" refers to an all-liquid state, "Region 1" is a mix of liquid and steam, and "Region 2" is all steam.
+	Note that the weight and balloon only have an effect in Region 2 cases.
+
+Oracle, World, and ThermoState:
+	In the scene, there is an object called Oracle. This is the object to which the World and ThermoState scripts are attached.
+	World is responsible for initiating almost all of the updates and changes within the scene in response to user interactions.
+	ThermoState is responsible for a few select things related to the state of the simulation.
