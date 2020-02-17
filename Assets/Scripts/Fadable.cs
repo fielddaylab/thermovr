@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/**
+ * This is used to fade object text out when the object has been idle for long enough.
+ **/
 public class Fadable : MonoBehaviour
 {
   //config

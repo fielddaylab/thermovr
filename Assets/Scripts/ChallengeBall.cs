@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/**
+ * Phil's WIP code for an object that would check for a collision with the ball for current state,
+ * to let the user complete a "match this state" sort of challenge.
+ **/
 public class ChallengeBall : MonoBehaviour
 {
   GameObject state_dot;

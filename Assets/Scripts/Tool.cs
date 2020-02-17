@@ -128,6 +128,7 @@ public class Tool : MonoBehaviour
 
     text_fadable.set_factive(touchable.touch || dial_dial.examined);
 
+    // If tool has been sitting unused and unmoved for long enough, start it moving back to storage.
     if(!engaged && !stored && !touchable.grabbed && t_free > 1.0f)
     {
       rigidbody.isKinematic = true;

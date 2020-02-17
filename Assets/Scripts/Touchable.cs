@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/**
+ * Class to detect when an object gets touched and/or grabbed by the hand controller,
+ * and to mark itself as touched, for later processing in "World."
+ **/
 public class Touchable : MonoBehaviour
 {
   protected GameObject lhand;
@@ -34,6 +38,10 @@ public class Touchable : MonoBehaviour
 
   }
 
+  /*
+   * Check if the given collider is in the list of colliders found on
+   * the left/right hand.
+   */
   private bool cInHandList(Collider c, bool left)
   {
     Collider[] list = left ? lhand_c : rhand_c;
@@ -62,7 +70,7 @@ public class Touchable : MonoBehaviour
       var light_list = gameObject.GetComponentsInChildren<Lightable>();
       foreach (Lightable light in light_list)
       {
-        light.SetLit(touch); // set to lit if touched, or unlit if not.
+        light.SetLit(true);
       }
     }
   }
@@ -79,7 +87,7 @@ public class Touchable : MonoBehaviour
       var light_list = gameObject.GetComponentsInChildren<Lightable>();
       foreach (Lightable light in light_list)
       {
-        light.SetLit(touch); // set to lit if touched, or unlit if not.
+        light.SetLit(false);
       }
     }
   }

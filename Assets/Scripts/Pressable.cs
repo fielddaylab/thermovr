@@ -2,6 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/**
+ * WIP code, not in use, probably not worth looking at too hard unless you are trying to implement a feature
+ * for "pressing" buttons with a finger.
+ * Based on FingerToggleable and Touchable classes.
+ **/
 public class Pressable : Touchable
 {
   const float BUTTONS_BASE_HEIGHT = 0.0115f;

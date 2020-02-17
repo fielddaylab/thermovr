@@ -32,6 +32,9 @@ public class DirectionalIndicator : MonoBehaviour
     this.Stop(); // we start the game stopped.
   }
 
+  /*
+   * Function to stop the indicator, if heat is no longer actually flowing.
+   */
   public void Stop()
   {
     if (running)
@@ -45,6 +48,9 @@ public class DirectionalIndicator : MonoBehaviour
     }
   }
 
+  /*
+   * Function to show the indicator, when heat starts to flow.
+   */
   public void Go(bool flow_outward)
   {
     // If we weren't running already, then start.
@@ -57,7 +63,7 @@ public class DirectionalIndicator : MonoBehaviour
         mr.enabled = true;
       }
     }
-    // If we aren't flowing in the right direction, fix it.
+    // If we aren't pointing in the same direction as flow, fix it.
     FLOW_DIRECTIONS correct_direction = flow_outward ? FLOW_DIRECTIONS.OUT : FLOW_DIRECTIONS.IN;
     if (flow_direction != correct_direction)
     {

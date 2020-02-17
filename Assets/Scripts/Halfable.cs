@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/**
+ * Toggles between a cross-sectional "halved" view of an object,
+ * and a full solid view of the object.
+ **/
 public class Halfable : MonoBehaviour
 {
   public GameObject full;

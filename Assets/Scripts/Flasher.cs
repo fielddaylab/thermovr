@@ -2,6 +2,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/**
+ * Really simple class to flash a Lightable object on and off, every PERIOD frames.
+ * Note, this isn't a very precise use of the term "period," which properly should be the time
+ * the light is on and off before coming back to "on."
+ * Instead, it's the time spent in each state.
+ **/
 public class Flasher : MonoBehaviour
 {
   private const int PERIOD = 15;

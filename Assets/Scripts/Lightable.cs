@@ -2,6 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/**
+ * Class to allow "lighting" of an object.
+ * By default, just adds emission uniformly to the object, based on material/texture color.
+ * Optionally, one can provide "lit" and "unlit" materials, instead of using a naive "emission" approach to lighting.
+ **/
 public class Lightable : MonoBehaviour
 {
   public bool use_custom_mats;
@@ -26,6 +31,8 @@ public class Lightable : MonoBehaviour
       else
       {
         mesh_renderer.material.EnableKeyword("_Emission");
+        // if there is a texture, use grey light, which will be modified by texture to match color (it appears).
+        // else, emit light matching exactly to the material color (which wouldn't work so well if we had a black object, I suppose...)
         Color color = (mesh_renderer.material.mainTexture != null) ? new Color(0.5f, 0.5f, 0.5f) : mesh_renderer.material.color;
         mesh_renderer.material.SetColor("_EmissionColor", color);
       }

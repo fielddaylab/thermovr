@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
+/**
+ * Presumably used for tabs on the clipboard.
+ * Doesn't seem to be in use.
+ **/
 public class Tab : MonoBehaviour
 {
 

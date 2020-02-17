@@ -192,6 +192,7 @@ public class ThermoState : MonoBehaviour
   // this is done by walking the sorted list of "orphaned" points (<- I could have come up with a better name for that...), which corresponds to the list of points disconnected by the cutting of the grid mesh
   // and simultaneously walking the sorted list of the vapor dome region points, zig-zagging triangles to fill the space
   //the good news: any complexity from the generation of the mesh is pretty well isolated to this one function
+  // NOTE: Phil didn't really say *what* this mesh is, just "a mesh". This function generates the graph object's mesh.
   void genMesh()
   {
     GameObject old_gm = GameObject.Find("graph_mesh");

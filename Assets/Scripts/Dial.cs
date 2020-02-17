@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
+/**
+ * Runs a "dial" object, which is really a slider.
+ * This controls the amount of heat I/O or weight from a tool
+ **/
 public class Dial : MonoBehaviour
 {
   public int response_power; //sometimes, we want log mapping
@@ -50,9 +54,18 @@ public class Dial : MonoBehaviour
     Update();
   }
 
+  /*
+   * Standard way to map from 0-1 slder "val" range to min-max "tool" range.
+   */
   private float mapLinear()
   { return min_map + (max_map - min_map) * val;  }
 
+  /*
+   * Non-linear mapping, which raises the 0-1 "val" to given power.
+   * This gives us super-linear behavior, so for a 0-1 range we have "slow" growth of mapped value initially,
+   * accelerating as we approach 1.
+   * Useful for sliders whose tool's influence tends to apply too rapidly at small values.
+   */
   private float mapSharp()
   { return min_map + (max_map - min_map) * Mathf.Pow(val, response_power);  }
 }
