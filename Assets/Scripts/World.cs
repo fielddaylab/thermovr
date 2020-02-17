@@ -113,6 +113,8 @@ public class World : MonoBehaviour
   // Start is called before the first frame update
   void Start()
   {
+    // All this code does, at end of day, is find all the objects to manage,
+    // and set initial values and such as needed.
     thermo = GameObject.Find("Oracle").GetComponent<ThermoState>();
 
     cam_offset = GameObject.Find("CamOffset");
@@ -137,6 +139,7 @@ public class World : MonoBehaviour
     lhand_meshrenderer.materials = hand_emptys;
     rhand_meshrenderer.materials = hand_emptys;
 
+    // As we grab them, set ranges on tool dials (sliders).
     Tool t;
     tools = new List<Tool>();
     t = GameObject.Find("Tool_Insulator").GetComponent<Tool>(); tool_insulator = t; tools.Add(t); t.dial_dial.min_map =  0f; t.dial_dial.max_map = 1f; t.dial_dial.unit = "n";
@@ -154,6 +157,7 @@ public class World : MonoBehaviour
     handle_workspace = GameObject.Find("Handle_Workspace");
     handle_workspace_touchable = handle_workspace.GetComponent<Touchable>();
 
+    // set initial states of meshrenderers and transforms for our tools.
     for(int i = 0; i < tools.Count; i++)
     {
       t = tools[i];
@@ -199,6 +203,7 @@ public class World : MonoBehaviour
     halfables.Add(GameObject.Find("Tool_Insulator").GetComponent<Halfable>());
     halfables.Add(GameObject.Find("Tool_Coil"     ).GetComponent<Halfable>());
 
+    // A bunch of stuff related to initializing clipboard.
     instructions_parent = GameObject.Find("Instructions");
     challenge_parent = GameObject.Find("Challenge");
     quiz_parent = GameObject.Find("Quiz");
@@ -295,6 +300,9 @@ public class World : MonoBehaviour
     return new Vector3(Random.Range(-1f,1f),1f,Random.Range(-1f,1f));
   }
 
+  // The three functions below are used to manage attach/detach and storage of tools.
+  // Generally, they have to set the transforms properly, update state variables,
+  // and update text.
   void ActivateTool(Tool t)
   {
     GameObject o = t.gameObject;
@@ -462,7 +470,11 @@ public class World : MonoBehaviour
     }
   }
 
-  //"which": true -> left, false -> right
+  /*
+   * This function seems to handle all possible interactions between the hand and other objects.
+   * Honestly, I haven't quite got a full understanding of this ~200-line behemoth.
+   */
+  //"left_hand": true -> left, false -> right
   void TryHand(bool left_hand, float htrigger_val, float itrigger_val, float x_val, float y_val, Vector3 hand_vel, ref bool ref_htrigger, ref bool ref_itrigger, ref int ref_htrigger_delta, ref int ref_itrigger_delta, ref float ref_x, ref float ref_y, ref GameObject ref_hand, ref GameObject ref_grabbed, ref GameObject ref_ohand, ref GameObject ref_ograbbed)
   {
     float htrigger_threshhold = 0.1f;
@@ -657,6 +669,9 @@ public class World : MonoBehaviour
 
   }
 
+  /*
+   * Function to update object materials/appearance in response to a "grab" event.
+   */
   void UpdateGrabVis()
   {
     for(int i = 0; i < tools.Count; i++)
@@ -790,6 +805,12 @@ public class World : MonoBehaviour
     }
   }
 
+  /*
+   * Another behemoth, does frame-by-frame updates to state, appearances, transforms, etc.
+   * Includes calls to TryHand, UpdateGrabVis, etc. as well as calls to ThermoState functions.
+   * Basically, wraps calls to a bunch of other functions, and a hodgepodge of other random tasks,
+   * as far as I can tell.
+   */
   void Update()
   {
     //hands keep trying to run away- no idea why (this is a silly way to keep them still)

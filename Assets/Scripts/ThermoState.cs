@@ -852,7 +852,7 @@ public class ThermoState : MonoBehaviour
     size_p = height/((float)radius*2f); //"max height" is approx 2x diameter, so this sets size_p to essentially "%_contents_size"
                                         // Not accurate, Phil. Max value of height here is max_volume / surfacearea = 1000 / 0.024674011 ~ 40,535.
                                         // radius * 2 = 0.05 *2 = 0.1. max value for size_p is then over 400,000.
-                                        // In practice, I've gotten size_p as high as 3,500, which is still much bigger than 1.
+                                        // In practice, I've gotten size_p as high as 3,500, which is still much bigger than 1; 1 should be the max if this were in fact "essentially %_contents_size."
                                         // *sigh*
                                         // I dunno what the math is *supposed* to be, but I'm just gonna take the natural log of size_p whenever it gets above 1, and call it a day.
                                         // Actually, I'm gonna scale it down linearly, because taking the log is still putting it too high in some cases.
