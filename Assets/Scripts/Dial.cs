@@ -11,17 +11,21 @@ public class Dial : MonoBehaviour
 {
   public int response_power; //sometimes, we want log mapping
   [System.NonSerialized]
-  public float val = 0.0f;
+  public float val = 0.0f; //abstract 0-1 representing knob position
   [System.NonSerialized]
   public float prev_val = 0.0f;
   [System.NonSerialized]
-  public float map = 0.0f;
+  public float map = 0.0f; //meaningful value mapped from val to [min_map,max_map]
   [System.NonSerialized]
   public float min_map = 0.0f;
   [System.NonSerialized]
   public float max_map = 1.0f;
   [System.NonSerialized]
   public string unit = "";
+  [System.NonSerialized]
+  public string display_unit = "";
+  [System.NonSerialized]
+  public float display_mul = 1.0f; //multiplied with map before displaying with display_unit
   public GameObject tool;
 
   [System.NonSerialized]
@@ -38,12 +42,17 @@ public class Dial : MonoBehaviour
   {
   }
 
-  // Update is called once per frame
+  // Update is called once per frame, and after val updated
   void Update()
   {
     Vector3 lp = meter.transform.localPosition;
     lp.x = 0.05f-val*0.1f;
     meter.transform.localPosition = lp;
+    forceMap();
+  }
+
+  public void forceMap()
+  {
     //map = min_map+(max_map-min_map)*val;
     map = response_power > 1 ? mapSharp() : mapLinear();
   }

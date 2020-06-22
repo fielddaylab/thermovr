@@ -47,8 +47,8 @@ public class ThermoState : MonoBehaviour
   //state
   //xyz corresponds to vpt (Y = "up")
   public double pressure;       //p //pascals
-  public double temperature;    //t //kelvin
-  public double volume;         //v //M^3/kg
+  public double temperature;    //t //°kelvin
+  public double volume;         //v //M³/kg
   public double internalenergy; //u //J/kg
   public double entropy;        //s //J/kgK
   public double enthalpy;       //h //J/kg
@@ -217,9 +217,9 @@ public class ThermoState : MonoBehaviour
         double p = ThermoMath.p_given_percent(pst);
         double t = ThermoMath.t_given_percent(tst);
         double v = ThermoMath.v_given_pt(p,t);
-        //pvt in Pa, M^3/Kg, K
+        //pvt in Pa, M³/Kg, K
 
-        //Debug.LogFormat("p:{0}Pa, v:{1}M^3/Kg, t:{2}K",p,v,t);
+        //Debug.LogFormat("p:{0}Pa, v:{1}M³/Kg, t:{2}K",p,v,t);
         int i = samples*y+z;
         pt_positions[i] = plot(p,v,t);
       }
@@ -259,9 +259,9 @@ public class ThermoState : MonoBehaviour
       double pst = sample(pt);
       double p = ThermoMath.psat_given_percent(pst);
       double t = ThermoMath.tsat_given_p(p);
-      //pvt in Pa, M^3/Kg, K
+      //pvt in Pa, M³/Kg, K
 
-      //Debug.LogFormat("p:{0}Pa, v:{1}M^3/Kg, t:{2}K",p,v,t);
+      //Debug.LogFormat("p:{0}Pa, v:{1}M³/Kg, t:{2}° K",p,v,t);
       float pplot = plot_dimension(ThermoMath.p_min,ThermoMath.p_max,p);
       if(pplot > highest_y) { highest_y = pplot; highest_y_i = mesh_positions.Count; }
       float tplot = plot_dimension(ThermoMath.t_min,ThermoMath.t_max,t);
@@ -878,6 +878,17 @@ public class ThermoState : MonoBehaviour
     //Debug.Log(String.Format("Water scale: {0}, water scale lossy: {3}, child scale: {1}, steam scale: {2}", water.transform.localScale, water.GetComponentInChildren<MeshRenderer>().gameObject.transform.lossyScale, steam.transform.localScale, water.transform.lossyScale));
   }
 
+  string regionToName(int region) //0 subcooled liquid, 1 two-phase, 2 superheated vapor
+  {
+    switch(region)
+    {
+      case 0: return "Subcooled Liquid";
+      case 1: return "Two-Phase";
+      case 2: return "Superheated Vapor";
+    }
+    return "Undefined";
+  }
+
   // Update is called once per frame
   void Update()
   {
@@ -888,14 +899,19 @@ public class ThermoState : MonoBehaviour
     plot_lbase_prev = plot_lbase;
     if(modified) genMesh();
 
-    if(Math.Abs(pressure       - prev_pressure)       > ThermoMath.p_smallstep) text_pressure.SetText(      "P: {0:3}KP",     (float)pressure/1000f);
-    if(Math.Abs(temperature    - prev_temperature)    > ThermoMath.t_smallstep) text_temperature.SetText(   "T: {0:3}K",      (float)temperature);
-    if(Math.Abs(volume         - prev_volume)         > ThermoMath.v_smallstep) text_volume.SetText(        "v: {0:3}M^3/kg", (float)volume);
-    if(Math.Abs(internalenergy - prev_internalenergy) > ThermoMath.u_smallstep) text_internalenergy.SetText("u: {0:3}J/kg",   (float)internalenergy);
-    if(Math.Abs(entropy        - prev_entropy)        > ThermoMath.s_smallstep) text_entropy.SetText(       "s: {0:3}J/KgK",  (float)entropy);
-    if(Math.Abs(enthalpy       - prev_enthalpy)       > ThermoMath.h_smallstep) text_enthalpy.SetText(      "h: {0:3}J/kg",   (float)enthalpy);
-    if(Math.Abs(quality        - prev_quality)        > ThermoMath.x_smallstep) text_quality.SetText(       "x: {0:3}%",      (float)(quality*100.0));
-    if(region != prev_region)                                                   text_region.SetText(        "region: {0}",    region);                                       
+    if(Math.Abs(pressure - prev_pressure)              > ThermoMath.p_smallstep) text_pressure.SetText(      "P: {0:3} kPa",         (float)pressure/1000f);
+    if(Math.Abs(temperature - prev_temperature)        > ThermoMath.t_smallstep) text_temperature.SetText(   "T: {0:3}°K ({1:3}°C)", (float)temperature, (float)temperature-273.15f);
+    if(Math.Abs(volume - prev_volume)                  > ThermoMath.v_smallstep) text_volume.SetText(        "v: {0:3} M³/kg",       (float)volume);
+    if(Math.Abs(internalenergy - prev_internalenergy)  > ThermoMath.u_smallstep) text_internalenergy.SetText("u: {0:3} kJ/kg",       (float)internalenergy/1000f);
+    if(Math.Abs(entropy - prev_entropy)                > ThermoMath.s_smallstep) text_entropy.SetText(       "s: {0:3} kJ/kgK",      (float)entropy/1000f);
+    if(Math.Abs(enthalpy - prev_enthalpy)              > ThermoMath.h_smallstep) text_enthalpy.SetText(      "h: {0:3} kJ/kg",       (float)enthalpy/1000f);
+    if(region == 1 && Math.Abs(quality - prev_quality) > ThermoMath.x_smallstep) text_quality.SetText("x: {0:3}%", (float)(quality * 100f));
+    if(region != prev_region)
+    {
+      text_region.SetText("region: " + regionToName(region));
+      if(region == 1)                                                            text_quality.SetText("x: {0:3}%", (float)(quality * 100f));
+      else                                                                       text_quality.SetText("x: Undefined");
+    }
 
     prev_pressure       = pressure;
     prev_temperature    = temperature;

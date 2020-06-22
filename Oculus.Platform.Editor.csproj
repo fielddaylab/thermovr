@@ -9,10 +9,10 @@
     <ProductVersion>10.0.20506</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <RootNamespace></RootNamespace>
-    <ProjectGuid>{F6712EE8-8F04-403F-DD0E-35A4AA3EF53C}</ProjectGuid>
+    <ProjectGuid>{4AD5A461-ACC0-A343-DE78-1C56B3A946AE}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <AssemblyName>Oculus.VR.Editor</AssemblyName>
+    <AssemblyName>Oculus.Platform.Editor</AssemblyName>
     <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <BaseDirectory>.</BaseDirectory>
@@ -63,31 +63,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Oculus\VR\Editor\OVRADBTool.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRBuild.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRBundleManager.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRBundleTool.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRConfig.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRDeviceSelector.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRDirectorySyncer.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVREngineConfigurationUpdater.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRExpansionFileGenerator.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRGradleGeneration.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRLayerAttributeEditor.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRLint.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRManifestPreprocessor.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRPlatformTool.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRPlatformToolSettings.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRPluginUpdater.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRPluginUpdaterStub.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRProjectConfig.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRScreenshotWizard.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRShaderBuildProcessor.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRSystemProfilerPanel.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\PathHelper.cs" />
-    <None Include="Assets\Oculus\VR\Editor\Oculus.VR.Editor.asmdef" />
-    <None Include="Assets\Oculus\VR\Editor\network_sec_config.xml" />
-    <None Include="Assets\Oculus\VR\Editor\AndroidManifest.OVRSubmission.xml" />
+    <Compile Include="Assets\Oculus\Platform\Editor\GUIHelper.cs" />
+    <Compile Include="Assets\Oculus\Platform\Editor\OculusPlatformSettingsEditor.cs" />
+    <Compile Include="Assets\Oculus\Platform\Editor\OculusPluginUpdaterStub.cs" />
+    <Compile Include="Assets\Oculus\Platform\Editor\OculusStandalonePlatformResponse.cs" />
+    <None Include="Assets\Oculus\Platform\Editor\Oculus.Platform.Editor.asmdef" />
     <Reference Include="UnityEngine">
       <HintPath>C:/Program Files/Unity/2019.4.0f1/Editor/Data/Managed/UnityEngine/UnityEngine.dll</HintPath>
     </Reference>
@@ -681,9 +661,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="Oculus.VR.csproj">
-      <Project>{18EC8FA1-DFB7-D782-580F-F974A50A7A3F}</Project>
-      <Name>Oculus.VR</Name>
+    <ProjectReference Include="Oculus.Platform.csproj">
+      <Project>{120490F2-71C7-81EC-5C57-2324D480ADE1}</Project>
+      <Name>Oculus.Platform</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

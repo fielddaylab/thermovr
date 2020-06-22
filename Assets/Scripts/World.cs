@@ -142,14 +142,14 @@ public class World : MonoBehaviour
     // As we grab them, set ranges on tool dials (sliders).
     Tool t;
     tools = new List<Tool>();
-    t = GameObject.Find("Tool_Insulator").GetComponent<Tool>(); tool_insulator = t; tools.Add(t); t.dial_dial.min_map =  0f; t.dial_dial.max_map = 1f; t.dial_dial.unit = "n";
-    t = GameObject.Find("Tool_Clamp").GetComponent<Tool>(); tool_clamp     = t; tools.Add(t); t.dial_dial.min_map =  0f; t.dial_dial.max_map = 1f; t.dial_dial.unit = "h";
-    t = GameObject.Find("Tool_Burner"   ).GetComponent<Tool>(); tool_burner    = t; tools.Add(t); t.dial_dial.min_map =  1f; t.dial_dial.max_map =  1000f*100f; t.dial_dial.unit = "J/s";
-    t = GameObject.Find("Tool_Coil"     ).GetComponent<Tool>(); tool_coil      = t; tools.Add(t); t.dial_dial.min_map = -1f; t.dial_dial.max_map = -1000f*100f; t.dial_dial.unit = "J/s";
+    t = GameObject.Find("Tool_Insulator").GetComponent<Tool>(); tool_insulator = t; tools.Add(t); t.dial_dial.min_map = 0f; t.dial_dial.max_map = 1f;                                t.dial_dial.unit = "n";   t.dial_dial.display_unit = t.dial_dial.unit;
+    t = GameObject.Find("Tool_Clamp"    ).GetComponent<Tool>(); tool_clamp     = t; tools.Add(t); t.dial_dial.min_map = 0f; t.dial_dial.max_map = 1f;                                t.dial_dial.unit = "h";   t.dial_dial.display_unit = t.dial_dial.unit;
+    t = GameObject.Find("Tool_Burner"   ).GetComponent<Tool>(); tool_burner    = t; tools.Add(t); t.dial_dial.min_map = 0f; t.dial_dial.max_map =  1000f*100f;                       t.dial_dial.unit = "J/s"; t.dial_dial.display_unit = "kJ/s"; t.dial_dial.display_mul = 0.001f;
+    t = GameObject.Find("Tool_Coil"     ).GetComponent<Tool>(); tool_coil      = t; tools.Add(t); t.dial_dial.min_map = 0f; t.dial_dial.max_map = -1000f*100f;                       t.dial_dial.unit = "J/s"; t.dial_dial.display_unit = "kJ/s"; t.dial_dial.display_mul = 0.001f;
     double kg_corresponding_to_10mpa = thermo.surfacearea_insqr*(10*1453.8/*MPa->psi*/)*0.453592/*lb->kg*/;
-    double kg_corresponding_to_2mpa = thermo.surfacearea_insqr*(2*1453.8/*MPa->psi*/)*0.453592/*lb->kg*/; // 10 MPa seems way too big, sooooo... we'll just do 2 MPa.
-    t = GameObject.Find("Tool_Weight"   ).GetComponent<Tool>(); tool_weight    = t; tools.Add(t); t.dial_dial.min_map =  0f; t.dial_dial.max_map =  (float)kg_corresponding_to_10mpa; t.dial_dial.unit = "kg";
-    t = GameObject.Find("Tool_Balloon"  ).GetComponent<Tool>(); tool_balloon   = t; tools.Add(t); t.dial_dial.min_map =  0f; t.dial_dial.max_map = -(float)kg_corresponding_to_10mpa; t.dial_dial.unit = "kg";
+    double kg_corresponding_to_2mpa  = thermo.surfacearea_insqr*(2 *1453.8/*MPa->psi*/)*0.453592/*lb->kg*/; // 10 MPa seems way too big, sooooo... we'll just do 2 MPa.
+    t = GameObject.Find("Tool_Weight"   ).GetComponent<Tool>(); tool_weight    = t; tools.Add(t); t.dial_dial.min_map =  0f; t.dial_dial.max_map =  (float)kg_corresponding_to_10mpa; t.dial_dial.unit = "kg";  t.dial_dial.display_unit = t.dial_dial.unit;
+    t = GameObject.Find("Tool_Balloon"  ).GetComponent<Tool>(); tool_balloon   = t; tools.Add(t); t.dial_dial.min_map =  0f; t.dial_dial.max_map = -(float)kg_corresponding_to_10mpa; t.dial_dial.unit = "kg";  t.dial_dial.display_unit = t.dial_dial.unit;
 
     flame = GameObject.Find("Flame").GetComponent<ParticleSystem>();
 
@@ -174,7 +174,7 @@ public class World : MonoBehaviour
       float v = t.storage.transform.localScale.x; //can grab any dimension
       Vector3 invscale = new Vector3(1f/v,1f/v,1f/v);
       t.text.transform.localScale = invscale;
-      t.textv_tmpro.SetText("{0:3}"+t.dial_dial.unit,(float)t.dial_dial.map);
+      t.textv_tmpro.SetText("{0:3} "+t.dial_dial.display_unit,(float)(t.dial_dial.map*t.dial_dial.display_mul));
     }
 
     vessel = GameObject.Find("Vessel");
@@ -315,7 +315,7 @@ public class World : MonoBehaviour
     //     if(t == tool_insulator) t.dial_dial.val = (float)ThermoMath.percent_given_t(thermo.temperature);
     //else if(t == tool_clamp)     t.dial_dial.val = (float)ThermoMath.percent_given_v(thermo.volume);
     t.dial_dial.Reset(); // reset tool when we add it.
-    t.textv_tmpro.SetText("{0:3}"+t.dial_dial.unit,(float)t.dial_dial.val);
+    t.textv_tmpro.SetText("{0:3} "+t.dial_dial.display_unit,(float)(t.dial_dial.map*t.dial_dial.display_mul));
     UpdateApplyTool(t);
     o.transform.localPosition = new Vector3(0f,0f,0f);
     o.transform.localRotation = Quaternion.identity;
@@ -342,7 +342,7 @@ public class World : MonoBehaviour
     Halfable h = o.GetComponent<Halfable>();
     if(h != null) h.setHalf(false); //Un-half when we store a tool.
     t.dial_dial.Reset(); // definitely need to reset tool when we store it.
-    t.textv_tmpro.SetText("{0:3}"+t.dial_dial.unit,(float)t.dial_dial.val);
+    t.textv_tmpro.SetText("{0:3} "+t.dial_dial.display_unit,(float)(t.dial_dial.map*t.dial_dial.display_mul));
     UpdateApplyTool(t);
   }
   void DetachTool(Tool t, Vector3 vel)
@@ -357,7 +357,7 @@ public class World : MonoBehaviour
     t.rigidbody.isKinematic = false;
     t.rigidbody.velocity = vel;
     t.dial_dial.Reset(); // may as well reset tool when we remove it, too.
-    t.textv_tmpro.SetText("{0:3}"+t.dial_dial.unit,(float)t.dial_dial.val);
+    t.textv_tmpro.SetText("{0:3} "+t.dial_dial.display_unit,(float)(t.dial_dial.map*t.dial_dial.display_mul));
     UpdateApplyTool(t);
   }
 
@@ -384,6 +384,16 @@ public class World : MonoBehaviour
 
       if(t == tool_burner)
       {
+        if(t.dial_dial.map == 0.0f)
+        {
+          var e = flame.emission;
+          e.enabled = false;
+        }
+        else
+        {
+          var e = flame.emission;
+          e.enabled = true;
+        }
         var vel = flame.velocityOverLifetime;
         vel.speedModifierMultiplier = Mathf.Lerp(0.1f,0.5f,t.dial_dial.val);
       }
@@ -464,6 +474,10 @@ public class World : MonoBehaviour
         Tool t = d.tool.GetComponent<Tool>();
         float dx = (r_x-x_val)*-10f;
         d.val = Mathf.Clamp(d.val-dx,0f,1f);
+        //if this close to either end, assume user wants min/max
+        if(d.val < 0.005) d.val = 0f;
+        if(d.val > 0.995) d.val = 1f;
+        d.forceMap();
 
         UpdateApplyTool(t);
       }
@@ -965,7 +979,7 @@ public class World : MonoBehaviour
       if(t.dial == lgrabbed || t.dial == rgrabbed) t.dial_dial.examined = true;
       if(t.dial_dial.val != t.dial_dial.prev_val)
       {
-        t.textv_tmpro.SetText("{0:3}"+t.dial_dial.unit,(float)t.dial_dial.map);
+        t.textv_tmpro.SetText("{0:3} "+t.dial_dial.display_unit,(float)(t.dial_dial.map*t.dial_dial.display_mul));
         t.dial_dial.examined = true;
       }
       t.dial_dial.prev_val = t.dial_dial.val;

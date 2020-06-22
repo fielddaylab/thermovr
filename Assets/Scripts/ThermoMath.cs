@@ -50,7 +50,7 @@ public static class ThermoMath
   //Pa
   public static double psat_min;
   public static double psat_max;
-  //M^3/kg
+  //M³/kg
   public static double v_min;
   public static double v_max;
   public static double v_neutral;
@@ -101,7 +101,7 @@ public static class ThermoMath
     psat_min = IF97.get_ptrip()*1000000.0; //TODO: comment actual value for quick reference
     psat_max = IF97.get_pcrit()*1000000.0; //TODO: comment actual value for quick reference
 
-    //M^3/kg
+    //M³/kg
     v_min = 1.0/3000;  // 0.0003
     v_max = 1.0/0.001; // 1000
     v_neutral = 0.001;
@@ -165,10 +165,10 @@ public static class ThermoMath
         double p = Lerpd(p_min,p_max,pst);
         double t = Lerpd(t_min,t_max,tst);
         double v = v_given_pt(p,t);
-        //pvt in Pa, M^3/Kg, K
+        //pvt in Pa, M³/Kg, K
         double _p = p_given_vt(v,t);
 
-        Debug.LogFormat("error:{0} p:{1}Pa ({2}Pa), v:{3}M^3/Kg, t:{4}K",p-_p,p,_p,v,t);
+        Debug.LogFormat("error:{0} p:{1}Pa ({2}Pa), v:{3}M³/Kg, t:{4}K",p-_p,p,_p,v,t);
       }
     }
 
@@ -280,7 +280,7 @@ public static class ThermoMath
     double ret_val;
     try
     {
-      ret_val = IAPWS95.IAPWS95_pressure(1.0 / v, t) * 1000.0; //expects:Kg/M^3,K returns KPa
+      ret_val = IAPWS95.IAPWS95_pressure(1.0 / v, t) * 1000.0; //expects:Kg/M³,K returns KPa
       return ret_val;
     }
     catch (Exception ex)
@@ -289,7 +289,7 @@ public static class ThermoMath
       got_error = true;
       return p_neutral;
     }
-    //return IAPWS95.IAPWS95_pressure(1.0/v,t)*1000.0; //expects:Kg/M^3,K returns KPa
+    //return IAPWS95.IAPWS95_pressure(1.0/v,t)*1000.0; //expects:Kg/M³,K returns KPa
   }
 
   public static double v_given_pt(double p, double t) //DO NOT USE IN VAPOR DOME
@@ -297,7 +297,7 @@ public static class ThermoMath
     double ret_val;
     try
     {
-      ret_val = 1.0/IF97.rhomass_Tp(t,p/1000000.0); //expects:K,MPa returns Kg/M^3
+      ret_val = 1.0/IF97.rhomass_Tp(t,p/1000000.0); //expects:K,MPa returns Kg/M³
       return ret_val;
     }
     catch (Exception ex)
@@ -306,7 +306,7 @@ public static class ThermoMath
       got_error = true;
       return v_neutral;
     }
-    //return 1.0/IF97.rhomass_Tp(t,p/1000000.0); //expects:K,MPa returns Kg/M^3
+    //return 1.0/IF97.rhomass_Tp(t,p/1000000.0); //expects:K,MPa returns Kg/M³
   }
 
   public static double v_given_ph(double p, double h)
@@ -382,7 +382,7 @@ public static class ThermoMath
     double ret_val;
     try
     {
-      ret_val = 1.0/IF97.rholiq_p(p/1000000.0); //expects:MPa returns Kg/M^3
+      ret_val = 1.0/IF97.rholiq_p(p/1000000.0); //expects:MPa returns Kg/M³
       return ret_val;
     }
     catch (Exception ex)
@@ -391,7 +391,7 @@ public static class ThermoMath
       got_error = true;
       return v_neutral;
     }
-    //return 1.0/IF97.rholiq_p(p/1000000.0); //expects:MPa returns Kg/M^3
+    //return 1.0/IF97.rholiq_p(p/1000000.0); //expects:MPa returns Kg/M³
   }
 
   public static double vvap_given_p(double p)
@@ -399,7 +399,7 @@ public static class ThermoMath
     double ret_val;
     try
     {
-      ret_val = 1.0/IF97.rhovap_p(p/1000000.0); //expects:MPa returns Kg/M^3
+      ret_val = 1.0/IF97.rhovap_p(p/1000000.0); //expects:MPa returns Kg/M³
       return ret_val;
     }
     catch (Exception ex)
@@ -408,7 +408,7 @@ public static class ThermoMath
       got_error = true;
       return v_neutral;
     }
-    //return 1.0/IF97.rhovap_p(p/1000000.0); //expects:MPa returns Kg/M^3
+    //return 1.0/IF97.rhovap_p(p/1000000.0); //expects:MPa returns Kg/M³
   }
 
   public static double u_given_pt(double p, double t) //DO NOT USE IN VAPOR DOME
