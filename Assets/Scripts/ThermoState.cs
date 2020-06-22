@@ -850,17 +850,42 @@ public class ThermoState : MonoBehaviour
     state_dot.transform.localPosition = plot(pressure,volume,temperature);
 
     float height =  (float)(volume/surfacearea); //M
-    size_p = height/((float)radius*2f); //"max height" is approx 2x diameter, so this sets size_p to essentially "%_contents_size"
+
+
+    //Phil 06/22/2020: solution to comment conversation/explanation below
+    // (I'm leaving the comment conversation here for explanatory purposes)
+    float reductionFactor = 0.03f;
+    height *= reductionFactor;
+    //Phil 06/22/2020: end hack solution; begin old comment conversation
+
+    size_p = height/((float)radius*2f); //"max height" is approx 2x diameter, so this sets size_p to essentially "%_contents_size" //<- phil's initial comment
                                         // Not accurate, Phil. Max value of height here is max_volume / surfacearea = 1000 / 0.024674011 ~ 40,535.
                                         // radius * 2 = 0.05 *2 = 0.1. max value for size_p is then over 400,000.
                                         // In practice, I've gotten size_p as high as 3,500, which is still much bigger than 1; 1 should be the max if this were in fact "essentially %_contents_size."
                                         // *sigh*
                                         // I dunno what the math is *supposed* to be, but I'm just gonna take the natural log of size_p whenever it gets above 1, and call it a day.
                                         // Actually, I'm gonna scale it down linearly, because taking the log is still putting it too high in some cases.
-    if (size_p > 1.0f )
-    {
-      size_p = 1.0f + (float)Math.Max(0.5f*Math.Log(size_p), 0.0); // clamp at 0, just to be safe.
-    }
+
+
+    /* Phil 06/22/2020: commenting this out
+        if (size_p > 1.0f )
+        {
+          size_p = 1.0f + (float)Math.Max(0.5f*Math.Log(size_p), 0.0); // clamp at 0, just to be safe.
+        }
+    */
+
+    //Phil 06/22/2020: End of previous comment conversation.
+
+    //Phil 06/22/2020: an explanation:
+    // size_p (expanded to "size percentage") is the proportion of the canister which is full. 1.0 would be "filled to the brim", while 0.0 would be "completely empty".
+    // if the volume (given as "height" after taking into account the surface area) given to visualize exceeds the "filled to the brim" percentage, then it will simply be a percentage > 1 (2x the volume? size_p = 2; etc...)
+    // the problem of "the volumes given exceed the capacity of the container" is NOT a problem of visualization, but a problem of initial conditions allowing for such an excess (ie, too much water, or not a big enough cannister)
+    // the problems in documentation are: 1. I poorly named the variable "size_p", and 2. I referred to "max height" in a comment, failing to specify it meaning "the max height to fill the container"
+    // The solution we will run with: scale everything by a factor of reductionFactor. While it would be more correct to to reduce the molarity of water, thermo calculations are already completed/tested and made simpler by using 1kg of water.
+    // I am unsure if a linear reduction of molarity results in a proportional reduction of volume, but it would make intuitive sense if that were true, and if so: then all calculations remain 100% correct (assuming a reduction of molarity also reduced to a factor of reductionFactor)
+    // If it is NOT the case, then the visualization concession we are making is "you have eyes which are very far apart in this virtual world, and everything is actually huge" as opposed to "the behavior of vapor radically changes once passed an arbitrary threshhold", which goes against the point of this simulation
+    // Future solution: all of this is exacerbated by the fact that, the plunger model is maximally pressed into the cannister reaching only about 75% of the way to the bottom. This sets a high low-bar for "minimum amount of volume"- a state represented by incompressible water.
+    // If we use this minimum as the benchmark for "molarity of water", we won't be able to help extending beyond the top upon ~100x volume expansion. The solution here is to use a longer plunger, allowing us to set the qty of water to be very low in the first place.
                                         
     Vector3 piston_lt = piston.transform.localPosition;
     piston_lt.y = piston_min_y+size_p*(piston_max_y-piston_min_y);
@@ -873,6 +898,7 @@ public class ThermoState : MonoBehaviour
     Vector3 water_lt = water_scale.transform.localScale;
     water_lt.y = 1f-(float)quality;
     water_scale.transform.localScale = water_lt;
+
     //Vector3 steam_lt = steam.transform.localScale;
     //steam_lt.y = (float)quality;
     //steam.transform.localScale = -1f*steam_lt;
