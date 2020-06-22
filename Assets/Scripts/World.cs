@@ -177,7 +177,7 @@ public class World : MonoBehaviour
       float v = t.storage.transform.localScale.x; //can grab any dimension
       Vector3 invscale = new Vector3(1f/v,1f/v,1f/v);
       t.text.transform.localScale = invscale;
-      t.textv_tmpro.SetText("{0:3} "+t.dial_dial.display_unit,(float)(t.dial_dial.map*t.dial_dial.display_mul));
+      UpdateToolText(t);
     }
 
     vessel = GameObject.Find("Vessel");
@@ -318,7 +318,7 @@ public class World : MonoBehaviour
     //     if(t == tool_insulator) t.dial_dial.val = (float)ThermoMath.percent_given_t(thermo.temperature);
     //else if(t == tool_clamp)     t.dial_dial.val = (float)ThermoMath.percent_given_v(thermo.volume);
     t.dial_dial.Reset(); // reset tool when we add it.
-    t.textv_tmpro.SetText("{0:3} "+t.dial_dial.display_unit,(float)(t.dial_dial.map*t.dial_dial.display_mul));
+    UpdateToolText(t);
     UpdateApplyTool(t);
     o.transform.localPosition = new Vector3(0f,0f,0f);
     o.transform.localRotation = Quaternion.identity;
@@ -345,7 +345,7 @@ public class World : MonoBehaviour
     Halfable h = o.GetComponent<Halfable>();
     if(h != null) h.setHalf(false); //Un-half when we store a tool.
     t.dial_dial.Reset(); // definitely need to reset tool when we store it.
-    t.textv_tmpro.SetText("{0:3} "+t.dial_dial.display_unit,(float)(t.dial_dial.map*t.dial_dial.display_mul));
+    UpdateToolText(t);
     UpdateApplyTool(t);
   }
   void DetachTool(Tool t, Vector3 vel)
@@ -360,7 +360,7 @@ public class World : MonoBehaviour
     t.rigidbody.isKinematic = false;
     t.rigidbody.velocity = vel;
     t.dial_dial.Reset(); // may as well reset tool when we remove it, too.
-    t.textv_tmpro.SetText("{0:3} "+t.dial_dial.display_unit,(float)(t.dial_dial.map*t.dial_dial.display_mul));
+    UpdateToolText(t);
     UpdateApplyTool(t);
   }
 
@@ -457,6 +457,16 @@ public class World : MonoBehaviour
       if(tool_balloon.engaged) applied_weight += tool_balloon.dial_dial.map;
     }
 
+  }
+
+  void UpdateToolText(Tool t)
+  {
+    if(!t.dial_dial) return;
+    string txt = string.Format("{0:3} "+t.dial_dial.display_unit,(float)(t.dial_dial.map * t.dial_dial.display_mul));
+    //t.textv_tmpro.SetText(txt);
+    //if(t.textd_tmpro) t.textd_tmpro.SetText(txt);
+    t.textv_tmpro.SetText("{0:3} "+t.dial_dial.display_unit,(float)(t.dial_dial.map * t.dial_dial.display_mul));
+    if(t.textd_tmpro) t.textd_tmpro.SetText("{0:3} "+t.dial_dial.display_unit,(float)(t.dial_dial.map * t.dial_dial.display_mul));
   }
 
   //safe to call if not interactable, as it will just do nothing
@@ -984,7 +994,7 @@ public class World : MonoBehaviour
       if(t.dial == lgrabbed || t.dial == rgrabbed) t.dial_dial.examined = true;
       if(t.dial_dial.val != t.dial_dial.prev_val)
       {
-        t.textv_tmpro.SetText("{0:3} "+t.dial_dial.display_unit,(float)(t.dial_dial.map*t.dial_dial.display_mul));
+        UpdateToolText(t);
         t.dial_dial.examined = true;
       }
       t.dial_dial.prev_val = t.dial_dial.val;

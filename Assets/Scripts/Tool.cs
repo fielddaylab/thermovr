@@ -75,6 +75,12 @@ public class Tool : MonoBehaviour
   [System.NonSerialized]
   public MeshRenderer textl_meshrenderer;
 
+  public GameObject textd;
+  [System.NonSerialized]
+  public TextMeshPro textd_tmpro;
+  [System.NonSerialized]
+  public MeshRenderer textd_meshrenderer;
+
   public GameObject textn;
 
   [System.NonSerialized]
@@ -111,6 +117,8 @@ public class Tool : MonoBehaviour
     textl_tmpro = textl.GetComponent<TextMeshPro>();
     textl_meshrenderer = textl.GetComponent<MeshRenderer>();
     text_fadable = GetComponent<Fadable>();
+    textd_tmpro = textd.GetComponent<TextMeshPro>();
+    textd_meshrenderer = textd.GetComponent<MeshRenderer>();
 
     disabled = false;
   }
