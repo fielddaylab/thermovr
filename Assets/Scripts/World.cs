@@ -15,6 +15,9 @@ using TMPro;
 public class World : MonoBehaviour
 {
   const float CONTAINER_INSULATION_COEFFICIENT = 0.1f; // Not really based on a physical material, just a way to roughly simulate imperfect insulation.
+  const bool QUIZ_ENABLED = false;
+  const bool CHALLENGE_ENABLED = false;
+
   public Material hand_empty;
   Material[] hand_emptys;
   public Material hand_touching;
@@ -209,9 +212,9 @@ public class World : MonoBehaviour
     quiz_parent = GameObject.Find("Quiz");
 
     mode_tabs = new List<Tab>();
-    mode_tabs.Add(GameObject.Find("ModeInstructions").GetComponent<Tab>());
-    mode_tabs.Add(GameObject.Find("ModeChallenge").GetComponent<Tab>());
-    mode_tabs.Add(GameObject.Find("ModeQuiz").GetComponent<Tab>());
+                          mode_tabs.Add(GameObject.Find("ModeInstructions").GetComponent<Tab>());
+    if(CHALLENGE_ENABLED) mode_tabs.Add(GameObject.Find("ModeChallenge").GetComponent<Tab>());
+    if(QUIZ_ENABLED)      mode_tabs.Add(GameObject.Find("ModeQuiz").GetComponent<Tab>());
 
     questions = new List<string>();
     options = new List<string>();
@@ -916,16 +919,18 @@ public class World : MonoBehaviour
     if(board_mode == -1) board_mode = old_board_mode;
     updateSelectableVis(board_mode, mode_tabs);
 
+    if(!CHALLENGE_ENABLED && board_mode == 1) board_mode = 0;
+    if(!QUIZ_ENABLED      && board_mode == 2) board_mode = 0;
     switch(board_mode)
     {
       case 0: //instructions
         if(!instructions_parent.activeSelf) instructions_parent.SetActive(true);
-        if( challenge_parent.activeSelf)    challenge_parent.SetActive(   false);
+        if (challenge_parent.activeSelf)  { challenge_parent.SetActive(   false); challenge_dot.SetActive(false); }
         if( quiz_parent.activeSelf)         quiz_parent.SetActive(        false);
         break;
       case 1: //challenge
         if( instructions_parent.activeSelf) instructions_parent.SetActive(false);
-        if(!challenge_parent.activeSelf)    challenge_parent.SetActive(   true);
+        if (!challenge_parent.activeSelf) { challenge_parent.SetActive(   true); challenge_dot.SetActive(true); }
         if( quiz_parent.activeSelf)         quiz_parent.SetActive(        false);
 
         if(challenge_ball_collide.win)
@@ -936,7 +941,7 @@ public class World : MonoBehaviour
         break;
       case 2: //quiz
         if( instructions_parent.activeSelf) instructions_parent.SetActive(false);
-        if( challenge_parent.activeSelf)    challenge_parent.SetActive(   false);
+        if (challenge_parent.activeSelf)  { challenge_parent.SetActive(   false); challenge_dot.SetActive(false); }
         if(!quiz_parent.activeSelf)         quiz_parent.SetActive(        true);
         qselected = reconcileDependentSelectables(qselected, option_tabs);
         updateSelectableVis(qselected, option_tabs);
