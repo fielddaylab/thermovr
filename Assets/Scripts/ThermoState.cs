@@ -683,6 +683,13 @@ public class ThermoState : MonoBehaviour
 
   //assume starting/ending point consistent for whole API!
 
+  public void warp_pv(double p, double v)
+  {
+    pressure = p;
+    volume = v;
+    //temperature = ThermoMath.t_given_pv(pressure,volume);
+  }
+
   public void add_heat_constant_p(double j)
   {
     try

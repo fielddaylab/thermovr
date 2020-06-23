@@ -165,10 +165,10 @@ public static class ThermoMath
         double p = Lerpd(p_min,p_max,pst);
         double t = Lerpd(t_min,t_max,tst);
         double v = v_given_pt(p,t);
-        //pvt in Pa, M³/Kg, K
+        //pvt in Pa, M³/kg, K
         double _p = p_given_vt(v,t);
 
-        Debug.LogFormat("error:{0} p:{1}Pa ({2}Pa), v:{3}M³/Kg, t:{4}K",p-_p,p,_p,v,t);
+        Debug.LogFormat("error:{0} p:{1}Pa ({2}Pa), v:{3}M³/kg, t:{4}K",p-_p,p,_p,v,t);
       }
     }
 
@@ -273,14 +273,14 @@ public static class ThermoMath
   public static double percent_given_x(   double x) { return x; } //x already is a percent
 
   //rule of naming for consistency: prefer lexical ordering "p < v < t < u < s < h < q", ie "p_given_vt" rather than "p_given_tv"
-  //note- where it says "UNIT CONVERSION UNTESTED", that measn I haven't yet verified that it performs the correct translation of units between APIs (ie, one may be expecting KPa, and another just Pa). I have learned to not trust the documentation of either API (IAPWS95 or IF97)
+  //note- where it says "UNIT CONVERSION UNTESTED", that measn I haven't yet verified that it performs the correct translation of units between APIs (ie, one may be expecting kPa, and another just Pa). I have learned to not trust the documentation of either API (IAPWS95 or IF97)
 
   public static double p_given_vt(double v, double t)
   {
     double ret_val;
     try
     {
-      ret_val = IAPWS95.IAPWS95_pressure(1.0 / v, t) * 1000.0; //expects:Kg/M³,K returns KPa
+      ret_val = IAPWS95.IAPWS95_pressure(1.0 / v, t) * 1000.0; //expects:kg/M³,K returns kPa
       return ret_val;
     }
     catch (Exception ex)
@@ -289,7 +289,7 @@ public static class ThermoMath
       got_error = true;
       return p_neutral;
     }
-    //return IAPWS95.IAPWS95_pressure(1.0/v,t)*1000.0; //expects:Kg/M³,K returns KPa
+    //return IAPWS95.IAPWS95_pressure(1.0/v,t)*1000.0; //expects:kg/M³,K returns kPa
   }
 
   public static double v_given_pt(double p, double t) //DO NOT USE IN VAPOR DOME
@@ -297,16 +297,16 @@ public static class ThermoMath
     double ret_val;
     try
     {
-      ret_val = 1.0/IF97.rhomass_Tp(t,p/1000000.0); //expects:K,MPa returns Kg/M³
+      ret_val = 1.0/IF97.rhomass_Tp(t,p/1000000.0); //expects:K,MPa returns kg/M³
       return ret_val;
     }
-    catch (Exception ex)
+    catch(Exception ex)
     {
       Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, v_neutral) );
       got_error = true;
       return v_neutral;
     }
-    //return 1.0/IF97.rhomass_Tp(t,p/1000000.0); //expects:K,MPa returns Kg/M³
+    //return 1.0/IF97.rhomass_Tp(t,p/1000000.0); //expects:K,MPa returns kg/M³
   }
 
   public static double v_given_ph(double p, double h)
@@ -382,7 +382,7 @@ public static class ThermoMath
     double ret_val;
     try
     {
-      ret_val = 1.0/IF97.rholiq_p(p/1000000.0); //expects:MPa returns Kg/M³
+      ret_val = 1.0/IF97.rholiq_p(p/1000000.0); //expects:MPa returns kg/M³
       return ret_val;
     }
     catch (Exception ex)
@@ -391,7 +391,7 @@ public static class ThermoMath
       got_error = true;
       return v_neutral;
     }
-    //return 1.0/IF97.rholiq_p(p/1000000.0); //expects:MPa returns Kg/M³
+    //return 1.0/IF97.rholiq_p(p/1000000.0); //expects:MPa returns kg/M³
   }
 
   public static double vvap_given_p(double p)
@@ -399,7 +399,7 @@ public static class ThermoMath
     double ret_val;
     try
     {
-      ret_val = 1.0/IF97.rhovap_p(p/1000000.0); //expects:MPa returns Kg/M³
+      ret_val = 1.0/IF97.rhovap_p(p/1000000.0); //expects:MPa returns kg/M³
       return ret_val;
     }
     catch (Exception ex)
@@ -408,7 +408,7 @@ public static class ThermoMath
       got_error = true;
       return v_neutral;
     }
-    //return 1.0/IF97.rhovap_p(p/1000000.0); //expects:MPa returns Kg/M³
+    //return 1.0/IF97.rhovap_p(p/1000000.0); //expects:MPa returns kg/M³
   }
 
   public static double u_given_pt(double p, double t) //DO NOT USE IN VAPOR DOME
@@ -555,41 +555,31 @@ public static class ThermoMath
   {
     try
     {
-      var task = Task.Run(() =>
+      int MAX_ITERS = 100;     //max # of iterations before giving up //TODO: define intentionally
+      double MAX_DELTA = 0.01; //acceptible solution error //TODO: define intentionally
+      double step = 0.01;      //size of first step (shrinks every time it overshoots) //TODO: define intentionally
+      double guess = t;
+      double mark = u;
+      double delta = Math.Abs(u_given_pt(p,guess)-mark);
+      for(int i = 0; i < MAX_ITERS && delta > MAX_DELTA; i++)
       {
-        int MAX_ITERS = 100;     //max # of iterations before giving up //TODO: define intentionally
-        double MAX_DELTA = 0.01; //acceptible solution error //TODO: define intentionally
-        double step = 0.01;      //size of first step (shrinks every time it overshoots) //TODO: define intentionally
-        double guess = t;
-        double mark = u;
-        double delta = Math.Abs(u_given_pt(p,guess)-mark);
-        for(int i = 0; i < MAX_ITERS && delta < MAX_DELTA; i++)
+        double delta_a = Math.Abs(u_given_pt(p,guess+ step     )-mark);
+        double delta_b = Math.Abs(u_given_pt(p,guess-(step/2.0))-mark);
+        if(delta < delta_a && delta < delta_b) //original guess superior
+          step = step / 2.0;
+        else if(delta_a < delta_b)
         {
-          double delta_a = Math.Abs(u_given_pt(p,guess+ step     )-mark);
-          double delta_b = Math.Abs(u_given_pt(p,guess-(step/2.0))-mark);
-          if(delta_a < delta_b)
-          {
-            delta = delta_a;
-          }
-          else
-          {
-            delta = delta_b;
-            step = step/-2.0;
-          }
+          delta = delta_a;
           guess += step;
         }
-        return guess;
-      });
-      if (!task.Wait(MAX_MILLISECOND))
-      {
-        Debug.Log( String.Format("Did not complete iterate_t_given_p_verify_u in {0} msec, returning initial guess {1}", MAX_MILLISECOND, t) );
-        return t;
+        else
+        {
+          delta = delta_b;
+          step = step/-2.0;
+          guess += step;
+        }
       }
-      else
-      {
-        //Debug.Log("Successfully completed iterate_t_given_p_verify_u");
-        return task.Result;
-      }
+      return guess;
     }
     catch (Exception ex)
     {
@@ -603,41 +593,31 @@ public static class ThermoMath
   {
     try
     {
-      var task = Task.Run(() =>
+      int MAX_ITERS = 100;     //max # of iterations before giving up //TODO: define intentionally
+      double MAX_DELTA = 0.01; //acceptible solution error //TODO: define intentionally
+      double step = 0.01;      //size of first step (shrinks every time it overshoots) //TODO: define intentionally
+      double guess = t;
+      double mark = u;
+      double delta = u_given_vt(v,guess)-mark;
+      for(int i = 0; i < MAX_ITERS && delta > MAX_DELTA; i++)
       {
-        int MAX_ITERS = 100;     //max # of iterations before giving up //TODO: define intentionally
-        double MAX_DELTA = 0.01; //acceptible solution error //TODO: define intentionally
-        double step = 0.01;      //size of first step (shrinks every time it overshoots) //TODO: define intentionally
-        double guess = t;
-        double mark = u;
-        double delta = u_given_vt(v,guess)-mark;
-        for(int i = 0; i < MAX_ITERS && delta < MAX_DELTA; i++)
+        double delta_a = Math.Abs(u_given_vt(v,guess+ step     )-mark);
+        double delta_b = Math.Abs(u_given_vt(v,guess-(step/2.0))-mark);
+        if(delta < delta_a && delta < delta_b) //original guess superior
+          step = step / 2.0;
+        else if(delta_a < delta_b)
         {
-          double delta_a = Math.Abs(u_given_vt(v,guess+ step     )-mark);
-          double delta_b = Math.Abs(u_given_vt(v,guess-(step/2.0))-mark);
-          if(delta_a < delta_b)
-          {
-            delta = delta_a;
-          }
-          else
-          {
-            delta = delta_b;
-            step = step/-2.0;
-          }
+          delta = delta_a;
           guess += step;
         }
-        return guess;
-      });
-      if (!task.Wait(50))
-      {
-        Debug.Log( String.Format("Did not complete iterate_t_given_v_verify_u in {0} sec, returning initial guess {1}", MAX_MILLISECOND, t) );
-        return t;
+        else
+        {
+          delta = delta_b;
+          step = step/-2.0;
+          guess += step;
+        }
       }
-      else
-      {
-        //Debug.Log("Successfully completed iterate_t_given_v_verify_u");
-        return task.Result;
-      }
+      return guess;
     }
     catch (Exception ex)
     {
@@ -646,5 +626,65 @@ public static class ThermoMath
       return t_neutral;
     }
   }
+
+  public static double iterate_t_given_pv(double t, double p, double v) //t = first guess
+  {
+    try
+    {
+      int MAX_ITERS = 100;     //max # of iterations before giving up //TODO: define intentionally
+      double MAX_DELTA = 0.01; //acceptible solution error //TODO: define intentionally
+      double step = 0.01;      //size of first step (shrinks every time it overshoots) //TODO: define intentionally
+      double guess = t;
+      double vdelta = MAX_DELTA + 1.0;
+      double pdelta = MAX_DELTA + 1.0; ;
+      for (int i = 0; i < MAX_ITERS && (vdelta > MAX_DELTA || pdelta > MAX_DELTA); i++)
+      {
+        //one iteration on v
+        vdelta = Math.Abs(v_given_pt(p, guess) - v);
+        double vdelta_a = Math.Abs(v_given_pt(p, guess + step) - v);
+        double vdelta_b = Math.Abs(v_given_pt(p, guess - (step / 2.0)) - v);
+        if (vdelta < vdelta_a && vdelta < vdelta_b) //unaltered guess is superior
+          step = step / 2.0;
+        else if (vdelta_a < vdelta_b)
+        {
+          vdelta = vdelta_a;
+          guess += step;
+        }
+        else
+        {
+          vdelta = vdelta_b;
+          step = step / -2.0;
+          guess += step;
+        }
+        i++; //force "iteration counter", bc we do two iters per loop
+
+        //another iteration on p
+        pdelta = Math.Abs(p_given_vt(v, guess) - p);
+        double pdelta_a = Math.Abs(p_given_vt(v, guess + step) - p);
+        double pdelta_b = Math.Abs(p_given_vt(v, guess - (step / 2.0)) - p);
+        if (pdelta < pdelta_a && pdelta < pdelta_b) //unaltered guess is superior
+          step = step / 2.0;
+        else if (pdelta_a < pdelta_b)
+        {
+          pdelta = pdelta_a;
+          guess += step;
+        }
+        else
+        {
+          pdelta = pdelta_b;
+          step = step / -2.0;
+          guess += step;
+        }
+      }
+      return guess;
+    }
+    catch (Exception ex)
+    {
+      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, t_neutral) );
+      got_error = true;
+      return t_neutral;
+    }
+  }
+
 }
 
