@@ -15,6 +15,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using System.Collections.Specialized;
 
 //One-Off class used for ordering points in graphgen zipper phase
 class GRAPHPTCMP : IComparer<int>
@@ -126,6 +127,8 @@ public class ThermoState : MonoBehaviour
   public void Reset()
   {
     this.reset_state();
+    clamp_state();
+    visualize_state();
     this.HideError();
   }
 
@@ -140,6 +143,22 @@ public class ThermoState : MonoBehaviour
   public double plot_lbase = 10f;
   double plot_lbase_prev = 0f;
   public float plot_dimension(double min, double max, double val) { double lval = Math.Log(val,plot_lbase); double lmax = Math.Log(max,plot_lbase); double lmin = Math.Log(min,plot_lbase); return (float)((lval-lmin)/(lmax-lmin)); }
+  public float invplot_dimension(double min, double max, double res)
+  {
+    double lmax = Math.Log(max,plot_lbase);
+    double lmin = Math.Log(min,plot_lbase);
+    //return (float)Math.Pow(plot_lbase, 1.0/((res*(lmax-lmin))+lmin));
+    return (float)Math.Pow(plot_lbase, (res*(lmax-lmin))+lmin);
+
+/*
+    double lval = ;
+    double lmax = Math.Log(max,plot_lbase);
+    double lmin = Math.Log(min,plot_lbase);
+    (res*(lmax-lmin))+lmin = Math.Log(val,plot_lbase);
+    plot_lbase^
+*/
+
+  }
 
   public Vector3 plot(double pressure, double volume, double temperature)
   {
@@ -148,7 +167,13 @@ public class ThermoState : MonoBehaviour
     float tplot = plot_dimension(ThermoMath.t_min,ThermoMath.t_max,temperature);
     return new Vector3(vplot,pplot,tplot);
   }
-
+  public Vector3 invplot(double pplot, double vplot, double tplot)
+  {
+    float pressure    = invplot_dimension(ThermoMath.p_min,ThermoMath.p_max,pplot);
+    float volume      = invplot_dimension(ThermoMath.v_min,ThermoMath.v_max,vplot);
+    float temperature = invplot_dimension(ThermoMath.t_min,ThermoMath.t_max,tplot);
+    return new Vector3(volume,pressure,temperature);
+  }
   public void UpdateErrorState()
   {
     if (ThermoMath.got_error)
@@ -193,6 +218,10 @@ public class ThermoState : MonoBehaviour
   // and simultaneously walking the sorted list of the vapor dome region points, zig-zagging triangles to fill the space
   //the good news: any complexity from the generation of the mesh is pretty well isolated to this one function
   // NOTE: Phil didn't really say *what* this mesh is, just "a mesh". This function generates the graph object's mesh.
+
+  //required for distance checks
+  List<Vector3> mesh_positions;
+  int position_dome_region;
   void genMesh()
   {
     GameObject old_gm = GameObject.Find("graph_mesh");
@@ -202,9 +231,8 @@ public class ThermoState : MonoBehaviour
     int n_pts_per_group = 1000;
     int n_groups = (int)Mathf.Ceil(n_pts / n_pts_per_group);
 
-    Vector3[] pt_positions;
-
     //gen positions
+    Vector3[] pt_positions;
     pt_positions = new Vector3[n_pts];
     for(int y = 0; y < samples; y++)
     {
@@ -226,7 +254,6 @@ public class ThermoState : MonoBehaviour
     }
 
     //MESH
-    List<Vector3> mesh_positions;
     List<Vector3> mesh_normals;
     List<int> mesh_triangles;
 
@@ -250,7 +277,7 @@ public class ThermoState : MonoBehaviour
     }
 
     int concentrated_samples = samples*2;
-    int position_dome_region = mesh_positions.Count;
+    position_dome_region = mesh_positions.Count;
     float highest_y = 0f;
     int highest_y_i = 0;
     for(int y = 0; y < concentrated_samples; y++)
@@ -584,6 +611,7 @@ public class ThermoState : MonoBehaviour
   }
 
   double Clampd(double v, double min, double max) { if(v < min) return min;  if(v > max) return max; return v; }
+  float Clampf(float v, float min, float max) { if(v < min) return min;  if(v > max) return max; return v; }
   void clamp_state()
   {
     if(Double.IsNaN(pressure))       pressure       = prev_pressure;
@@ -683,11 +711,92 @@ public class ThermoState : MonoBehaviour
 
   //assume starting/ending point consistent for whole API!
 
-  public void warp_pv(double p, double v)
+  public Vector3 guessPlot(double guess_t, double pcube, double vcube)
   {
-    pressure = p;
-    volume = v;
-    //temperature = ThermoMath.t_given_pv(pressure,volume);
+    //attempt to do it "the right way"
+    /* //not worth the complexity
+        Vector3 plot;
+        plot.x = Clampf(invplot_dimension(ThermoMath.v_min, ThermoMath.v_max, vcube), (float)ThermoMath.v_min, (float)ThermoMath.v_max);
+        plot.y = Clampf(invplot_dimension(ThermoMath.p_min, ThermoMath.p_max, pcube), (float)ThermoMath.p_min, (float)ThermoMath.p_max);
+        plot.z = (float)ThermoMath.iterate_t_given_pv(guess_t, 10.0, (double)plot.y, (double)plot.x); //gives off warnings because now these math functions are stateful (bad)
+        int region = ThermoMath.region_given_pvt(pressure,volume,temperature);
+        if (region != 1)
+        {
+          plot.y = (float)ThermoMath.p_given_vt((double)plot.x, (double)plot.z);
+          plot.x = (float)ThermoMath.v_given_pt((double)plot.y, (double)plot.z);
+        }
+        else
+        {
+           //TODO: !!
+        }
+        if (plot.z == 0.0) plot = new Vector3((float)volume, (float)pressure, (float)temperature);
+        return plot;
+    */
+    return new Vector3(0, 0, 0);
+  }
+
+  public Vector3 guessMeshPlot(double vcube, double pcube, double tcube)
+  {
+    Vector3 pt = new Vector3((float)vcube, (float)pcube, (float)tcube);
+    float d = Vector3.SqrMagnitude(pt - mesh_positions[0]);
+    int closest = 0;
+    for (int i = 1; i < mesh_positions.Count; i++)
+    {
+      float od = Vector3.SqrMagnitude(pt - mesh_positions[i]);
+      if(od < d)
+      {
+        d = od;
+        closest = i;
+      }
+    }
+
+    Vector3 plot;
+    if(closest < position_dome_region)
+    {
+      plot.x = Clampf(invplot_dimension(ThermoMath.v_min, ThermoMath.v_max, mesh_positions[closest].x), (float)ThermoMath.v_min, (float)ThermoMath.v_max);
+      plot.y = Clampf(invplot_dimension(ThermoMath.p_min, ThermoMath.p_max, mesh_positions[closest].y), (float)ThermoMath.p_min, (float)ThermoMath.p_max);
+      plot.z = Clampf(invplot_dimension(ThermoMath.t_min, ThermoMath.t_max, mesh_positions[closest].z), (float)ThermoMath.t_min, (float)ThermoMath.t_max);
+    }
+    else
+    {
+      plot.x = Clampf(invplot_dimension(ThermoMath.v_min, ThermoMath.v_max, vcube),                     (float)ThermoMath.v_min, (float)ThermoMath.v_max);
+      plot.y = Clampf(invplot_dimension(ThermoMath.p_min, ThermoMath.p_max, mesh_positions[closest].y), (float)ThermoMath.p_min, (float)ThermoMath.p_max);
+      plot.z = Clampf(invplot_dimension(ThermoMath.t_min, ThermoMath.t_max, mesh_positions[closest].z), (float)ThermoMath.t_min, (float)ThermoMath.t_max);
+    }
+    return plot;
+  }
+
+  public void warp_pv(double p, double v, double t)
+  {
+    try
+    {
+      pressure = p;
+      volume = v;
+      temperature = t;
+
+      region = ThermoMath.region_given_pvt(pressure, volume, temperature);
+      entropy = ThermoMath.s_given_vt(volume, temperature);
+      enthalpy = ThermoMath.h_given_vt(volume, temperature);
+
+      switch (region)
+      {
+        case 0: quality = 0; internalenergy = ThermoMath.u_given_vt(volume, temperature); break; //subcooled liquid
+        case 1: quality = ThermoMath.x_given_pv(pressure, volume); internalenergy = ThermoMath.u_given_px(pressure, quality); break; //two-phase region
+        case 2: quality = 1; internalenergy = ThermoMath.u_given_vt(volume, temperature); break; //superheated vapor
+      }
+    }
+    catch (Exception e)
+    {
+      temperature = prev_temperature;
+      pressure = prev_pressure;
+      volume = prev_volume;
+      region = prev_region;
+      entropy = prev_entropy;
+      enthalpy = prev_enthalpy;
+      internalenergy = prev_internalenergy;
+    }
+    clamp_state();
+    visualize_state();
   }
 
   public void add_heat_constant_p(double j)
@@ -903,12 +1012,12 @@ public class ThermoState : MonoBehaviour
     if(Math.Abs(internalenergy - prev_internalenergy)  > ThermoMath.u_smallstep) text_internalenergy.SetText(string.Format("u: {0:#.##E+0} kJ/kg", (float)internalenergy/1000f));
     if(Math.Abs(entropy - prev_entropy)                > ThermoMath.s_smallstep) text_entropy.SetText(                     "s: {0:3} kJ/kgK",      (float)entropy/1000f);
     if(Math.Abs(enthalpy - prev_enthalpy)              > ThermoMath.h_smallstep) text_enthalpy.SetText(      string.Format("h: {0:#.##E+0} kJ/kg", (float)enthalpy/1000f));
-    if(region == 1 && Math.Abs(quality - prev_quality) > ThermoMath.x_smallstep) text_quality.SetText(       string.Format("x: {0:3}%", (float)(quality * 100f)));
+    if(region == 1 && Math.Abs(quality - prev_quality) > ThermoMath.x_smallstep) text_quality.SetText(                     "x: {0:3}%", (float)(quality * 100f));
     if(region != prev_region)
     {
       text_region.SetText("region: " + regionToName(region));
-      if(region == 1)                                                            text_quality.SetText(       "x: {0:3}%", (float)(quality * 100f));
-      else                                                                       text_quality.SetText(       "x: Undefined");
+      if(region == 1)                                                            text_quality.SetText(                     "x: {0:3}%", (float)(quality * 100f));
+      else                                                                       text_quality.SetText(                     "x: Undefined");
     }
 
     prev_pressure       = pressure;

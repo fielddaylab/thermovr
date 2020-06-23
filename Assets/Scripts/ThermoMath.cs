@@ -291,7 +291,6 @@ public static class ThermoMath
     }
     //return IAPWS95.IAPWS95_pressure(1.0/v,t)*1000.0; //expects:kg/M³,K returns kPa
   }
-
   public static double v_given_pt(double p, double t) //DO NOT USE IN VAPOR DOME
   {
     double ret_val;
@@ -626,14 +625,12 @@ public static class ThermoMath
       return t_neutral;
     }
   }
-
-  public static double iterate_t_given_pv(double t, double p, double v) //t = first guess
+  public static double iterate_t_given_pv(double t, double step, double p, double v) //t = first guess, step = first step
   {
     try
     {
-      int MAX_ITERS = 100;     //max # of iterations before giving up //TODO: define intentionally
+      int MAX_ITERS = 200;     //max # of iterations before giving up //TODO: define intentionally
       double MAX_DELTA = 0.01; //acceptible solution error //TODO: define intentionally
-      double step = 0.01;      //size of first step (shrinks every time it overshoots) //TODO: define intentionally
       double guess = t;
       double vdelta = MAX_DELTA + 1.0;
       double pdelta = MAX_DELTA + 1.0; ;

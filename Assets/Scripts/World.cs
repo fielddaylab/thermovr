@@ -52,6 +52,7 @@ public class World : MonoBehaviour
   GameObject workspace;
   GameObject handle_workspace;
   Touchable handle_workspace_touchable;
+  Touchable graph_touchable;
   GameObject lgrabbed = null;
   GameObject rgrabbed = null;
   int lhtrigger_delta = 0;
@@ -83,6 +84,9 @@ public class World : MonoBehaviour
   GameObject vessel;
   GameObject graph;
   GameObject state_dot;
+  GameObject placement_dot;
+  Vector3 placement_thermo;
+  bool placement_thermo_reasonable;
   GameObject challenge_dot;
   GameObject clipboard;
 
@@ -186,7 +190,11 @@ public class World : MonoBehaviour
 
     vessel = GameObject.Find("Vessel");
     graph = GameObject.Find("Graph");
+    graph_touchable = graph.GetComponent<Touchable>();
     state_dot = GameObject.Find("gstate");
+    placement_dot = GameObject.Find("tstate");
+    placement_dot.GetComponent<Renderer>().enabled = false;
+    placement_thermo_reasonable = false;
     challenge_dot = GameObject.Find("cstate");
     clipboard = GameObject.Find("Clipboard");
 
@@ -198,7 +206,6 @@ public class World : MonoBehaviour
 
     movables = new List<Touchable>();
     for(int i = 0; i < tools.Count; i++) movables.Add(tools[i].touchable); //important that tools take priority, so they can be grabbed and removed
-    movables.Add(graph.GetComponent<Touchable>());
     movables.Add(clipboard.GetComponent<Touchable>());
 
     halfer = GameObject.Find("Halfer");
@@ -462,7 +469,6 @@ public class World : MonoBehaviour
     }
 
   }
-
   void UpdateToolText(Tool t)
   {
     if(!t.dial_dial) return;
@@ -476,26 +482,51 @@ public class World : MonoBehaviour
   }
 
   //safe to call if not interactable, as it will just do nothing
-  void TryInteractable(GameObject actable, float x_val, float y_val, ref float r_x, ref float r_y)
+  bool floatNumeric(float f)
+  {
+    if (double.IsNaN(f)) return false;
+    if (double.IsInfinity(f)) return false;
+    return true;
+  }
+  void TryInteractable(GameObject actable, Vector3 pos, ref float r_x, ref float r_y)
   {
     //grabbing handle
     if(actable == handle_workspace)
     {
-      float dy = (r_y-y_val);
-      workspace.transform.position = new Vector3(workspace.transform.position.x,workspace.transform.position.y-dy,workspace.transform.position.z);
+      float dy = (r_y - pos.y);
+      workspace.transform.position = new Vector3(workspace.transform.position.x, workspace.transform.position.y - dy, workspace.transform.position.z);
+    }
+    else if(actable == graph)
+    {
+      Vector3 localspace = graph.transform.InverseTransformPoint(pos);
+      Vector3 correctedspace = new Vector3(localspace.z, localspace.y, -localspace.x)*4.0f; //rotate 90, mul by 4 (inverse transform of gmodel)
+
+      //note: thermospace is v,p,t
+
+      //Vector3 thermoguess = thermo.guessPlot(ThermoMath.t_neutral, correctedspace.y, correctedspace.x);
+      Vector3 thermoguess = thermo.guessMeshPlot(correctedspace.x, correctedspace.y, correctedspace.z);
+      Vector3 localguess = thermo.plot(thermoguess.y, thermoguess.x, thermoguess.z); //note swizzle!
+
+      if (floatNumeric(localguess.x) && floatNumeric(localguess.y) && floatNumeric(localguess.z))
+      {
+        placement_dot.transform.localPosition = localguess;
+        placement_thermo = thermoguess;
+        placement_thermo_reasonable = true;
+      }
+      else placement_thermo_reasonable = false;
     }
     else
     {
       Dial d = actable.GetComponent<Dial>();
       //grabbing dial
-      if(d != null)
+      if (d != null)
       {
         Tool t = d.tool.GetComponent<Tool>();
-        float dx = (r_x-x_val)*-10f;
-        d.val = Mathf.Clamp(d.val-dx,0f,1f);
+        float dx = (r_x - pos.x) * -10f;
+        d.val = Mathf.Clamp(d.val - dx, 0f, 1f);
         //if this close to either end, assume user wants min/max
-        if(d.val < 0.005) d.val = 0f;
-        if(d.val > 0.995) d.val = 1f;
+        if (d.val < 0.005) d.val = 0f;
+        if (d.val > 0.995) d.val = 1f;
         d.forceMap();
 
         UpdateApplyTool(t);
@@ -508,7 +539,7 @@ public class World : MonoBehaviour
    * Honestly, I haven't quite got a full understanding of this ~200-line behemoth.
    */
   //"left_hand": true -> left, false -> right
-  void TryHand(bool left_hand, float htrigger_val, float itrigger_val, float x_val, float y_val, Vector3 hand_vel, ref bool ref_htrigger, ref bool ref_itrigger, ref int ref_htrigger_delta, ref int ref_itrigger_delta, ref float ref_x, ref float ref_y, ref GameObject ref_hand, ref GameObject ref_grabbed, ref GameObject ref_ohand, ref GameObject ref_ograbbed)
+  void TryHand(bool left_hand, float htrigger_val, float itrigger_val, Vector3 hand_pos, Vector3 hand_vel, ref bool ref_htrigger, ref bool ref_itrigger, ref int ref_htrigger_delta, ref int ref_itrigger_delta, ref float ref_x, ref float ref_y, ref GameObject ref_hand, ref GameObject ref_grabbed, ref GameObject ref_ohand, ref GameObject ref_ograbbed)
   {
     float htrigger_threshhold = 0.1f;
     float itrigger_threshhold = 0.1f;
@@ -531,8 +562,8 @@ public class World : MonoBehaviour
     {
       ref_itrigger_delta = 1;
       ref_itrigger = true;
-      ref_x = x_val;
-      ref_y = y_val;
+      ref_x = hand_pos.x;
+      ref_y = hand_pos.y;
     }
     else if(ref_itrigger && itrigger_val <= itrigger_threshhold)
     {
@@ -606,6 +637,21 @@ public class World : MonoBehaviour
         }
       }
 
+      if(ref_grabbed == null) //still not holding anything
+      {
+        Touchable g = graph_touchable;
+        if( //graph newly grabbed
+          ( left_hand && g.ltouch) ||
+          (!left_hand && g.rtouch)
+        )
+        {
+          ref_grabbed = graph;
+          placement_dot.GetComponent<Renderer>().enabled = true;
+          g.grabbed = true;
+          if(ref_grabbed == ref_ograbbed) ref_ograbbed = null;
+        }
+      }
+
       if (ref_grabbed == null) //still not holding anything
       {
         Touchable g = halfer_touchable;
@@ -670,16 +716,21 @@ public class World : MonoBehaviour
           v.rigidbody.isKinematic = false;
           v.rigidbody.velocity = hand_vel;
         }
+        if(ref_grabbed == graph)
+        {
+          placement_dot.GetComponent<Renderer>().enabled = false;
+          if(placement_thermo_reasonable) thermo.warp_pv(placement_thermo.y,placement_thermo.x,placement_thermo.z);
+        }
       }
 
       ref_grabbed.GetComponent<Touchable>().grabbed = false;
       ref_grabbed = null;
     }
 
-    if(ref_grabbed) TryInteractable(ref_grabbed, x_val, y_val, ref ref_x, ref ref_y);
+    if(ref_grabbed) TryInteractable(ref_grabbed, hand_pos, ref ref_x, ref ref_y);
 
-    ref_x = x_val;
-    ref_y = y_val;
+    ref_x = hand_pos.x;
+    ref_y = hand_pos.y;
 
     //centerer
     if(vrcenter_fingertoggleable.finger) //finger hitting vrcenter object
@@ -762,6 +813,9 @@ public class World : MonoBehaviour
       if(gr.rtouch) rtouch = true;
     }
     gr = handle_workspace_touchable;
+    if(gr.ltouch) ltouch = true;
+    if(gr.rtouch) rtouch = true;
+    gr = graph_touchable;
     if(gr.ltouch) ltouch = true;
     if(gr.rtouch) rtouch = true;
     Touchable press_gr = halfer_touchable;
@@ -924,8 +978,8 @@ public class World : MonoBehaviour
       ;
     }
     //test effect of hands one at a time ("true" == "left hand", "false" == "right hand")
-    TryHand(true,  lhandt, lindext, lhand.transform.position.x, lhand.transform.position.y, lhand_vel, ref lhtrigger, ref litrigger, ref lhtrigger_delta, ref litrigger_delta, ref lz, ref ly, ref lhand, ref lgrabbed, ref rhand, ref rgrabbed); //left hand
-    TryHand(false, rhandt, rindext, rhand.transform.position.x, rhand.transform.position.y, rhand_vel, ref rhtrigger, ref ritrigger, ref rhtrigger_delta, ref ritrigger_delta, ref rz, ref ry, ref rhand, ref rgrabbed, ref lhand, ref lgrabbed); //right hand
+    TryHand(true,  lhandt, lindext, lhand.transform.position, lhand_vel, ref lhtrigger, ref litrigger, ref lhtrigger_delta, ref litrigger_delta, ref lz, ref ly, ref lhand, ref lgrabbed, ref rhand, ref rgrabbed); //left hand
+    TryHand(false, rhandt, rindext, rhand.transform.position, rhand_vel, ref rhtrigger, ref ritrigger, ref rhtrigger_delta, ref ritrigger_delta, ref rz, ref ry, ref rhand, ref rgrabbed, ref lhand, ref lgrabbed); //right hand
 
     UpdateGrabVis();
 
