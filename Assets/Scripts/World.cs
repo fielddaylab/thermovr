@@ -145,14 +145,18 @@ public class World : MonoBehaviour
     // As we grab them, set ranges on tool dials (sliders).
     Tool t;
     tools = new List<Tool>();
-    t = GameObject.Find("Tool_Insulator").GetComponent<Tool>(); tool_insulator = t; tools.Add(t); t.dial_dial.min_map = 0f; t.dial_dial.max_map = 1f;                                t.dial_dial.unit = "n";   t.dial_dial.display_unit = t.dial_dial.unit;
-    t = GameObject.Find("Tool_Clamp"    ).GetComponent<Tool>(); tool_clamp     = t; tools.Add(t); t.dial_dial.min_map = 0f; t.dial_dial.max_map = 1f;                                t.dial_dial.unit = "h";   t.dial_dial.display_unit = t.dial_dial.unit;
+    t = GameObject.Find("Tool_Insulator").GetComponent<Tool>(); tool_insulator = t; tools.Add(t); t.dial_dial.min_map = 0f; t.dial_dial.max_map = 1f;                                t.dial_dial.unit = "";    t.dial_dial.display_unit = t.dial_dial.unit;
+    t = GameObject.Find("Tool_Clamp"    ).GetComponent<Tool>(); tool_clamp     = t; tools.Add(t); t.dial_dial.min_map = 0f; t.dial_dial.max_map = 1f;                                t.dial_dial.unit = "";    t.dial_dial.display_unit = t.dial_dial.unit;
     t = GameObject.Find("Tool_Burner"   ).GetComponent<Tool>(); tool_burner    = t; tools.Add(t); t.dial_dial.min_map = 0f; t.dial_dial.max_map =  1000f*100f;                       t.dial_dial.unit = "J/s"; t.dial_dial.display_unit = "kJ/s"; t.dial_dial.display_mul = 0.001f;
     t = GameObject.Find("Tool_Coil"     ).GetComponent<Tool>(); tool_coil      = t; tools.Add(t); t.dial_dial.min_map = 0f; t.dial_dial.max_map = -1000f*100f;                       t.dial_dial.unit = "J/s"; t.dial_dial.display_unit = "kJ/s"; t.dial_dial.display_mul = 0.001f;
     double kg_corresponding_to_10mpa = thermo.surfacearea_insqr*(10*1453.8/*MPa->psi*/)*0.453592/*lb->kg*/;
     double kg_corresponding_to_2mpa  = thermo.surfacearea_insqr*(2 *1453.8/*MPa->psi*/)*0.453592/*lb->kg*/; // 10 MPa seems way too big, sooooo... we'll just do 2 MPa.
     t = GameObject.Find("Tool_Weight"   ).GetComponent<Tool>(); tool_weight    = t; tools.Add(t); t.dial_dial.min_map =  0f; t.dial_dial.max_map =  (float)kg_corresponding_to_10mpa; t.dial_dial.unit = "kg";  t.dial_dial.display_unit = t.dial_dial.unit;
     t = GameObject.Find("Tool_Balloon"  ).GetComponent<Tool>(); tool_balloon   = t; tools.Add(t); t.dial_dial.min_map =  0f; t.dial_dial.max_map = -(float)kg_corresponding_to_10mpa; t.dial_dial.unit = "kg";  t.dial_dial.display_unit = t.dial_dial.unit;
+
+    //Phil 06/23/2020: I can't figure out why tool_insulator and tool_clamp are both disabled. In the editor, they appear enabled until I hit play. I can't find anywhere in code that disables them. But they get to here, and are disabled, so I'm just re-enabling them
+    tool_insulator.enabled = true;
+    tool_clamp.enabled = true;
 
     flame = GameObject.Find("Flame").GetComponent<ParticleSystem>();
 
@@ -164,10 +168,10 @@ public class World : MonoBehaviour
     for(int i = 0; i < tools.Count; i++)
     {
       t = tools[i];
-      t.active_available_meshrenderer.enabled = false;
-      t.active_snap_meshrenderer.enabled = false;
+      t.active_available_meshrenderer.enabled  = false;
+      t.active_snap_meshrenderer.enabled       = false;
       t.storage_available_meshrenderer.enabled = false;
-      t.storage_snap_meshrenderer.enabled = false;
+      t.storage_snap_meshrenderer.enabled      = false;
       GameObject g = t.gameObject;
       g.transform.SetParent(t.storage.gameObject.transform);
       t.stored = true;
@@ -462,6 +466,8 @@ public class World : MonoBehaviour
   void UpdateToolText(Tool t)
   {
     if(!t.dial_dial) return;
+    if(t == tool_insulator || t == tool_clamp) return;
+
     string txt = string.Format("{0:3} "+t.dial_dial.display_unit,(float)(t.dial_dial.map * t.dial_dial.display_mul));
     //t.textv_tmpro.SetText(txt);
     //if(t.textd_tmpro) t.textd_tmpro.SetText(txt);
@@ -624,7 +630,7 @@ public class World : MonoBehaviour
         )
         {
           ref_grabbed = reset;
-          g.touch = true;
+          g.touch = true;                 
           if(ref_grabbed == ref_ograbbed) ref_ograbbed = null;
           thermo.Reset();
         }
@@ -696,7 +702,7 @@ public class World : MonoBehaviour
 
   }
 
-  /*
+  /*                 
    * Function to update object materials/appearance in response to a "grab" event.
    */
   void UpdateGrabVis()
@@ -821,7 +827,7 @@ public class World : MonoBehaviour
     return known;
   }
 
-  void updateSelectableVis(int known, List<Tab> list)
+  void updateSelectableVis(int known, List<Tab> list)                 
   {
     Tab t;
     for(int i = 0; i < list.Count; i++)
@@ -868,7 +874,7 @@ public class World : MonoBehaviour
           arrows.SetFlow(delta_pressure);
         }
         if (tool_insulator.engaged) thermo.add_pressure_insulated(delta_pressure);
-        else                       thermo.add_pressure_uninsulated(delta_pressure);
+        else                        thermo.add_pressure_uninsulated(delta_pressure);
       }
       else if (arrows.running)
       {
