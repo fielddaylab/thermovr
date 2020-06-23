@@ -898,10 +898,10 @@ public class ThermoState : MonoBehaviour
     if(modified) genMesh();
 
     if(Math.Abs(pressure - prev_pressure)              > ThermoMath.p_smallstep) text_pressure.SetText(      string.Format("P: {0:#.##E+0} kPa",   (float)pressure/1000f));
-    if(Math.Abs(temperature - prev_temperature)        > ThermoMath.t_smallstep) text_temperature.SetText(   string.Format("T: {0:3}°K ({1:3}°C)", (float)temperature, (float)temperature-273.15f));
+    if(Math.Abs(temperature - prev_temperature)        > ThermoMath.t_smallstep) text_temperature.SetText(                 "T: {0:3}°K ({1:3}°C)", (float)temperature, (float)temperature-273.15f);
     if(Math.Abs(volume - prev_volume)                  > ThermoMath.v_smallstep) text_volume.SetText(        string.Format("v: {0:#.##E+0} M³/kg", (float)volume));
     if(Math.Abs(internalenergy - prev_internalenergy)  > ThermoMath.u_smallstep) text_internalenergy.SetText(string.Format("u: {0:#.##E+0} kJ/kg", (float)internalenergy/1000f));
-    if(Math.Abs(entropy - prev_entropy)                > ThermoMath.s_smallstep) text_entropy.SetText(       string.Format("s: {0:3} kJ/kgK",      (float)entropy/1000f));
+    if(Math.Abs(entropy - prev_entropy)                > ThermoMath.s_smallstep) text_entropy.SetText(                     "s: {0:3} kJ/kgK",      (float)entropy/1000f);
     if(Math.Abs(enthalpy - prev_enthalpy)              > ThermoMath.h_smallstep) text_enthalpy.SetText(      string.Format("h: {0:#.##E+0} kJ/kg", (float)enthalpy/1000f));
     if(region == 1 && Math.Abs(quality - prev_quality) > ThermoMath.x_smallstep) text_quality.SetText(       string.Format("x: {0:3}%", (float)(quality * 100f)));
     if(region != prev_region)
