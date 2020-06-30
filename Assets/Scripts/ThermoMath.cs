@@ -42,10 +42,15 @@ public static class ThermoMath
   smallstep = a "small step" in the given range (useful for cache invalidation threshhold)
   */
 
+  //region: 0 subcooled liquid, 1 two-phase, 2 superheated vapor
+  public static int region_liquid;
+  public static int region_twophase;
+  public static int region_vapor;
+
   //Pa
   public static double p_min;
   public static double p_max;
-  public static double p_neutral;
+  public static double[] p_neutral;
   public static double p_smallstep;
   //Pa
   public static double psat_min;
@@ -53,32 +58,32 @@ public static class ThermoMath
   //M³/kg
   public static double v_min;
   public static double v_max;
-  public static double v_neutral;
+  public static double[] v_neutral;
   public static double v_smallstep;
   //K
   public static double t_min;
   public static double t_max;
-  public static double t_neutral;
+  public static double[] t_neutral;
   public static double t_smallstep;
   //J/kg
   public static double u_min;
   public static double u_max;
-  public static double u_neutral;
+  public static double[] u_neutral;
   public static double u_smallstep;
   //J/kgK
   public static double s_min;
   public static double s_max;
-  public static double s_neutral;
+  public static double[] s_neutral;
   public static double s_smallstep;
   //J/kg
   public static double h_min;
   public static double h_max;
-  public static double h_neutral;
+  public static double[] h_neutral;
   public static double h_smallstep;
   //%
   public static double x_min;
   public static double x_max;
-  public static double x_neutral;
+  public static double[] x_neutral;
   public static double x_smallstep;
 
   // A sort of notifier for users of the class.
@@ -91,56 +96,62 @@ public static class ThermoMath
     got_error = false;
     IF97.initRegions();
 
+    region_liquid = 0;
+    region_twophase = 1;
+    region_vapor = 2;
+
     //Pa
     p_min = IF97.get_Pmin()*1000000.0; // 611.213
     p_max = IF97.get_Pmax()*1000000.0; // 100000000
-    p_neutral = 101325.0;
+    p_neutral = new double[] { 101325.0, 3142, 3142 };
     p_smallstep = 1.0;
 
     //Pa
-    psat_min = IF97.get_ptrip()*1000000.0; //TODO: comment actual value for quick reference
-    psat_max = IF97.get_pcrit()*1000000.0; //TODO: comment actual value for quick reference
+    psat_min = IF97.get_ptrip()*1000000.0; // 611.656
+    psat_max = IF97.get_pcrit()*1000000.0; // 22064000
 
     //M³/kg
     v_min = 1.0/3000;  // 0.0003
     v_max = 1.0/0.001; // 1000
-    v_neutral = 0.001;
+    v_neutral = new double[]{0.001,21.85,0}; //note: v_neutral[2] calculated/set below
     v_smallstep = 0.00001;
 
     //K
     t_min = IF97.get_Tmin(); // 273.15
     t_max = IF97.get_Tmax(); // 1073.15
-    t_neutral = 293.0;
+    t_neutral = new double[]{293.0,298.0,400.0};
     t_smallstep = 0.001;
 
     //J/kg
-    u_min = 0.0; //TODO:find actual min
-    u_max =  9999999999; //TODO:find actual max
-    u_neutral = 83.28;
-    u_smallstep = 0.0; //TODO: find
+    u_min = 0.1238;
+    u_max = 3700;
+    u_neutral = new double[]{83.28,83.28,83.28}; //note: all get calculated/set below
+    u_smallstep = 0.001;
 
     //J/kgK
-    //s_min = IF97.Smin; //TODO: comment actual value for quick reference //I don't think this is correct
-    //s_max = IF97.Smax; //11.9210548250511 //I don't think this is correct...
-    s_min = 0.0; //TODO: actually find something coherent
-    s_max =  999999999999.0; //TODO: actually find something coherent
-    s_neutral = 294.322;
-    s_smallstep = 0.0; //TODO: find
+    s_min = IF97.Smin*1000; //0.0
+    s_max = IF97.Smax*1000; //11921.0548250511
+    s_neutral = new double[]{294.322,294.322,294.322};
+    s_smallstep = 0.0001;
 
     //J/kg
-    //h_? = ; //experimentally derived- room temp water 
-    //h_min = IF97.Hmin(s_min); //TODO: I don't think this is correct...
-    //h_max = IF97.Hmax(s_max); //4171.65498424024 given s_max 11.9... //TODO: I don't think this is correct...
-    h_min = 0.0; //TODO: actually come up with something coherent
-    h_max =  9999999.0; //TODO: actually come up with something coherent
-    h_neutral = 83377.0;
-    h_smallstep = 0.0; //TODO: find
+    h_min = IF97.Hmin(s_min); //0.0006286
+    h_max = IF97.Hmax(s_max/1000.0)*1000.0; //4171654.98424024
+    h_neutral = new double[]{83377.0,83377.0,83377.0};
+    h_smallstep = 0.001;
 
     //%
     x_min = 0.0;
     x_max = 1.0;
-    x_neutral = 0;
+    x_neutral = new double[]{0,0,0};
     x_smallstep = 0.00001;
+
+    //fill in missing/sloppy neutrals (note: if any of these fallback on "fallback_region", defeats the purpose. do not let that happen)
+    v_neutral[2] = v_given_pt(p_neutral[2], t_neutral[2], 2);
+    for(int i = 0; i < 3; i++) u_neutral[i] = u_given_vt(v_neutral[i], t_neutral[i], i);
+    for(int i = 0; i < 3; i++) s_neutral[i] = s_given_vt(v_neutral[i], t_neutral[i], i);
+    for(int i = 0; i < 3; i++) h_neutral[i] = h_given_vt(v_neutral[i], t_neutral[i], i);
+    x_neutral[1] = x_given_pv(p_neutral[1], v_neutral[1], 1);
 
     //DEBUG INFO:
     //IF97.print_tables();
@@ -180,13 +191,9 @@ public static class ThermoMath
   //region: 0 subcooled liquid, 1 two-phase, 2 superheated vapor
   public static int region_given_pvt(double p, double v, double t)
   {
-    int liq = 0;
-    int two = 1;
-    int vapor = 2;
-
     //broad check w/ t
-    if(t-t_smallstep > IF97.Tsat97(p/1000000.0)) return vapor;
-    if(t+t_smallstep < IF97.Tsat97(p/1000000.0)) return liq;
+    if(t-t_smallstep > IF97.Tsat97(p/1000000.0)) return region_vapor;
+    if(t+t_smallstep < IF97.Tsat97(p/1000000.0)) return region_liquid;
 
     //broad check w/ p - unneeded
     //if(p-p_smallstep > IF97.psat97(t)) return liq;
@@ -196,10 +203,10 @@ public static class ThermoMath
     //f means saturated liquid,
     //g means saturated gas
     double vf = 1.0/IF97.rholiq_p(p/1000000.0);
-    if(v <= vf) return liq;
+    if(v <= vf) return region_liquid;
     double vg = 1.0/IF97.rhovap_p(p/1000000.0);
-    if(v >= vg) return vapor;
-    return two;
+    if(v >= vg) return region_vapor;
+    return region_twophase;
   }
   /*
   public static int region_given_pvt(double p, double v, double t)
@@ -225,13 +232,13 @@ public static class ThermoMath
     switch(r)
     {
       case 1: //liquid
-        return 0; //subcooled liquid
+        return region_liquid; //subcooled liquid
       case 2: //vapor
-        return 2; //superheated vapor
+        return region_vapor; //superheated vapor
       case 3:
       case 4: //two-phase
       case 5:
-        return 1; //two-phase
+        return region_twophase; //two-phase
     }
     return -1;
   }
@@ -241,13 +248,13 @@ public static class ThermoMath
     switch(r)
     {
       case 1: //liquid
-        return 0; //subcooled liquid
+        return region_liquid; //subcooled liquid
       case 2: //vapor
-        return 2; //superheated vapor
+        return region_vapor; //superheated vapor
       case 3:
       case 4: //two-phase
       case 5:
-        return 1; //two-phase
+        return region_twophase; //two-phase
     }
     return -1;
   }
@@ -275,7 +282,7 @@ public static class ThermoMath
   //rule of naming for consistency: prefer lexical ordering "p < v < t < u < s < h < q", ie "p_given_vt" rather than "p_given_tv"
   //note- where it says "UNIT CONVERSION UNTESTED", that measn I haven't yet verified that it performs the correct translation of units between APIs (ie, one may be expecting kPa, and another just Pa). I have learned to not trust the documentation of either API (IAPWS95 or IF97)
 
-  public static double p_given_vt(double v, double t)
+  public static double p_given_vt(double v, double t, int fallback_region=0)
   {
     double ret_val;
     try
@@ -285,13 +292,13 @@ public static class ThermoMath
     }
     catch (Exception ex)
     {
-      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, p_neutral) );
+      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, p_neutral[fallback_region]) );
       got_error = true;
-      return p_neutral;
+      return p_neutral[fallback_region];
     }
     //return IAPWS95.IAPWS95_pressure(1.0/v,t)*1000.0; //expects:kg/M³,K returns kPa
   }
-  public static double v_given_pt(double p, double t) //DO NOT USE IN VAPOR DOME
+  public static double v_given_pt(double p, double t, int fallback_region=0) //DO NOT USE IN VAPOR DOME
   {
     double ret_val;
     try
@@ -301,14 +308,14 @@ public static class ThermoMath
     }
     catch(Exception ex)
     {
-      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, v_neutral) );
+      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, v_neutral[fallback_region]) );
       got_error = true;
-      return v_neutral;
+      return v_neutral[fallback_region];
     }
     //return 1.0/IF97.rhomass_Tp(t,p/1000000.0); //expects:K,MPa returns kg/M³
   }
 
-  public static double v_given_ph(double p, double h)
+  public static double v_given_ph(double p, double h, int fallback_region=0)
   {
     double ret_val;
     try
@@ -318,14 +325,14 @@ public static class ThermoMath
     }
     catch (Exception ex)
     {
-      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, v_neutral) );
+      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, v_neutral[fallback_region]) );
       got_error = true;
-      return v_neutral;
+      return v_neutral[fallback_region];
     }
     //return 1.0/IF97.rhomass_phmass(p/1000000.0,h/1000.0); //UNIT CONVERSION UNTESTED!
   }
 
-  public static double v_given_px(double p,double x) //ONLY USE IN VAPOR DOME
+  public static double v_given_px(double p,double x, int fallback_region=0) //ONLY USE IN VAPOR DOME
   {
     double ret_val;
     try
@@ -335,14 +342,14 @@ public static class ThermoMath
     }
     catch (Exception ex)
     {
-      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, v_neutral) );
+      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, v_neutral[fallback_region]) );
       got_error = true;
-      return v_neutral;
+      return v_neutral[fallback_region];
     }
     //return 1.0/IF97.rhomass_pQ(p/1000000.0,x); //UNIT CONVERSION UNTESTED!
   }
 
-  public static double t_given_ph(double p, double h)
+  public static double t_given_ph(double p, double h, int fallback_region=0)
   {
     double ret_val;
     try
@@ -352,14 +359,14 @@ public static class ThermoMath
     }
     catch (Exception ex)
     {
-      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, t_neutral) );
+      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, t_neutral[fallback_region]) );
       got_error = true;
-      return t_neutral;
+      return t_neutral[fallback_region];
     }
     //return IF97.T_phmass(p/1000000.0,h/1000.0); //UNIT CONVERSION UNTESTED!
   }
 
-  public static double tsat_given_p(double p)
+  public static double tsat_given_p(double p, int fallback_region=0)
   {
     double ret_val;
     try
@@ -369,14 +376,14 @@ public static class ThermoMath
     }
     catch (Exception ex)
     {
-      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, t_neutral) );
+      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, t_neutral[fallback_region]) );
       got_error = true;
-      return t_neutral;
+      return t_neutral[fallback_region];
     }
     //return IF97.Tsat97(p/1000000.0); //UNIT CONVERSION UNTESTED!
   }
 
-  public static double vliq_given_p(double p)
+  public static double vliq_given_p(double p, int fallback_region=0)
   {
     double ret_val;
     try
@@ -386,14 +393,14 @@ public static class ThermoMath
     }
     catch (Exception ex)
     {
-      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, v_neutral) );
+      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, v_neutral[fallback_region]) );
       got_error = true;
-      return v_neutral;
+      return v_neutral[fallback_region];
     }
     //return 1.0/IF97.rholiq_p(p/1000000.0); //expects:MPa returns kg/M³
   }
 
-  public static double vvap_given_p(double p)
+  public static double vvap_given_p(double p, int fallback_region = 0)
   {
     double ret_val;
     try
@@ -403,14 +410,14 @@ public static class ThermoMath
     }
     catch (Exception ex)
     {
-      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, v_neutral) );
+      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, v_neutral[fallback_region]) );
       got_error = true;
-      return v_neutral;
+      return v_neutral[fallback_region];
     }
     //return 1.0/IF97.rhovap_p(p/1000000.0); //expects:MPa returns kg/M³
   }
 
-  public static double u_given_pt(double p, double t) //DO NOT USE IN VAPOR DOME
+  public static double u_given_pt(double p, double t, int fallback_region = 0) //DO NOT USE IN VAPOR DOME
   {
     double ret_val;
     try
@@ -420,14 +427,14 @@ public static class ThermoMath
     }
     catch (Exception ex)
     {
-      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, u_neutral) );
+      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, u_neutral[fallback_region]) );
       got_error = true;
-      return u_neutral;
+      return u_neutral[fallback_region];
     }
     //return IF97.umass_Tp(t, p/1000000.0)*1000f; //UNIT CONVERSION UNTESTED!
   }
 
-  public static double u_given_vt(double v, double t)
+  public static double u_given_vt(double v, double t, int fallback_region=0)
   {
     double ret_val;
     try
@@ -437,14 +444,14 @@ public static class ThermoMath
     }
     catch (Exception ex)
     {
-      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, u_neutral) );
+      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, u_neutral[fallback_region]) );
       got_error = true;
-      return u_neutral;
+      return u_neutral[fallback_region];
     }
     //return IAPWS95.IAPWS95_internal_energy(1f/v,t)*1000f; //UNIT CONVERSION UNTESTED!
   }
 
-  public static double u_given_px(double p, double x)
+  public static double u_given_px(double p, double x, int fallback_region=0)
   {
     double ret_val;
     try
@@ -454,14 +461,14 @@ public static class ThermoMath
     }
     catch (Exception ex)
     {
-      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, u_neutral) );
+      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, u_neutral[fallback_region]) );
       got_error = true;
-      return u_neutral;
+      return u_neutral[fallback_region];
     }
     //return IF97.umass_pQ(p/1000000.0,x)*1000f; //UNIT CONVERSION UNTESTED!
   }
 
-  public static double s_given_vt(double v, double t)
+  public static double s_given_vt(double v, double t, int fallback_region=0)
   {
     double ret_val;
     try
@@ -471,14 +478,14 @@ public static class ThermoMath
     }
     catch (Exception ex)
     {
-      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, s_neutral) );
+      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, s_neutral[fallback_region]) );
       got_error = true;
-      return s_neutral;
+      return s_neutral[fallback_region];
     }
     //return IAPWS95.IAPWS95_entropy(1f/v,t)*1000f; //UNIT CONVERSION UNTESTED!
   }
 
-  public static double s_given_px(double p, double x)
+  public static double s_given_px(double p, double x, int fallback_region=0)
   {
     double ret_val;
     try
@@ -488,14 +495,14 @@ public static class ThermoMath
     }
     catch (Exception ex)
     {
-      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, s_neutral) );
+      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, s_neutral[fallback_region]) );
       got_error = true;
-      return s_neutral;
+      return s_neutral[fallback_region];
     }
     //return IF97.smass_pQ(p/1000000.0,x)*1000f; //UNIT CONVERSION UNTESTED!
   }
 
-  public static double h_given_vt(double v, double t)
+  public static double h_given_vt(double v, double t, int fallback_region=0)
   {
     double ret_val;
     try
@@ -505,14 +512,14 @@ public static class ThermoMath
     }
     catch (Exception ex)
     {
-      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, h_neutral) );
+      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, h_neutral[fallback_region]) );
       got_error = true;
-      return h_neutral;
+      return h_neutral[fallback_region];
     }
     //return IAPWS95.IAPWS95_enthalpy(1f/v,t)*1000f; //UNIT CONVERSION UNTESTED!
   }
 
-  public static double x_given_pv(double p, double v) //ONLY USE IN VAPOR DOME
+  public static double x_given_pv(double p, double v, int fallback_region=0) //ONLY USE IN VAPOR DOME
   {
     double ret_val;
     try
@@ -526,14 +533,14 @@ public static class ThermoMath
     }
     catch (Exception ex)
     {
-      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, x_neutral) );
+      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, x_neutral[fallback_region]) );
       got_error = true;
-      return x_neutral;
+      return x_neutral[fallback_region];
     }
     //return (v-vf)/(vg-vf); //UNIT CONVERSION UNTESTED!
   }
 
-  public static double x_given_ph(double p, double h) //ONLY USE IN VAPOR DOME
+  public static double x_given_ph(double p, double h, int fallback_region=0) //ONLY USE IN VAPOR DOME
   {
     double ret_val;
     try
@@ -543,14 +550,14 @@ public static class ThermoMath
     }
     catch (Exception ex)
     {
-      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, x_neutral) );
+      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, x_neutral[fallback_region]) );
       got_error = true;
-      return x_neutral;
+      return x_neutral[fallback_region];
     }
     //return IF97.Q_phmass(p/1000000.0,h/1000.0); //UNIT CONVERSION UNTESTED!
   }
 
-  public static double iterate_t_given_p_verify_u(double t, double p, double u) //t = first guess
+  public static double iterate_t_given_p_verify_u(double t, double p, double u, int fallback_region=0) //t = first guess
   {
     try
     {
@@ -582,13 +589,13 @@ public static class ThermoMath
     }
     catch (Exception ex)
     {
-      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, t_neutral) );
+      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, t_neutral[fallback_region]) );
       got_error = true;
-      return t_neutral;
+      return t_neutral[fallback_region];
     }
   }
 
-  public static double iterate_t_given_v_verify_u(double t, double v, double u) //t = first guess
+  public static double iterate_t_given_v_verify_u(double t, double v, double u, int fallback_region=0) //t = first guess
   {
     try
     {
@@ -620,16 +627,16 @@ public static class ThermoMath
     }
     catch (Exception ex)
     {
-      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, t_neutral) );
+      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, t_neutral[fallback_region]) );
       got_error = true;
-      return t_neutral;
+      return t_neutral[fallback_region];
     }
   }
-  public static double iterate_t_given_pv(double t, double step, double p, double v) //t = first guess, step = first step
+  public static double iterate_t_given_pv(double t, double step, double p, double v, int fallback_region=0) //t = first guess, step = first step
   {
     try
     {
-      int MAX_ITERS = 200;     //max # of iterations before giving up //TODO: define intentionally
+      int MAX_ITERS = 100;     //max # of iterations before giving up //TODO: define intentionally
       double MAX_DELTA = 0.01; //acceptible solution error //TODO: define intentionally
       double guess = t;
       double vdelta = MAX_DELTA + 1.0;
@@ -677,9 +684,9 @@ public static class ThermoMath
     }
     catch (Exception ex)
     {
-      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, t_neutral) );
+      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, t_neutral[fallback_region]) );
       got_error = true;
-      return t_neutral;
+      return t_neutral[fallback_region];
     }
   }
 
