@@ -223,6 +223,60 @@ public class ThermoState : MonoBehaviour
   //required for distance checks
   List<Vector3> mesh_positions;
   int position_dome_region;
+
+  GameObject genTestMeshFromPts(Vector3[] pt_positions, string name)
+  {
+    List<Vector3> mesh_positions = new List<Vector3>(pt_positions);
+    List<int>mesh_triangles = new List<int>((samples-1)*(samples-1)*6);
+
+    int vi = 0;
+    int ni = 0;
+    for(int y = 0; y < samples-1; y++)
+    {
+      for(int z = 0; z < samples-1; z++)
+      {
+        vi = samples*y+z;
+        mesh_triangles.Add(vi        +0); ni++;
+        mesh_triangles.Add(vi+samples+0); ni++;
+        mesh_triangles.Add(vi+samples+1); ni++;
+        mesh_triangles.Add(vi        +0); ni++;
+        mesh_triangles.Add(vi+samples+1); ni++;
+        mesh_triangles.Add(vi        +1); ni++;
+      }
+    }
+
+    List<Vector3>mesh_normals = new List<Vector3>(new Vector3[mesh_positions.Count]);
+    for(int i = 0; i < mesh_triangles.Count; i+=3)
+    {
+      int ai = mesh_triangles[i+0];
+      int bi = mesh_triangles[i+1];
+      int ci = mesh_triangles[i+2];
+      Vector3 a = mesh_positions[ai];
+      Vector3 b = mesh_positions[bi];
+      Vector3 c = mesh_positions[ci];
+      Vector3 n = Vector3.Cross(Vector3.Normalize(b-a),Vector3.Normalize(c-a));
+      mesh_normals[ai] = n;
+      mesh_normals[bi] = n;
+      mesh_normals[ci] = n;
+    }
+
+    Mesh mesh = new Mesh();
+    mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
+    mesh.vertices = mesh_positions.ToArray();
+    mesh.normals = mesh_normals.ToArray();
+    mesh.triangles = mesh_triangles.ToArray();
+
+    GameObject graphObject = new GameObject(name, typeof(MeshFilter), typeof(MeshRenderer));
+    graphObject.transform.parent = graph.transform;
+    graphObject.transform.localPosition = new Vector3(0f,0f,0f);
+    graphObject.transform.localScale = new Vector3(1f,1f,1f);
+    graphObject.transform.localRotation = Quaternion.identity;
+    graphObject.GetComponent<MeshFilter>().mesh = mesh;
+    graphObject.GetComponent<MeshRenderer>().material = graph_material;
+    graphObject.GetComponent<MeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+
+    return graphObject;
+  }
   void genMesh()
   {
     GameObject old_gm = GameObject.Find("graph_mesh");
@@ -523,38 +577,24 @@ public class ThermoState : MonoBehaviour
 
     //fill in dome
     int triangle_inner_dome_region = mesh_triangles.Count;
-    int position_dome_inner_region = mesh_positions.Count;
-    for(int i = position_dome_region; i < position_dome_inner_region; i++) //duplicate inner positions so each can have own normal at seam
+    int position_inner_dome_region = mesh_positions.Count;
+    for(int i = position_dome_region; i < position_inner_dome_region; i++) //duplicate inner positions so each can have own normal at seam
     {
       mesh_positions.Add(mesh_positions[i]);
     }
     for(int y = 0; y < concentrated_samples-1; y++)
     {
-      mesh_triangles.Add(position_dome_inner_region+y*2+0);
-      mesh_triangles.Add(position_dome_inner_region+y*2+2);
-      mesh_triangles.Add(position_dome_inner_region+y*2+1);
-      mesh_triangles.Add(position_dome_inner_region+y*2+1);
-      mesh_triangles.Add(position_dome_inner_region+y*2+2);
-      mesh_triangles.Add(position_dome_inner_region+y*2+3);
+      mesh_triangles.Add(position_inner_dome_region+y*2+0);
+      mesh_triangles.Add(position_inner_dome_region+y*2+2);
+      mesh_triangles.Add(position_inner_dome_region+y*2+1);
+      mesh_triangles.Add(position_inner_dome_region+y*2+1);
+      mesh_triangles.Add(position_inner_dome_region+y*2+2);
+      mesh_triangles.Add(position_inner_dome_region+y*2+3);
     }
 
     //set normals
     mesh_normals = new List<Vector3>(new Vector3[mesh_positions.Count]);
-    for(int i = 0; i < triangle_inner_dome_region; i+=3)
-    {
-      int ai = mesh_triangles[i+0];
-      int bi = mesh_triangles[i+1];
-      int ci = mesh_triangles[i+2];
-      Vector3 a = mesh_positions[ai];
-      Vector3 b = mesh_positions[bi];
-      Vector3 c = mesh_positions[ci];
-      Vector3 n = Vector3.Cross(Vector3.Normalize(b-a),Vector3.Normalize(c-a));
-      mesh_normals[ai] = n;
-      mesh_normals[bi] = n;
-      mesh_normals[ci] = n;
-    }
-
-    for(int i = triangle_inner_dome_region; i < mesh_triangles.Count; i+=3)
+    for(int i = 0; i < mesh_triangles.Count; i+=3)
     {
       int ai = mesh_triangles[i+0];
       int bi = mesh_triangles[i+1];
@@ -586,6 +626,57 @@ public class ThermoState : MonoBehaviour
     lightable.use_custom_mats = true;
     lightable.base_mat = graph_material;
     lightable.lit_mat  = graph_material_lit;
+
+
+/*
+    //add tests
+    for(int y = 0; y < samples; y++)
+    {
+      double pt = ((double)y/(samples-1));
+      for(int z = 0; z < samples; z++)
+      {
+        double tt = ((double)z/(samples-1));
+        double pst = sample(pt);
+        double tst = sample(tt);
+
+        //pvt in Pa, M³/Kg, K
+        double p = ThermoMath.p_given_percent(pst);
+        double t = ThermoMath.t_given_percent(tst);
+        double v = ThermoMath.v_given_pt(p,t, region);
+
+        //Debug.LogFormat("p:{0}Pa, v:{1}M³/Kg, t:{2}K",p,v,t);
+        int i = samples*y+z;
+        pt_positions[i] = plot(p,v,t);
+      }
+    }
+    genTestMeshFromPts(pt_positions, "v_given_pt"); //used to gen main mesh
+
+    for(int y = 0; y < samples; y++)
+    {
+      double pt = ((double)y/(samples-1));
+      for(int z = 0; z < samples; z++)
+      {
+        double tt = ((double)z/(samples-1));
+        double pst = sample(pt);
+        double tst = sample(tt);
+
+        //pvt in Pa, M³/Kg, K
+        //double p = ThermoMath.p_given_percent(pst);
+        //double t = ThermoMath.t_given_percent(tst);
+        //double v = ThermoMath.v_given_pt(p,t, region);
+
+        double t = ThermoMath.t_given_percent(1.0-tst);
+        double v = ThermoMath.v_given_percent(pst);
+        double p = ThermoMath.p_given_vt(v,t);
+
+        //Debug.LogFormat("p:{0}Pa, v:{1}M³/Kg, t:{2}K",p,v,t);
+        int i = samples*y+z;
+        pt_positions[i] = plot(p,v,t);
+      }
+    }
+    genTestMeshFromPts(pt_positions, "p_given_vt");
+
+//*/
   }
 
   public void reset_state()
@@ -876,6 +967,10 @@ public class ThermoState : MonoBehaviour
       internalenergy = new_u;
       temperature = new_t;
       pressure = ThermoMath.p_given_vt(volume,temperature, region);
+      if(Math.Abs(ThermoMath.v_given_pt(pressure, temperature) - volume) > volume * 0.1) //> 10% change
+      {
+        //ERROR: pressure (very likely) can't be trusted...
+      }
       enthalpy = ThermoMath.h_given_vt(volume,temperature, region);
       entropy = ThermoMath.s_given_vt(volume,temperature, region);
 
