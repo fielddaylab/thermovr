@@ -287,7 +287,7 @@ public static class ThermoMath
 
   //rule of naming for consistency: prefer lexical ordering "p < v < t < u < s < h < q", ie "p_given_vt" rather than "p_given_tv"
 
-  public static double p_given_vt(double v, double t, int fallback_region=0)
+  public static double p_given_vt(double v, double t, int fallback_region=0) //experimentally only valid in the superheated vapor region
   {
     try
     {
@@ -514,17 +514,32 @@ public static class ThermoMath
     }
   }
 
+  public static double x_given_pu(double p, double u, int fallback_region=0) //ONLY USE IN VAPOR DOME
+  {
+    try
+    {
+      return IF97.Q_pumass(p/1000000.0,u);
+    }
+    catch (Exception ex)
+    {
+      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, x_neutral[fallback_region]) );
+      got_error = true;
+      return x_neutral[fallback_region];
+    }
+  }
+
   public static double iterate_t_given_p_verify_u(double t, double p, double u, int fallback_region=0) //t = first guess
   {
     try
     {
-      int MAX_ITERS = 100;     //max # of iterations before giving up //TODO: define intentionally
-      double MAX_DELTA = 0.01; //acceptible solution error //TODO: define intentionally
-      double step = 10.0;      //size of first step (shrinks every time it overshoots) //TODO: define intentionally
+      int MAX_ITERS = 100; //max # of iterations before giving up
+      double MAX_DELTA = 0.01; //acceptible solution error
+      double step = 10.0; //size of first step (shrinks every time it overshoots)
       double guess = t;
       double mark = u;
       double delta = Math.Abs(u_given_pt(p,guess)-mark);
-      for(int i = 0; i < MAX_ITERS && delta > MAX_DELTA; i++)
+      int i = 0;
+      for(i = 0; i < MAX_ITERS && delta > MAX_DELTA; i++)
       {
         double delta_a = Math.Abs(u_given_pt(p,guess+ step     )-mark);
         double delta_b = Math.Abs(u_given_pt(p,guess-(step/2.0))-mark);
@@ -542,6 +557,7 @@ public static class ThermoMath
           guess += step;
         }
       }
+      //Debug.LogFormat("{0} iters, {1} delta, {2} guess", i, delta, guess);
       return guess;
     }
     catch (Exception ex)
@@ -556,13 +572,14 @@ public static class ThermoMath
   {
     try
     {
-      int MAX_ITERS = 200;     //max # of iterations before giving up //TODO: define intentionally
-      double MAX_DELTA = 0.01; //acceptible solution error //TODO: define intentionally
-      double step = 100.0;      //size of first step (shrinks every time it overshoots) //TODO: define intentionally
+      int MAX_ITERS = 200; //max # of iterations before giving up
+      double MAX_DELTA = 0.01; //acceptible solution error
+      double step = 10.0; //size of first step (shrinks every time it overshoots)
       double guess = t;
       double mark = u;
       double delta = Math.Abs(u_given_vt(v,guess,fallback_region)-mark);
-      for(int i = 0; i < MAX_ITERS && delta > MAX_DELTA; i++)
+      int i = 0;
+      for(i = 0; i < MAX_ITERS && delta > MAX_DELTA; i++)
       {
         double delta_a = Math.Abs(u_given_vt(v,guess+ step     ,fallback_region)-mark);
         double delta_b = Math.Abs(u_given_vt(v,guess-(step/2.0),fallback_region)-mark);
@@ -580,6 +597,7 @@ public static class ThermoMath
           guess += step;
         }
       }
+      //Debug.LogFormat("{0} iters, {1} delta, {2} guess", i, delta, guess);
       return guess;
     }
     catch (Exception ex)
@@ -589,17 +607,18 @@ public static class ThermoMath
       return t_neutral[fallback_region];
     }
   }
-  public static double iterate_t_given_pv(double t, double p, double v, int fallback_region=0) //t = first guess, step = first step
+  public static double iterate_t_given_pv(double t, double p, double v, int fallback_region=0) //t = first guess
   {
     try
     {
-      int MAX_ITERS = 100;     //max # of iterations before giving up //TODO: define intentionally
-      double MAX_DELTA = 0.01; //acceptible solution error //TODO: define intentionally
-      double step = 100.0;
+      int MAX_ITERS = 100; //max # of iterations before giving up
+      double MAX_DELTA = 0.01; //acceptible solution error
+      double step = 10.0; //size of first step (shrinks every time it overshoots)
       double guess = t;
       double vdelta = MAX_DELTA + 1.0;
       double pdelta = MAX_DELTA + 1.0; ;
-      for (int i = 0; i < MAX_ITERS && (vdelta > MAX_DELTA || pdelta > MAX_DELTA); i++)
+      int i = 0;
+      for(i = 0; i < MAX_ITERS && (vdelta > MAX_DELTA || pdelta > MAX_DELTA); i++)
       {
         //one iteration on v
         if(region_given_pvt(p, v, guess) != region_twophase)
@@ -641,6 +660,7 @@ public static class ThermoMath
           guess += step;
         }
       }
+      //Debug.LogFormat("{0} iters, {1} vdelta, {2} pdelta, {3} guess", i, vdelta, pdelta, guess);
       return guess;
     }
     catch (Exception ex)
@@ -651,5 +671,43 @@ public static class ThermoMath
     }
   }
 
+  public static double iterate_p_given_vu(double p, double v, double u, int fallback_region = 0) //pq = first guess, step = first step
+  {
+    try
+    {
+      int MAX_ITERS = 200; //max # of iterations before giving up
+      double MAX_DELTA = 0.0000000001; //acceptible solution error
+      double step = 1.0; //size of first step (shrinks every time it overshoots)
+      double guess = p;
+      double delta = Math.Abs(x_given_pu(guess,u,fallback_region)-x_given_pv(guess,v,fallback_region));
+      int i = 0;
+      for(i = 0; i < MAX_ITERS && delta > MAX_DELTA; i++)
+      {
+        double delta_a = Math.Abs(x_given_pu(guess+step      ,u,fallback_region)-x_given_pv(guess+step      ,v,fallback_region));
+        double delta_b = Math.Abs(x_given_pu(guess-(step/2.0),u,fallback_region)-x_given_pv(guess-(step/2.0),v,fallback_region));
+        if(delta < delta_a && delta < delta_b) //original guess superior
+          step = step / 2.0;
+        else if(delta_a < delta_b)
+        {
+          delta = delta_a;
+          guess += step;
+        }
+        else
+        {
+          delta = delta_b;
+          step = step/-2.0;
+          guess += step;
+        }
+      }
+      //Debug.LogFormat("{0} iters, {1} delta, {2} guess", i, delta, guess);
+      return guess;
+    }
+    catch (Exception ex)
+    {
+      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, t_neutral[fallback_region]) );
+      got_error = true;
+      return t_neutral[fallback_region];
+    }
+  }
 }
 

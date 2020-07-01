@@ -961,26 +961,42 @@ public class ThermoState : MonoBehaviour
     try
     {
       double new_u = internalenergy+j;
-      double new_t = ThermoMath.iterate_t_given_v_verify_u(temperature,volume,new_u, region);
+      double new_t = temperature;
+      double new_p = pressure;
 
-      //at this point, we have enough internal state to derive the rest
-      internalenergy = new_u;
-      temperature = new_t;
-      pressure = ThermoMath.p_given_vt(volume,temperature, region);
-      if(Math.Abs(ThermoMath.v_given_pt(pressure, temperature) - volume) > volume * 0.1) //> 10% change
+      if (region != ThermoMath.region_twophase)
       {
-        //ERROR: pressure (very likely) can't be trusted...
+        new_t = ThermoMath.iterate_t_given_v_verify_u(temperature, volume, new_u, region); //try to move t assuming we stay in starting region
+        if (region == ThermoMath.region_liquid && new_t > ThermoMath.tsat_given_p(pressure)) //overshot
+        {
+          new_t = ThermoMath.tsat_given_p(pressure);
+          region = ThermoMath.region_twophase;
+        }
+        else if (region == ThermoMath.region_vapor && new_t < ThermoMath.tsat_given_p(pressure)) //overshot
+        {
+          new_t = ThermoMath.tsat_given_p(pressure);
+          region = ThermoMath.region_twophase;
+        }
       }
-      enthalpy = ThermoMath.h_given_vt(volume,temperature, region);
-      entropy = ThermoMath.s_given_vt(volume,temperature, region);
 
-      region = ThermoMath.region_given_pvt(pressure,volume,temperature);
-      switch(region)
+      if (region != ThermoMath.region_twophase) //still not twophase
       {
-        case ThermoMath.region_liquid:   quality = 0;                                               break;
-        case ThermoMath.region_twophase: quality = ThermoMath.x_given_pv(pressure, volume, region); break;
-        case ThermoMath.region_vapor:    quality = 1;                                               break;
+        internalenergy = new_u;
+        temperature = new_t;
+        pressure = ThermoMath.p_given_vt(volume, temperature, region);
       }
+      else //twophase
+      {
+        new_p = ThermoMath.iterate_p_given_vu(pressure, volume, new_u, region);
+        new_t = ThermoMath.tsat_given_p(new_p);
+        internalenergy = new_u;
+        pressure = new_p;
+        temperature = new_t;
+        quality = ThermoMath.x_given_pv(pressure, volume, region);
+      }
+      
+      enthalpy = ThermoMath.h_given_vt(volume, temperature, region);
+      entropy = ThermoMath.s_given_vt(volume, temperature, region);
     }
     catch(Exception e) {}
 
