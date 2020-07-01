@@ -105,6 +105,7 @@ public class ThermoState : MonoBehaviour
   void Awake()
   {
     ThermoMath.Init();
+    reset_state();
   }
 
   // Start is called before the first frame update
@@ -126,10 +127,10 @@ public class ThermoState : MonoBehaviour
 
   public void Reset()
   {
-    this.reset_state();
+    reset_state();
     clamp_state();
     visualize_state();
-    this.HideError();
+    HideError();
   }
 
   //sample bias- "graph density"
@@ -587,17 +588,20 @@ public class ThermoState : MonoBehaviour
     lightable.lit_mat  = graph_material_lit;
   }
 
-  void reset_state()
+  public void reset_state()
   {
     //ensure consistent state
     pressure       = ThermoMath.p_neutral[region];
     temperature    = ThermoMath.t_neutral[region];
     //from this point, the rest should be derived!
+    quality        = ThermoMath.x_neutral[region];
+    if(region == ThermoMath.region_twophase)
+    volume         = ThermoMath.v_given_px(pressure,quality,region);
+    else
     volume         = ThermoMath.v_given_pt(pressure,temperature,region);
     internalenergy = ThermoMath.u_given_pt(pressure,temperature,region);
     enthalpy       = ThermoMath.h_given_vt(volume,temperature,region);
     entropy        = ThermoMath.s_given_vt(volume,temperature,region);
-    quality        = ThermoMath.x_neutral[region];
     region         = ThermoMath.region_given_pvt(pressure,volume,temperature); //should certainly stay the same, as bases were calculated from assumed region
 
     prev_pressure       = -1;
@@ -643,24 +647,37 @@ public class ThermoState : MonoBehaviour
     */
     //END DEBUGGING
 
-    //TODO: do this! should fix many errors!
+/*
+    //This isn't worth it: even tiny errors in fixed variables warp results,
+    //and this function is devoid of the context to know which warps are appropriate.
+
     //snap to known region using region-stable perspectives
     if(prev_region != region)
     { //make sure new state snapped to new region!
       switch(region)
       {
-        case 0:  //subcooled liquid
+        case ThermoMath.region_liquid:  //subcooled liquid
+        case ThermoMath.region_vapor:  //superheated vapor
           //use P,T to fix the rest
+          internalenergy = ThermoMath.u_given_pt(pressure, temperature, region);
+          volume         = ThermoMath.v_given_pt(pressure, temperature, region);
+          enthalpy       = ThermoMath.h_given_vt(volume, temperature, region);
+          entropy        = ThermoMath.s_given_vt(volume, temperature, region);
+          if(region == ThermoMath.region_liquid) quality = 0;
+          if(region == ThermoMath.region_vapor)  quality = 1;
           break;
-        case 1:  //two-phase region
+        case ThermoMath.region_twophase:  //two-phase region
           //use P,V to fix the rest
           //temperature = ThermoMath.t_given_pv();
-          break;
-        case 2:  //superheated vapor
-          //use P,T to fix the rest
+          temperature = ThermoMath.tsat_given_p(pressure, region);
+          entropy = ThermoMath.s_given_vt(volume, temperature, region);
+          enthalpy = ThermoMath.h_given_vt(volume, temperature, region);
+          quality = ThermoMath.x_given_pv(pressure, volume, region);
+          internalenergy = ThermoMath.u_given_px(pressure, quality, region);
           break;
       }
     }
+*/
 
     pressure       = Clampd(pressure,       ThermoMath.p_min,ThermoMath.p_max);
     volume         = Clampd(volume,         ThermoMath.v_min,ThermoMath.v_max);
@@ -718,7 +735,7 @@ public class ThermoState : MonoBehaviour
         Vector3 plot;
         plot.x = Clampf(invplot_dimension(ThermoMath.v_min, ThermoMath.v_max, vcube), (float)ThermoMath.v_min, (float)ThermoMath.v_max);
         plot.y = Clampf(invplot_dimension(ThermoMath.p_min, ThermoMath.p_max, pcube), (float)ThermoMath.p_min, (float)ThermoMath.p_max);
-        plot.z = (float)ThermoMath.iterate_t_given_pv(guess_t, 10.0, (double)plot.y, (double)plot.x); //gives off warnings because now these math functions are stateful (bad)
+        plot.z = (float)ThermoMath.iterate_t_given_pv(guess_t, (double)plot.y, (double)plot.x); //gives off warnings because now these math functions are stateful (bad)
         int region = ThermoMath.region_given_pvt(pressure,volume,temperature);
         if (region != 1)
         {
@@ -780,9 +797,9 @@ public class ThermoState : MonoBehaviour
 
       switch (region)
       {
-        case 0: quality = 0; internalenergy = ThermoMath.u_given_vt(volume, temperature, region); break; //subcooled liquid
-        case 1: quality = ThermoMath.x_given_pv(pressure, volume, region); internalenergy = ThermoMath.u_given_px(pressure, quality, region); break; //two-phase region
-        case 2: quality = 1; internalenergy = ThermoMath.u_given_vt(volume, temperature, region); break; //superheated vapor
+        case ThermoMath.region_liquid:   quality = 0;                                               internalenergy = ThermoMath.u_given_vt(volume, temperature, region); break;
+        case ThermoMath.region_twophase: quality = ThermoMath.x_given_pv(pressure, volume, region); internalenergy = ThermoMath.u_given_px(pressure, quality, region);   break;
+        case ThermoMath.region_vapor:    quality = 1;                                               internalenergy = ThermoMath.u_given_vt(volume, temperature, region); break;
       }
     }
     catch (Exception e)
@@ -807,7 +824,7 @@ public class ThermoState : MonoBehaviour
       
       switch(region)
       {
-        case 1:
+        case ThermoMath.region_twophase:
           double new_x = ThermoMath.x_given_ph(pressure,new_h, region);
           //at this point, we have enough internal state to derive the rest
           enthalpy = new_h;
@@ -817,8 +834,8 @@ public class ThermoState : MonoBehaviour
           entropy = ThermoMath.s_given_px(pressure,new_x, region);
           internalenergy = ThermoMath.u_given_px(pressure,new_x, region);
           break;
-        case 0:
-        case 2:
+        case ThermoMath.region_liquid:
+        case ThermoMath.region_vapor:
           //at this point, we have enough internal state to derive the rest
           enthalpy = new_h;
           volume = ThermoMath.v_given_ph(pressure, new_h, region);
@@ -831,9 +848,9 @@ public class ThermoState : MonoBehaviour
       region = ThermoMath.region_given_pvt(pressure,volume,temperature);
       switch(region)
       {
-        case 0: quality = 0;                                       break; //subcooled liquid
-        case 1: quality = ThermoMath.x_given_pv(pressure, volume, region); break; //two-phase region
-        case 2: quality = 1;                                       break; //superheated vapor
+        case ThermoMath.region_liquid:   quality = 0;                                               break;
+        case ThermoMath.region_twophase: quality = ThermoMath.x_given_pv(pressure, volume, region); break;
+        case ThermoMath.region_vapor:    quality = 1;                                               break;
       }
     }
     catch(Exception e) {}
@@ -865,9 +882,9 @@ public class ThermoState : MonoBehaviour
       region = ThermoMath.region_given_pvt(pressure,volume,temperature);
       switch(region)
       {
-        case 0: quality = 0;                                       break; //subcooled liquid
-        case 1: quality = ThermoMath.x_given_pv(pressure, volume, region); break; //two-phase region
-        case 2: quality = 1;                                       break; //superheated vapor
+        case ThermoMath.region_liquid:   quality = 0;                                               break;
+        case ThermoMath.region_twophase: quality = ThermoMath.x_given_pv(pressure, volume, region); break;
+        case ThermoMath.region_vapor:    quality = 1;                                               break;
       }
     }
     catch(Exception e) {}
@@ -885,9 +902,7 @@ public class ThermoState : MonoBehaviour
       //default guess
       double new_u = internalenergy;
       double new_v = volume;
-
-      //already done!
-      new_v = ThermoMath.v_given_pt(new_p,temperature, region);
+      new_v = ThermoMath.v_given_pt(new_p,temperature, region); //ERROR: DO NOT USE IN VAPOR DOME (safe assuming any delta p sufficient to _leave_ vapor dome)
       new_u = ThermoMath.u_given_pt(new_p,temperature, region);
       //at this point, we have enough internal state to derive the rest
       pressure = new_p;
@@ -896,6 +911,13 @@ public class ThermoState : MonoBehaviour
       enthalpy = ThermoMath.h_given_vt(volume,temperature, region);
       entropy = ThermoMath.s_given_vt(volume,temperature, region);
       region = ThermoMath.region_given_pvt(pressure,volume,temperature);
+      switch(region)
+      {
+        case ThermoMath.region_liquid:   quality = 0;                                               break;
+        case ThermoMath.region_twophase: quality = ThermoMath.x_given_pv(pressure, volume, region); break;
+        case ThermoMath.region_vapor:    quality = 1;                                               break;
+      }
+        
     }
     catch(Exception e) {}
 
@@ -911,13 +933,13 @@ public class ThermoState : MonoBehaviour
 
       switch(region)
       {
-        case 0: //subcooled liquid
-        case 1: //two-phase region
+        case ThermoMath.region_liquid: //subcooled liquid
+        case ThermoMath.region_twophase: //two-phase region
         {
           //AVOID THESE SCENARIOS
         }
         break;
-        case 2: //superheated vapor
+        case ThermoMath.region_vapor: //superheated vapor
         {
           //default guess
           double new_t = temperature;
@@ -928,6 +950,7 @@ public class ThermoState : MonoBehaviour
           new_v = volume*Math.Pow(pressure/new_p,1.0/k);
           new_u = internalenergy-((new_p*new_v-pressure*volume)/(1-k));
           new_t = ThermoMath.iterate_t_given_p_verify_u(temperature,pressure,new_u, region);
+          //new_t = ThermoMath.iterate_t_given_pv(temperature,pressure,new_v, region);
 
           //at this point, we have enough internal state to derive the rest
           pressure = new_p;
@@ -935,8 +958,8 @@ public class ThermoState : MonoBehaviour
           temperature = new_t;
           internalenergy = new_u;
           enthalpy = ThermoMath.h_given_vt(volume,temperature, region);
-          entropy = ThermoMath.s_given_vt(volume,temperature, region);
-          region = ThermoMath.region_given_pvt(pressure,volume,temperature);
+          entropy  = ThermoMath.s_given_vt(volume,temperature, region);
+          region   = ThermoMath.region_given_pvt(pressure,volume,temperature);
         }
         break;
       }
@@ -964,10 +987,26 @@ public class ThermoState : MonoBehaviour
     contents.transform.localScale = contents_lt;
 
     Vector3 water_lt = water.transform.localScale;
-    water_lt.y = 1f-(float)quality;
+    float q = (float)quality;
+    switch (region)
+    {
+      case ThermoMath.region_liquid:
+      case ThermoMath.region_vapor:
+        water_lt.y = 1f - q;
+        break;
+      case ThermoMath.region_twophase:
+/*      
+        //This eqn would derive "quality as percentage of volume" from "quality as a percentage of mass"
+        //apparently "quality" is already "percentage of volume" (which seems strange to me but ok)
+        float vliq = (float)ThermoMath.vliq_given_p(pressure, region);
+        float vvap = (float)ThermoMath.vvap_given_p(pressure, region);
+        q = (vliq * q) / ((vliq * q) + (vvap * (1 - q)));
+*/
+        //so just do the same thing regardless of region
+        water_lt.y = 1f - q;
+        break;
+    }
     water.transform.localScale = water_lt;
-    //Vector3 steam_lt = steam.transform.localScale;
-    //steam_lt.y = (float)quality;
     //steam.transform.localScale = -1f*steam_lt;
   }
 
@@ -975,9 +1014,9 @@ public class ThermoState : MonoBehaviour
   {
     switch(region)
     {
-      case 0: return "Subcooled Liquid";
-      case 1: return "Two-Phase";
-      case 2: return "Superheated Vapor";
+      case ThermoMath.region_liquid:   return "Subcooled Liquid";
+      case ThermoMath.region_twophase: return "Two-Phase";
+      case ThermoMath.region_vapor:    return "Superheated Vapor";
     }
     return "Undefined";
   }
@@ -992,12 +1031,12 @@ public class ThermoState : MonoBehaviour
     plot_lbase_prev = plot_lbase;
     if(modified) genMesh();
 
-    if(Math.Abs(pressure - prev_pressure)              > ThermoMath.p_smallstep) text_pressure.SetText(      string.Format("P: {0:#.##E+0} kPa",   (float)pressure/1000f));
+    if(Math.Abs(pressure - prev_pressure)              > ThermoMath.p_smallstep) text_pressure.SetText(      string.Format("P: {0:#.##e+0} kPa",   (float)pressure/1000f));
     if(Math.Abs(temperature - prev_temperature)        > ThermoMath.t_smallstep) text_temperature.SetText(                 "T: {0:3}°K ({1:3}°C)", (float)temperature, (float)temperature-273.15f);
-    if(Math.Abs(volume - prev_volume)                  > ThermoMath.v_smallstep) text_volume.SetText(        string.Format("v: {0:#.##E+0} M³/kg", (float)volume));
-    if(Math.Abs(internalenergy - prev_internalenergy)  > ThermoMath.u_smallstep) text_internalenergy.SetText(string.Format("u: {0:#.##E+0} kJ/kg", (float)internalenergy/1000f));
+    if(Math.Abs(volume - prev_volume)                  > ThermoMath.v_smallstep) text_volume.SetText(        string.Format("v: {0:#.##e+0} M³/kg", (float)volume));
+    if(Math.Abs(internalenergy - prev_internalenergy)  > ThermoMath.u_smallstep) text_internalenergy.SetText(string.Format("u: {0:#.##e+0} kJ/kg", (float)internalenergy/1000f));
     if(Math.Abs(entropy - prev_entropy)                > ThermoMath.s_smallstep) text_entropy.SetText(                     "s: {0:3} kJ/kgK",      (float)entropy/1000f);
-    if(Math.Abs(enthalpy - prev_enthalpy)              > ThermoMath.h_smallstep) text_enthalpy.SetText(      string.Format("h: {0:#.##E+0} kJ/kg", (float)enthalpy/1000f));
+    if(Math.Abs(enthalpy - prev_enthalpy)              > ThermoMath.h_smallstep) text_enthalpy.SetText(      string.Format("h: {0:#.##e+0} kJ/kg", (float)enthalpy/1000f));
     if(region == 1 && Math.Abs(quality - prev_quality) > ThermoMath.x_smallstep) text_quality.SetText(                     "x: {0:3}%", (float)(quality * 100f));
     if(region != prev_region)
     {

@@ -155,8 +155,8 @@ public class World : MonoBehaviour
     t = GameObject.Find("Tool_Coil"     ).GetComponent<Tool>(); tool_coil      = t; tools.Add(t); t.dial_dial.min_map = 0f; t.dial_dial.max_map = -1000f*100f;                       t.dial_dial.unit = "J/s"; t.dial_dial.display_unit = "kJ/s"; t.dial_dial.display_mul = 0.001f;
     double kg_corresponding_to_10mpa = thermo.surfacearea_insqr*(10*1453.8/*MPa->psi*/)*0.453592/*lb->kg*/;
     double kg_corresponding_to_2mpa  = thermo.surfacearea_insqr*(2 *1453.8/*MPa->psi*/)*0.453592/*lb->kg*/; // 10 MPa seems way too big, sooooo... we'll just do 2 MPa.
-    t = GameObject.Find("Tool_Weight"   ).GetComponent<Tool>(); tool_weight    = t; tools.Add(t); t.dial_dial.min_map =  0f; t.dial_dial.max_map =  (float)kg_corresponding_to_10mpa; t.dial_dial.unit = "kg";  t.dial_dial.display_unit = t.dial_dial.unit;
-    t = GameObject.Find("Tool_Balloon"  ).GetComponent<Tool>(); tool_balloon   = t; tools.Add(t); t.dial_dial.min_map =  0f; t.dial_dial.max_map = -(float)kg_corresponding_to_10mpa; t.dial_dial.unit = "kg";  t.dial_dial.display_unit = t.dial_dial.unit;
+    t = GameObject.Find("Tool_Weight"   ).GetComponent<Tool>(); tool_weight    = t; tools.Add(t); t.dial_dial.min_map =  0f; t.dial_dial.max_map =  (float)kg_corresponding_to_10mpa;        t.dial_dial.unit = "kg";  t.dial_dial.display_unit = t.dial_dial.unit;
+    t = GameObject.Find("Tool_Balloon"  ).GetComponent<Tool>(); tool_balloon   = t; tools.Add(t); t.dial_dial.min_map =  0f; t.dial_dial.max_map = -(float)kg_corresponding_to_10mpa/500.0f; t.dial_dial.unit = "kg";  t.dial_dial.display_unit = t.dial_dial.unit;
 
     //Phil 06/23/2020: I can't figure out why tool_insulator and tool_clamp are both disabled. In the editor, they appear enabled until I hit play. I can't find anywhere in code that disables them. But they get to here, and are disabled, so I'm just re-enabling them
     tool_insulator.enabled = true;

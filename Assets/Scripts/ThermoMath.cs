@@ -43,9 +43,9 @@ public static class ThermoMath
   */
 
   //region: 0 subcooled liquid, 1 two-phase, 2 superheated vapor
-  public static int region_liquid;
-  public static int region_twophase;
-  public static int region_vapor;
+  public const int region_liquid = 0;
+  public const int region_twophase = 1;
+  public const int region_vapor = 2;
 
   //Pa
   public static double p_min;
@@ -96,10 +96,6 @@ public static class ThermoMath
     got_error = false;
     IF97.initRegions();
 
-    region_liquid = 0;
-    region_twophase = 1;
-    region_vapor = 2;
-
     //Pa
     p_min = IF97.get_Pmin()*1000000.0; // 611.213
     p_max = IF97.get_Pmax()*1000000.0; // 100000000
@@ -123,10 +119,10 @@ public static class ThermoMath
     t_smallstep = 0.001;
 
     //J/kg
-    u_min = 0.1238;
-    u_max = 3700;
-    u_neutral = new double[]{83.28,83.28,83.28}; //note: all get calculated/set below
-    u_smallstep = 0.001;
+    u_min = 123.8;
+    u_max = 3700000.0;
+    u_neutral = new double[]{83280.0,8328.0,8328.0}; //note: all get calculated/set below
+    u_smallstep = 1;
 
     //J/kgK
     s_min = IF97.Smin*1000; //0.0
@@ -143,7 +139,7 @@ public static class ThermoMath
     //%
     x_min = 0.0;
     x_max = 1.0;
-    x_neutral = new double[]{0,0,0};
+    x_neutral = new double[]{0,0.5,1};
     x_smallstep = 0.00001;
 
     //fill in missing/sloppy neutrals (note: if any of these fallback on "fallback_region", defeats the purpose. do not let that happen)
@@ -161,6 +157,10 @@ public static class ThermoMath
 
   static double SAMPLE_LBASE = 1.6f;
   static double sample(double t) { return Math.Pow(t,SAMPLE_LBASE); }
+
+
+/*
+  //FOR DEBUGGING
   public static void compare_impls()
   {
     int samples = 350; //match value in ThermoState to match sample points
@@ -184,6 +184,7 @@ public static class ThermoMath
     }
 
   }
+*/
 
   static double Lerpd(double a, double b, double t) { return (b-a)*t+a; }
 
@@ -226,8 +227,12 @@ public static class ThermoMath
     return -1;
   }
   */
+
+// Currently unused; 6/30/2020
+/*
   public static int region_given_ph(double p, double h)
   {
+    //Be careful - don’t calculate T from these if you are close to the saturation line (within 25 mK).
     int r = IF97.Region_ph(p/1000000.0, h/1000.0); 
     switch(r)
     {
@@ -242,6 +247,7 @@ public static class ThermoMath
     }
     return -1;
   }
+*/
   public static int region_given_ps(double p, double s)
   {
     int r = IF97.Region_ps(p/1000000.0, s/1000.0);
@@ -280,15 +286,12 @@ public static class ThermoMath
   public static double percent_given_x(   double x) { return x; } //x already is a percent
 
   //rule of naming for consistency: prefer lexical ordering "p < v < t < u < s < h < q", ie "p_given_vt" rather than "p_given_tv"
-  //note- where it says "UNIT CONVERSION UNTESTED", that measn I haven't yet verified that it performs the correct translation of units between APIs (ie, one may be expecting kPa, and another just Pa). I have learned to not trust the documentation of either API (IAPWS95 or IF97)
 
   public static double p_given_vt(double v, double t, int fallback_region=0)
   {
-    double ret_val;
     try
     {
-      ret_val = IAPWS95.IAPWS95_pressure(1.0 / v, t) * 1000.0; //expects:kg/M³,K returns kPa
-      return ret_val;
+      return IAPWS95.IAPWS95_pressure(1.0 / v, t) * 1000.0; //expects:kg/M³,K returns kPa
     }
     catch (Exception ex)
     {
@@ -296,15 +299,12 @@ public static class ThermoMath
       got_error = true;
       return p_neutral[fallback_region];
     }
-    //return IAPWS95.IAPWS95_pressure(1.0/v,t)*1000.0; //expects:kg/M³,K returns kPa
   }
   public static double v_given_pt(double p, double t, int fallback_region=0) //DO NOT USE IN VAPOR DOME
   {
-    double ret_val;
     try
     {
-      ret_val = 1.0/IF97.rhomass_Tp(t,p/1000000.0); //expects:K,MPa returns kg/M³
-      return ret_val;
+      return 1.0/IF97.rhomass_Tp(t,p/1000000.0); //expects:K,MPa returns kg/M³
     }
     catch(Exception ex)
     {
@@ -312,16 +312,13 @@ public static class ThermoMath
       got_error = true;
       return v_neutral[fallback_region];
     }
-    //return 1.0/IF97.rhomass_Tp(t,p/1000000.0); //expects:K,MPa returns kg/M³
   }
 
   public static double v_given_ph(double p, double h, int fallback_region=0)
   {
-    double ret_val;
     try
     {
-      ret_val = 1.0/IF97.rhomass_phmass(p/1000000.0,h/1000.0); //UNIT CONVERSION UNTESTED!
-      return ret_val;
+      return 1.0/IF97.rhomass_phmass(p/1000000.0,h/1000.0);
     }
     catch (Exception ex)
     {
@@ -329,16 +326,13 @@ public static class ThermoMath
       got_error = true;
       return v_neutral[fallback_region];
     }
-    //return 1.0/IF97.rhomass_phmass(p/1000000.0,h/1000.0); //UNIT CONVERSION UNTESTED!
   }
 
   public static double v_given_px(double p,double x, int fallback_region=0) //ONLY USE IN VAPOR DOME
   {
-    double ret_val;
     try
     {
-      ret_val = 1.0/IF97.rhomass_pQ(p/1000000.0,x); //UNIT CONVERSION UNTESTED!
-      return ret_val;
+      return 1.0/IF97.rhomass_pQ(p/1000000.0,x);
     }
     catch (Exception ex)
     {
@@ -346,16 +340,13 @@ public static class ThermoMath
       got_error = true;
       return v_neutral[fallback_region];
     }
-    //return 1.0/IF97.rhomass_pQ(p/1000000.0,x); //UNIT CONVERSION UNTESTED!
   }
 
   public static double t_given_ph(double p, double h, int fallback_region=0)
   {
-    double ret_val;
     try
     {
-      ret_val = IF97.T_phmass(p/1000000.0,h/1000.0); //UNIT CONVERSION UNTESTED!
-      return ret_val;
+      return IF97.T_phmass(p/1000000.0,h/1000.0);
     }
     catch (Exception ex)
     {
@@ -363,16 +354,13 @@ public static class ThermoMath
       got_error = true;
       return t_neutral[fallback_region];
     }
-    //return IF97.T_phmass(p/1000000.0,h/1000.0); //UNIT CONVERSION UNTESTED!
   }
 
   public static double tsat_given_p(double p, int fallback_region=0)
   {
-    double ret_val;
     try
     {
-      ret_val = IF97.Tsat97(p/1000000.0); //UNIT CONVERSION UNTESTED!
-      return ret_val;
+      return IF97.Tsat97(p/1000000.0);
     }
     catch (Exception ex)
     {
@@ -380,16 +368,13 @@ public static class ThermoMath
       got_error = true;
       return t_neutral[fallback_region];
     }
-    //return IF97.Tsat97(p/1000000.0); //UNIT CONVERSION UNTESTED!
   }
 
   public static double vliq_given_p(double p, int fallback_region=0)
   {
-    double ret_val;
     try
     {
-      ret_val = 1.0/IF97.rholiq_p(p/1000000.0); //expects:MPa returns kg/M³
-      return ret_val;
+      return 1.0/IF97.rholiq_p(p/1000000.0); //expects:MPa returns kg/M³
     }
     catch (Exception ex)
     {
@@ -397,16 +382,13 @@ public static class ThermoMath
       got_error = true;
       return v_neutral[fallback_region];
     }
-    //return 1.0/IF97.rholiq_p(p/1000000.0); //expects:MPa returns kg/M³
   }
 
   public static double vvap_given_p(double p, int fallback_region = 0)
   {
-    double ret_val;
     try
     {
-      ret_val = 1.0/IF97.rhovap_p(p/1000000.0); //expects:MPa returns kg/M³
-      return ret_val;
+      return 1.0/IF97.rhovap_p(p/1000000.0); //expects:MPa returns kg/M³
     }
     catch (Exception ex)
     {
@@ -414,16 +396,13 @@ public static class ThermoMath
       got_error = true;
       return v_neutral[fallback_region];
     }
-    //return 1.0/IF97.rhovap_p(p/1000000.0); //expects:MPa returns kg/M³
   }
 
   public static double u_given_pt(double p, double t, int fallback_region = 0) //DO NOT USE IN VAPOR DOME
   {
-    double ret_val;
     try
     {
-      ret_val = IF97.umass_Tp(t, p/1000000.0)*1000f; //UNIT CONVERSION UNTESTED!
-      return ret_val;
+      return IF97.umass_Tp(t, p/1000000.0) * 1000;
     }
     catch (Exception ex)
     {
@@ -431,16 +410,13 @@ public static class ThermoMath
       got_error = true;
       return u_neutral[fallback_region];
     }
-    //return IF97.umass_Tp(t, p/1000000.0)*1000f; //UNIT CONVERSION UNTESTED!
   }
 
   public static double u_given_vt(double v, double t, int fallback_region=0)
   {
-    double ret_val;
     try
     {
-      ret_val = IAPWS95.IAPWS95_internal_energy(1f/v,t)*1000f; //UNIT CONVERSION UNTESTED!
-      return ret_val;
+      return IAPWS95.IAPWS95_internal_energy(1f / v, t) * 1000;
     }
     catch (Exception ex)
     {
@@ -448,16 +424,13 @@ public static class ThermoMath
       got_error = true;
       return u_neutral[fallback_region];
     }
-    //return IAPWS95.IAPWS95_internal_energy(1f/v,t)*1000f; //UNIT CONVERSION UNTESTED!
   }
 
   public static double u_given_px(double p, double x, int fallback_region=0)
   {
-    double ret_val;
     try
     {
-      ret_val = IF97.umass_pQ(p/1000000.0,x)*1000f; //UNIT CONVERSION UNTESTED!
-      return ret_val;
+      return IF97.umass_pQ(p/1000000.0,x) * 1000;
     }
     catch (Exception ex)
     {
@@ -465,16 +438,13 @@ public static class ThermoMath
       got_error = true;
       return u_neutral[fallback_region];
     }
-    //return IF97.umass_pQ(p/1000000.0,x)*1000f; //UNIT CONVERSION UNTESTED!
   }
 
   public static double s_given_vt(double v, double t, int fallback_region=0)
   {
-    double ret_val;
     try
     {
-      ret_val = IAPWS95.IAPWS95_entropy(1f/v,t)*1000f; //UNIT CONVERSION UNTESTED!
-      return ret_val;
+      return IAPWS95.IAPWS95_entropy(1f/v,t)*1000f;
     }
     catch (Exception ex)
     {
@@ -482,16 +452,13 @@ public static class ThermoMath
       got_error = true;
       return s_neutral[fallback_region];
     }
-    //return IAPWS95.IAPWS95_entropy(1f/v,t)*1000f; //UNIT CONVERSION UNTESTED!
   }
 
   public static double s_given_px(double p, double x, int fallback_region=0)
   {
-    double ret_val;
     try
     {
-      ret_val = IF97.smass_pQ(p/1000000.0,x)*1000f; //UNIT CONVERSION UNTESTED!
-      return ret_val;
+      return IF97.smass_pQ(p/1000000.0,x)*1000f;
     }
     catch (Exception ex)
     {
@@ -499,16 +466,13 @@ public static class ThermoMath
       got_error = true;
       return s_neutral[fallback_region];
     }
-    //return IF97.smass_pQ(p/1000000.0,x)*1000f; //UNIT CONVERSION UNTESTED!
   }
 
   public static double h_given_vt(double v, double t, int fallback_region=0)
   {
-    double ret_val;
     try
     {
-      ret_val = IAPWS95.IAPWS95_enthalpy(1f/v,t)*1000f; //UNIT CONVERSION UNTESTED!
-      return ret_val;
+      return IAPWS95.IAPWS95_enthalpy(1f/v,t)*1000f;
     }
     catch (Exception ex)
     {
@@ -516,20 +480,17 @@ public static class ThermoMath
       got_error = true;
       return h_neutral[fallback_region];
     }
-    //return IAPWS95.IAPWS95_enthalpy(1f/v,t)*1000f; //UNIT CONVERSION UNTESTED!
   }
 
   public static double x_given_pv(double p, double v, int fallback_region=0) //ONLY USE IN VAPOR DOME
   {
-    double ret_val;
     try
     {
       //f means saturated liquid,
       //g means saturated gas
       double vf = 1.0/IF97.rholiq_p(p/1000000.0);
       double vg = 1.0/IF97.rhovap_p(p/1000000.0);
-      ret_val = (v-vf)/(vg-vf); //UNIT CONVERSION UNTESTED!
-      return ret_val;
+      return (v-vf)/(vg-vf);
     }
     catch (Exception ex)
     {
@@ -537,16 +498,13 @@ public static class ThermoMath
       got_error = true;
       return x_neutral[fallback_region];
     }
-    //return (v-vf)/(vg-vf); //UNIT CONVERSION UNTESTED!
   }
 
   public static double x_given_ph(double p, double h, int fallback_region=0) //ONLY USE IN VAPOR DOME
   {
-    double ret_val;
     try
     {
-      ret_val = IF97.Q_phmass(p/1000000.0,h/1000.0); //UNIT CONVERSION UNTESTED!
-      return ret_val;
+      return IF97.Q_phmass(p/1000000.0,h/1000.0);
     }
     catch (Exception ex)
     {
@@ -554,7 +512,6 @@ public static class ThermoMath
       got_error = true;
       return x_neutral[fallback_region];
     }
-    //return IF97.Q_phmass(p/1000000.0,h/1000.0); //UNIT CONVERSION UNTESTED!
   }
 
   public static double iterate_t_given_p_verify_u(double t, double p, double u, int fallback_region=0) //t = first guess
@@ -563,7 +520,7 @@ public static class ThermoMath
     {
       int MAX_ITERS = 100;     //max # of iterations before giving up //TODO: define intentionally
       double MAX_DELTA = 0.01; //acceptible solution error //TODO: define intentionally
-      double step = 0.01;      //size of first step (shrinks every time it overshoots) //TODO: define intentionally
+      double step = 10.0;      //size of first step (shrinks every time it overshoots) //TODO: define intentionally
       double guess = t;
       double mark = u;
       double delta = Math.Abs(u_given_pt(p,guess)-mark);
@@ -599,16 +556,16 @@ public static class ThermoMath
   {
     try
     {
-      int MAX_ITERS = 100;     //max # of iterations before giving up //TODO: define intentionally
+      int MAX_ITERS = 200;     //max # of iterations before giving up //TODO: define intentionally
       double MAX_DELTA = 0.01; //acceptible solution error //TODO: define intentionally
-      double step = 0.01;      //size of first step (shrinks every time it overshoots) //TODO: define intentionally
+      double step = 100.0;      //size of first step (shrinks every time it overshoots) //TODO: define intentionally
       double guess = t;
       double mark = u;
-      double delta = u_given_vt(v,guess)-mark;
+      double delta = Math.Abs(u_given_vt(v,guess,fallback_region)-mark);
       for(int i = 0; i < MAX_ITERS && delta > MAX_DELTA; i++)
       {
-        double delta_a = Math.Abs(u_given_vt(v,guess+ step     )-mark);
-        double delta_b = Math.Abs(u_given_vt(v,guess-(step/2.0))-mark);
+        double delta_a = Math.Abs(u_given_vt(v,guess+ step     ,fallback_region)-mark);
+        double delta_b = Math.Abs(u_given_vt(v,guess-(step/2.0),fallback_region)-mark);
         if(delta < delta_a && delta < delta_b) //original guess superior
           step = step / 2.0;
         else if(delta_a < delta_b)
@@ -632,40 +589,44 @@ public static class ThermoMath
       return t_neutral[fallback_region];
     }
   }
-  public static double iterate_t_given_pv(double t, double step, double p, double v, int fallback_region=0) //t = first guess, step = first step
+  public static double iterate_t_given_pv(double t, double p, double v, int fallback_region=0) //t = first guess, step = first step
   {
     try
     {
       int MAX_ITERS = 100;     //max # of iterations before giving up //TODO: define intentionally
       double MAX_DELTA = 0.01; //acceptible solution error //TODO: define intentionally
+      double step = 100.0;
       double guess = t;
       double vdelta = MAX_DELTA + 1.0;
       double pdelta = MAX_DELTA + 1.0; ;
       for (int i = 0; i < MAX_ITERS && (vdelta > MAX_DELTA || pdelta > MAX_DELTA); i++)
       {
         //one iteration on v
-        vdelta = Math.Abs(v_given_pt(p, guess) - v);
-        double vdelta_a = Math.Abs(v_given_pt(p, guess + step) - v);
-        double vdelta_b = Math.Abs(v_given_pt(p, guess - (step / 2.0)) - v);
-        if (vdelta < vdelta_a && vdelta < vdelta_b) //unaltered guess is superior
-          step = step / 2.0;
-        else if (vdelta_a < vdelta_b)
+        if(region_given_pvt(p, v, guess) != region_twophase)
         {
-          vdelta = vdelta_a;
-          guess += step;
+          vdelta          = Math.Abs(v_given_pt(p, guess,               fallback_region) - v);
+          double vdelta_a = Math.Abs(v_given_pt(p, guess + step,        fallback_region) - v);
+          double vdelta_b = Math.Abs(v_given_pt(p, guess - (step / 2.0),fallback_region) - v);
+          if (vdelta < vdelta_a && vdelta < vdelta_b) //unaltered guess is superior
+            step = step / 2.0;
+          else if (vdelta_a < vdelta_b)
+          {
+            vdelta = vdelta_a;
+            guess += step;
+          }
+          else
+          {
+            vdelta = vdelta_b;
+            step = step / -2.0;
+            guess += step;
+          }
+          i++; //force "iteration counter", bc we do two iters per loop
         }
-        else
-        {
-          vdelta = vdelta_b;
-          step = step / -2.0;
-          guess += step;
-        }
-        i++; //force "iteration counter", bc we do two iters per loop
 
         //another iteration on p
-        pdelta = Math.Abs(p_given_vt(v, guess) - p);
-        double pdelta_a = Math.Abs(p_given_vt(v, guess + step) - p);
-        double pdelta_b = Math.Abs(p_given_vt(v, guess - (step / 2.0)) - p);
+        pdelta          = Math.Abs(p_given_vt(v, guess,                fallback_region) - p);
+        double pdelta_a = Math.Abs(p_given_vt(v, guess + step,         fallback_region) - p);
+        double pdelta_b = Math.Abs(p_given_vt(v, guess - (step / 2.0), fallback_region) - p);
         if (pdelta < pdelta_a && pdelta < pdelta_b) //unaltered guess is superior
           step = step / 2.0;
         else if (pdelta_a < pdelta_b)
