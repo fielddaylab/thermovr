@@ -518,7 +518,7 @@ public static class ThermoMath
   {
     try
     {
-      return IF97.Q_pumass(p/1000000.0,u);
+      return IF97.Q_pumass(p/1000000.0,u/1000.0);
     }
     catch (Exception ex)
     {
@@ -573,7 +573,7 @@ public static class ThermoMath
     try
     {
       int MAX_ITERS = 200; //max # of iterations before giving up
-      double MAX_DELTA = 0.01; //acceptible solution error
+      double MAX_DELTA = 0.0001; //acceptible solution error
       double step = 10.0; //size of first step (shrinks every time it overshoots)
       double guess = t;
       double mark = u;
@@ -676,8 +676,8 @@ public static class ThermoMath
     try
     {
       int MAX_ITERS = 200; //max # of iterations before giving up
-      double MAX_DELTA = 0.0000000001; //acceptible solution error
-      double step = 1.0; //size of first step (shrinks every time it overshoots)
+      double MAX_DELTA = 0.001; //acceptible solution error
+      double step = 10.0; //size of first step (shrinks every time it overshoots)
       double guess = p;
       double delta = Math.Abs(x_given_pu(guess,u,fallback_region)-x_given_pv(guess,v,fallback_region));
       int i = 0;

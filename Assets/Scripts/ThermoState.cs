@@ -964,7 +964,7 @@ public class ThermoState : MonoBehaviour
       double new_t = temperature;
       double new_p = pressure;
 
-      if (region != ThermoMath.region_twophase)
+      if(region != ThermoMath.region_twophase)
       {
         new_t = ThermoMath.iterate_t_given_v_verify_u(temperature, volume, new_u, region); //try to move t assuming we stay in starting region
         if (region == ThermoMath.region_liquid && new_t > ThermoMath.tsat_given_p(pressure)) //overshot
@@ -977,15 +977,15 @@ public class ThermoState : MonoBehaviour
           new_t = ThermoMath.tsat_given_p(pressure);
           region = ThermoMath.region_twophase;
         }
+        else
+        {
+          internalenergy = new_u;
+          temperature = new_t;
+          pressure = ThermoMath.p_given_vt(volume, temperature, region);
+        }
       }
 
-      if (region != ThermoMath.region_twophase) //still not twophase
-      {
-        internalenergy = new_u;
-        temperature = new_t;
-        pressure = ThermoMath.p_given_vt(volume, temperature, region);
-      }
-      else //twophase
+      if(region == ThermoMath.region_twophase) //either newly, or all along
       {
         new_p = ThermoMath.iterate_p_given_vu(pressure, volume, new_u, region);
         new_t = ThermoMath.tsat_given_p(new_p);
