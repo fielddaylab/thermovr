@@ -16,4 +16,4 @@ Unity Version: 2019.4.1f1
 ** SDK - Platform Tools
 * Remove any packages from Legacy XR Input, Oculus XR
 * Install "3d Living Room" asset from Barking Dog
-* Install "Oculus Integration" asset from App Store
+* Install "Oculus Integration" asset from App Store. It may ask to upgrade the OVR and Spacailizers and restart Oculus. Do so.
