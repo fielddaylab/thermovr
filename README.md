@@ -4,7 +4,7 @@ This is a Unity-based simulation of the thermodynamics properties of water, targ
 
 Unity Version: 2019.4.1f1
 
-## Install Steps
+## Build Steps
 
 * Clone
 * Install Correct unity version
