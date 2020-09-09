@@ -15,7 +15,7 @@ Unity Version: 2019.4.1f1
 ** SDK Tools (In the “Android SDK Tools” tab)
 ** SDK - Platform Tools
 * Remove any packages that may exist: Legacy XR Input, Oculus (Desktop), OpenVR (Desktop), Oculus XR
-* Install "3d Living Room" asset from Barking Dog
+* Download and Import "3d Living Room" asset from Barking Dog. IF it prompts to install package dependancies, do so.
 * Install "Oculus Integration" asset from App Store. It may ask to upgrade the OVR and Spacailizers and restart Oculus. Do so.
 * It will wartn that you need to install the Oculus (Desktop) and OpenVR (Desktop) pacakges. Do so using the package manager.
 * In Build Settings, change the platform to Android. MAke sure Scenes/MainScene is selected.
