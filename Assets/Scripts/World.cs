@@ -949,11 +949,17 @@ public class World : MonoBehaviour
 
     double insulation_coefficient = tool_insulator.engaged ? 1.0f : CONTAINER_INSULATION_COEFFICIENT;
     double heat_joules = insulation_coefficient * applied_heat * (double)Time.deltaTime;
-    if(!tool_insulator.engaged) //heat leak
+/*
+    if (!tool_insulator.engaged) //heat leak
     {
-      float room_temp = 295.372f;
-      heat_joules += (room_temp-thermo.temperature)*100 * (double)Time.deltaTime; //nonsense calculation
+      double room_temp = 295.372f;
+      double diff = room_temp - thermo.temperature;
+      heat_joules += diff * 100 * (double)Time.deltaTime; //nonsense calculation
+      arrows.Go(diff < 0);
+      arrows.SetFlow(diff / 100.0f);
     }
+    else if (arrows.running) arrows.Stop();
+*/
     if(tool_clamp.engaged) thermo.add_heat_constant_v(heat_joules);
     else                   thermo.add_heat_constant_p(heat_joules);
 
