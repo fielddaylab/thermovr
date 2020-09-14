@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using Boo.Lang.Runtime;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -12,8 +13,8 @@ public class Touchable : MonoBehaviour
   protected GameObject rhand;
   [System.NonSerialized]
   public bool grabbed = false;
-  protected Collider[] lhand_c;
-  protected Collider[] rhand_c;
+  protected Collider lhand_c;
+  protected Collider rhand_c;
   [System.NonSerialized]
   public Transform og_parent;
 
@@ -21,8 +22,10 @@ public class Touchable : MonoBehaviour
   {
     lhand = GameObject.Find("LeftControllerAnchor");
     rhand = GameObject.Find("RightControllerAnchor");
-    lhand_c = lhand.GetComponentsInChildren<Collider>();
-    rhand_c = rhand.GetComponentsInChildren<Collider>();
+    //lhand_c = lhand.GetComponentsInChildren<Collider>();
+    //rhand_c = rhand.GetComponentsInChildren<Collider>();
+    lhand_c = GameObject.Find("LeftControllerAnchor").GetComponent<SphereCollider>();
+    rhand_c = GameObject.Find("RightControllerAnchor").GetComponent<SphereCollider>();
     og_parent = gameObject.transform.parent;
   }
 
@@ -44,52 +47,38 @@ public class Touchable : MonoBehaviour
    */
   private bool cInHandList(Collider c, bool left)
   {
-    Collider[] list = left ? lhand_c : rhand_c;
-    foreach (Collider candidate in list)
-    {
-      if (candidate == c) return true;
-    }
+    Collider hc = left ? lhand_c : rhand_c;
+    if(c == hc) return true; //big volume grab collider
     return false;
   }
 
-  [System.NonSerialized]
+  //[System.NonSerialized]
   public bool ltouch = false;
-  [System.NonSerialized]
+  //[System.NonSerialized]
   public bool rtouch = false;
-  [System.NonSerialized]
+  //[System.NonSerialized]
   public bool touch = false;
-  protected virtual void OnTriggerEnter(Collider c)
+
+  public void deltaTouch(Collider c, bool delta)
   {
-    if (cInHandList(c, true))  ltouch = true;
-    if (cInHandList(c, false)) rtouch = true;
+    if(cInHandList(c, true))  ltouch = delta;
+    if(cInHandList(c, false)) rtouch = delta;
 
     touch = (ltouch || rtouch);
 
-    if (touch)
-    {
-      var light_list = gameObject.GetComponentsInChildren<Lightable>();
-      foreach (Lightable light in light_list)
-      {
-        light.SetLit(true);
-      }
-    }
+    var light_list = gameObject.GetComponentsInChildren<Lightable>();
+    foreach (Lightable light in light_list)
+      light.SetLit(touch);
+  }
+
+  protected virtual void OnTriggerEnter(Collider c)
+  {
+    deltaTouch(c, true);
   }
 
   protected virtual void OnTriggerExit(Collider c)
   {
-    if(cInHandList(c, true))  ltouch = false;
-    if(cInHandList(c, false)) rtouch = false;
-
-    touch = (ltouch || rtouch);
-
-    if (!touch)
-    {
-      var light_list = gameObject.GetComponentsInChildren<Lightable>();
-      foreach (Lightable light in light_list)
-      {
-        light.SetLit(false);
-      }
-    }
+    deltaTouch(c, false);
   }
 
 }

@@ -22,20 +22,25 @@ public class Pressable : Touchable
 
   void Awake()
   {
+/*
     lhand = GameObject.Find("LeftControllerAnchor");
     rhand = GameObject.Find("RightControllerAnchor");
     lhand_c = lhand.GetComponentsInChildren<Collider>();
     rhand_c = rhand.GetComponentsInChildren<Collider>();
     og_parent = gameObject.transform.parent;
+*/
   }
 
   private bool cInHandList(Collider c, bool left)
   {
-    Collider[] list = left ? lhand_c : rhand_c;
-    foreach (Collider candidate in list)
-    {
-      if (candidate == c) return true;
-    }
+    /*
+        Collider[] list = left ? lhand_c : rhand_c;
+        foreach (Collider candidate in list)
+        {
+          if (candidate == c) return true;
+        }
+        return false;
+    */
     return false;
   }
 
@@ -47,6 +52,7 @@ public class Pressable : Touchable
   //public bool touch = false;
   protected override void OnTriggerEnter(Collider c)
   {
+/*
     if (OVRInput.Get(OVRInput.RawAxis1D.LHandTrigger) > 0f && OVRInput.Get(OVRInput.RawAxis1D.LIndexTrigger) == 0f && cInHandList(c, true)) { ltouch = true; }
     if (OVRInput.Get(OVRInput.RawAxis1D.RHandTrigger) > 0f && OVRInput.Get(OVRInput.RawAxis1D.RIndexTrigger) == 0f && cInHandList(c, false)) { rtouch = true; }
     touch = (ltouch || rtouch);
@@ -62,10 +68,12 @@ public class Pressable : Touchable
       //var trans = gameObject.GetComponentInChildren<MeshRenderer>().gameObject.transform;
       //trans.position = new Vector3(trans.position.x, BUTTONS_BASE_HEIGHT, trans.position.z);
     }
+*/
   }
 
   protected override void OnTriggerExit(Collider c)
   {
+/*
     if ((OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger) == 0f || OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger) > 0f) && cInHandList(c, true)) ltouch = false;
     if ((OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger) == 0f || OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger) > 0f) && cInHandList(c, false)) rtouch = false;
     touch = (ltouch || rtouch);
@@ -75,6 +83,7 @@ public class Pressable : Touchable
       //var trans = gameObject.GetComponentInChildren<MeshRenderer>().gameObject.transform;
       //trans.position = new Vector3(trans.position.x, BUTTONS_BASE_HEIGHT, trans.position.z);
     }
+*/
   }
   //GameObject l_finger;
   //GameObject r_finger;

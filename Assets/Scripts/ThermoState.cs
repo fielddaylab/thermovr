@@ -1089,6 +1089,7 @@ public class ThermoState : MonoBehaviour
     float reductionFactor = 0.02f; //hack to reduce overall volume; do all calculations assuming 1.0kg of water, do all visualizations assuming reductionFactor*1.0kg of water. Assuming volume is linearly proportional to molarity (I _think_ it is?), we should be good. If not, we're still better than altering the behavior of vapor at an arbitrary threshhold
     height *= reductionFactor;
     float size_p = height/((float)radius*2f); //"max height" is approx 2x diameter, so this sets size_p to essentially "%_contents_size"
+    if(size_p > 1) size_p = 1; //hard stop on visualization
     Vector3 piston_lt = piston.transform.localPosition;
     piston_lt.y = piston_min_y+size_p*(piston_max_y-piston_min_y);
     piston.transform.localPosition = piston_lt;

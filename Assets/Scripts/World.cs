@@ -78,8 +78,10 @@ public class World : MonoBehaviour
   List<Halfable> halfables;
   GameObject halfer;
   Touchable halfer_touchable;
+  FingerToggleable halfer_fingertoggleable;
   GameObject reset;
   Touchable reset_touchable;
+  FingerToggleable reset_fingertoggleable;
 
   GameObject vessel;
   GameObject graph;
@@ -210,8 +212,10 @@ public class World : MonoBehaviour
 
     halfer = GameObject.Find("Halfer");
     halfer_touchable = halfer.GetComponent<Touchable>();
+    halfer_fingertoggleable = halfer.GetComponent<FingerToggleable>();
     reset = GameObject.Find("Reset");
     reset_touchable = reset.GetComponent<Touchable>();
+    reset_fingertoggleable = reset.GetComponent<FingerToggleable>();
     halfables = new List<Halfable>();
     halfables.Add(GameObject.Find("Container"     ).GetComponent<Halfable>());
     halfables.Add(GameObject.Find("Tool_Insulator").GetComponent<Halfable>());
@@ -652,36 +656,6 @@ public class World : MonoBehaviour
         }
       }
 
-      if (ref_grabbed == null) //still not holding anything
-      {
-        Touchable g = halfer_touchable;
-        if ( //halfing button newly grabbed
-          (left_hand && g.ltouch) ||
-          (!left_hand && g.rtouch)
-        )
-        {
-          ref_grabbed = halfer;
-          g.touch = true;
-          if (ref_grabbed == ref_ograbbed) ref_ograbbed = null;
-          SetAllHalfed(!halfed);
-        }
-      }
-
-      if (ref_grabbed == null) //still not holding anything
-      {
-        Touchable g = reset_touchable;
-        if( //reset button newly grabbed
-          ( left_hand && g.ltouch) ||
-          (!left_hand && g.rtouch)
-        )
-        {
-          ref_grabbed = reset;
-          g.touch = true;                 
-          if(ref_grabbed == ref_ograbbed) ref_ograbbed = null;
-          thermo.Reset();
-        }
-      }
-
       if(ref_grabbed != null) //something newly grabbed
       {
         Halfable h = ref_grabbed.GetComponent<Halfable>();
@@ -731,6 +705,43 @@ public class World : MonoBehaviour
 
     ref_x = hand_pos.x;
     ref_y = hand_pos.y;
+
+    if(ref_grabbed == null) //still not holding anything
+    {
+      if(halfer_fingertoggleable.finger) //finger hitting halfer object
+      {
+        if( //we're currently checking the correct hand
+          (left_hand && halfer_fingertoggleable.lfinger) ||
+          (!left_hand && halfer_fingertoggleable.rfinger)
+        )
+        { //halfer state
+          if(halfer_fingertoggleable.on)
+          {
+            SetAllHalfed(!halfed);
+            halfer_fingertoggleable.on = false;
+          }
+        }
+      }
+      else halfer_fingertoggleable.on = false;
+
+      if(reset_fingertoggleable.finger) //finger hitting reset object
+      {
+        if( //we're currently checking the correct hand
+          (left_hand && reset_fingertoggleable.lfinger) ||
+          (!left_hand && reset_fingertoggleable.rfinger)
+        )
+        { //reset state
+          if(reset_fingertoggleable.on)
+          {
+            for (int i = 0; i < tools.Count; i++)
+              if (tools[i].engaged) DetachTool(tools[i], new Vector3(0.0f, 0.0f, 0.0f));
+            thermo.Reset();
+            reset_fingertoggleable.on = false;
+          }
+        }
+      }
+      else reset_fingertoggleable.on = false;
+    }
 
     //centerer
     if(vrcenter_fingertoggleable.finger) //finger hitting vrcenter object
@@ -962,6 +973,8 @@ public class World : MonoBehaviour
     float lindext = OVRInput.Get(OVRInput.RawAxis1D.LIndexTrigger);
     float rhandt  = OVRInput.Get(OVRInput.RawAxis1D.RHandTrigger);
     float rindext = OVRInput.Get(OVRInput.RawAxis1D.RIndexTrigger);
+
+/*
     //index compatibility
     if (OVRInput.Get(OVRInput.Button.One, OVRInput.Controller.LTouch))
     {
@@ -977,6 +990,8 @@ public class World : MonoBehaviour
     {
       ;
     }
+*/
+
     //test effect of hands one at a time ("true" == "left hand", "false" == "right hand")
     TryHand(true,  lhandt, lindext, lhand.transform.position, lhand_vel, ref lhtrigger, ref litrigger, ref lhtrigger_delta, ref litrigger_delta, ref lz, ref ly, ref lhand, ref lgrabbed, ref rhand, ref rgrabbed); //left hand
     TryHand(false, rhandt, rindext, rhand.transform.position, rhand_vel, ref rhtrigger, ref ritrigger, ref rhtrigger_delta, ref ritrigger_delta, ref rz, ref ry, ref rhand, ref rgrabbed, ref lhand, ref lgrabbed); //right hand
