@@ -946,14 +946,16 @@ public class World : MonoBehaviour
         arrows.Stop();
       }
     }
-    //if(tool_insulator.engaged && applied_heat != 0) //yes, "engaged" is correct. if insulator NOT engaged, then any heat added IMMEDIATELY dissipates
-    if (applied_heat != 0)
+
+    double insulation_coefficient = tool_insulator.engaged ? 1.0f : CONTAINER_INSULATION_COEFFICIENT;
+    double heat_joules = insulation_coefficient * applied_heat * (double)Time.deltaTime;
+    if(!tool_insulator.engaged) //heat leak
     {
-      double insulation_coefficient = tool_insulator.engaged ? 1.0f : CONTAINER_INSULATION_COEFFICIENT;
-      double heat_joules = insulation_coefficient * applied_heat * (double)Time.deltaTime;
-      if(tool_clamp.engaged) thermo.add_heat_constant_v(heat_joules);
-      else                   thermo.add_heat_constant_p(heat_joules);
+      float room_temp = 295.372f;
+      heat_joules += (room_temp-thermo.temperature)*100 * (double)Time.deltaTime; //nonsense calculation
     }
+    if(tool_clamp.engaged) thermo.add_heat_constant_v(heat_joules);
+    else                   thermo.add_heat_constant_p(heat_joules);
 
     //running blended average of hand velocity (transfers this velocity on "release object" for consistent "throwing")
     lhand_vel += (lhand.transform.position-lhand_pos)/Time.deltaTime;
