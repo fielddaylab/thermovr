@@ -88,6 +88,9 @@ public class Tool : MonoBehaviour
   [System.NonSerialized]
   public bool disabled;
 
+  [System.NonSerialized]
+  public AudioSource audioS;
+
   void Awake()
   {
     touchable = gameObject.GetComponent<Touchable>();
@@ -122,6 +125,8 @@ public class Tool : MonoBehaviour
       textd_tmpro = textd.GetComponent<TextMeshPro>();
       textd_meshrenderer = textd.GetComponent<MeshRenderer>();
     }
+
+    audioS = gameObject.GetComponent<AudioSource>();
 
     disabled = false;
   }

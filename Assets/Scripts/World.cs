@@ -593,6 +593,7 @@ public class World : MonoBehaviour
           Tool t = ref_grabbed.GetComponent<Tool>();
           if(t) //newly grabbed object is a tool
           {
+            t.audioS.Play();
             t.engaged = false;
             t.stored = false;
             ref_grabbed.transform.localScale = new Vector3(1f,1f,1f);
@@ -668,6 +669,7 @@ public class World : MonoBehaviour
       Tool t = ref_grabbed.GetComponent<Tool>();
       if(t) //tool newly released
       {
+        t.audioS.Play();
         if(t.active_ghost.tintersect) //tool released making it active
         {
           ActivateTool(t);
@@ -717,6 +719,7 @@ public class World : MonoBehaviour
         { //halfer state
           if(halfer_fingertoggleable.on)
           {
+            halfer.GetComponent<AudioSource>().Play();
             SetAllHalfed(!halfed);
             halfer_fingertoggleable.on = false;
           }
@@ -733,6 +736,7 @@ public class World : MonoBehaviour
         { //reset state
           if(reset_fingertoggleable.on)
           {
+            reset.GetComponent<AudioSource>().Play();
             for (int i = 0; i < tools.Count; i++)
               if (tools[i].engaged) DetachTool(tools[i], new Vector3(0.0f, 0.0f, 0.0f));
             thermo.Reset();
