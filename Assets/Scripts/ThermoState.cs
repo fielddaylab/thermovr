@@ -341,9 +341,9 @@ public class ThermoState : MonoBehaviour
       double pst = sample(pt);
       double p = ThermoMath.psat_given_percent(pst);
       double t = ThermoMath.tsat_given_p(p, region);
-      //pvt in Pa, M³/Kg, K
+      //pvt in Pa, m³/Kg, K
 
-      //Debug.LogFormat("p:{0}Pa, v:{1}M³/Kg, t:{2}° K",p,v,t);
+      //Debug.LogFormat("p:{0}Pa, v:{1}m³/Kg, t:{2}° K",p,v,t);
       float pplot = plot_dimension(ThermoMath.p_min,ThermoMath.p_max,p);
       if(pplot > highest_y) { highest_y = pplot; highest_y_i = mesh_positions.Count; }
       float tplot = plot_dimension(ThermoMath.t_min,ThermoMath.t_max,t);
@@ -644,7 +644,7 @@ public class ThermoState : MonoBehaviour
         double t = ThermoMath.t_given_percent(tst);
         double v = ThermoMath.v_given_pt(p,t, region);
 
-        //Debug.LogFormat("p:{0}Pa, v:{1}M³/Kg, t:{2}K",p,v,t);
+        //Debug.LogFormat("p:{0}Pa, v:{1}m³/Kg, t:{2}K",p,v,t);
         int i = samples*y+z;
         pt_positions[i] = plot(p,v,t);
       }
@@ -669,7 +669,7 @@ public class ThermoState : MonoBehaviour
         double v = ThermoMath.v_given_percent(pst);
         double p = ThermoMath.p_given_vt(v,t);
 
-        //Debug.LogFormat("p:{0}Pa, v:{1}M³/Kg, t:{2}K",p,v,t);
+        //Debug.LogFormat("p:{0}Pa, v:{1}m³/Kg, t:{2}K",p,v,t);
         int i = samples*y+z;
         pt_positions[i] = plot(p,v,t);
       }
@@ -1145,7 +1145,7 @@ public class ThermoState : MonoBehaviour
 
     if(Math.Abs(pressure - prev_pressure)              > ThermoMath.p_smallstep) text_pressure.SetText(      string.Format("P: {0:#.##e+0} kPa",   (float)pressure/1000f));
     if(Math.Abs(temperature - prev_temperature)        > ThermoMath.t_smallstep) text_temperature.SetText(                 "T: {0:3}°K ({1:3}°C)", (float)temperature, (float)temperature-273.15f);
-    if(Math.Abs(volume - prev_volume)                  > ThermoMath.v_smallstep) text_volume.SetText(        string.Format("v: {0:#.##e+0} M³/kg", (float)volume));
+    if(Math.Abs(volume - prev_volume)                  > ThermoMath.v_smallstep) text_volume.SetText(        string.Format("v: {0:#.##e+0} m³/kg", (float)volume));
     if(Math.Abs(internalenergy - prev_internalenergy)  > ThermoMath.u_smallstep) text_internalenergy.SetText(string.Format("u: {0:#.##e+0} kJ/kg", (float)internalenergy/1000f));
     if(Math.Abs(entropy - prev_entropy)                > ThermoMath.s_smallstep) text_entropy.SetText(                     "s: {0:3} kJ/kgK",      (float)entropy/1000f);
     if(Math.Abs(enthalpy - prev_enthalpy)              > ThermoMath.h_smallstep) text_enthalpy.SetText(      string.Format("h: {0:#.##e+0} kJ/kg", (float)enthalpy/1000f));
