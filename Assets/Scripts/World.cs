@@ -1087,7 +1087,8 @@ public class World : MonoBehaviour
       t.dial_dial.prev_val = t.dial_dial.val;
     }
 
-    // we did tool text above, so here I'll drop in the bit to check whether to show phase warning for balloon and weight.
+    // Disable the warning on that the tools are not available in this region
+    /* 
     switch (thermo.region)
     {
       case 0:
@@ -1104,7 +1105,7 @@ public class World : MonoBehaviour
         tool_balloon.disabled = false;
         break;
     }
-
+    */
     for(int i = 0; i < tools.Count; i++)
     {
       t = tools[i];
