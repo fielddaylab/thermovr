@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using System.Collections;
-using UnityEngine.VR;
 using UnityEngine.SceneManagement;
 
 public class Splash : MonoBehaviour

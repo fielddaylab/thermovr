@@ -9,10 +9,10 @@
     <ProductVersion>10.0.20506</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <RootNamespace></RootNamespace>
-    <ProjectGuid>{65CDF75F-9D24-B380-2846-F714C5CAC4FA}</ProjectGuid>
+    <ProjectGuid>{280B8F3C-7125-F83B-CB46-91BF7950E191}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <AssemblyName>Oculus.VR.Editor</AssemblyName>
+    <AssemblyName>Meta.WitAi.TTS.Editor</AssemblyName>
     <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <BaseDirectory>.</BaseDirectory>
@@ -22,7 +22,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>Temp\Bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE;UNITY_2020_3_6;UNITY_2020_3;UNITY_2020;UNITY_5_3_OR_NEWER;UNITY_5_4_OR_NEWER;UNITY_5_5_OR_NEWER;UNITY_5_6_OR_NEWER;UNITY_2017_1_OR_NEWER;UNITY_2017_2_OR_NEWER;UNITY_2017_3_OR_NEWER;UNITY_2017_4_OR_NEWER;UNITY_2018_1_OR_NEWER;UNITY_2018_2_OR_NEWER;UNITY_2018_3_OR_NEWER;UNITY_2018_4_OR_NEWER;UNITY_2019_1_OR_NEWER;UNITY_2019_2_OR_NEWER;UNITY_2019_3_OR_NEWER;UNITY_2019_4_OR_NEWER;UNITY_2020_1_OR_NEWER;UNITY_2020_2_OR_NEWER;UNITY_2020_3_OR_NEWER;UNITY_INCLUDE_TESTS;USE_SEARCH_ENGINE_API;SCENE_TEMPLATE_MODULE;ENABLE_AR;ENABLE_AUDIO;ENABLE_CACHING;ENABLE_CLOTH;ENABLE_EVENT_QUEUE;ENABLE_MICROPHONE;ENABLE_MULTIPLE_DISPLAYS;ENABLE_PHYSICS;ENABLE_TEXTURE_STREAMING;ENABLE_UNET;ENABLE_LZMA;ENABLE_UNITYEVENTS;ENABLE_VR;ENABLE_WEBCAM;ENABLE_UNITYWEBREQUEST;ENABLE_WWW;ENABLE_CLOUD_SERVICES;ENABLE_CLOUD_SERVICES_COLLAB;ENABLE_CLOUD_SERVICES_COLLAB_SOFTLOCKS;ENABLE_CLOUD_SERVICES_ADS;ENABLE_CLOUD_SERVICES_USE_WEBREQUEST;ENABLE_CLOUD_SERVICES_CRASH_REPORTING;ENABLE_CLOUD_SERVICES_NATIVE_CRASH_REPORTING;ENABLE_CLOUD_SERVICES_PURCHASING;ENABLE_CLOUD_SERVICES_ANALYTICS;ENABLE_CLOUD_SERVICES_UNET;ENABLE_CLOUD_SERVICES_BUILD;ENABLE_CLOUD_LICENSE;ENABLE_EDITOR_HUB_LICENSE;ENABLE_WEBSOCKET_CLIENT;ENABLE_DIRECTOR_AUDIO;ENABLE_DIRECTOR_TEXTURE;ENABLE_MANAGED_JOBS;ENABLE_MANAGED_TRANSFORM_JOBS;ENABLE_MANAGED_ANIMATION_JOBS;ENABLE_MANAGED_AUDIO_JOBS;ENABLE_RUNTIME_PERMISSIONS;ENABLE_ENGINE_CODE_STRIPPING;ENABLE_ONSCREEN_KEYBOARD;INCLUDE_DYNAMIC_GI;ENABLE_MONO_BDWGC;ENABLE_SCRIPTING_GC_WBARRIERS;PLATFORM_SUPPORTS_MONO;ENABLE_VIDEO;PLATFORM_ANDROID;UNITY_ANDROID;UNITY_ANDROID_API;ENABLE_EGL;ENABLE_NETWORK;ENABLE_RUNTIME_GI;ENABLE_CRUNCH_TEXTURE_COMPRESSION;UNITY_CAN_SHOW_SPLASH_SCREEN;UNITY_HAS_GOOGLEVR;UNITY_HAS_TANGO;ENABLE_SPATIALTRACKING;UNITY_ASTC_ONLY_DECOMPRESS;PLATFORM_EXTENDS_VULKAN_DEVICE;PLATFORM_HAS_MULTIPLE_SWAPCHAINS;UNITY_ANDROID_SUPPORTS_SHADOWFILES;ENABLE_UNITYADS_RUNTIME;UNITY_UNITYADS_API;ENABLE_MONO;NET_4_6;ENABLE_PROFILER;UNITY_ASSERTIONS;UNITY_EDITOR;UNITY_EDITOR_64;UNITY_EDITOR_WIN;ENABLE_UNITY_COLLECTIONS_CHECKS;ENABLE_BURST_AOT;UNITY_TEAM_LICENSE;ENABLE_CUSTOM_RENDER_TEXTURE;ENABLE_DIRECTOR;ENABLE_LOCALIZATION;ENABLE_SPRITES;ENABLE_TERRAIN;ENABLE_TILEMAP;ENABLE_TIMELINE;ENABLE_LEGACY_INPUT_MANAGER;UNITY_POST_PROCESSING_STACK_V2;USING_XR_MANAGEMENT;USING_XR_SDK_OCULUS;USING_XR_SDK_OPENXR;USING_COMPATIBLE_OCULUS_XR_PLUGIN_VERSION;PRIORITIZE_OCULUS_XR_SETTINGS;OVR_UNITY_ASSET_STORE;CSHARP_7_OR_LATER;CSHARP_7_3_OR_NEWER;NET_STANDARD_2_0</DefineConstants>
+    <DefineConstants>DEBUG;TRACE;UNITY_2020_3_6;UNITY_2020_3;UNITY_2020;UNITY_5_3_OR_NEWER;UNITY_5_4_OR_NEWER;UNITY_5_5_OR_NEWER;UNITY_5_6_OR_NEWER;UNITY_2017_1_OR_NEWER;UNITY_2017_2_OR_NEWER;UNITY_2017_3_OR_NEWER;UNITY_2017_4_OR_NEWER;UNITY_2018_1_OR_NEWER;UNITY_2018_2_OR_NEWER;UNITY_2018_3_OR_NEWER;UNITY_2018_4_OR_NEWER;UNITY_2019_1_OR_NEWER;UNITY_2019_2_OR_NEWER;UNITY_2019_3_OR_NEWER;UNITY_2019_4_OR_NEWER;UNITY_2020_1_OR_NEWER;UNITY_2020_2_OR_NEWER;UNITY_2020_3_OR_NEWER;UNITY_INCLUDE_TESTS;USE_SEARCH_ENGINE_API;SCENE_TEMPLATE_MODULE;ENABLE_AR;ENABLE_AUDIO;ENABLE_CACHING;ENABLE_CLOTH;ENABLE_EVENT_QUEUE;ENABLE_MICROPHONE;ENABLE_MULTIPLE_DISPLAYS;ENABLE_PHYSICS;ENABLE_TEXTURE_STREAMING;ENABLE_UNET;ENABLE_LZMA;ENABLE_UNITYEVENTS;ENABLE_VR;ENABLE_WEBCAM;ENABLE_UNITYWEBREQUEST;ENABLE_WWW;ENABLE_CLOUD_SERVICES;ENABLE_CLOUD_SERVICES_COLLAB;ENABLE_CLOUD_SERVICES_COLLAB_SOFTLOCKS;ENABLE_CLOUD_SERVICES_ADS;ENABLE_CLOUD_SERVICES_USE_WEBREQUEST;ENABLE_CLOUD_SERVICES_CRASH_REPORTING;ENABLE_CLOUD_SERVICES_NATIVE_CRASH_REPORTING;ENABLE_CLOUD_SERVICES_PURCHASING;ENABLE_CLOUD_SERVICES_ANALYTICS;ENABLE_CLOUD_SERVICES_UNET;ENABLE_CLOUD_SERVICES_BUILD;ENABLE_CLOUD_LICENSE;ENABLE_EDITOR_HUB_LICENSE;ENABLE_WEBSOCKET_CLIENT;ENABLE_DIRECTOR_AUDIO;ENABLE_DIRECTOR_TEXTURE;ENABLE_MANAGED_JOBS;ENABLE_MANAGED_TRANSFORM_JOBS;ENABLE_MANAGED_ANIMATION_JOBS;ENABLE_MANAGED_AUDIO_JOBS;ENABLE_RUNTIME_PERMISSIONS;ENABLE_ENGINE_CODE_STRIPPING;ENABLE_ONSCREEN_KEYBOARD;INCLUDE_DYNAMIC_GI;ENABLE_MONO_BDWGC;ENABLE_SCRIPTING_GC_WBARRIERS;PLATFORM_SUPPORTS_MONO;ENABLE_VIDEO;PLATFORM_ANDROID;UNITY_ANDROID;UNITY_ANDROID_API;ENABLE_EGL;ENABLE_NETWORK;ENABLE_RUNTIME_GI;ENABLE_CRUNCH_TEXTURE_COMPRESSION;UNITY_CAN_SHOW_SPLASH_SCREEN;UNITY_HAS_GOOGLEVR;UNITY_HAS_TANGO;ENABLE_SPATIALTRACKING;UNITY_ASTC_ONLY_DECOMPRESS;PLATFORM_EXTENDS_VULKAN_DEVICE;PLATFORM_HAS_MULTIPLE_SWAPCHAINS;UNITY_ANDROID_SUPPORTS_SHADOWFILES;ENABLE_UNITYADS_RUNTIME;UNITY_UNITYADS_API;ENABLE_MONO;NET_4_6;ENABLE_PROFILER;UNITY_ASSERTIONS;UNITY_EDITOR;UNITY_EDITOR_64;UNITY_EDITOR_WIN;ENABLE_UNITY_COLLECTIONS_CHECKS;ENABLE_BURST_AOT;UNITY_TEAM_LICENSE;ENABLE_CUSTOM_RENDER_TEXTURE;ENABLE_DIRECTOR;ENABLE_LOCALIZATION;ENABLE_SPRITES;ENABLE_TERRAIN;ENABLE_TILEMAP;ENABLE_TIMELINE;ENABLE_LEGACY_INPUT_MANAGER;UNITY_POST_PROCESSING_STACK_V2;CSHARP_7_OR_LATER;CSHARP_7_3_OR_NEWER;NET_STANDARD_2_0</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <NoWarn>0169</NoWarn>
@@ -53,64 +53,16 @@
     <UnityVersion>2020.3.6f1</UnityVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Assets\Oculus\VR\Editor\OVRProjectSetup\Tasks\Implementations\OVRProjectSetupXRTasks.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRProjectSetup\OVRProjectSetupUpdater.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRPlatformToolSettings.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRProjectSetup\Tasks\Processors\OVRConfigurationTaskUpdaterSummary.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRProjectSetup\Tasks\OVRConfigurationTaskException.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRProjectSetup\OVRProjectSetupStatusIcon.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRProjectSetup\OVRProjectSetupSettingsProvider.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRProjectSetup\OVRProjectSetupBuildValidator.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRPlatformTool.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRProjectSetup\OVRProjectSetup.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\PathHelper.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRADBTool.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRLint.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRProjectSetup\OVRProjectSetupSettings.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRProjectSetup\Tasks\Implementations\OVRProjectSetupMovementSDK.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRProjectSetup\Tasks\Implementations\OVRProjectSetupQualityTasks.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRGradleGeneration.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRProjectSetup\Utils\ConsoleLinkEventHandler.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRProjectSetup\Tasks\Processors\OVRConfigurationTaskProcessor.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRScreenshotWizard.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRProjectSetup\Tasks\Processors\OVRConfigurationTaskUpdater.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRProjectSetup\Utils\SerializableDictionary.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRBuild.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRProjectSetup\Tasks\Processors\OVRConfigurationTaskProcessorQueue.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRBundleTool.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRProjectSetup\Tasks\OVRConfigurationTaskSourceCode.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRPluginUpdater.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRProjectSetup\OVRProjectSetupUtils.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRProjectSetup\OVRProjectSetupSettingItem.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRLayerAttributeEditor.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRProjectSetup\Tasks\Implementations\OVRProjectSetupCompatibilityTasks.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\AssemblyInfo.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRProjectSetup\OVRProjectSetupDrawer.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRProjectConfig.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRProjectSetup\Tasks\Implementations\OVRProjectSetupPhysicsTasks.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRShaderBuildProcessor.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRProjectSetup\Utils\OptionalLambdaType.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRSystemProfilerPanel.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRBundleManager.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRProjectSetup\Tasks\OVRConfigurationTaskRegistry.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRProjectSetup\Tasks\Implementations\OVRProjectSetupRenderingTasks.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRProjectSetup\Tasks\Processors\OVRConfigurationTaskFixer.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRDeviceSelector.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRPluginInfoOpenXR.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRManifestPreprocessor.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRProjectSetup\Tasks\Implementations\OVRProjectSetupPassthrough.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRPluginInfo.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRProjectSetup\Tasks\OVRConfigurationTask.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRExpansionFileGenerator.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVREngineConfigurationUpdater.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRConfig.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRDirectorySyncer.cs" />
-    <Compile Include="Assets\Oculus\VR\Editor\OVRProjectSetup\Tasks\Implementations\OVRProjectSetupSceneTasks.cs" />
+    <Compile Include="Assets\Oculus\Voice\Lib\Wit.ai\Features\TTS\Scripts\Editor\TTSSpeakerInspector.cs" />
+    <Compile Include="Assets\Oculus\Voice\Lib\Wit.ai\Features\TTS\Scripts\Editor\Preload\TTSPreloadSettings.cs" />
+    <Compile Include="Assets\Oculus\Voice\Lib\Wit.ai\Features\TTS\Scripts\Editor\TTSEditorUtilities.cs" />
+    <Compile Include="Assets\Oculus\Voice\Lib\Wit.ai\Features\TTS\Scripts\Editor\TTSServiceInspector.cs" />
+    <Compile Include="Assets\Oculus\Voice\Lib\Wit.ai\Features\TTS\Scripts\Editor\Preload\TTSPreloadUtility.cs" />
+    <Compile Include="Assets\Oculus\Voice\Lib\Wit.ai\Features\TTS\Scripts\Editor\Preload\TTSPreloadSettingsInspector.cs" />
+    <Compile Include="Assets\Oculus\Voice\Lib\Wit.ai\Features\TTS\Scripts\Editor\Voices\TTSWitVoiceSettingsDrawer.cs" />
   </ItemGroup>
   <ItemGroup>
-     <None Include="Assets\Oculus\VR\Editor\Oculus.VR.Editor.asmdef" />
-     <None Include="Assets\Oculus\VR\Editor\network_sec_config.xml" />
-     <None Include="Assets\Oculus\VR\Editor\AndroidManifest.OVRSubmission.xml" />
+     <None Include="Assets\Oculus\Voice\Lib\Wit.ai\Features\TTS\Scripts\Editor\Facebook.Wit.TTS.Editor.asmdef" />
     <Reference Include="UnityEngine">
       <HintPath>C:\Program Files\Unity\Hub\Editor\2020.3.6f1\Editor\Data\Managed\UnityEngine\UnityEngine.dll</HintPath>
     </Reference>
@@ -699,21 +651,6 @@
     <Reference Include="System.Xml.XPath.XDocument">
       <HintPath>C:\Program Files\Unity\Hub\Editor\2020.3.6f1\Editor\Data\MonoBleedingEdge\lib\mono\4.7.1-api\Facades\System.Xml.XPath.XDocument.dll</HintPath>
     </Reference>
-    <Reference Include="Unity.XR.Oculus">
-      <HintPath>Library\ScriptAssemblies\Unity.XR.Oculus.dll</HintPath>
-    </Reference>
-    <Reference Include="Unity.XR.OpenXR">
-      <HintPath>Library\ScriptAssemblies\Unity.XR.OpenXR.dll</HintPath>
-    </Reference>
-    <Reference Include="Unity.XR.OpenXR.Editor">
-      <HintPath>Library\ScriptAssemblies\Unity.XR.OpenXR.Editor.dll</HintPath>
-    </Reference>
-    <Reference Include="Unity.XR.Management">
-      <HintPath>Library\ScriptAssemblies\Unity.XR.Management.dll</HintPath>
-    </Reference>
-    <Reference Include="Unity.XR.Management.Editor">
-      <HintPath>Library\ScriptAssemblies\Unity.XR.Management.Editor.dll</HintPath>
-    </Reference>
     <Reference Include="UnityEditor.UI">
       <HintPath>Library\ScriptAssemblies\UnityEditor.UI.dll</HintPath>
     </Reference>
@@ -728,9 +665,25 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="Oculus.VR.csproj">
-      <Project>{282B50D3-0CD4-D7F0-C89B-20E8EB044AAB}</Project>
-      <Name>Oculus.VR</Name>
+    <ProjectReference Include="Meta.WitAi.csproj">
+      <Project>{389F2CA9-D542-2105-B024-C5DC18981852}</Project>
+      <Name>Meta.WitAi</Name>
+    </ProjectReference>
+    <ProjectReference Include="Meta.WitAi.Editor.csproj">
+      <Project>{DB58AA47-DF82-F9F9-F9F7-1FDDE6C674FE}</Project>
+      <Name>Meta.WitAi.Editor</Name>
+    </ProjectReference>
+    <ProjectReference Include="Meta.WitAi.TTS.csproj">
+      <Project>{9D601E79-9C37-1EDF-9B53-0CF7338A3B62}</Project>
+      <Name>Meta.WitAi.TTS</Name>
+    </ProjectReference>
+    <ProjectReference Include="Meta.WitAi.Lib.csproj">
+      <Project>{81636D39-3D44-B7CD-D815-C293FCFAF1DC}</Project>
+      <Name>Meta.WitAi.Lib</Name>
+    </ProjectReference>
+    <ProjectReference Include="Meta.WitAI.Lib.Editor.csproj">
+      <Project>{FD53656C-B371-797A-4251-8F6E1EC4F69D}</Project>
+      <Name>Meta.WitAI.Lib.Editor</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
