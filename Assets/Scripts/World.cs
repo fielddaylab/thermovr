@@ -875,8 +875,8 @@ public class World : MonoBehaviour
                     arrows.Go(delta_pressure > 0.0f);
                     arrows.SetFlow(delta_pressure);
                 }
-                if (tool_insulator.engaged) thermo_present.add_pressure_insulated(delta_pressure);
-                else thermo_present.add_pressure_uninsulated(delta_pressure);
+                if (tool_insulator.engaged) thermo_present.add_pressure_insulated(delta_pressure); // Pressure Constrained -> Insulated ->  delta pressure
+                else thermo_present.add_pressure_uninsulated(delta_pressure); // Pressure Constrained -> Uninsulated ->  delta pressure
             }
             else if (arrows.running) {
                 arrows.Stop();
@@ -896,8 +896,8 @@ public class World : MonoBehaviour
             }
             else if (arrows.running) arrows.Stop();
         */
-        if (tool_clamp.engaged) thermo_present.add_heat_constant_v(heat_joules);
-        else thermo_present.add_heat_constant_p(heat_joules);
+        if (tool_clamp.engaged) thermo_present.add_heat_constant_v(heat_joules); // Volume Constrained -> Insulated && Uninsulated ->  delta energy
+        else thermo_present.add_heat_constant_p(heat_joules); // Pressure Constrained -> Insulated && Uninsulated -> delta energy
 
         //running blended average of hand velocity (transfers this velocity on "release object" for consistent "throwing")
         lhand_vel += (lhand.transform.position - lhand_pos) / Time.deltaTime;

@@ -237,23 +237,26 @@ public class ThermoState : MonoBehaviour
 
             if (region != ThermoMath.region_twophase) {
                 new_t = ThermoMath.iterate_t_given_v_verify_u(temperature, volume, new_u, region); //try to move t assuming we stay in starting region
-                if (region == ThermoMath.region_liquid && new_t > ThermoMath.tsat_given_p(pressure)) //overshot
+                if (region == ThermoMath.region_liquid && new_t > ThermoMath.tsat_given_p(pressure)) //overshot form liquid
                 {
                     new_t = ThermoMath.tsat_given_p(pressure);
                     region = ThermoMath.region_twophase;
                 }
-                else if (region == ThermoMath.region_vapor && new_t < ThermoMath.tsat_given_p(pressure)) //overshot
+                else if (region == ThermoMath.region_vapor && new_t < ThermoMath.tsat_given_p(pressure)) //overshot from vapor
                 {
                     new_t = ThermoMath.tsat_given_p(pressure);
                     region = ThermoMath.region_twophase;
                 }
                 else {
+                    // remain in liquid or vapor region
                     internalenergy = new_u;
                     temperature = new_t;
                     pressure = ThermoMath.p_given_vt(volume, temperature, region);
                 }
             }
 
+            
+            // two-phase region
             if (region == ThermoMath.region_twophase) //either newly, or all along
             {
                 new_p = ThermoMath.iterate_p_given_vu(pressure, volume, new_u, region);
@@ -279,7 +282,8 @@ public class ThermoState : MonoBehaviour
             //default guess
             double new_u = internalenergy;
             double new_v = volume;
-            new_v = ThermoMath.v_given_pt(new_p, temperature, region); //ERROR: DO NOT USE IN VAPOR DOME (safe assuming any delta p sufficient to _leave_ vapor dome)
+            // Pressure Constrained -> Insulated -> delta pressure (all phases)
+            new_v = ThermoMath.v_given_pt(new_p, temperature, region); //ERROR: DO NOT USE IN VAPOR DOME (safe assuming any delta p sufficient to _leave_ vapor dome) TODO: enforce this check
             new_u = ThermoMath.u_given_pt(new_p, temperature, region);
             //at this point, we have enough internal state to derive the rest
             pressure = new_p;
@@ -308,7 +312,7 @@ public class ThermoState : MonoBehaviour
                 case ThermoMath.region_liquid: //subcooled liquid
                 case ThermoMath.region_twophase: //two-phase region
                 {
-                        //AVOID THESE SCENARIOS
+                        //AVOID THESE SCENARIOS // Pressure Constrained -> Insulated -> delta pressure (liquid and two-phase)
                     }
                     break;
                 case ThermoMath.region_vapor: //superheated vapor
