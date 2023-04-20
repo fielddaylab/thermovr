@@ -850,7 +850,7 @@ public class World : MonoBehaviour
      * Basically, wraps calls to a bunch of other functions, and a hodgepodge of other random tasks,
      * as far as I can tell.
      */
-    void Update() {
+    void FixedUpdate() {
         //hands keep trying to run away- no idea why (this is a silly way to keep them still)
         lactualhand.transform.localPosition = new Vector3(0f, 0f, 0f);
         lactualhand.transform.localEulerAngles = new Vector3(0f, 0f, 90f);
@@ -884,27 +884,28 @@ public class World : MonoBehaviour
         }
 
         double insulation_coefficient = tool_insulator.engaged ? 1.0f : CONTAINER_INSULATION_COEFFICIENT;
-        double heat_joules = insulation_coefficient * applied_heat * (double)Time.deltaTime;
+
         /*
             if (!tool_insulator.engaged) //heat leak
             {
               double room_temp = 295.372f;
               double diff = room_temp - thermo.temperature;
-              heat_joules += diff * 100 * (double)Time.deltaTime; //nonsense calculation
+              heat_joules += diff * 100 * (double)Time.fixedDeltaTime; //nonsense calculation
               arrows.Go(diff < 0);
               arrows.SetFlow(diff / 100.0f);
             }
             else if (arrows.running) arrows.Stop();
         */
-        if (tool_clamp.engaged) thermo_present.add_heat_constant_v(heat_joules); // Volume Constrained -> Insulated && Uninsulated ->  delta energy
-        else thermo_present.add_heat_constant_p(heat_joules); // Pressure Constrained -> Insulated && Uninsulated -> delta energy
+        double delta_time = (double)Time.fixedDeltaTime;
+        if (tool_clamp.engaged) thermo_present.add_heat_constant_v_per_delta_time(applied_heat, insulation_coefficient, delta_time);    // Volume Constrained -> Insulated && Uninsulated ->  delta energy     // time eqtn 6a
+        else thermo_present.add_heat_constant_p_per_delta_time(applied_heat, insulation_coefficient, delta_time);                       // Pressure Constrained -> Insulated && Uninsulated -> delta energy    // time eqtn 6b
 
         //running blended average of hand velocity (transfers this velocity on "release object" for consistent "throwing")
-        lhand_vel += (lhand.transform.position - lhand_pos) / Time.deltaTime;
+        lhand_vel += (lhand.transform.position - lhand_pos) / Time.fixedDeltaTime;
         lhand_vel *= 0.5f;
         lhand_pos = lhand.transform.position;
 
-        rhand_vel += (rhand.transform.position - rhand_pos) / Time.deltaTime;
+        rhand_vel += (rhand.transform.position - rhand_pos) / Time.fixedDeltaTime;
         rhand_vel *= 0.5f;
         rhand_pos = rhand.transform.position;
 

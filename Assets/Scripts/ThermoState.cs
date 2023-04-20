@@ -191,9 +191,11 @@ public class ThermoState : MonoBehaviour
         clamp_state();
     }
 
-    public void add_heat_constant_p(double j) {
+    public void add_heat_constant_p_per_delta_time(double applied_heat, double insulation_coefficient, double delta_time) {
         try {
-            double new_h = enthalpy + j;
+            double delta_h = delta_time / mass * (applied_heat * insulation_coefficient);  // time eqtn 6a
+
+            double new_h = enthalpy + delta_h;
 
             switch (region) {
                 case ThermoMath.region_twophase:
@@ -229,9 +231,11 @@ public class ThermoState : MonoBehaviour
         clamp_state();
     }
 
-    public void add_heat_constant_v(double j) {
+    public void add_heat_constant_v_per_delta_time(double applied_heat, double insulation_coefficient, double delta_time) {
         try {
-            double new_u = internalenergy + j;
+            double delta_u = delta_time / mass * (applied_heat * insulation_coefficient); // time eqtn 6b
+
+            double new_u = internalenergy + delta_u;
             double new_t = temperature;
             double new_p = pressure;
 

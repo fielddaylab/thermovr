@@ -701,19 +701,19 @@ public class ThermoPresent : MonoBehaviour
         visualize_state();
     }
 
-    public void add_heat_constant_p(double j) {
-        state.add_heat_constant_p(j);
+    public void add_heat_constant_p_per_delta_time(double applied_heat, double insulation_coefficient, double delta_time) {
+        state.add_heat_constant_p_per_delta_time(applied_heat, insulation_coefficient, delta_time);
 
         if (debug_write) {
-            debug_file.WriteLine("add_heat_constant_p({0})", j);
+            debug_file.WriteLine("add_heat_constant_p({0})", applied_heat * insulation_coefficient);
             debug_deltas();
         }
 
         visualize_state();
     }
 
-    public void add_heat_constant_v(double j) {
-        state.add_heat_constant_v(j);
+    public void add_heat_constant_v_per_delta_time(double applied_heat, double insulation_coefficient, double delta_time) {
+        state.add_heat_constant_v_per_delta_time(applied_heat, insulation_coefficient, delta_time);
         visualize_state();
     }
 
