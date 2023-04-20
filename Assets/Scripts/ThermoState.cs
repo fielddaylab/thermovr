@@ -263,7 +263,7 @@ public class ThermoState : MonoBehaviour
             // two-phase region
             if (region == ThermoMath.region_twophase) //either newly, or all along
             {
-                new_p = ThermoMath.iterate_p_given_vu(pressure, volume, new_u, region);
+                new_p = ThermoMath.iterate_p_given_vu(pressure, volume, new_u, region); // time eqtn 6
                 new_t = ThermoMath.tsat_given_p(new_p);
                 internalenergy = new_u;
                 pressure = new_p;
@@ -279,9 +279,9 @@ public class ThermoState : MonoBehaviour
         clamp_state();
     }
 
-    public void add_pressure_uninsulated(double p) {
+    public void add_pressure_uninsulated_per_delta_time(double p, double delta_time) {
         try {
-            double new_p = pressure + p;
+            double new_p = pressure + p * delta_time;
 
             //default guess
             double new_u = internalenergy;
@@ -308,9 +308,9 @@ public class ThermoState : MonoBehaviour
         clamp_state();
     }
 
-    public void add_pressure_insulated(double p) {
+    public void add_pressure_insulated_per_delta_time(double p, double delta_time) {
         try {
-            double new_p = pressure + p;
+            double new_p = pressure + p * delta_time;
 
             switch (region) {
                 case ThermoMath.region_liquid: //subcooled liquid

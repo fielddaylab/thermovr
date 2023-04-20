@@ -717,13 +717,13 @@ public class ThermoPresent : MonoBehaviour
         visualize_state();
     }
 
-    public void add_pressure_uninsulated(double p) {
-        state.add_pressure_uninsulated(p);
+    public void add_pressure_uninsulated_per_delta_time(double p, double delta_time) {
+        state.add_pressure_uninsulated_per_delta_time(p, delta_time);
         visualize_state();
     }
 
-    public void add_pressure_insulated(double p) {
-        state.add_pressure_insulated(p);
+    public void add_pressure_insulated_per_delta_time(double p, double delta_time) {
+        state.add_pressure_insulated_per_delta_time(p, delta_time);
         visualize_state();
     }
 

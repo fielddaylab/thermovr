@@ -857,6 +857,8 @@ public class World : MonoBehaviour
         ractualhand.transform.localPosition = new Vector3(0f, 0f, 0f);
         ractualhand.transform.localEulerAngles = new Vector3(0f, 0f, -90f);
 
+        double delta_time = (double)Time.fixedDeltaTime;
+
         //apply thermo
         if (!tool_clamp.engaged) {
             double psi_to_pascal = 6894.76;
@@ -867,16 +869,19 @@ public class World : MonoBehaviour
 
             //treat "applied_weight" as target, and iterate toward it, rather than applying it additively
             //(technically, "should" add_pressure(...) with every delta of weight on the piston, but that would result in very jumpy nonsense movements. iterating toward a target smooths it out)
-            double delta_pressure = (weight_pressure - thermo_present.get_pressure()) * 0.01; //1% of difference
-            if (System.Math.Abs(delta_pressure) > 1) {
+            double delta_pressure = (weight_pressure - thermo_present.get_pressure()); // * 0.01; //1% of difference
+
+            bool significantChange = delta_pressure * Time.fixedDeltaTime > 1.0 ? true : false;
+            if (significantChange) {
                 // we only are applying pressure added/released if we are in gas region.
                 // if this ever changes, adapt this "if" check as needed.
                 if (thermo_present.get_region() == 2) {
                     arrows.Go(delta_pressure > 0.0f);
                     arrows.SetFlow(delta_pressure);
                 }
-                if (tool_insulator.engaged) thermo_present.add_pressure_insulated(delta_pressure); // Pressure Constrained -> Insulated ->  delta pressure
-                else thermo_present.add_pressure_uninsulated(delta_pressure); // Pressure Constrained -> Uninsulated ->  delta pressure
+
+                if (tool_insulator.engaged) thermo_present.add_pressure_insulated_per_delta_time(delta_pressure, delta_time); // Pressure Constrained -> Insulated ->  delta pressure
+                else thermo_present.add_pressure_uninsulated_per_delta_time(delta_pressure, delta_time); // Pressure Constrained -> Uninsulated ->  delta pressure
             }
             else if (arrows.running) {
                 arrows.Stop();
@@ -896,7 +901,6 @@ public class World : MonoBehaviour
             }
             else if (arrows.running) arrows.Stop();
         */
-        double delta_time = (double)Time.fixedDeltaTime;
         if (tool_clamp.engaged) thermo_present.add_heat_constant_v_per_delta_time(applied_heat, insulation_coefficient, delta_time);    // Volume Constrained -> Insulated && Uninsulated ->  delta energy     // time eqtn 6a
         else thermo_present.add_heat_constant_p_per_delta_time(applied_heat, insulation_coefficient, delta_time);                       // Pressure Constrained -> Insulated && Uninsulated -> delta energy    // time eqtn 6b
 
