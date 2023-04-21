@@ -871,7 +871,7 @@ public class World : MonoBehaviour
             //(technically, "should" add_pressure(...) with every delta of weight on the piston, but that would result in very jumpy nonsense movements. iterating toward a target smooths it out)
             double delta_pressure = (weight_pressure - thermo_present.get_pressure()); // * 0.01; //1% of difference
 
-            bool significantChange = delta_pressure * Time.fixedDeltaTime > 1.0 ? true : false;
+            bool significantChange = Mathf.Abs((float)delta_pressure * Time.fixedDeltaTime) > 1.0 ? true : false;
             if (significantChange) {
                 // we only are applying pressure added/released if we are in gas region.
                 // if this ever changes, adapt this "if" check as needed.
