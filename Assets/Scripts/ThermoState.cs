@@ -283,7 +283,7 @@ public class ThermoState : MonoBehaviour
     public void add_pressure_uninsulated_per_delta_time(double p, double delta_time) {
         try {
             double new_p = pressure + p * delta_time;
-            if (p * delta_time < 1.0) { new_p = pressure + p; } // small enough step; finish transition
+            if (Math.Abs(p * delta_time) < 1.0) { new_p = pressure + p; } // small enough step; finish transition
 
             //default guess
             double new_u = internalenergy;
@@ -320,6 +320,15 @@ public class ThermoState : MonoBehaviour
                 case ThermoMath.region_liquid: //subcooled liquid
                 case ThermoMath.region_vapor: //vapor region
                 {
+                        if (ThermoMath.region_given_ps(new_p, entropy) != region) {
+                            if (ThermoMath.region_given_ps(new_p, entropy) == ThermoMath.region_twophase) {
+                                region = ThermoMath.region_twophase;
+                                pressure = new_p;
+                                enthalpy = ThermoMath.h_given_vt(volume, temperature, region);
+                                break;
+                            }
+                        }
+
                         // Pressure Constrained -> Insulated -> delta pressure (all phases)
                         new_v = ThermoMath.v_given_pt(new_p, temperature, region); //ERROR: DO NOT USE IN VAPOR DOME (safe assuming any delta p sufficient to _leave_ vapor dome)
                         new_u = ThermoMath.u_given_pt(new_p, temperature, region);
@@ -340,41 +349,43 @@ public class ThermoState : MonoBehaviour
                         }
                     }
                     break;
-                case ThermoMath.region_twophase: //two-phase region
-                {
-                        /* 
-                         * A starting point in the 2-phase region must be in terms of P (or T) and some other parameter, such as v, h, u, or s.
-                         * The starting point in the 2 phase region cannot be defined by P and T alone.
-                         * 
-                         * If this condition (uninsulated) falls in the category that the conductivity of the wall is infinity and therefore the temperature is really constant,
-                         * then the new state is defined by the conditions:
-                         * 
-                         * P = P_new and T = T_old.
-                         * 
-                         * From a starting position in the two-phase region, an increase of pressure with T=constant will send the state over to the sub cooled liquid range. (if on the line, in other words.)
-                         * The process will move along a T=constant, P=constant line until it hits the saturated liquid line. (<- I assume this means moving along volume axis)
-                         * 
-                         * If the conductivity of the wall is less than infinity (insulation % > 0), this same process will occur, although at a slower rate. 
-                         */
-
-                        new_x = ThermoMath.x_given_ph(new_p, enthalpy);
-                        new_v = ThermoMath.v_given_px(new_p, quality);
-                        new_u = ThermoMath.u_given_vt(volume, temperature, region);
-
-                        volume = new_v;
-                        entropy = ThermoMath.s_given_vt(volume, temperature, region);
-                        internalenergy = new_u;
-                        quality = new_x;
-
-                        //region = ThermoMath.region_given_pvt(pressure, volume, temperature);
-                        region = ThermoMath.region_given_ps(new_p, entropy);
-
-                        switch (region) {
-                            case ThermoMath.region_liquid: quality = 0; break;
-                            case ThermoMath.region_vapor: quality = 1; break;
-                        }
-                    }
+                default:
                     break;
+            }
+
+            if (region == ThermoMath.region_twophase) //two-phase region, either newly or all along
+             {
+                /* 
+                 * A starting point in the 2-phase region must be in terms of P (or T) and some other parameter, such as v, h, u, or s.
+                 * The starting point in the 2 phase region cannot be defined by P and T alone.
+                 * 
+                 * If this condition (uninsulated) falls in the category that the conductivity of the wall is infinity and therefore the temperature is really constant,
+                 * then the new state is defined by the conditions:
+                 * 
+                 * P = P_new and T = T_old.
+                 * 
+                 * From a starting position in the two-phase region, an increase of pressure with T=constant will send the state over to the sub cooled liquid range. (if on the line, in other words.)
+                 * The process will move along a T=constant, P=constant line until it hits the saturated liquid line. (<- I assume this means moving along volume axis)
+                 * 
+                 * If the conductivity of the wall is less than infinity (insulation % > 0), this same process will occur, although at a slower rate. 
+                 */
+
+                new_x = ThermoMath.x_given_ph(new_p, enthalpy);
+                new_v = ThermoMath.v_given_px(new_p, quality);
+                new_u = ThermoMath.u_given_vt(volume, temperature, region);
+
+                volume = new_v;
+                entropy = ThermoMath.s_given_vt(volume, temperature, region);
+                internalenergy = new_u;
+                quality = new_x;
+
+                //region = ThermoMath.region_given_pvt(pressure, volume, temperature);
+                region = ThermoMath.region_given_ps(new_p, entropy);
+
+                switch (region) {
+                    case ThermoMath.region_liquid: quality = 0; break;
+                    case ThermoMath.region_vapor: quality = 1; break;
+                }
             }
 
             //at this point, we have enough internal state to derive the rest
@@ -382,6 +393,12 @@ public class ThermoState : MonoBehaviour
             // temperature = new_t;
             // enthalpy = ThermoMath.h_given_vt(volume, temperature, region);
 
+
+            // TODO: after applying weight in 2 phase, water enters liquid state. But once you remove the weight, it barely crosses into two-phase. (Actually, this may be correct behavior. Will need to double check with experts.)
+            // Furthermore, trying to reduce pressure with ballon on verge of liquid works in 2-phase briefly, but eventually it jumps to vapor.
+            // Transitions from vapor to two-phase and vice versa:
+                // two-phase to vapor works, but when reducing balloon back to 2-phase, it sets the 2-phase closer to the liquid line.
+                    // same way reducing balloon happens, applying weight sets back to start of 2 phase.
 
         }
         catch (Exception e) { }
@@ -392,7 +409,7 @@ public class ThermoState : MonoBehaviour
     public void add_pressure_insulated_per_delta_time(double p, double delta_time) {
         try {
             double new_p = pressure + p * delta_time;
-            if (p * delta_time < 1.0) { new_p = pressure + p; } // small enough step; finish transition
+            if (Math.Abs(p * delta_time) < 1.0) { new_p = pressure + p; } // small enough step; finish transition
 
             double new_h = enthalpy;
             double new_u = internalenergy;
