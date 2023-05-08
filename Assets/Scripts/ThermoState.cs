@@ -12,6 +12,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Collections.Specialized;
+using Oculus.Platform;
 
 public class ThermoState : MonoBehaviour
 {
@@ -25,7 +26,7 @@ public class ThermoState : MonoBehaviour
     public double enthalpy;       //h //J/kg
     public double quality;        //x //%
     public int region;            //0 subcooled liquid, 1 two-phase, 2 superheated vapor
-    
+
     public double prev_pressure;
     public double prev_temperature;
     public double prev_volume;
@@ -204,7 +205,7 @@ public class ThermoState : MonoBehaviour
                     enthalpy = new_h;
                     quality = new_x;
                     volume = ThermoMath.v_given_px(pressure, new_x, region);
-                    temperature = ThermoMath.tsat_given_p(pressure, region);
+                    temperature = ThermoMath.tsat_given_p(pressure, region); // TODO: should adjusting pressure in two-phase affect this like it currently does?
                     entropy = ThermoMath.s_given_px(pressure, new_x, region);
                     internalenergy = ThermoMath.u_given_px(pressure, new_x, region);
                     break;
@@ -241,7 +242,7 @@ public class ThermoState : MonoBehaviour
 
             if (region != ThermoMath.region_twophase) {
                 new_t = ThermoMath.iterate_t_given_v_verify_u(temperature, volume, new_u, region); //try to move t assuming we stay in starting region
-                if (region == ThermoMath.region_liquid && new_t > ThermoMath.tsat_given_p(pressure)) //overshot form liquid
+                if (region == ThermoMath.region_liquid && new_t > ThermoMath.tsat_given_p(pressure)) //overshot from liquid
                 {
                     new_t = ThermoMath.tsat_given_p(pressure);
                     region = ThermoMath.region_twophase;
@@ -259,7 +260,7 @@ public class ThermoState : MonoBehaviour
                 }
             }
 
-            
+
             // two-phase region
             if (region == ThermoMath.region_twophase) //either newly, or all along
             {
@@ -282,25 +283,105 @@ public class ThermoState : MonoBehaviour
     public void add_pressure_uninsulated_per_delta_time(double p, double delta_time) {
         try {
             double new_p = pressure + p * delta_time;
+            if (p * delta_time < 1.0) { new_p = pressure + p; } // small enough step; finish transition
 
             //default guess
             double new_u = internalenergy;
             double new_v = volume;
-            // Pressure Constrained -> Insulated -> delta pressure (all phases)
-            new_v = ThermoMath.v_given_pt(new_p, temperature, region); //ERROR: DO NOT USE IN VAPOR DOME (safe assuming any delta p sufficient to _leave_ vapor dome) TODO: enforce this check
-            new_u = ThermoMath.u_given_pt(new_p, temperature, region);
-            //at this point, we have enough internal state to derive the rest
-            pressure = new_p;
-            volume = new_v;
-            internalenergy = new_u;
-            enthalpy = ThermoMath.h_given_vt(volume, temperature, region);
-            entropy = ThermoMath.s_given_vt(volume, temperature, region);
-            region = ThermoMath.region_given_pvt(pressure, volume, temperature);
-            switch (region) {
-                case ThermoMath.region_liquid: quality = 0; break;
-                case ThermoMath.region_twophase: quality = ThermoMath.x_given_pv(pressure, volume, region); break;
-                case ThermoMath.region_vapor: quality = 1; break;
+
+            double new_h = enthalpy;
+            double new_x = quality;
+
+            /*
+            // pressure change is what is sending into two-phase, and volume is changing in two-phase, so check for overshoot on pressure given volume 
+            if (region != ThermoMath.region_twophase) {
+                new_p = ThermoMath.iterate_p_given_vu(pressure, volume, internalenergy, region); //try to move p assuming we stay in starting region
+                if (region == ThermoMath.region_liquid && volume > ThermoMath.v_given_pt(new_p, temperature)) //overshot from liquid
+                {
+                    new_t = ThermoMath.tsat_given_p(pressure);
+                    region = ThermoMath.region_twophase;
+                }
+                else if (region == ThermoMath.region_vapor && new_t < ThermoMath.tsat_given_p(pressure)) //overshot from vapor
+                {
+                    new_t = ThermoMath.tsat_given_p(pressure);
+                    region = ThermoMath.region_twophase;
+                }
+                else {
+                    // remain in liquid or vapor region
+                    internalenergy = new_u;
+                    temperature = new_t;
+                    pressure = ThermoMath.p_given_vt(volume, temperature, region);
+                }
             }
+            */
+
+
+            switch (region) {
+                case ThermoMath.region_liquid: //subcooled liquid
+                case ThermoMath.region_vapor: //vapor region
+                {
+                        // Pressure Constrained -> Insulated -> delta pressure (all phases)
+                        new_v = ThermoMath.v_given_pt(new_p, temperature, region); //ERROR: DO NOT USE IN VAPOR DOME (safe assuming any delta p sufficient to _leave_ vapor dome)
+                        new_u = ThermoMath.u_given_pt(new_p, temperature, region);
+
+                        //at this point, we have enough internal state to derive the rest
+
+                        pressure = new_p;
+                        volume = new_v;
+                        internalenergy = new_u;
+                        // temperature = new_t;
+                        enthalpy = ThermoMath.h_given_vt(volume, temperature, region);
+                        entropy = ThermoMath.s_given_vt(volume, temperature, region);
+                        region = ThermoMath.region_given_pvt(pressure, volume, temperature);
+                        switch (region) {
+                            case ThermoMath.region_liquid: quality = 0; break;
+                            case ThermoMath.region_twophase: quality = ThermoMath.x_given_pv(pressure, volume, region); break;
+                            case ThermoMath.region_vapor: quality = 1; break;
+                        }
+                    }
+                    break;
+                case ThermoMath.region_twophase: //two-phase region
+                {
+                        /* 
+                         * A starting point in the 2-phase region must be in terms of P (or T) and some other parameter, such as v, h, u, or s.
+                         * The starting point in the 2 phase region cannot be defined by P and T alone.
+                         * 
+                         * If this condition (uninsulated) falls in the category that the conductivity of the wall is infinity and therefore the temperature is really constant,
+                         * then the new state is defined by the conditions:
+                         * 
+                         * P = P_new and T = T_old.
+                         * 
+                         * From a starting position in the two-phase region, an increase of pressure with T=constant will send the state over to the sub cooled liquid range. (if on the line, in other words.)
+                         * The process will move along a T=constant, P=constant line until it hits the saturated liquid line. (<- I assume this means moving along volume axis)
+                         * 
+                         * If the conductivity of the wall is less than infinity (insulation % > 0), this same process will occur, although at a slower rate. 
+                         */
+
+                        new_x = ThermoMath.x_given_ph(new_p, enthalpy);
+                        new_v = ThermoMath.v_given_px(new_p, quality);
+                        new_u = ThermoMath.u_given_vt(volume, temperature, region);
+
+                        volume = new_v;
+                        entropy = ThermoMath.s_given_vt(volume, temperature, region);
+                        internalenergy = new_u;
+                        quality = new_x;
+
+                        //region = ThermoMath.region_given_pvt(pressure, volume, temperature);
+                        region = ThermoMath.region_given_ps(new_p, entropy);
+
+                        switch (region) {
+                            case ThermoMath.region_liquid: quality = 0; break;
+                            case ThermoMath.region_vapor: quality = 1; break;
+                        }
+                    }
+                    break;
+            }
+
+            //at this point, we have enough internal state to derive the rest
+            // internalenergy = new_u;
+            // temperature = new_t;
+            // enthalpy = ThermoMath.h_given_vt(volume, temperature, region);
+
 
         }
         catch (Exception e) { }
@@ -311,19 +392,27 @@ public class ThermoState : MonoBehaviour
     public void add_pressure_insulated_per_delta_time(double p, double delta_time) {
         try {
             double new_p = pressure + p * delta_time;
+            if (p * delta_time < 1.0) { new_p = pressure + p; } // small enough step; finish transition
+
+            double new_h = enthalpy;
+            double new_u = internalenergy;
 
             switch (region) {
                 case ThermoMath.region_liquid: //subcooled liquid
                 case ThermoMath.region_twophase: //two-phase region
                 {
-                        //AVOID THESE SCENARIOS // Pressure Constrained -> Insulated -> delta pressure (liquid and two-phase)
+                        // Pressure Constrained -> Insulated -> delta pressure (liquid and two-phase)
+                        pressure = new_p;
+
+                        new_u = ThermoMath.u_given_pt(pressure, temperature);
+                        //new_h = ThermoMath.h_given_vt(volume, temperature);
                     }
                     break;
                 case ThermoMath.region_vapor: //superheated vapor
                 {
                         //default guess
                         double new_t = temperature;
-                        double new_u = internalenergy;
+                        new_u = internalenergy;
                         double new_v = volume;
 
                         double k = 1.27;

@@ -869,7 +869,7 @@ public class World : MonoBehaviour
 
             //treat "applied_weight" as target, and iterate toward it, rather than applying it additively
             //(technically, "should" add_pressure(...) with every delta of weight on the piston, but that would result in very jumpy nonsense movements. iterating toward a target smooths it out)
-            double delta_pressure = (weight_pressure - thermo_present.get_pressure()); // * 0.01; //1% of difference
+            double delta_pressure = (weight_pressure - thermo_present.get_pressure());
 
             bool significantChange = Mathf.Abs((float)delta_pressure * Time.fixedDeltaTime) > 1.0 ? true : false;
             if (significantChange) {
@@ -879,13 +879,13 @@ public class World : MonoBehaviour
                     arrows.Go(delta_pressure > 0.0f);
                     arrows.SetFlow(delta_pressure);
                 }
-
-                if (tool_insulator.engaged) thermo_present.add_pressure_insulated_per_delta_time(delta_pressure, delta_time); // Pressure Constrained -> Insulated ->  delta pressure
-                else thermo_present.add_pressure_uninsulated_per_delta_time(delta_pressure, delta_time); // Pressure Constrained -> Uninsulated ->  delta pressure
             }
             else if (arrows.running) {
                 arrows.Stop();
             }
+
+            if (tool_insulator.engaged) thermo_present.add_pressure_insulated_per_delta_time(delta_pressure, delta_time); // Pressure Constrained -> Insulated ->  delta pressure
+            else thermo_present.add_pressure_uninsulated_per_delta_time(delta_pressure, delta_time); // Pressure Constrained -> Uninsulated ->  delta pressure
         }
 
         double insulation_coefficient = tool_insulator.engaged ? 1.0f : CONTAINER_INSULATION_COEFFICIENT;
@@ -901,8 +901,10 @@ public class World : MonoBehaviour
             }
             else if (arrows.running) arrows.Stop();
         */
-        if (tool_clamp.engaged) thermo_present.add_heat_constant_v_per_delta_time(applied_heat, insulation_coefficient, delta_time);    // Volume Constrained -> Insulated && Uninsulated ->  delta energy     // time eqtn 6a
-        else thermo_present.add_heat_constant_p_per_delta_time(applied_heat, insulation_coefficient, delta_time);                       // Pressure Constrained -> Insulated && Uninsulated -> delta energy    // time eqtn 6b
+        if (applied_heat != 0) {
+            if (tool_clamp.engaged) thermo_present.add_heat_constant_v_per_delta_time(applied_heat, insulation_coefficient, delta_time);    // Volume Constrained -> Insulated && Uninsulated ->  delta energy     // time eqtn 6a
+            else thermo_present.add_heat_constant_p_per_delta_time(applied_heat, insulation_coefficient, delta_time);                       // Pressure Constrained -> Insulated && Uninsulated -> delta energy    // time eqtn 6b
+        }
 
         //running blended average of hand velocity (transfers this velocity on "release object" for consistent "throwing")
         lhand_vel += (lhand.transform.position - lhand_pos) / Time.fixedDeltaTime;
