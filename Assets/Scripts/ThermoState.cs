@@ -230,6 +230,8 @@ public class ThermoState : MonoBehaviour
         }
         catch (Exception e) { }
 
+        // TODO: unstable when applying coil to super pressurized vapor 
+
         clamp_state();
     }
 
@@ -240,6 +242,8 @@ public class ThermoState : MonoBehaviour
             double new_u = internalenergy + delta_u;
             double new_t = temperature;
             double new_p = pressure;
+
+            // TODO: why is pressure being added when the clamp is engaged?
 
             if (region != ThermoMath.region_twophase) {
                 new_t = ThermoMath.iterate_t_given_v_verify_u(temperature, volume, new_u, region); //try to move t assuming we stay in starting region
@@ -277,6 +281,8 @@ public class ThermoState : MonoBehaviour
             entropy = ThermoMath.s_given_vt(volume, temperature, region);
         }
         catch (Exception e) { }
+
+        // applying heat with clamp results in unstable state
 
         clamp_state();
     }
@@ -376,6 +382,7 @@ public class ThermoState : MonoBehaviour
 
             double new_h = enthalpy;
             double new_u = internalenergy;
+            double new_t = temperature;
 
             switch (region) {
                 case ThermoMath.region_liquid: //subcooled liquid
@@ -385,13 +392,16 @@ public class ThermoState : MonoBehaviour
                         pressure = new_p;
 
                         new_u = ThermoMath.u_given_pt(pressure, temperature);
+                        new_t = ThermoMath.tsat_given_p(pressure);
+                        
+                        temperature = new_t;
                         //new_h = ThermoMath.h_given_vt(volume, temperature);
                     }
                     break;
                 case ThermoMath.region_vapor: //superheated vapor
                 {
                         //default guess
-                        double new_t = temperature;
+                        new_t = temperature;
                         new_u = internalenergy;
                         double new_v = volume;
 
