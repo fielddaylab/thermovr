@@ -205,7 +205,7 @@ public class ThermoState : MonoBehaviour
                     enthalpy = new_h;
                     quality = new_x;
                     volume = ThermoMath.v_given_px(pressure, new_x, region);
-                    temperature = ThermoMath.tsat_given_p(pressure, region); // TODO: should adjusting pressure in two-phase affect this like it currently does?
+                    temperature = ThermoMath.tsat_given_p(pressure, region);
                     entropy = ThermoMath.s_given_px(pressure, new_x, region);
                     internalenergy = ThermoMath.u_given_px(pressure, new_x, region);
                     break;
@@ -221,6 +221,7 @@ public class ThermoState : MonoBehaviour
             }
 
             region = ThermoMath.region_given_pvt(pressure, volume, temperature);
+
             switch (region) {
                 case ThermoMath.region_liquid: quality = 0; break;
                 case ThermoMath.region_twophase: quality = ThermoMath.x_given_pv(pressure, volume, region); break;
@@ -283,7 +284,7 @@ public class ThermoState : MonoBehaviour
     public void add_pressure_uninsulated_per_delta_time(double p, double delta_time) {
         try {
             double new_p = pressure + p * delta_time;
-            if (Math.Abs(p * delta_time) < 1.0) { new_p = pressure + p; } // small enough step; finish transition
+            if (Math.Abs(p * delta_time) < World.DELTA_PRESSURE_CUTOFF) { new_p = pressure + p; } // small enough step; finish transition
 
             //default guess
             double new_u = internalenergy;
@@ -292,62 +293,38 @@ public class ThermoState : MonoBehaviour
             double new_h = enthalpy;
             double new_x = quality;
 
-            /*
-            // pressure change is what is sending into two-phase, and volume is changing in two-phase, so check for overshoot on pressure given volume 
-            if (region != ThermoMath.region_twophase) {
-                new_p = ThermoMath.iterate_p_given_vu(pressure, volume, internalenergy, region); //try to move p assuming we stay in starting region
-                if (region == ThermoMath.region_liquid && volume > ThermoMath.v_given_pt(new_p, temperature)) //overshot from liquid
-                {
-                    new_t = ThermoMath.tsat_given_p(pressure);
-                    region = ThermoMath.region_twophase;
-                }
-                else if (region == ThermoMath.region_vapor && new_t < ThermoMath.tsat_given_p(pressure)) //overshot from vapor
-                {
-                    new_t = ThermoMath.tsat_given_p(pressure);
-                    region = ThermoMath.region_twophase;
-                }
-                else {
-                    // remain in liquid or vapor region
-                    internalenergy = new_u;
-                    temperature = new_t;
-                    pressure = ThermoMath.p_given_vt(volume, temperature, region);
-                }
-            }
-            */
-
-
             switch (region) {
                 case ThermoMath.region_liquid: //subcooled liquid
                 case ThermoMath.region_vapor: //vapor region
-                {
-                        if (ThermoMath.region_given_ps(new_p, entropy) != region) {
-                            if (ThermoMath.region_given_ps(new_p, entropy) == ThermoMath.region_twophase) {
-                                region = ThermoMath.region_twophase;
-                                pressure = new_p;
-                                enthalpy = ThermoMath.h_given_vt(volume, temperature, region);
-                                break;
-                            }
-                        }
-
-                        // Pressure Constrained -> Insulated -> delta pressure (all phases)
-                        new_v = ThermoMath.v_given_pt(new_p, temperature, region); //ERROR: DO NOT USE IN VAPOR DOME (safe assuming any delta p sufficient to _leave_ vapor dome)
-                        new_u = ThermoMath.u_given_pt(new_p, temperature, region);
-
-                        //at this point, we have enough internal state to derive the rest
-
-                        pressure = new_p;
-                        volume = new_v;
-                        internalenergy = new_u;
-                        // temperature = new_t;
-                        enthalpy = ThermoMath.h_given_vt(volume, temperature, region);
-                        entropy = ThermoMath.s_given_vt(volume, temperature, region);
-                        region = ThermoMath.region_given_pvt(pressure, volume, temperature);
-                        switch (region) {
-                            case ThermoMath.region_liquid: quality = 0; break;
-                            case ThermoMath.region_twophase: quality = ThermoMath.x_given_pv(pressure, volume, region); break;
-                            case ThermoMath.region_vapor: quality = 1; break;
+                    if (ThermoMath.region_given_ps(new_p, entropy) != region) {
+                        if (ThermoMath.region_given_ps(new_p, entropy) == ThermoMath.region_twophase) {
+                            region = ThermoMath.region_twophase;
+                            pressure = new_p;
+                            break;
                         }
                     }
+
+                    // Pressure Constrained -> Insulated -> delta pressure (all phases)
+                    new_v = ThermoMath.v_given_pt(new_p, temperature, region); //ERROR: DO NOT USE IN VAPOR DOME (safe assuming any delta p sufficient to _leave_ vapor dome)
+                    new_u = ThermoMath.u_given_pt(new_p, temperature, region);
+
+                    //at this point, we have enough internal state to derive the rest
+
+                    pressure = new_p;
+                    volume = new_v;
+                    internalenergy = new_u;
+                    // temperature = new_t;
+                    enthalpy = ThermoMath.h_given_vt(volume, temperature, region);
+                    entropy = ThermoMath.s_given_vt(volume, temperature, region);
+                    region = ThermoMath.region_given_pvt(pressure, volume, temperature);
+                    // TODO: fix -- when applying weight from vapor, jumps directly to liquid phase (should transition through 2-phase)
+                        // v, u, s, and h all jump drastically
+                    switch (region) {
+                        case ThermoMath.region_liquid: quality = 0; break;
+                        case ThermoMath.region_twophase: quality = ThermoMath.x_given_pv(pressure, volume, region); break;
+                        case ThermoMath.region_vapor: quality = 1; break;
+                    }
+
                     break;
                 default:
                     break;
@@ -375,11 +352,10 @@ public class ThermoState : MonoBehaviour
                 new_u = ThermoMath.u_given_vt(volume, temperature, region);
 
                 volume = new_v;
-                entropy = ThermoMath.s_given_vt(volume, temperature, region);
+                entropy = ThermoMath.s_given_px(pressure, new_x, region);
                 internalenergy = new_u;
                 quality = new_x;
 
-                //region = ThermoMath.region_given_pvt(pressure, volume, temperature);
                 region = ThermoMath.region_given_ps(new_p, entropy);
 
                 switch (region) {
@@ -387,19 +363,6 @@ public class ThermoState : MonoBehaviour
                     case ThermoMath.region_vapor: quality = 1; break;
                 }
             }
-
-            //at this point, we have enough internal state to derive the rest
-            // internalenergy = new_u;
-            // temperature = new_t;
-            // enthalpy = ThermoMath.h_given_vt(volume, temperature, region);
-
-
-            // TODO: after applying weight in 2 phase, water enters liquid state. But once you remove the weight, it barely crosses into two-phase. (Actually, this may be correct behavior. Will need to double check with experts.)
-            // Furthermore, trying to reduce pressure with ballon on verge of liquid works in 2-phase briefly, but eventually it jumps to vapor.
-            // Transitions from vapor to two-phase and vice versa:
-                // two-phase to vapor works, but when reducing balloon back to 2-phase, it sets the 2-phase closer to the liquid line.
-                    // same way reducing balloon happens, applying weight sets back to start of 2 phase.
-
         }
         catch (Exception e) { }
 
@@ -409,7 +372,7 @@ public class ThermoState : MonoBehaviour
     public void add_pressure_insulated_per_delta_time(double p, double delta_time) {
         try {
             double new_p = pressure + p * delta_time;
-            if (Math.Abs(p * delta_time) < 1.0) { new_p = pressure + p; } // small enough step; finish transition
+            if (Math.Abs(p * delta_time) < World.DELTA_PRESSURE_CUTOFF) { new_p = pressure + p; } // small enough step; finish transition
 
             double new_h = enthalpy;
             double new_u = internalenergy;
@@ -436,7 +399,6 @@ public class ThermoState : MonoBehaviour
                         new_v = volume * Math.Pow(pressure / new_p, 1.0 / k);
                         new_u = internalenergy - ((new_p * new_v - pressure * volume) / (1 - k));
                         new_t = ThermoMath.iterate_t_given_p_verify_u(temperature, pressure, new_u, region);
-                        //new_t = ThermoMath.iterate_t_given_pv(temperature,pressure,new_v, region);
 
                         //at this point, we have enough internal state to derive the rest
                         pressure = new_p;

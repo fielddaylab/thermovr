@@ -17,6 +17,7 @@ public class World : MonoBehaviour
     const float CONTAINER_INSULATION_COEFFICIENT = 0.1f; // Not really based on a physical material, just a way to roughly simulate imperfect insulation.
     const bool QUIZ_ENABLED = false;
     const bool CHALLENGE_ENABLED = false;
+    public const double DELTA_PRESSURE_CUTOFF = 100.0;
 
     public Material hand_empty;
     Material[] hand_emptys;
@@ -871,7 +872,7 @@ public class World : MonoBehaviour
             //(technically, "should" add_pressure(...) with every delta of weight on the piston, but that would result in very jumpy nonsense movements. iterating toward a target smooths it out)
             double delta_pressure = (weight_pressure - thermo_present.get_pressure());
 
-            bool significantChange = Mathf.Abs((float)delta_pressure * Time.fixedDeltaTime) > 1.0 ? true : false;
+            bool significantChange = Mathf.Abs((float)delta_pressure * Time.fixedDeltaTime) > DELTA_PRESSURE_CUTOFF ? true : false;
             if (significantChange) {
                 // we only are applying pressure added/released if we are in gas region.
                 // if this ever changes, adapt this "if" check as needed.
@@ -884,8 +885,15 @@ public class World : MonoBehaviour
                 arrows.Stop();
             }
 
-            if (tool_insulator.engaged) thermo_present.add_pressure_insulated_per_delta_time(delta_pressure, delta_time); // Pressure Constrained -> Insulated ->  delta pressure
-            else thermo_present.add_pressure_uninsulated_per_delta_time(delta_pressure, delta_time); // Pressure Constrained -> Uninsulated ->  delta pressure
+            if (System.Math.Abs(delta_pressure) > 0) {
+                if (tool_insulator.engaged) thermo_present.add_pressure_insulated_per_delta_time(delta_pressure, delta_time); // Pressure Constrained -> Insulated ->  delta pressure
+                else thermo_present.add_pressure_uninsulated_per_delta_time(delta_pressure, delta_time); // Pressure Constrained -> Uninsulated ->  delta pressure
+            }
+        }
+
+        // stop arrows if there was a jump to another region other than gas
+        if (thermo_present.get_region() != 2 && arrows.running) {
+            arrows.Stop();
         }
 
         double insulation_coefficient = tool_insulator.engaged ? 1.0f : CONTAINER_INSULATION_COEFFICIENT;
