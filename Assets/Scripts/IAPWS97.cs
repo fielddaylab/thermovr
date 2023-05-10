@@ -4803,6 +4803,22 @@ public static class IF97
     Debug.Log("  [IAPWS SR4-04(2014)]\" \n\n\n");
   }
 
+    #region Additional Helpers
+
+    static public void h_bounds_given_p(double p, out double h_min_given_p, out double h_max_given_p) {
+        double adjusted_p = p / 1000000.0;
+        // Check overall boundary limits
+        if ((adjusted_p < Pmin) || (adjusted_p > Pmax))
+            throw new ArgumentOutOfRangeException("Pressure out of range");
+        double Hmin = R1.output(IF97parameters.IF97_HMASS, Tmin, adjusted_p);
+        double Hmax = R2.output(IF97parameters.IF97_HMASS, Tmax, adjusted_p);
+
+        h_min_given_p = Hmin * 1000.0;
+        h_max_given_p = Hmax * 1000.0;
+    }
+
+    #endregion // Additional Helpers
+
 } /* IF97 */
 
 #if ENABLE_CATCH

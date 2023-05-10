@@ -148,7 +148,18 @@ public class ThermoState : MonoBehaviour
         temperature = Clampd(temperature, ThermoMath.t_min, ThermoMath.t_max);
         internalenergy = Clampd(internalenergy, ThermoMath.u_min, ThermoMath.u_max);
         entropy = Clampd(entropy, ThermoMath.s_min, ThermoMath.s_max);
+
         enthalpy = Clampd(enthalpy, ThermoMath.h_min, ThermoMath.h_max);
+        double h_min_given_p;
+        double h_max_given_p;
+        try {
+            IF97.h_bounds_given_p(pressure, out h_min_given_p, out h_max_given_p);
+            enthalpy = Clampd(enthalpy, h_min_given_p, h_max_given_p);
+        }
+        catch (Exception ex) {
+            Debug.Log("[Error] " + ex.Message);
+        }
+
         quality = Clampd(quality, ThermoMath.x_min, ThermoMath.x_max);
     }
 
@@ -204,6 +215,7 @@ public class ThermoState : MonoBehaviour
                     double new_x = ThermoMath.x_given_ph(pressure, new_h, region);
                     //at this point, we have enough internal state to derive the rest
                     enthalpy = new_h;
+                    clamp_state();
                     quality = new_x;
                     volume = ThermoMath.v_given_px(pressure, new_x, region);
                     temperature = ThermoMath.tsat_given_p(pressure, region);
@@ -212,10 +224,12 @@ public class ThermoState : MonoBehaviour
                     break;
                 case ThermoMath.region_liquid:
                 case ThermoMath.region_vapor:
-                    //at this point, we have enough internal state to derive the rest
+                    // check that h is within bounds
                     enthalpy = new_h;
-                    volume = ThermoMath.v_given_ph(pressure, new_h, region);
-                    temperature = ThermoMath.t_given_ph(pressure, new_h, region);
+                    clamp_state();
+                    //at this point, we have enough internal state to derive the rest
+                    volume = ThermoMath.v_given_ph(pressure, enthalpy, region);
+                    temperature = ThermoMath.t_given_ph(pressure, enthalpy, region);
                     entropy = ThermoMath.s_given_vt(volume, temperature, region);
                     internalenergy = ThermoMath.u_given_vt(volume, temperature, region);
                     break;
@@ -320,7 +334,7 @@ public class ThermoState : MonoBehaviour
                     entropy = ThermoMath.s_given_vt(volume, temperature, region);
                     region = ThermoMath.region_given_pvt(pressure, volume, temperature);
                     // TODO: fix -- when applying weight from vapor, jumps directly to liquid phase (should transition through 2-phase)
-                        // v, u, s, and h all jump drastically
+                    // v, u, s, and h all jump drastically
                     switch (region) {
                         case ThermoMath.region_liquid: quality = 0; break;
                         case ThermoMath.region_twophase: quality = ThermoMath.x_given_pv(pressure, volume, region); break;
@@ -389,7 +403,7 @@ public class ThermoState : MonoBehaviour
 
                         new_u = ThermoMath.u_given_pt(pressure, temperature);
                         new_t = ThermoMath.tsat_given_p(pressure);
-                        
+
                         temperature = new_t;
                     }
                     break;

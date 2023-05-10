@@ -25,689 +25,639 @@ using UnityEngine;
 
 public static class ThermoMath
 {
-  private const int MAX_MILLISECOND = 50;
-  /*
-  pressure = p
-  specificvolume = v
-  temperature = t
-  internalenergy = u
-  entropy = s
-  enthalpy = h
-  quality = x
-  */
+    private const int MAX_MILLISECOND = 50;
+    /*
+    pressure = p
+    specificvolume = v
+    temperature = t
+    internalenergy = u
+    entropy = s
+    enthalpy = h
+    quality = x
+    */
 
-  /*
-  max-min = the total range expected by the simulation
-  neutral = "room temperature, 1 atm, 1kg water"
-  smallstep = a "small step" in the given range (useful for cache invalidation threshhold)
-  */
+    /*
+    max-min = the total range expected by the simulation
+    neutral = "room temperature, 1 atm, 1kg water"
+    smallstep = a "small step" in the given range (useful for cache invalidation threshhold)
+    */
 
-  //region: 0 subcooled liquid, 1 two-phase, 2 superheated vapor
-  public const int region_liquid = 0;
-  public const int region_twophase = 1;
-  public const int region_vapor = 2;
-
-  //Pa
-  public static double p_min;
-  public static double p_max;
-  public static double[] p_neutral;
-  public static double p_smallstep;
-  //Pa
-  public static double psat_min;
-  public static double psat_max;
-  //M³/kg
-  public static double v_min;
-  public static double v_max;
-  public static double[] v_neutral;
-  public static double v_smallstep;
-  //K
-  public static double t_min;
-  public static double t_max;
-  public static double[] t_neutral;
-  public static double t_smallstep;
-  //J/kg
-  public static double u_min;
-  public static double u_max;
-  public static double[] u_neutral;
-  public static double u_smallstep;
-  //J/kgK
-  public static double s_min;
-  public static double s_max;
-  public static double[] s_neutral;
-  public static double s_smallstep;
-  //J/kg
-  public static double h_min;
-  public static double h_max;
-  public static double[] h_neutral;
-  public static double h_smallstep;
-  //%
-  public static double x_min;
-  public static double x_max;
-  public static double[] x_neutral;
-  public static double x_smallstep;
-
-  // A sort of notifier for users of the class.
-  // Whenever an exception occurs, we set this to true.
-  // User of the class can then check and react appropriately, setting false after handling the error.
-  public static bool got_error;
-
-  public static void Init()
-  {
-    got_error = false;
-    IF97.initRegions();
+    //region: 0 subcooled liquid, 1 two-phase, 2 superheated vapor
+    public const int region_liquid = 0;
+    public const int region_twophase = 1;
+    public const int region_vapor = 2;
 
     //Pa
-    p_min = IF97.get_Pmin()*1000000.0; // 611.213
-    p_max = IF97.get_Pmax()*1000000.0; // 100000000
-    p_neutral = new double[] { 101325.0, 3142, 3142 };
-    p_smallstep = 1.0;
-
+    public static double p_min;
+    public static double p_max;
+    public static double[] p_neutral;
+    public static double p_smallstep;
     //Pa
-    psat_min = IF97.get_ptrip()*1000000.0; // 611.656
-    psat_max = IF97.get_pcrit()*1000000.0; // 22064000
-
+    public static double psat_min;
+    public static double psat_max;
     //M³/kg
-    v_min = 1.0/3000;  // 0.0003
-    v_max = 1.0/0.001; // 1000
-    v_neutral = new double[]{0.001,21.85,0}; //note: v_neutral[2] calculated/set below
-    v_smallstep = 0.00001;
-
+    public static double v_min;
+    public static double v_max;
+    public static double[] v_neutral;
+    public static double v_smallstep;
     //K
-    t_min = IF97.get_Tmin(); // 273.15
-    t_max = IF97.get_Tmax(); // 1073.15
-    t_neutral = new double[]{293.0,298.0,400.0};
-    t_smallstep = 0.001;
-
+    public static double t_min;
+    public static double t_max;
+    public static double[] t_neutral;
+    public static double t_smallstep;
     //J/kg
-    u_min = 123.8;
-    u_max = 3700000.0;
-    u_neutral = new double[]{83280.0,8328.0,8328.0}; //note: all get calculated/set below
-    u_smallstep = 1;
-
+    public static double u_min;
+    public static double u_max;
+    public static double[] u_neutral;
+    public static double u_smallstep;
     //J/kgK
-    s_min = IF97.Smin*1000; //0.0
-    s_max = IF97.Smax*1000; //11921.0548250511
-    s_neutral = new double[]{294.322,294.322,294.322};
-    s_smallstep = 0.0001;
-
+    public static double s_min;
+    public static double s_max;
+    public static double[] s_neutral;
+    public static double s_smallstep;
     //J/kg
-    h_min = IF97.Hmin(s_min); //0.0006286
-    h_max = IF97.Hmax(s_max/1000.0)*1000.0; //4171654.98424024
-    h_neutral = new double[]{83377.0,83377.0,83377.0};
-    h_smallstep = 0.001;
-
+    public static double h_min;
+    public static double h_max;
+    public static double[] h_neutral;
+    public static double h_smallstep;
     //%
-    x_min = 0.0;
-    x_max = 1.0;
-    x_neutral = new double[]{0,0.5,1};
-    x_smallstep = 0.00001;
+    public static double x_min;
+    public static double x_max;
+    public static double[] x_neutral;
+    public static double x_smallstep;
 
-    //fill in missing/sloppy neutrals (note: if any of these fallback on "fallback_region", defeats the purpose. do not let that happen)
-    v_neutral[2] = v_given_pt(p_neutral[2], t_neutral[2], 2);
-    for(int i = 0; i < 3; i++) u_neutral[i] = u_given_vt(v_neutral[i], t_neutral[i], i);
-    for(int i = 0; i < 3; i++) s_neutral[i] = s_given_vt(v_neutral[i], t_neutral[i], i);
-    for(int i = 0; i < 3; i++) h_neutral[i] = h_given_vt(v_neutral[i], t_neutral[i], i);
-    x_neutral[1] = x_given_pv(p_neutral[1], v_neutral[1], 1);
+    // A sort of notifier for users of the class.
+    // Whenever an exception occurs, we set this to true.
+    // User of the class can then check and react appropriately, setting false after handling the error.
+    public static bool got_error;
 
-    //DEBUG INFO:
-    //IF97.print_tables();
-    //IAPWS95.print_tables();
-    //compare_impls();
-  }
+    public static void Init() {
+        got_error = false;
+        IF97.initRegions();
 
-  static double SAMPLE_LBASE = 1.6f;
-  static double sample(double t) { return Math.Pow(t,SAMPLE_LBASE); }
+        //Pa
+        p_min = IF97.get_Pmin() * 1000000.0; // 611.213
+        p_max = IF97.get_Pmax() * 1000000.0; // 100000000
+        p_neutral = new double[] { 101325.0, 3142, 3142 };
+        p_smallstep = 1.0;
+
+        //Pa
+        psat_min = IF97.get_ptrip() * 1000000.0; // 611.656
+        psat_max = IF97.get_pcrit() * 1000000.0; // 22064000
+
+        //M³/kg
+        v_min = 1.0 / 3000;  // 0.0003
+        v_max = 1.0 / 0.001; // 1000
+        v_neutral = new double[] { 0.001, 21.85, 0 }; //note: v_neutral[2] calculated/set below
+        v_smallstep = 0.00001;
+
+        //K
+        t_min = IF97.get_Tmin(); // 273.15
+        t_max = IF97.get_Tmax(); // 1073.15
+        t_neutral = new double[] { 293.0, 298.0, 400.0 };
+        t_smallstep = 0.001;
+
+        //J/kg
+        u_min = 123.8;
+        u_max = 3700000.0;
+        u_neutral = new double[] { 83280.0, 8328.0, 8328.0 }; //note: all get calculated/set below
+        u_smallstep = 1;
+
+        //J/kgK
+        s_min = IF97.Smin * 1000; //0.0
+        s_max = IF97.Smax * 1000; //11921.0548250511
+        s_neutral = new double[] { 294.322, 294.322, 294.322 };
+        s_smallstep = 0.0001;
+
+        //J/kg
+        h_min = IF97.Hmin(s_min); //0.0006286
+        h_max = IF97.Hmax(s_max / 1000.0) * 1000.0; //4171654.98424024
+        h_neutral = new double[] { 83377.0, 83377.0, 83377.0 };
+        h_smallstep = 0.001;
+
+        //%
+        x_min = 0.0;
+        x_max = 1.0;
+        x_neutral = new double[] { 0, 0.5, 1 };
+        x_smallstep = 0.00001;
+
+        //fill in missing/sloppy neutrals (note: if any of these fallback on "fallback_region", defeats the purpose. do not let that happen)
+        v_neutral[2] = v_given_pt(p_neutral[2], t_neutral[2], 2);
+        for (int i = 0; i < 3; i++) u_neutral[i] = u_given_vt(v_neutral[i], t_neutral[i], i);
+        for (int i = 0; i < 3; i++) s_neutral[i] = s_given_vt(v_neutral[i], t_neutral[i], i);
+        for (int i = 0; i < 3; i++) h_neutral[i] = h_given_vt(v_neutral[i], t_neutral[i], i);
+        x_neutral[1] = x_given_pv(p_neutral[1], v_neutral[1], 1);
+
+        //DEBUG INFO:
+        //IF97.print_tables();
+        //IAPWS95.print_tables();
+        //compare_impls();
+    }
+
+    static double SAMPLE_LBASE = 1.6f;
+    static double sample(double t) { return Math.Pow(t, SAMPLE_LBASE); }
 
 
-/*
-  //FOR DEBUGGING
-  public static void compare_impls()
-  {
-    int samples = 350; //match value in ThermoState to match sample points
-
-    for(int y = 0; y < samples; y++)
-    {
-      double pt = ((double)y/(samples-1));
-      for(int z = 0; z < samples; z++)
+    /*
+      //FOR DEBUGGING
+      public static void compare_impls()
       {
-        double tt = ((double)z/(samples-1));
-        double pst = sample(pt);
-        double tst = sample(tt);
-        double p = Lerpd(p_min,p_max,pst);
-        double t = Lerpd(t_min,t_max,tst);
-        double v = v_given_pt(p,t);
-        //pvt in Pa, M³/kg, K
-        double _p = p_given_vt(v,t);
+        int samples = 350; //match value in ThermoState to match sample points
 
-        Debug.LogFormat("error:{0} p:{1}Pa ({2}Pa), v:{3}M³/kg, t:{4}K",p-_p,p,_p,v,t);
-      }
-    }
-
-  }
-*/
-
-  static double Lerpd(double a, double b, double t) { return (b-a)*t+a; }
-
-  //a bunch of options for getting region here- still need to figure out most reliable
-  //region: 0 subcooled liquid, 1 two-phase, 2 superheated vapor
-  public static int region_given_pvt(double p, double v, double t)
-  {
-    //broad check w/ t
-    if(t-t_smallstep > IF97.Tsat97(p/1000000.0)) return region_vapor;
-    if(t+t_smallstep < IF97.Tsat97(p/1000000.0)) return region_liquid;
-
-    //broad check w/ p - unneeded
-    //if(p-p_smallstep > IF97.psat97(t)) return liq;
-    //if(p+p_smallstep < IF97.psat97(t)) return vapor;
-
-    //fine check w/ v
-    //f means saturated liquid,
-    //g means saturated gas
-    double vf = 1.0/IF97.rholiq_p(p/1000000.0);
-    if(v <= vf) return region_liquid;
-    double vg = 1.0/IF97.rhovap_p(p/1000000.0);
-    if(v >= vg) return region_vapor;
-    return region_twophase;
-  }
-  /*
-  public static int region_given_pvt(double p, double v, double t)
-  {
-    IF97.IF97REGIONS r = IF97.RegionDetermination_TP(t, p/1000000.0);
-    switch(r)
-    {
-      case 1: //liquid
-        return 0; //subcooled liquid
-      case 2: //vapor
-        return 2; //superheated vapor
-      case 3:
-      case 4: //two-phase
-      case 5:
-        return 1; //two-phase
-    }
-    return -1;
-  }
-  */
-
-// Currently unused; 6/30/2020
-/*
-  public static int region_given_ph(double p, double h)
-  {
-    //Be careful - don’t calculate T from these if you are close to the saturation line (within 25 mK).
-    int r = IF97.Region_ph(p/1000000.0, h/1000.0); 
-    switch(r)
-    {
-      case 1: //liquid
-        return region_liquid; //subcooled liquid
-      case 2: //vapor
-        return region_vapor; //superheated vapor
-      case 3:
-      case 4: //two-phase
-      case 5:
-        return region_twophase; //two-phase
-    }
-    return -1;
-  }
-*/
-  public static int region_given_ps(double p, double s)
-  {
-    int r = IF97.Region_ps(p/1000000.0, s/1000.0);
-    switch(r)
-    {
-      case 1: //liquid
-        return region_liquid; //subcooled liquid
-      case 2: //vapor
-        return region_vapor; //superheated vapor
-      case 3:
-      case 4: //two-phase
-      case 5:
-        return region_twophase; //two-phase
-    }
-    return -1;
-  }
-
-  //helpers to easily generate values "randomly", ensuring we're within the range we care about- NOT PHYSICALLY BASED
-  //"percent" = "percent between min value and max value across given dimension"
-  public static double p_given_percent(   double t) { return Lerpd(p_min,p_max,t); }
-  public static double psat_given_percent(double t) { return Lerpd(psat_min,psat_max,t); }
-  public static double v_given_percent(   double t) { return Lerpd(v_min,v_max,t); }
-  public static double t_given_percent(   double t) { return Lerpd(t_min,t_max,t); }
-  public static double u_given_percent(   double t) { return Lerpd(u_min,u_max,t); }
-  public static double s_given_percent(   double t) { return Lerpd(s_min,s_max,t); }
-  public static double h_given_percent(   double t) { return Lerpd(h_min,h_max,t); }
-  public static double x_given_percent(   double t) { return t; } //x already is a percent
-
-  public static double percent_given_p(   double p) { return (p-p_min)/(p_max-p_min); }
-  public static double percent_given_psat(double psat) { return (psat-psat_min)/(psat_max-psat_min); }
-  public static double percent_given_v(   double v) { return (v-v_min)/(v_max-v_min); }
-  public static double percent_given_t(   double t) { return (t-t_min)/(t_max-t_min); }
-  public static double percent_given_u(   double u) { return (u-u_min)/(u_max-u_min); }
-  public static double percent_given_s(   double s) { return (s-s_min)/(s_max-s_min); }
-  public static double percent_given_h(   double h) { return (h-h_min)/(h_max-h_min); }
-  public static double percent_given_x(   double x) { return x; } //x already is a percent
-
-  //rule of naming for consistency: prefer lexical ordering "p < v < t < u < s < h < q", ie "p_given_vt" rather than "p_given_tv"
-
-  public static double p_given_vt(double v, double t, int fallback_region=0) //experimentally only valid in the superheated vapor region
-  {
-    try
-    {
-      return IAPWS95.IAPWS95_pressure(1.0 / v, t) * 1000.0; //expects:kg/M³,K returns kPa
-    }
-    catch (Exception ex)
-    {
-      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, p_neutral[fallback_region]) );
-      got_error = true;
-      return p_neutral[fallback_region];
-    }
-  }
-  public static double v_given_pt(double p, double t, int fallback_region=0) //DO NOT USE IN VAPOR DOME
-  {
-    try
-    {
-      return 1.0/IF97.rhomass_Tp(t,p/1000000.0); //expects:K,MPa returns kg/M³
-    }
-    catch(Exception ex)
-    {
-      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, v_neutral[fallback_region]) );
-      got_error = true;
-      return v_neutral[fallback_region];
-    }
-  }
-
-  public static double v_given_ph(double p, double h, int fallback_region=0)
-  {
-    try
-    {
-      return 1.0/IF97.rhomass_phmass(p/1000000.0,h/1000.0);
-    }
-    catch (Exception ex)
-    {
-      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, v_neutral[fallback_region]) );
-      got_error = true;
-      return v_neutral[fallback_region];
-    }
-  }
-
-  public static double v_given_px(double p,double x, int fallback_region=0) //ONLY USE IN VAPOR DOME
-  {
-    try
-    {
-      return 1.0/IF97.rhomass_pQ(p/1000000.0,x);
-    }
-    catch (Exception ex)
-    {
-      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, v_neutral[fallback_region]) );
-      got_error = true;
-      return v_neutral[fallback_region];
-    }
-  }
-
-  public static double t_given_ph(double p, double h, int fallback_region=0)
-  {
-    try
-    {
-      return IF97.T_phmass(p/1000000.0,h/1000.0);
-    }
-    catch (Exception ex)
-    {
-      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, t_neutral[fallback_region]) );
-      got_error = true;
-      return t_neutral[fallback_region];
-    }
-  }
-
-  public static double tsat_given_p(double p, int fallback_region=0)
-  {
-    try
-    {
-      return IF97.Tsat97(p/1000000.0);
-    }
-    catch (Exception ex)
-    {
-      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, t_neutral[fallback_region]) );
-      got_error = true;
-      return t_neutral[fallback_region];
-    }
-  }
-
-  public static double vliq_given_p(double p, int fallback_region=0)
-  {
-    try
-    {
-      return 1.0/IF97.rholiq_p(p/1000000.0); //expects:MPa returns kg/M³
-    }
-    catch (Exception ex)
-    {
-      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, v_neutral[fallback_region]) );
-      got_error = true;
-      return v_neutral[fallback_region];
-    }
-  }
-
-  public static double vvap_given_p(double p, int fallback_region = 0)
-  {
-    try
-    {
-      return 1.0/IF97.rhovap_p(p/1000000.0); //expects:MPa returns kg/M³
-    }
-    catch (Exception ex)
-    {
-      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, v_neutral[fallback_region]) );
-      got_error = true;
-      return v_neutral[fallback_region];
-    }
-  }
-
-  public static double u_given_pt(double p, double t, int fallback_region = 0) //DO NOT USE IN VAPOR DOME
-  {
-    try
-    {
-      return IF97.umass_Tp(t, p/1000000.0) * 1000;
-    }
-    catch (Exception ex)
-    {
-      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, u_neutral[fallback_region]) );
-      got_error = true;
-      return u_neutral[fallback_region];
-    }
-  }
-
-  public static double u_given_vt(double v, double t, int fallback_region=0)
-  {
-    try
-    {
-      return IAPWS95.IAPWS95_internal_energy(1f / v, t) * 1000;
-    }
-    catch (Exception ex)
-    {
-      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, u_neutral[fallback_region]) );
-      got_error = true;
-      return u_neutral[fallback_region];
-    }
-  }
-
-  public static double u_given_px(double p, double x, int fallback_region=0)
-  {
-    try
-    {
-      return IF97.umass_pQ(p/1000000.0,x) * 1000;
-    }
-    catch (Exception ex)
-    {
-      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, u_neutral[fallback_region]) );
-      got_error = true;
-      return u_neutral[fallback_region];
-    }
-  }
-
-  public static double s_given_vt(double v, double t, int fallback_region=0)
-  {
-    try
-    {
-      return IAPWS95.IAPWS95_entropy(1f/v,t)*1000f;
-    }
-    catch (Exception ex)
-    {
-      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, s_neutral[fallback_region]) );
-      got_error = true;
-      return s_neutral[fallback_region];
-    }
-  }
-
-  public static double s_given_px(double p, double x, int fallback_region=0)
-  {
-    try
-    {
-      return IF97.smass_pQ(p/1000000.0,x)*1000f;
-    }
-    catch (Exception ex)
-    {
-      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, s_neutral[fallback_region]) );
-      got_error = true;
-      return s_neutral[fallback_region];
-    }
-  }
-
-  public static double h_given_vt(double v, double t, int fallback_region=0)
-  {
-    try
-    {
-      return IAPWS95.IAPWS95_enthalpy(1f/v,t)*1000f;
-    }
-    catch (Exception ex)
-    {
-      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, h_neutral[fallback_region]) );
-      got_error = true;
-      return h_neutral[fallback_region];
-    }
-  }
-
-  public static double x_given_pv(double p, double v, int fallback_region=0) //ONLY USE IN VAPOR DOME
-  {
-    try
-    {
-      //f means saturated liquid,
-      //g means saturated gas
-      double vf = 1.0/IF97.rholiq_p(p/1000000.0);
-      double vg = 1.0/IF97.rhovap_p(p/1000000.0);
-      return (v-vf)/(vg-vf);
-    }
-    catch (Exception ex)
-    {
-      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, x_neutral[fallback_region]) );
-      got_error = true;
-      return x_neutral[fallback_region];
-    }
-  }
-
-  public static double x_given_ph(double p, double h, int fallback_region=0) //ONLY USE IN VAPOR DOME
-  {
-    try
-    {
-      return IF97.Q_phmass(p/1000000.0,h/1000.0);
-    }
-    catch (Exception ex)
-    {
-      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, x_neutral[fallback_region]) );
-      got_error = true;
-      return x_neutral[fallback_region];
-    }
-  }
-
-  public static double x_given_pu(double p, double u, int fallback_region=0) //ONLY USE IN VAPOR DOME
-  {
-    try
-    {
-      return IF97.Q_pumass(p/1000000.0,u/1000.0);
-    }
-    catch (Exception ex)
-    {
-      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, x_neutral[fallback_region]) );
-      got_error = true;
-      return x_neutral[fallback_region];
-    }
-  }
-
-  public static double iterate_t_given_p_verify_u(double t, double p, double u, int fallback_region=0) //t = first guess
-  {
-    try
-    {
-      int MAX_ITERS = 100; //max # of iterations before giving up
-      double MAX_DELTA = 0.01; //acceptible solution error
-      double step = 10.0; //size of first step (shrinks every time it overshoots)
-      double guess = t;
-      double mark = u;
-      double delta = Math.Abs(u_given_pt(p,guess)-mark);
-      int i = 0;
-      for(i = 0; i < MAX_ITERS && delta > MAX_DELTA; i++)
-      {
-        double delta_a = Math.Abs(u_given_pt(p,guess+ step     )-mark);
-        double delta_b = Math.Abs(u_given_pt(p,guess-(step/2.0))-mark);
-        if(delta < delta_a && delta < delta_b) //original guess superior
-          step = step / 2.0;
-        else if(delta_a < delta_b)
+        for(int y = 0; y < samples; y++)
         {
-          delta = delta_a;
-          guess += step;
-        }
-        else
-        {
-          delta = delta_b;
-          step = step/-2.0;
-          guess += step;
-        }
-      }
-      //Debug.LogFormat("{0} iters, {1} delta, {2} guess", i, delta, guess);
-      return guess;
-    }
-    catch (Exception ex)
-    {
-      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, t_neutral[fallback_region]) );
-      got_error = true;
-      return t_neutral[fallback_region];
-    }
-  }
-
-  public static double iterate_t_given_v_verify_u(double t, double v, double u, int fallback_region=0) //t = first guess
-  {
-    try
-    {
-      int MAX_ITERS = 200; //max # of iterations before giving up
-      double MAX_DELTA = 0.0001; //acceptible solution error
-      double step = 10.0; //size of first step (shrinks every time it overshoots)
-      double guess = t;
-      double mark = u;
-      double delta = Math.Abs(u_given_vt(v,guess,fallback_region)-mark);
-      int i = 0;
-      for(i = 0; i < MAX_ITERS && delta > MAX_DELTA; i++)
-      {
-        double delta_a = Math.Abs(u_given_vt(v,guess+ step     ,fallback_region)-mark);
-        double delta_b = Math.Abs(u_given_vt(v,guess-(step/2.0),fallback_region)-mark);
-        if(delta < delta_a && delta < delta_b) //original guess superior
-          step = step / 2.0;
-        else if(delta_a < delta_b)
-        {
-          delta = delta_a;
-          guess += step;
-        }
-        else
-        {
-          delta = delta_b;
-          step = step/-2.0;
-          guess += step;
-        }
-      }
-      //Debug.LogFormat("{0} iters, {1} delta, {2} guess", i, delta, guess);
-      return guess;
-    }
-    catch (Exception ex)
-    {
-      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, t_neutral[fallback_region]) );
-      got_error = true;
-      return t_neutral[fallback_region];
-    }
-  }
-  public static double iterate_t_given_pv(double t, double p, double v, int fallback_region=0) //t = first guess
-  {
-    try
-    {
-      int MAX_ITERS = 100; //max # of iterations before giving up
-      double MAX_DELTA = 0.01; //acceptible solution error
-      double step = 10.0; //size of first step (shrinks every time it overshoots)
-      double guess = t;
-      double vdelta = MAX_DELTA + 1.0;
-      double pdelta = MAX_DELTA + 1.0; ;
-      int i = 0;
-      for(i = 0; i < MAX_ITERS && (vdelta > MAX_DELTA || pdelta > MAX_DELTA); i++)
-      {
-        //one iteration on v
-        if(region_given_pvt(p, v, guess) != region_twophase)
-        {
-          vdelta          = Math.Abs(v_given_pt(p, guess,               fallback_region) - v);
-          double vdelta_a = Math.Abs(v_given_pt(p, guess + step,        fallback_region) - v);
-          double vdelta_b = Math.Abs(v_given_pt(p, guess - (step / 2.0),fallback_region) - v);
-          if (vdelta < vdelta_a && vdelta < vdelta_b) //unaltered guess is superior
-            step = step / 2.0;
-          else if (vdelta_a < vdelta_b)
+          double pt = ((double)y/(samples-1));
+          for(int z = 0; z < samples; z++)
           {
-            vdelta = vdelta_a;
-            guess += step;
+            double tt = ((double)z/(samples-1));
+            double pst = sample(pt);
+            double tst = sample(tt);
+            double p = Lerpd(p_min,p_max,pst);
+            double t = Lerpd(t_min,t_max,tst);
+            double v = v_given_pt(p,t);
+            //pvt in Pa, M³/kg, K
+            double _p = p_given_vt(v,t);
+
+            Debug.LogFormat("error:{0} p:{1}Pa ({2}Pa), v:{3}M³/kg, t:{4}K",p-_p,p,_p,v,t);
           }
-          else
-          {
-            vdelta = vdelta_b;
-            step = step / -2.0;
-            guess += step;
-          }
-          i++; //force "iteration counter", bc we do two iters per loop
         }
 
-        //another iteration on p
-        pdelta          = Math.Abs(p_given_vt(v, guess,                fallback_region) - p);
-        double pdelta_a = Math.Abs(p_given_vt(v, guess + step,         fallback_region) - p);
-        double pdelta_b = Math.Abs(p_given_vt(v, guess - (step / 2.0), fallback_region) - p);
-        if (pdelta < pdelta_a && pdelta < pdelta_b) //unaltered guess is superior
-          step = step / 2.0;
-        else if (pdelta_a < pdelta_b)
-        {
-          pdelta = pdelta_a;
-          guess += step;
-        }
-        else
-        {
-          pdelta = pdelta_b;
-          step = step / -2.0;
-          guess += step;
-        }
       }
-      //Debug.LogFormat("{0} iters, {1} vdelta, {2} pdelta, {3} guess", i, vdelta, pdelta, guess);
-      return guess;
-    }
-    catch (Exception ex)
-    {
-      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, t_neutral[fallback_region]) );
-      got_error = true;
-      return t_neutral[fallback_region];
-    }
-  }
+    */
 
-  public static double iterate_p_given_vu(double p, double v, double u, int fallback_region = 0) //pq = first guess, step = first step
-  {
-    try
+    static double Lerpd(double a, double b, double t) { return (b - a) * t + a; }
+
+    //a bunch of options for getting region here- still need to figure out most reliable
+    //region: 0 subcooled liquid, 1 two-phase, 2 superheated vapor
+    public static int region_given_pvt(double p, double v, double t) {
+        //broad check w/ t
+        if (t - t_smallstep > IF97.Tsat97(p / 1000000.0)) return region_vapor;
+        if (t + t_smallstep < IF97.Tsat97(p / 1000000.0)) return region_liquid;
+
+        //broad check w/ p - unneeded
+        //if(p-p_smallstep > IF97.psat97(t)) return liq;
+        //if(p+p_smallstep < IF97.psat97(t)) return vapor;
+
+        //fine check w/ v
+        //f means saturated liquid,
+        //g means saturated gas
+        double vf = 1.0 / IF97.rholiq_p(p / 1000000.0);
+        if (v <= vf) return region_liquid;
+        double vg = 1.0 / IF97.rhovap_p(p / 1000000.0);
+        if (v >= vg) return region_vapor;
+        return region_twophase;
+    }
+    /*
+    public static int region_given_pvt(double p, double v, double t)
     {
-      int MAX_ITERS = 200; //max # of iterations before giving up
-      double MAX_DELTA = 0.001; //acceptible solution error
-      double step = 10.0; //size of first step (shrinks every time it overshoots)
-      double guess = p;
-      double delta = Math.Abs(x_given_pu(guess,u,fallback_region)-x_given_pv(guess,v,fallback_region));
-      int i = 0;
-      for(i = 0; i < MAX_ITERS && delta > MAX_DELTA; i++)
+      IF97.IF97REGIONS r = IF97.RegionDetermination_TP(t, p/1000000.0);
+      switch(r)
       {
-        double delta_a = Math.Abs(x_given_pu(guess+step      ,u,fallback_region)-x_given_pv(guess+step      ,v,fallback_region));
-        double delta_b = Math.Abs(x_given_pu(guess-(step/2.0),u,fallback_region)-x_given_pv(guess-(step/2.0),v,fallback_region));
-        if(delta < delta_a && delta < delta_b) //original guess superior
-          step = step / 2.0;
-        else if(delta_a < delta_b)
-        {
-          delta = delta_a;
-          guess += step;
-        }
-        else
-        {
-          delta = delta_b;
-          step = step/-2.0;
-          guess += step;
-        }
+        case 1: //liquid
+          return 0; //subcooled liquid
+        case 2: //vapor
+          return 2; //superheated vapor
+        case 3:
+        case 4: //two-phase
+        case 5:
+          return 1; //two-phase
       }
-      //Debug.LogFormat("{0} iters, {1} delta, {2} guess", i, delta, guess);
-      return guess;
+      return -1;
     }
-    catch (Exception ex)
+    */
+
+    // Currently unused; 6/30/2020
+    /*
+      public static int region_given_ph(double p, double h)
+      {
+        //Be careful - don’t calculate T from these if you are close to the saturation line (within 25 mK).
+        int r = IF97.Region_ph(p/1000000.0, h/1000.0); 
+        switch(r)
+        {
+          case 1: //liquid
+            return region_liquid; //subcooled liquid
+          case 2: //vapor
+            return region_vapor; //superheated vapor
+          case 3:
+          case 4: //two-phase
+          case 5:
+            return region_twophase; //two-phase
+        }
+        return -1;
+      }
+    */
+    public static int region_given_ps(double p, double s) {
+        int r = IF97.Region_ps(p / 1000000.0, s / 1000.0);
+        switch (r) {
+            case 1: //liquid
+                return region_liquid; //subcooled liquid
+            case 2: //vapor
+                return region_vapor; //superheated vapor
+            case 3:
+            case 4: //two-phase
+            case 5:
+                return region_twophase; //two-phase
+        }
+        return -1;
+    }
+
+    //helpers to easily generate values "randomly", ensuring we're within the range we care about- NOT PHYSICALLY BASED
+    //"percent" = "percent between min value and max value across given dimension"
+    public static double p_given_percent(double t) { return Lerpd(p_min, p_max, t); }
+    public static double psat_given_percent(double t) { return Lerpd(psat_min, psat_max, t); }
+    public static double v_given_percent(double t) { return Lerpd(v_min, v_max, t); }
+    public static double t_given_percent(double t) { return Lerpd(t_min, t_max, t); }
+    public static double u_given_percent(double t) { return Lerpd(u_min, u_max, t); }
+    public static double s_given_percent(double t) { return Lerpd(s_min, s_max, t); }
+    public static double h_given_percent(double t) { return Lerpd(h_min, h_max, t); }
+    public static double x_given_percent(double t) { return t; } //x already is a percent
+
+    public static double percent_given_p(double p) { return (p - p_min) / (p_max - p_min); }
+    public static double percent_given_psat(double psat) { return (psat - psat_min) / (psat_max - psat_min); }
+    public static double percent_given_v(double v) { return (v - v_min) / (v_max - v_min); }
+    public static double percent_given_t(double t) { return (t - t_min) / (t_max - t_min); }
+    public static double percent_given_u(double u) { return (u - u_min) / (u_max - u_min); }
+    public static double percent_given_s(double s) { return (s - s_min) / (s_max - s_min); }
+    public static double percent_given_h(double h) { return (h - h_min) / (h_max - h_min); }
+    public static double percent_given_x(double x) { return x; } //x already is a percent
+
+    //rule of naming for consistency: prefer lexical ordering "p < v < t < u < s < h < q", ie "p_given_vt" rather than "p_given_tv"
+
+    public static double p_given_vt(double v, double t, int fallback_region = 0) //experimentally only valid in the superheated vapor region
     {
-      Debug.Log( String.Format("Got an exception: {0}\nReturning {1}", ex.Message, t_neutral[fallback_region]) );
-      got_error = true;
-      return t_neutral[fallback_region];
+        try {
+            return IAPWS95.IAPWS95_pressure(1.0 / v, t) * 1000.0; //expects:kg/M³,K returns kPa
+        }
+        catch (Exception ex) {
+            Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, p_neutral[fallback_region]));
+            Debug.Log("[Error] " + ex.Message);
+            got_error = true;
+            return p_neutral[fallback_region];
+        }
     }
-  }
+    public static double v_given_pt(double p, double t, int fallback_region = 0) //DO NOT USE IN VAPOR DOME
+    {
+        try {
+            return 1.0 / IF97.rhomass_Tp(t, p / 1000000.0); //expects:K,MPa returns kg/M³
+        }
+        catch (Exception ex) {
+            Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, v_neutral[fallback_region]));
+            Debug.Log("[Error] " + ex.Message);
+            got_error = true;
+            return v_neutral[fallback_region];
+        }
+    }
+
+    public static double v_given_ph(double p, double h, int fallback_region = 0) {
+        try {
+            return 1.0 / IF97.rhomass_phmass(p / 1000000.0, h / 1000.0);
+        }
+        catch (Exception ex) {
+            Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, v_neutral[fallback_region]));
+            Debug.Log("[Error] " + ex.Message);
+            got_error = true;
+            return v_neutral[fallback_region];
+        }
+    }
+
+    public static double v_given_px(double p, double x, int fallback_region = 0) //ONLY USE IN VAPOR DOME
+    {
+        try {
+            return 1.0 / IF97.rhomass_pQ(p / 1000000.0, x);
+        }
+        catch (Exception ex) {
+            Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, v_neutral[fallback_region]));
+            Debug.Log("[Error] " + ex.Message);
+            got_error = true;
+            return v_neutral[fallback_region];
+        }
+    }
+
+    public static double t_given_ph(double p, double h, int fallback_region = 0) {
+        try {
+            return IF97.T_phmass(p / 1000000.0, h / 1000.0);
+        }
+        catch (Exception ex) {
+            Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, t_neutral[fallback_region]));
+            Debug.Log("[Error] " + ex.Message);
+            got_error = true;
+            return t_neutral[fallback_region];
+        }
+    }
+
+    public static double tsat_given_p(double p, int fallback_region = 0) {
+        try {
+            return IF97.Tsat97(p / 1000000.0);
+        }
+        catch (Exception ex) {
+            Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, t_neutral[fallback_region]));
+            Debug.Log("[Error] " + ex.Message);
+            got_error = true;
+            return t_neutral[fallback_region];
+        }
+    }
+
+    public static double vliq_given_p(double p, int fallback_region = 0) {
+        try {
+            return 1.0 / IF97.rholiq_p(p / 1000000.0); //expects:MPa returns kg/M³
+        }
+        catch (Exception ex) {
+            Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, v_neutral[fallback_region]));
+            Debug.Log("[Error] " + ex.Message);
+            got_error = true;
+            return v_neutral[fallback_region];
+        }
+    }
+
+    public static double vvap_given_p(double p, int fallback_region = 0) {
+        try {
+            return 1.0 / IF97.rhovap_p(p / 1000000.0); //expects:MPa returns kg/M³
+        }
+        catch (Exception ex) {
+            Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, v_neutral[fallback_region]));
+            Debug.Log("[Error] " + ex.Message);
+            got_error = true;
+            return v_neutral[fallback_region];
+        }
+    }
+
+    public static double u_given_pt(double p, double t, int fallback_region = 0) //DO NOT USE IN VAPOR DOME
+    {
+        try {
+            return IF97.umass_Tp(t, p / 1000000.0) * 1000;
+        }
+        catch (Exception ex) {
+            Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, u_neutral[fallback_region]));
+            Debug.Log("[Error] " + ex.Message);
+            got_error = true;
+            return u_neutral[fallback_region];
+        }
+    }
+
+    public static double u_given_vt(double v, double t, int fallback_region = 0) {
+        try {
+            return IAPWS95.IAPWS95_internal_energy(1f / v, t) * 1000;
+        }
+        catch (Exception ex) {
+            Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, u_neutral[fallback_region]));
+            Debug.Log("[Error] " + ex.Message);
+            got_error = true;
+            return u_neutral[fallback_region];
+        }
+    }
+
+    public static double u_given_px(double p, double x, int fallback_region = 0) {
+        try {
+            return IF97.umass_pQ(p / 1000000.0, x) * 1000;
+        }
+        catch (Exception ex) {
+            Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, u_neutral[fallback_region]));
+            Debug.Log("[Error] " + ex.Message);
+            got_error = true;
+            return u_neutral[fallback_region];
+        }
+    }
+
+    public static double s_given_vt(double v, double t, int fallback_region = 0) {
+        try {
+            return IAPWS95.IAPWS95_entropy(1f / v, t) * 1000f;
+        }
+        catch (Exception ex) {
+            Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, s_neutral[fallback_region]));
+            Debug.Log("[Error] " + ex.Message);
+            got_error = true;
+            return s_neutral[fallback_region];
+        }
+    }
+
+    public static double s_given_px(double p, double x, int fallback_region = 0) {
+        try {
+            return IF97.smass_pQ(p / 1000000.0, x) * 1000f;
+        }
+        catch (Exception ex) {
+            Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, s_neutral[fallback_region]));
+            Debug.Log("[Error] " + ex.Message);
+            got_error = true;
+            return s_neutral[fallback_region];
+        }
+    }
+
+    public static double h_given_vt(double v, double t, int fallback_region = 0) {
+        try {
+            return IAPWS95.IAPWS95_enthalpy(1f / v, t) * 1000f;
+        }
+        catch (Exception ex) {
+            Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, h_neutral[fallback_region]));
+            Debug.Log("[Error] " + ex.Message);
+            got_error = true;
+            return h_neutral[fallback_region];
+        }
+    }
+
+    public static double x_given_pv(double p, double v, int fallback_region = 0) //ONLY USE IN VAPOR DOME
+    {
+        try {
+            //f means saturated liquid,
+            //g means saturated gas
+            double vf = 1.0 / IF97.rholiq_p(p / 1000000.0);
+            double vg = 1.0 / IF97.rhovap_p(p / 1000000.0);
+            return (v - vf) / (vg - vf);
+        }
+        catch (Exception ex) {
+            Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, x_neutral[fallback_region]));
+            Debug.Log("[Error] " + ex.Message);
+            got_error = true;
+            return x_neutral[fallback_region];
+        }
+    }
+
+    public static double x_given_ph(double p, double h, int fallback_region = 0) //ONLY USE IN VAPOR DOME
+    {
+        try {
+            return IF97.Q_phmass(p / 1000000.0, h / 1000.0);
+        }
+        catch (Exception ex) {
+            Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, x_neutral[fallback_region]));
+            Debug.Log("[Error] " + ex.Message);
+            got_error = true;
+            return x_neutral[fallback_region];
+        }
+    }
+
+    public static double x_given_pu(double p, double u, int fallback_region = 0) //ONLY USE IN VAPOR DOME
+    {
+        try {
+            return IF97.Q_pumass(p / 1000000.0, u / 1000.0);
+        }
+        catch (Exception ex) {
+            Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, x_neutral[fallback_region]));
+            Debug.Log("[Error] " + ex.Message);
+            got_error = true;
+            return x_neutral[fallback_region];
+        }
+    }
+
+    public static double iterate_t_given_p_verify_u(double t, double p, double u, int fallback_region = 0) //t = first guess
+    {
+        try {
+            int MAX_ITERS = 100; //max # of iterations before giving up
+            double MAX_DELTA = 0.01; //acceptible solution error
+            double step = 10.0; //size of first step (shrinks every time it overshoots)
+            double guess = t;
+            double mark = u;
+            double delta = Math.Abs(u_given_pt(p, guess) - mark);
+            int i = 0;
+            for (i = 0; i < MAX_ITERS && delta > MAX_DELTA; i++) {
+                double delta_a = Math.Abs(u_given_pt(p, guess + step) - mark);
+                double delta_b = Math.Abs(u_given_pt(p, guess - (step / 2.0)) - mark);
+                if (delta < delta_a && delta < delta_b) //original guess superior
+                    step = step / 2.0;
+                else if (delta_a < delta_b) {
+                    delta = delta_a;
+                    guess += step;
+                }
+                else {
+                    delta = delta_b;
+                    step = step / -2.0;
+                    guess += step;
+                }
+            }
+            //Debug.LogFormat("{0} iters, {1} delta, {2} guess", i, delta, guess);
+            return guess;
+        }
+        catch (Exception ex) {
+            Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, t_neutral[fallback_region]));
+            Debug.Log("[Error] " + ex.Message);
+            got_error = true;
+            return t_neutral[fallback_region];
+        }
+    }
+
+    public static double iterate_t_given_v_verify_u(double t, double v, double u, int fallback_region = 0) //t = first guess
+    {
+        try {
+            int MAX_ITERS = 200; //max # of iterations before giving up
+            double MAX_DELTA = 0.0001; //acceptible solution error
+            double step = 10.0; //size of first step (shrinks every time it overshoots)
+            double guess = t;
+            double mark = u;
+            double delta = Math.Abs(u_given_vt(v, guess, fallback_region) - mark);
+            int i = 0;
+            for (i = 0; i < MAX_ITERS && delta > MAX_DELTA; i++) {
+                double delta_a = Math.Abs(u_given_vt(v, guess + step, fallback_region) - mark);
+                double delta_b = Math.Abs(u_given_vt(v, guess - (step / 2.0), fallback_region) - mark);
+                if (delta < delta_a && delta < delta_b) //original guess superior
+                    step = step / 2.0;
+                else if (delta_a < delta_b) {
+                    delta = delta_a;
+                    guess += step;
+                }
+                else {
+                    delta = delta_b;
+                    step = step / -2.0;
+                    guess += step;
+                }
+            }
+            //Debug.LogFormat("{0} iters, {1} delta, {2} guess", i, delta, guess);
+            return guess;
+        }
+        catch (Exception ex) {
+            Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, t_neutral[fallback_region]));
+            Debug.Log("[Error] " + ex.Message);
+            got_error = true;
+            return t_neutral[fallback_region];
+        }
+    }
+    public static double iterate_t_given_pv(double t, double p, double v, int fallback_region = 0) //t = first guess
+    {
+        try {
+            int MAX_ITERS = 100; //max # of iterations before giving up
+            double MAX_DELTA = 0.01; //acceptible solution error
+            double step = 10.0; //size of first step (shrinks every time it overshoots)
+            double guess = t;
+            double vdelta = MAX_DELTA + 1.0;
+            double pdelta = MAX_DELTA + 1.0; ;
+            int i = 0;
+            for (i = 0; i < MAX_ITERS && (vdelta > MAX_DELTA || pdelta > MAX_DELTA); i++) {
+                //one iteration on v
+                if (region_given_pvt(p, v, guess) != region_twophase) {
+                    vdelta = Math.Abs(v_given_pt(p, guess, fallback_region) - v);
+                    double vdelta_a = Math.Abs(v_given_pt(p, guess + step, fallback_region) - v);
+                    double vdelta_b = Math.Abs(v_given_pt(p, guess - (step / 2.0), fallback_region) - v);
+                    if (vdelta < vdelta_a && vdelta < vdelta_b) //unaltered guess is superior
+                        step = step / 2.0;
+                    else if (vdelta_a < vdelta_b) {
+                        vdelta = vdelta_a;
+                        guess += step;
+                    }
+                    else {
+                        vdelta = vdelta_b;
+                        step = step / -2.0;
+                        guess += step;
+                    }
+                    i++; //force "iteration counter", bc we do two iters per loop
+                }
+
+                //another iteration on p
+                pdelta = Math.Abs(p_given_vt(v, guess, fallback_region) - p);
+                double pdelta_a = Math.Abs(p_given_vt(v, guess + step, fallback_region) - p);
+                double pdelta_b = Math.Abs(p_given_vt(v, guess - (step / 2.0), fallback_region) - p);
+                if (pdelta < pdelta_a && pdelta < pdelta_b) //unaltered guess is superior
+                    step = step / 2.0;
+                else if (pdelta_a < pdelta_b) {
+                    pdelta = pdelta_a;
+                    guess += step;
+                }
+                else {
+                    pdelta = pdelta_b;
+                    step = step / -2.0;
+                    guess += step;
+                }
+            }
+            //Debug.LogFormat("{0} iters, {1} vdelta, {2} pdelta, {3} guess", i, vdelta, pdelta, guess);
+            return guess;
+        }
+        catch (Exception ex) {
+            Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, t_neutral[fallback_region]));
+            Debug.Log("[Error] " + ex.Message);
+            got_error = true;
+            return t_neutral[fallback_region];
+        }
+    }
+
+    public static double iterate_p_given_vu(double p, double v, double u, int fallback_region = 0) //pq = first guess, step = first step
+    {
+        try {
+            int MAX_ITERS = 200; //max # of iterations before giving up
+            double MAX_DELTA = 0.001; //acceptible solution error
+            double step = 10.0; //size of first step (shrinks every time it overshoots)
+            double guess = p;
+            double delta = Math.Abs(x_given_pu(guess, u, fallback_region) - x_given_pv(guess, v, fallback_region));
+            int i = 0;
+            for (i = 0; i < MAX_ITERS && delta > MAX_DELTA; i++) {
+                double delta_a = Math.Abs(x_given_pu(guess + step, u, fallback_region) - x_given_pv(guess + step, v, fallback_region));
+                double delta_b = Math.Abs(x_given_pu(guess - (step / 2.0), u, fallback_region) - x_given_pv(guess - (step / 2.0), v, fallback_region));
+                if (delta < delta_a && delta < delta_b) //original guess superior
+                    step = step / 2.0;
+                else if (delta_a < delta_b) {
+                    delta = delta_a;
+                    guess += step;
+                }
+                else {
+                    delta = delta_b;
+                    step = step / -2.0;
+                    guess += step;
+                }
+            }
+            //Debug.LogFormat("{0} iters, {1} delta, {2} guess", i, delta, guess);
+            return guess;
+        }
+        catch (Exception ex) {
+            Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, t_neutral[fallback_region]));
+            Debug.Log("[Error] " + ex.Message);
+            got_error = true;
+            return t_neutral[fallback_region];
+        }
+    }
 }
 
