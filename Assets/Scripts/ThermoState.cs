@@ -42,6 +42,7 @@ public class ThermoState : MonoBehaviour
                                  //public double surfacearea = Math.Pow(3.141592*radius,2.0); //M^2 //hardcoded answer below
     public double surfacearea = 0.024674011; //M^2 //hardcoded answer to eqn above
     public double surfacearea_insqr = 38.2447935395871; //in^2 //hardcoded conversion from m^2 to in^2
+    const double p_crit = 22.064; // Pa
 
     public void reset() {
         //ensure consistent state
@@ -243,16 +244,14 @@ public class ThermoState : MonoBehaviour
             double new_t = temperature;
             double new_p = pressure;
 
-            // TODO: why is pressure being added when the clamp is engaged?
-
             if (region != ThermoMath.region_twophase) {
                 new_t = ThermoMath.iterate_t_given_v_verify_u(temperature, volume, new_u, region); //try to move t assuming we stay in starting region
-                if (region == ThermoMath.region_liquid && new_t > ThermoMath.tsat_given_p(pressure)) //overshot from liquid
+                if (region == ThermoMath.region_liquid && pressure < p_crit && new_t > ThermoMath.tsat_given_p(pressure)) //overshot from liquid
                 {
                     new_t = ThermoMath.tsat_given_p(pressure);
                     region = ThermoMath.region_twophase;
                 }
-                else if (region == ThermoMath.region_vapor && new_t < ThermoMath.tsat_given_p(pressure)) //overshot from vapor
+                else if (region == ThermoMath.region_vapor && pressure < p_crit && new_t < ThermoMath.tsat_given_p(pressure)) //overshot from vapor
                 {
                     new_t = ThermoMath.tsat_given_p(pressure);
                     region = ThermoMath.region_twophase;
@@ -264,7 +263,6 @@ public class ThermoState : MonoBehaviour
                     pressure = ThermoMath.p_given_vt(volume, temperature, region);
                 }
             }
-
 
             // two-phase region
             if (region == ThermoMath.region_twophase) //either newly, or all along
@@ -281,8 +279,6 @@ public class ThermoState : MonoBehaviour
             entropy = ThermoMath.s_given_vt(volume, temperature, region);
         }
         catch (Exception e) { }
-
-        // applying heat with clamp results in unstable state
 
         clamp_state();
     }
@@ -395,7 +391,6 @@ public class ThermoState : MonoBehaviour
                         new_t = ThermoMath.tsat_given_p(pressure);
                         
                         temperature = new_t;
-                        //new_h = ThermoMath.h_given_vt(volume, temperature);
                     }
                     break;
                 case ThermoMath.region_vapor: //superheated vapor
