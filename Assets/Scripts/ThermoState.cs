@@ -245,8 +245,6 @@ public class ThermoState : MonoBehaviour
         }
         catch (Exception e) { }
 
-        // TODO: unstable when applying coil to super pressurized vapor 
-
         clamp_state();
     }
 
@@ -312,7 +310,7 @@ public class ThermoState : MonoBehaviour
             switch (region) {
                 case ThermoMath.region_liquid: //subcooled liquid
                 case ThermoMath.region_vapor: //vapor region
-                    if (ThermoMath.region_given_ps(new_p, entropy) != region) {
+                    if (ThermoMath.region_given_ps(new_p, entropy) != region) { // check for transition into 2-phase from other states (currently only works when leaving liquid)
                         if (ThermoMath.region_given_ps(new_p, entropy) == ThermoMath.region_twophase) {
                             region = ThermoMath.region_twophase;
                             pressure = new_p;
@@ -336,7 +334,8 @@ public class ThermoState : MonoBehaviour
                     // TODO: fix -- when applying weight from vapor, jumps directly to liquid phase (should transition through 2-phase)
                     // v, u, s, and h all jump drastically
                     switch (region) {
-                        case ThermoMath.region_liquid: quality = 0; break;
+                        case ThermoMath.region_liquid: 
+                            { quality = 0; break; }
                         case ThermoMath.region_twophase: quality = ThermoMath.x_given_pv(pressure, volume, region); break;
                         case ThermoMath.region_vapor: quality = 1; break;
                     }
@@ -402,9 +401,18 @@ public class ThermoState : MonoBehaviour
                         pressure = new_p;
 
                         new_u = ThermoMath.u_given_pt(pressure, temperature);
-                        new_t = ThermoMath.tsat_given_p(pressure);
+                        // new_t = ThermoMath.tsat_given_p(pressure);
+
+                        if (region == ThermoMath.region_twophase) {
+                            new_t = ThermoMath.tsat_given_p(pressure);
+                        }
+                        else {
+                            new_t = ThermoMath.iterate_t_given_pv(temperature, pressure, volume);
+                        }
 
                         temperature = new_t;
+
+                        region = ThermoMath.region_given_pvt(pressure, volume, temperature);
                     }
                     break;
                 case ThermoMath.region_vapor: //superheated vapor
