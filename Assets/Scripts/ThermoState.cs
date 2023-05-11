@@ -304,7 +304,9 @@ public class ThermoState : MonoBehaviour
             double new_u = internalenergy;
             double new_v = volume;
 
+            double new_s = entropy;
             double new_h = enthalpy;
+
             double new_x = quality;
 
             switch (region) {
@@ -319,23 +321,25 @@ public class ThermoState : MonoBehaviour
                     }
 
                     // Pressure Constrained -> Insulated -> delta pressure (all phases)
-                    new_v = ThermoMath.v_given_pt(new_p, temperature, region); //ERROR: DO NOT USE IN VAPOR DOME (safe assuming any delta p sufficient to _leave_ vapor dome)
-                    new_u = ThermoMath.u_given_pt(new_p, temperature, region);
+                    new_v = ThermoMath.v_given_ph(new_p, enthalpy);
+                    new_u = ThermoMath.u_given_vt(new_v, temperature, region); 
 
                     //at this point, we have enough internal state to derive the rest
+
+                    new_s = ThermoMath.s_given_vt(new_v, temperature, region);
+                    new_h = ThermoMath.h_given_vt(new_v, temperature, region);
 
                     pressure = new_p;
                     volume = new_v;
                     internalenergy = new_u;
-                    // temperature = new_t;
-                    enthalpy = ThermoMath.h_given_vt(volume, temperature, region);
-                    entropy = ThermoMath.s_given_vt(volume, temperature, region);
+
+                    entropy = new_s;
+                    enthalpy = new_h;
+
                     region = ThermoMath.region_given_pvt(pressure, volume, temperature);
-                    // TODO: fix -- when applying weight from vapor, jumps directly to liquid phase (should transition through 2-phase)
-                    // v, u, s, and h all jump drastically
+
                     switch (region) {
-                        case ThermoMath.region_liquid: 
-                            { quality = 0; break; }
+                        case ThermoMath.region_liquid: { quality = 0; break; }
                         case ThermoMath.region_twophase: quality = ThermoMath.x_given_pv(pressure, volume, region); break;
                         case ThermoMath.region_vapor: quality = 1; break;
                     }
@@ -363,11 +367,11 @@ public class ThermoState : MonoBehaviour
                  */
 
                 new_x = ThermoMath.x_given_ph(new_p, enthalpy);
-                new_v = ThermoMath.v_given_px(new_p, quality);
-                new_u = ThermoMath.u_given_vt(volume, temperature, region);
+                new_v = ThermoMath.v_given_px(new_p, new_x);
+                new_u = ThermoMath.u_given_vt(new_v, temperature, region);
 
                 volume = new_v;
-                entropy = ThermoMath.s_given_px(pressure, new_x, region);
+                entropy = ThermoMath.s_given_px(new_p, new_x, region);
                 internalenergy = new_u;
                 quality = new_x;
 
