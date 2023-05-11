@@ -402,19 +402,23 @@ public class ThermoState : MonoBehaviour
                 case ThermoMath.region_twophase: //two-phase region
                 {
                         // Pressure Constrained -> Insulated -> delta pressure (liquid and two-phase)
-                        pressure = new_p;
+                        
 
-                        new_u = ThermoMath.u_given_pt(pressure, temperature);
+                        new_u = ThermoMath.u_given_pt(new_p, temperature);
                         // new_t = ThermoMath.tsat_given_p(pressure);
 
                         if (region == ThermoMath.region_twophase) {
-                            new_t = ThermoMath.tsat_given_p(pressure);
+                            new_t = ThermoMath.tsat_given_p(new_p);
                         }
                         else {
-                            new_t = ThermoMath.iterate_t_given_pv(temperature, pressure, volume);
+                            new_t = ThermoMath.iterate_t_given_pv(temperature, new_p, volume);
                         }
 
+                        new_u = ThermoMath.u_given_vt(volume, new_t);
+
+                        pressure = new_p;
                         temperature = new_t;
+                        internalenergy = new_u;
 
                         region = ThermoMath.region_given_pvt(pressure, volume, temperature);
                     }
