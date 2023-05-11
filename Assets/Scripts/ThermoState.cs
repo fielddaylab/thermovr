@@ -405,7 +405,6 @@ public class ThermoState : MonoBehaviour
                         
 
                         new_u = ThermoMath.u_given_pt(new_p, temperature);
-                        // new_t = ThermoMath.tsat_given_p(pressure);
 
                         if (region == ThermoMath.region_twophase) {
                             new_t = ThermoMath.tsat_given_p(new_p);
@@ -433,7 +432,7 @@ public class ThermoState : MonoBehaviour
                         double k = 1.27;
                         new_v = volume * Math.Pow(pressure / new_p, 1.0 / k);
                         new_u = internalenergy - ((new_p * new_v - pressure * volume) / (1 - k));
-                        new_t = ThermoMath.iterate_t_given_p_verify_u(temperature, pressure, new_u, region);
+                        new_t = ThermoMath.t_given_ph(new_p, enthalpy);
 
                         //at this point, we have enough internal state to derive the rest
                         pressure = new_p;
