@@ -24,18 +24,6 @@ public class FingerToggleable : MonoBehaviour
     rfinger_c = r_finger.GetComponent<Collider>();
   }
 
-  // Start is called before the first frame update
-  void Start()
-  {
-
-  }
-
-  // Update is called once per frame
-  void Update()
-  {
-
-  }
-
   [System.NonSerialized]
   public bool lfinger = false;
   [System.NonSerialized]

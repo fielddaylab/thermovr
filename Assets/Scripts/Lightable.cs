@@ -15,10 +15,13 @@ public class Lightable : MonoBehaviour
     public Material lit_mat;
     private MeshRenderer mesh_renderer;
 
+    private bool is_on;
+
     // Start is called before the first frame update
     void Start()
     {
         mesh_renderer = gameObject.GetComponent<MeshRenderer>();
+        is_on = false;
     }
 
     public void SetLit(bool on)
@@ -28,7 +31,7 @@ public class Lightable : MonoBehaviour
             mesh_renderer = gameObject.GetComponent<MeshRenderer>();
         }
 
-        if (on)
+        if (on && !is_on) // turn on
         {
             if (use_custom_mats)
             {
@@ -42,8 +45,9 @@ public class Lightable : MonoBehaviour
                 Color color = (mesh_renderer.materials[0].mainTexture != null) ? new Color(0.5f, 0.5f, 0.5f) : mesh_renderer.materials[0].color;
                 mesh_renderer.materials[0].SetColor("_EmissionColor", color);
             }
+            is_on = true;
         }
-        else // Not On
+        else if (!on && is_on) // turn off
         {
             if (use_custom_mats)
             {
@@ -54,6 +58,7 @@ public class Lightable : MonoBehaviour
             {
                 mesh_renderer.materials[0].SetColor("_EmissionColor", Color.black);
             }
+            is_on = false;
         }
     }
 }

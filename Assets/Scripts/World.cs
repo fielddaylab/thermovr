@@ -175,9 +175,7 @@ public class World : MonoBehaviour
         for (int i = 0; i < tools.Count; i++) {
             t = tools[i];
             t.active_available_meshrenderer.enabled = false;
-            t.active_snap_meshrenderer.enabled = false;
-            t.storage_available_meshrenderer.enabled = false;
-            t.storage_snap_meshrenderer.enabled = false;
+            t.storage_meshrenderer.enabled = false;
             GameObject g = t.gameObject;
             g.transform.SetParent(t.storage.gameObject.transform);
             t.stored = true;
@@ -737,28 +735,26 @@ public class World : MonoBehaviour
             if (lgrabbed == g || rgrabbed == g) {
                 //active
                 if (t.active_ghost.tintersect) {
-                    t.active_available_meshrenderer.enabled = false;
-                    t.active_snap_meshrenderer.enabled = true;
+                    t.active_available_meshrenderer.enabled = true;
+                    t.active_available_meshrenderer.material = GameDB.Instance.SnapMat;
                 }
                 else {
                     t.active_available_meshrenderer.enabled = true;
-                    t.active_snap_meshrenderer.enabled = false;
+                    t.active_available_meshrenderer.material = GameDB.Instance.AvailableMat;
                 }
                 //storage
                 if (t.storage_ghost.tintersect) {
-                    t.storage_available_meshrenderer.enabled = false;
-                    t.storage_snap_meshrenderer.enabled = true;
+                    t.storage_meshrenderer.enabled = true;
+                    t.storage_meshrenderer.material = GameDB.Instance.SnapMat;
                 }
                 else {
-                    t.storage_available_meshrenderer.enabled = true;
-                    t.storage_snap_meshrenderer.enabled = false;
+                    t.storage_meshrenderer.enabled = true;
+                    t.storage_meshrenderer.material = GameDB.Instance.AvailableMat;
                 }
             }
             else {
-                t.active_snap_meshrenderer.enabled = false;
                 t.active_available_meshrenderer.enabled = false;
-                t.storage_snap_meshrenderer.enabled = false;
-                t.storage_available_meshrenderer.enabled = false;
+                t.storage_meshrenderer.enabled = false;
             }
         }
 

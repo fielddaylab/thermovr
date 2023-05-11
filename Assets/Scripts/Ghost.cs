@@ -4,39 +4,24 @@ using UnityEngine;
 
 public class Ghost : MonoBehaviour
 {
-  public GameObject tool;
-  public GameObject available;
-  public GameObject snap;
-  Collider tool_c;
+    public GameObject tool;
+    public GameObject obj;
 
-  void Awake()
-  {
-    tool_c = tool.GetComponent<Collider>();
-  }
+    Collider tool_c;
 
-  // Start is called before the first frame update
-  void Start()
-  {
+    void Awake() {
+        tool_c = tool.GetComponent<Collider>();
+    }
 
-  }
+    [System.NonSerialized]
+    public bool tintersect = false;
+    void OnTriggerEnter(Collider c) {
+        if (c == tool_c) tintersect = true;
+    }
 
-  // Update is called once per frame
-  void Update()
-  {
-
-  }
-
-  [System.NonSerialized]
-  public bool tintersect = false;
-  void OnTriggerEnter(Collider c)
-  {
-    if(c == tool_c) tintersect = true;
-  }
-
-  void OnTriggerExit(Collider c)
-  {
-    if(c == tool_c) tintersect = false;
-  }
+    void OnTriggerExit(Collider c) {
+        if (c == tool_c) tintersect = false;
+    }
 
 }
 
