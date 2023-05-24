@@ -52,7 +52,7 @@ public class Tool : MonoBehaviour
     [System.NonSerialized]
     public GameObject active_snap;
 
-    public GameObject dial;
+    public GameObject dial; // obj used by grabbing system
     [System.NonSerialized]
     public Dial dial_dial;
     [System.NonSerialized]
@@ -87,7 +87,13 @@ public class Tool : MonoBehaviour
     [System.NonSerialized]
     public AudioSource audioS;
 
-    void Awake() {
+    public void Init(float min_map, float max_map, string unit, string display_unit, float display_mul = 1) {
+        Setup();
+
+        dial_dial.Init(min_map, max_map, unit, display_unit, display_mul);
+    }
+
+    private void Setup() {
         touchable = gameObject.GetComponent<Touchable>();
         boxcollider = gameObject.GetComponent<BoxCollider>();
         rigidbody = gameObject.GetComponent<Rigidbody>();
@@ -100,7 +106,7 @@ public class Tool : MonoBehaviour
             storage_meshrenderer = storage_obj.GetComponent<MeshRenderer>();
         }
 
-        if (active != null) { 
+        if (active != null) {
             active_ghost = active.GetComponent<Ghost>();
             active_touchable = active.GetComponent<Touchable>();
             active_available = active_ghost.obj;
@@ -123,11 +129,6 @@ public class Tool : MonoBehaviour
         audioS = gameObject.GetComponent<AudioSource>();
 
         disabled = false;
-    }
-
-    // Start is called before the first frame update
-    void Start() {
-
     }
 
     // Update is called once per frame

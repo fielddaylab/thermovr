@@ -9,6 +9,9 @@ using TMPro;
  **/
 public class Dial : MonoBehaviour
 {
+    [SerializeField] private Transform max_pos;
+    [SerializeField] private Transform min_pos;
+
     public int response_power; //sometimes, we want log mapping
     [System.NonSerialized]
     public float val = 0.0f; //abstract 0-1 representing knob position
@@ -16,6 +19,8 @@ public class Dial : MonoBehaviour
     public float prev_val = 0.0f;
     [System.NonSerialized]
     public float default_val = 0;
+    [System.NonSerialized]
+    public Vector3 orientation_dir;
     [System.NonSerialized]
     public float map = 0.0f; //meaningful value mapped from val to [min_map,max_map]
     [System.NonSerialized]
@@ -34,8 +39,20 @@ public class Dial : MonoBehaviour
     public bool examined = false;
     GameObject meter;
 
-    void Awake() {
+    public void Init(float min_map, float max_map, string unit, string display_unit, float display_mul) {
         meter = gameObject.transform.GetChild(0).gameObject;
+
+        this.min_map = min_map;
+        this.max_map = max_map;
+        this.unit = unit;
+        this.display_unit = display_unit;
+        this.display_mul = display_mul;
+        if (min_pos == null) {
+            orientation_dir = new Vector3(1, 0, 0);
+        }
+        else {
+            orientation_dir = (max_pos.position - min_pos.position).normalized;
+        }
     }
 
     // Update is called once per frame, and after val updated

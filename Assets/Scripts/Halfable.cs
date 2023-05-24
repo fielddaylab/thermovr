@@ -34,19 +34,12 @@ public class Halfable : MonoBehaviour
   }
 
   // Start is called before the first frame update
-  void Start()
+  void Awake()
   {
     full_meshrenderer = full.GetComponent<MeshRenderer>();
     half_meshrenderer = half.GetComponent<MeshRenderer>();
     half_meshrenderer.enabled = false;
     halved = false;
   }
-
-  // Update is called once per frame
-  void Update()
-  {
-
-  }
-
 }
 

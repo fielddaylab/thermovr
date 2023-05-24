@@ -11,6 +11,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using ThermoVR.Controls;
 
 public class World : MonoBehaviour
 {
@@ -32,24 +33,23 @@ public class World : MonoBehaviour
     public DirectionalIndicator arrows;
 
     // ThermoState thermo;
-    ThermoPresent thermo_present;
-    GameObject cam_offset;
-    GameObject ceye;
-    GameObject lhand;
-    GameObject lactualhand;
-    Vector3 lhand_pos;
-    Vector3 lhand_vel;
-    SkinnedMeshRenderer lhand_meshrenderer;
-    GameObject rhand;
-    GameObject ractualhand;
-    Vector3 rhand_pos;
-    Vector3 rhand_vel;
-    SkinnedMeshRenderer rhand_meshrenderer;
+    [Space(5)]
+    [Header("Thermo")]
+    [SerializeField] private ThermoPresent thermo_present;
+
+    [Space(5)]
+    [Header("Controls")]
+    [SerializeField] private GameObject cam_offset;
+    [SerializeField] private GameObject ceye;
+    [SerializeField] private ControllerAnchor lhand;
+    [SerializeField] private ControllerAnchor rhand;
 
     GameObject vrcenter;
     FingerToggleable vrcenter_fingertoggleable;
     MeshRenderer vrcenter_backing_meshrenderer;
 
+    //[Space(5)]
+    //[Header("Moveables")]
     List<Touchable> movables;
     GameObject workspace;
     GameObject handle_workspace;
@@ -61,25 +61,27 @@ public class World : MonoBehaviour
     int litrigger_delta = 0;
     int rhtrigger_delta = 0;
     int ritrigger_delta = 0;
-    float lz = 0f;
-    float rz = 0f;
-    float ly = 0f;
-    float ry = 0f;
+    Vector3 lpos = new Vector3(0f, 0f, 0f);
+    Vector3 rpos = new Vector3(0f, 0f, 0f);
+
+    [Space(5)]
+    [Header("Tools")]
+    [SerializeField] private Tool tool_insulator;
+    [SerializeField] private Tool tool_clamp;
+    [SerializeField] private Tool tool_burner;
+    [SerializeField] private Tool tool_coil;
+    [SerializeField] private Tool tool_weight;
+    [SerializeField] private Tool tool_balloon;
+    [SerializeField] private Tool tool_ambientPressure;
+    [SerializeField] private Tool tool_roomTemp;
+    [SerializeField] private Tool tool_percentInsulation;
+    // [SerializeField] private Tool tool_clampRange;
 
     List<Tool> tools;
-    Tool tool_insulator;
-    Tool tool_clamp;
-    Tool tool_burner;
-    Tool tool_coil;
-    Tool tool_weight;
-    Tool tool_balloon;
-    Tool tool_ambientPressure;
-    Tool tool_roomTemp;
-    Tool tool_percentInsulation;
-    Tool tool_clampRange;
-
     ParticleSystem flame; //special case
 
+    [Space(5)]
+    [Header("Halfables")]
     bool halfed = false;
     List<Halfable> halfables;
     GameObject halfer;
@@ -89,6 +91,8 @@ public class World : MonoBehaviour
     Touchable reset_touchable;
     FingerToggleable reset_fingertoggleable;
 
+    [Space(5)]
+    [Header("Dot Placement")]
     GameObject vessel;
     GameObject graph;
     GameObject state_dot;
@@ -105,6 +109,8 @@ public class World : MonoBehaviour
     bool litrigger = false;
     bool ritrigger = false;
 
+    [Space(5)]
+    [Header("Quiz")]
     GameObject instructions_parent;
     GameObject challenge_parent;
     GameObject quiz_parent;
@@ -122,57 +128,42 @@ public class World : MonoBehaviour
     TextMeshPro qtext_tmp;
     int qselected = -1;
 
+    // sim variables
     double room_temp = 72; // in F
     double applied_heat = 0;
     double applied_weight = 0;
     double ambient_pressure = 0;
 
-    // Start is called before the first frame update
-    void Start() {
+    #region Initialization
+
+    public void Init() {
         // All this code does, at end of day, is find all the objects to manage,
         // and set initial values and such as needed.
-        thermo_present = GameObject.Find("Oracle").GetComponent<ThermoPresent>();
-
-        cam_offset = GameObject.Find("CamOffset");
-        ceye = GameObject.Find("CenterEyeAnchor");
+        // thermo_present = GameObject.Find("Oracle").GetComponent<ThermoPresent>();
 
         hand_emptys = new Material[] { hand_empty };
         hand_touchings = new Material[] { hand_touching };
         hand_grabbings = new Material[] { hand_grabbing };
 
-        lhand = GameObject.Find("LeftControllerAnchor");
-        lactualhand = lhand.transform.GetChild(0).gameObject;
-        lhand_pos = lhand.transform.position;
-        lhand_vel = new Vector3(0f, 0f, 0f);
-        lhand_meshrenderer = GameObject.Find("hands:Lhand").GetComponent<SkinnedMeshRenderer>();
+        lhand.Init(hand_emptys);
+        rhand.Init(hand_emptys);
 
-        rhand = GameObject.Find("RightControllerAnchor");
-        ractualhand = rhand.transform.GetChild(0).gameObject;
-        rhand_pos = rhand.transform.position;
-        rhand_vel = new Vector3(0f, 0f, 0f);
-        rhand_meshrenderer = GameObject.Find("hands:Rhand").GetComponent<SkinnedMeshRenderer>();
-
-        lhand_meshrenderer.materials = hand_emptys;
-        rhand_meshrenderer.materials = hand_emptys;
-
-        // As we grab them, set ranges on tool dials (sliders).
-        Tool t;
-        tools = new List<Tool>();
-        t = GameObject.Find("Tool_Insulator").GetComponent<Tool>(); tool_insulator = t; tools.Add(t); t.dial_dial.min_map = 0f; t.dial_dial.max_map = 1f; t.dial_dial.unit = ""; t.dial_dial.display_unit = t.dial_dial.unit;
-        t = GameObject.Find("Tool_Clamp").GetComponent<Tool>(); tool_clamp = t; tools.Add(t); t.dial_dial.min_map = 0f; t.dial_dial.max_map = 1f; t.dial_dial.unit = ""; t.dial_dial.display_unit = t.dial_dial.unit;
-        t = GameObject.Find("Tool_Burner").GetComponent<Tool>(); tool_burner = t; tools.Add(t); t.dial_dial.min_map = 0f; t.dial_dial.max_map = 1000f * 100f; t.dial_dial.unit = "J/s"; t.dial_dial.display_unit = "kJ/s"; t.dial_dial.display_mul = 0.001f;
-        t = GameObject.Find("Tool_Coil").GetComponent<Tool>(); tool_coil = t; tools.Add(t); t.dial_dial.min_map = 0f; t.dial_dial.max_map = -1000f * 100f; t.dial_dial.unit = "J/s"; t.dial_dial.display_unit = "kJ/s"; t.dial_dial.display_mul = 0.001f;
         double kg_corresponding_to_10mpa = thermo_present.get_surfacearea_insqr() * (10 * 1453.8/*MPa->psi*/) * 0.453592/*lb->kg*/;
         double kg_corresponding_to_2mpa = thermo_present.get_surfacearea_insqr() * (2 * 1453.8/*MPa->psi*/) * 0.453592/*lb->kg*/; // 10 MPa seems way too big, sooooo... we'll just do 2 MPa.
-        t = GameObject.Find("Tool_Weight").GetComponent<Tool>(); tool_weight = t; tools.Add(t); t.dial_dial.min_map = 0f; t.dial_dial.max_map = (float)kg_corresponding_to_10mpa; t.dial_dial.unit = "kg"; t.dial_dial.display_unit = t.dial_dial.unit;
-        t = GameObject.Find("Tool_Balloon").GetComponent<Tool>(); tool_balloon = t; tools.Add(t); t.dial_dial.min_map = 0f; t.dial_dial.max_map = -(float)kg_corresponding_to_10mpa / 500.0f; t.dial_dial.unit = "kg"; t.dial_dial.display_unit = t.dial_dial.unit;
-        // TODO: establish logical bounds and units on the ambient pressure dial
-        t = GameObject.Find("Tool_AmbientPressure").GetComponent<Tool>(); tool_ambientPressure = t; tools.Add(t); t.dial_dial.min_map = 0f; t.dial_dial.max_map = (float)kg_corresponding_to_2mpa / 100; t.dial_dial.unit = "kPa"; t.dial_dial.display_unit = t.dial_dial.unit;
-        // TODO: allow for non-zero starting values / positions; apply relevant heat transfer between room and piston
-        t = GameObject.Find("Tool_RoomTemp").GetComponent<Tool>(); tool_roomTemp = t; tools.Add(t); t.dial_dial.min_map = -100; t.dial_dial.max_map = 200; t.dial_dial.unit = "F"; t.dial_dial.display_unit = "F";
-        t = GameObject.Find("Tool_PercentInsulation").GetComponent<Tool>(); tool_percentInsulation = t; tools.Add(t); t.dial_dial.min_map = 0f; t.dial_dial.max_map = 100; t.dial_dial.unit = "%"; t.dial_dial.display_unit = "%";
-        // t = GameObject.Find("Tool_ClampRange").GetComponent<Tool>(); tool_burner = t; tools.Add(t); t.dial_dial.min_map = 0f; t.dial_dial.max_map = 1000f * 100f; t.dial_dial.unit = "J/s"; t.dial_dial.display_unit = "kJ/s"; t.dial_dial.display_mul = 0.001f;
 
+        // As we grab them, set ranges on tool dials (sliders).
+        tools = new List<Tool>();
+        tool_insulator.Init(0f, 1f, "", ""); tools.Add(tool_insulator);
+        tool_clamp.Init(0f, 1f, "", ""); tools.Add(tool_clamp);
+        tool_burner.Init(0f, 1000f * 100f, "J/s", "kJ/s", 0.001f); tools.Add(tool_burner);
+        tool_coil.Init(0f, -1000f * 100f, "J/s", "kJ/s", 0.001f); tools.Add(tool_coil);
+        tool_weight.Init(0f, (float)kg_corresponding_to_10mpa, "kg", "kg"); tools.Add(tool_weight);
+        tool_balloon.Init(0f, -(float)kg_corresponding_to_10mpa / 500.0f, "kg", "kg"); tools.Add(tool_balloon);
+        // TODO: establish logical bounds and units on the ambient pressure dial
+        tool_ambientPressure.Init(0f, (float)kg_corresponding_to_2mpa / 100, "kPa", "kPa"); tools.Add(tool_ambientPressure);
+        tool_roomTemp.Init(-100, 200, "F", "F"); tools.Add(tool_roomTemp);
+        tool_percentInsulation.Init(0f, 100, "%", "%"); tools.Add(tool_percentInsulation);
+        // t = tool_clampRange; tools.Add(t); t.dial_dial.min_map = 0f; t.dial_dial.max_map = 1000f * 100f; t.dial_dial.unit = "J/s"; t.dial_dial.display_unit = "kJ/s"; t.dial_dial.display_mul = 0.001f;
 
         //Phil 06/23/2020: I can't figure out why tool_insulator and tool_clamp are both disabled. In the editor, they appear enabled until I hit play. I can't find anywhere in code that disables them. But they get to here, and are disabled, so I'm just re-enabling them
         tool_insulator.enabled = true;
@@ -186,7 +177,7 @@ public class World : MonoBehaviour
 
         // set initial states of meshrenderers and transforms for our tools.
         for (int i = 0; i < tools.Count; i++) {
-            t = tools[i];
+            Tool t = tools[i];
             if (t.active_available_meshrenderer != null) {
                 t.active_available_meshrenderer.enabled = false;
             }
@@ -248,7 +239,14 @@ public class World : MonoBehaviour
         mode_tabs.Add(GameObject.Find("ModeInstructions").GetComponent<Tab>());
         if (CHALLENGE_ENABLED) mode_tabs.Add(GameObject.Find("ModeChallenge").GetComponent<Tab>());
         if (QUIZ_ENABLED) mode_tabs.Add(GameObject.Find("ModeQuiz").GetComponent<Tab>());
+        InitializeQuiz();
 
+        SetChallengeBall();
+
+        SetAllHalfed(true);
+    }
+
+    void InitializeQuiz() {
         questions = new List<string>();
         options = new List<string>();
         answers = new List<int>(); //the correct answer
@@ -303,9 +301,9 @@ public class World : MonoBehaviour
         board = GameObject.Find("Board");
         qtext_tmp = GameObject.Find("Qtext").GetComponent<TextMeshPro>();
         SetQuizText();
-        SetChallengeBall();
-        SetAllHalfed(true);
     }
+
+    #endregion // Initialization
 
     void SetQuizText() {
         qtext_tmp.SetText(questions[question]);
@@ -331,6 +329,8 @@ public class World : MonoBehaviour
     Vector3 popVector() {
         return new Vector3(Random.Range(-1f, 1f), 1f, Random.Range(-1f, 1f));
     }
+
+    #region Tools
 
     // The three functions below are used to manage attach/detach and storage of tools.
     // Generally, they have to set the transforms properly, update state variables,
@@ -485,20 +485,22 @@ public class World : MonoBehaviour
         if (t.textd_tmpro) t.textd_tmpro.SetText("{0:3} " + t.dial_dial.display_unit, (float)(t.dial_dial.map * t.dial_dial.display_mul));
     }
 
+    #endregion // Tools
+
     //safe to call if not interactable, as it will just do nothing
     bool floatNumeric(float f) {
         if (double.IsNaN(f)) return false;
         if (double.IsInfinity(f)) return false;
         return true;
     }
-    void TryInteractable(GameObject actable, Vector3 pos, ref float r_x, ref float r_y) {
+    void TryInteractable(GameObject actable, Vector3 hand_pos, ref Vector3 r_hand_pos) {
         //grabbing handle
         if (actable == handle_workspace) {
-            float dy = (r_y - pos.y);
+            float dy = (r_hand_pos.y - hand_pos.y);
             workspace.transform.position = new Vector3(workspace.transform.position.x, workspace.transform.position.y - dy, workspace.transform.position.z);
         }
         else if (actable == graph) {
-            Vector3 localspace = graph.transform.InverseTransformPoint(pos);
+            Vector3 localspace = graph.transform.InverseTransformPoint(hand_pos);
             Vector3 correctedspace = new Vector3(localspace.z, localspace.y, -localspace.x) * 4.0f; //rotate 90, mul by 4 (inverse transform of gmodel)
 
             //note: thermospace is v,p,t
@@ -519,8 +521,31 @@ public class World : MonoBehaviour
             //grabbing dial
             if (d != null) {
                 Tool t = d.tool.GetComponent<Tool>();
-                float dx = (r_x - pos.x) * -10f;
-                d.val = Mathf.Clamp(d.val - dx, 0f, 1f);
+
+                float dx = r_hand_pos.x - hand_pos.x;
+                float dy = r_hand_pos.y - hand_pos.y;
+                float dz = r_hand_pos.z - hand_pos.z;
+
+                Vector3 movement_vector = new Vector3(
+                    (dx) * d.orientation_dir.x,
+                    (dy) * d.orientation_dir.y,
+                    (dz) * d.orientation_dir.z
+                    );
+
+                movement_vector *= -10f;
+                // float dx = (r_hand_pos.x - hand_pos.x) * -10f;
+                // constrain vector to relative orientation
+                float magnitude = movement_vector.magnitude;
+
+                bool orient_positive = (d.orientation_dir.x + d.orientation_dir.y + d.orientation_dir.z) >= 0; // whether orientation vector is overall positively directioned
+                bool delta_positive = (dx + dy + dz) >= 0; // whether movement vector is overall positively directioned
+
+                if (orient_positive != delta_positive) {
+                    // if not heading in same direction, decrease value
+                    magnitude *= -1;
+                }
+
+                d.val = Mathf.Clamp(d.val - magnitude, 0f, 1f);
                 //if this close to either end, assume user wants min/max
                 if (d.val < 0.005) d.val = 0f;
                 if (d.val > 0.995) d.val = 1f;
@@ -536,7 +561,7 @@ public class World : MonoBehaviour
      * Honestly, I haven't quite got a full understanding of this ~200-line behemoth.
      */
     //"left_hand": true -> left, false -> right
-    void TryHand(bool left_hand, float htrigger_val, float itrigger_val, Vector3 hand_pos, Vector3 hand_vel, ref bool ref_htrigger, ref bool ref_itrigger, ref int ref_htrigger_delta, ref int ref_itrigger_delta, ref float ref_x, ref float ref_y, ref GameObject ref_hand, ref GameObject ref_grabbed, ref GameObject ref_ohand, ref GameObject ref_ograbbed) {
+    void TryHand(bool left_hand, float htrigger_val, float itrigger_val, Vector3 hand_pos, Vector3 hand_vel, ref bool ref_htrigger, ref bool ref_itrigger, ref int ref_htrigger_delta, ref int ref_itrigger_delta, ref Vector3 ref_hand_pos, ref GameObject ref_hand, ref GameObject ref_grabbed, ref GameObject ref_ohand, ref GameObject ref_ograbbed) {
         float htrigger_threshhold = 0.1f;
         float itrigger_threshhold = 0.1f;
 
@@ -555,8 +580,8 @@ public class World : MonoBehaviour
         if (!ref_itrigger && itrigger_val > itrigger_threshhold) {
             ref_itrigger_delta = 1;
             ref_itrigger = true;
-            ref_x = hand_pos.x;
-            ref_y = hand_pos.y;
+            ref_hand_pos.x = hand_pos.x;
+            ref_hand_pos.y = hand_pos.y;
         }
         else if (ref_itrigger && itrigger_val <= itrigger_threshhold) {
             ref_itrigger_delta = -1;
@@ -684,10 +709,9 @@ public class World : MonoBehaviour
             ref_grabbed = null;
         }
 
-        if (ref_grabbed) TryInteractable(ref_grabbed, hand_pos, ref ref_x, ref ref_y);
+        if (ref_grabbed) TryInteractable(ref_grabbed, hand_pos, ref ref_hand_pos);
 
-        ref_x = hand_pos.x;
-        ref_y = hand_pos.y;
+        ref_hand_pos = hand_pos;
 
         if (ref_grabbed == null) //still not holding anything
         {
@@ -808,13 +832,13 @@ public class World : MonoBehaviour
         if (press_gr.ltouch) ltouch = true;
         if (press_gr.rtouch) rtouch = true;
 
-        if (lgrabbed) lhand_meshrenderer.materials = hand_grabbings;
-        else if (ltouch) lhand_meshrenderer.materials = hand_touchings;
-        else lhand_meshrenderer.materials = hand_emptys;
+        if (lgrabbed) lhand.meshrenderer.materials = hand_grabbings;
+        else if (ltouch) lhand.meshrenderer.materials = hand_touchings;
+        else lhand.meshrenderer.materials = hand_emptys;
 
-        if (rgrabbed) rhand_meshrenderer.materials = hand_grabbings;
-        else if (rtouch) rhand_meshrenderer.materials = hand_touchings;
-        else rhand_meshrenderer.materials = hand_emptys;
+        if (rgrabbed) rhand.meshrenderer.materials = hand_grabbings;
+        else if (rtouch) rhand.meshrenderer.materials = hand_touchings;
+        else rhand.meshrenderer.materials = hand_emptys;
     }
 
     //give it a list of fingertoggleables, and it manipulates them to act as a singularly-selectable list
@@ -871,12 +895,12 @@ public class World : MonoBehaviour
      * Basically, wraps calls to a bunch of other functions, and a hodgepodge of other random tasks,
      * as far as I can tell.
      */
-    void FixedUpdate() {
+    public void ManualFixedUpdate() {
         //hands keep trying to run away- no idea why (this is a silly way to keep them still)
-        lactualhand.transform.localPosition = new Vector3(0f, 0f, 0f);
-        lactualhand.transform.localEulerAngles = new Vector3(0f, 0f, 90f);
-        ractualhand.transform.localPosition = new Vector3(0f, 0f, 0f);
-        ractualhand.transform.localEulerAngles = new Vector3(0f, 0f, -90f);
+        lhand.actualhand.transform.localPosition = new Vector3(0f, 0f, 0f);
+        lhand.actualhand.transform.localEulerAngles = new Vector3(0f, 0f, 90f);
+        rhand.actualhand.transform.localPosition = new Vector3(0f, 0f, 0f);
+        rhand.actualhand.transform.localEulerAngles = new Vector3(0f, 0f, -90f);
 
         double delta_time = (double)Time.fixedDeltaTime;
 
@@ -939,13 +963,13 @@ public class World : MonoBehaviour
         // TODO: apply heat transfer from piston to outer room and vice versa
 
         //running blended average of hand velocity (transfers this velocity on "release object" for consistent "throwing")
-        lhand_vel += (lhand.transform.position - lhand_pos) / Time.fixedDeltaTime;
-        lhand_vel *= 0.5f;
-        lhand_pos = lhand.transform.position;
+        lhand.vel += (lhand.transform.position - lhand.pos) / Time.fixedDeltaTime;
+        lhand.vel *= 0.5f;
+        lhand.pos = lhand.transform.position;
 
-        rhand_vel += (rhand.transform.position - rhand_pos) / Time.fixedDeltaTime;
-        rhand_vel *= 0.5f;
-        rhand_pos = rhand.transform.position;
+        rhand.vel += (rhand.transform.position - rhand.pos) / Time.fixedDeltaTime;
+        rhand.vel *= 0.5f;
+        rhand.pos = rhand.transform.position;
 
         //input
         //float lhandt  = OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger);
@@ -976,11 +1000,68 @@ public class World : MonoBehaviour
         */
 
         //test effect of hands one at a time ("true" == "left hand", "false" == "right hand")
-        TryHand(true, lhandt, lindext, lhand.transform.position, lhand_vel, ref lhtrigger, ref litrigger, ref lhtrigger_delta, ref litrigger_delta, ref lz, ref ly, ref lhand, ref lgrabbed, ref rhand, ref rgrabbed); //left hand
-        TryHand(false, rhandt, rindext, rhand.transform.position, rhand_vel, ref rhtrigger, ref ritrigger, ref rhtrigger_delta, ref ritrigger_delta, ref rz, ref ry, ref rhand, ref rgrabbed, ref lhand, ref lgrabbed); //right hand
+        TryHand(true, lhandt, lindext, lhand.transform.position, lhand.vel, ref lhtrigger, ref litrigger, ref lhtrigger_delta, ref litrigger_delta, ref lpos, ref lhand.obj, ref lgrabbed, ref rhand.obj, ref rgrabbed); //left hand
+        TryHand(false, rhandt, rindext, rhand.transform.position, rhand.vel, ref rhtrigger, ref ritrigger, ref rhtrigger_delta, ref ritrigger_delta, ref rpos, ref rhand.obj, ref rgrabbed, ref lhand.obj, ref lgrabbed); //right hand
 
         UpdateGrabVis();
 
+        UpdateClipboard();
+
+        //tooltext
+        Tool t;
+        for (int i = 0; i < tools.Count; i++) {
+            t = tools[i];
+            t.dial_dial.examined = false;
+            if (t.dial == lgrabbed || t.dial == rgrabbed) t.dial_dial.examined = true;
+            if (t.dial_dial.val != t.dial_dial.prev_val) {
+                UpdateToolText(t);
+                t.dial_dial.examined = true;
+            }
+            t.dial_dial.prev_val = t.dial_dial.val;
+        }
+
+        // Disable the warning on that the tools are not available in this region
+        /* 
+        switch (thermo.region)
+        {
+          case 0:
+          case 1:
+            tool_weight.textn.GetComponent<MeshRenderer>().enabled = true;
+            tool_weight.disabled = true;
+            tool_balloon.textn.GetComponent<MeshRenderer>().enabled = true;
+            tool_balloon.disabled = true;
+            break;
+          case 2:
+            tool_weight.textn.GetComponent<MeshRenderer>().enabled = false;
+            tool_weight.disabled = false;
+            tool_balloon.textn.GetComponent<MeshRenderer>().enabled = false;
+            tool_balloon.disabled = false;
+            break;
+        }
+        */
+        for (int i = 0; i < tools.Count; i++) {
+            t = tools[i];
+            if (t.text_fadable == null) {
+                continue;
+            }
+            if (!t.text_fadable.stale) {
+                if (t.text_fadable.alpha == 0f) {
+                    t.textv_meshrenderer.enabled = false;
+                    t.textl_meshrenderer.enabled = false;
+                }
+                else {
+                    t.textv_meshrenderer.enabled = true;
+                    t.textl_meshrenderer.enabled = true;
+                    Color32 c = t.disabled ? new Color32(70, 70, 70, (byte)(t.text_fadable.alpha * 255)) : new Color32(0, 0, 0, (byte)(t.text_fadable.alpha * 255));
+                    t.textv_tmpro.faceColor = c;
+                    t.textl_tmpro.faceColor = c;
+                }
+            }
+        }
+        thermo_present.UpdateErrorState();
+    }
+
+    private void UpdateClipboard() {
         //clipboard
         int old_board_mode = board_mode;
         board_mode = reconcileDependentSelectables(board_mode, mode_tabs);
@@ -1040,59 +1121,6 @@ public class World : MonoBehaviour
                 board_mode = 2; //immediately return back to quiz until this section is actually implemented
                 break;
         }
-
-        //tooltext
-        Tool t;
-        for (int i = 0; i < tools.Count; i++) {
-            t = tools[i];
-            t.dial_dial.examined = false;
-            if (t.dial == lgrabbed || t.dial == rgrabbed) t.dial_dial.examined = true;
-            if (t.dial_dial.val != t.dial_dial.prev_val) {
-                UpdateToolText(t);
-                t.dial_dial.examined = true;
-            }
-            t.dial_dial.prev_val = t.dial_dial.val;
-        }
-
-        // Disable the warning on that the tools are not available in this region
-        /* 
-        switch (thermo.region)
-        {
-          case 0:
-          case 1:
-            tool_weight.textn.GetComponent<MeshRenderer>().enabled = true;
-            tool_weight.disabled = true;
-            tool_balloon.textn.GetComponent<MeshRenderer>().enabled = true;
-            tool_balloon.disabled = true;
-            break;
-          case 2:
-            tool_weight.textn.GetComponent<MeshRenderer>().enabled = false;
-            tool_weight.disabled = false;
-            tool_balloon.textn.GetComponent<MeshRenderer>().enabled = false;
-            tool_balloon.disabled = false;
-            break;
-        }
-        */
-        for (int i = 0; i < tools.Count; i++) {
-            t = tools[i];
-            if (t.text_fadable == null) {
-                continue;
-            }
-            if (!t.text_fadable.stale) {
-                if (t.text_fadable.alpha == 0f) {
-                    t.textv_meshrenderer.enabled = false;
-                    t.textl_meshrenderer.enabled = false;
-                }
-                else {
-                    t.textv_meshrenderer.enabled = true;
-                    t.textl_meshrenderer.enabled = true;
-                    Color32 c = t.disabled ? new Color32(70, 70, 70, (byte)(t.text_fadable.alpha * 255)) : new Color32(0, 0, 0, (byte)(t.text_fadable.alpha * 255));
-                    t.textv_tmpro.faceColor = c;
-                    t.textl_tmpro.faceColor = c;
-                }
-            }
-        }
-        thermo_present.UpdateErrorState();
     }
 
 }
