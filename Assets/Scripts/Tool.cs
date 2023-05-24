@@ -92,16 +92,20 @@ public class Tool : MonoBehaviour
         boxcollider = gameObject.GetComponent<BoxCollider>();
         rigidbody = gameObject.GetComponent<Rigidbody>();
 
-        default_storage_scale = storage.transform.localScale.x; //could grab any dimension
-        storage_ghost = storage.GetComponent<Ghost>();
-        storage_touchable = storage.GetComponent<Touchable>();
-        storage_obj = storage_ghost.obj;
-        storage_meshrenderer = storage_obj.GetComponent<MeshRenderer>();
+        if (storage != null) {
+            default_storage_scale = storage.transform.localScale.x; //could grab any dimension
+            storage_ghost = storage.GetComponent<Ghost>();
+            storage_touchable = storage.GetComponent<Touchable>();
+            storage_obj = storage_ghost.obj;
+            storage_meshrenderer = storage_obj.GetComponent<MeshRenderer>();
+        }
 
-        active_ghost = active.GetComponent<Ghost>();
-        active_touchable = active.GetComponent<Touchable>();
-        active_available = active_ghost.obj;
-        active_available_meshrenderer = active_available.GetComponent<MeshRenderer>();
+        if (active != null) { 
+            active_ghost = active.GetComponent<Ghost>();
+            active_touchable = active.GetComponent<Touchable>();
+            active_available = active_ghost.obj;
+            active_available_meshrenderer = active_available.GetComponent<MeshRenderer>();
+        }
 
         dial_dial = dial.GetComponent<Dial>();
         dial_touchable = dial.GetComponent<Touchable>();
@@ -133,7 +137,7 @@ public class Tool : MonoBehaviour
         if (text_fadable) text_fadable.set_factive(touchable.touch || dial_dial.examined);
 
         // If tool has been sitting unused and unmoved for long enough, start it moving back to storage.
-        if (!engaged && !stored && !touchable.grabbed && t_free > 1.0f) {
+        if (!engaged && !stored && !touchable.grabbed && t_free > 1.0f && storage != null) {
             rigidbody.isKinematic = true;
             gameObject.transform.position = Vector3.Lerp(gameObject.transform.position, storage.transform.position, 0.1f);
             gameObject.transform.localRotation = Quaternion.Lerp(gameObject.transform.localRotation, storage.transform.localRotation, 0.1f);

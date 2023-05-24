@@ -73,6 +73,10 @@ public class World : MonoBehaviour
     Tool tool_coil;
     Tool tool_weight;
     Tool tool_balloon;
+    Tool tool_ambientPressure;
+    Tool tool_roomTemp;
+    Tool tool_percentInsulation;
+    Tool tool_clampRange;
 
     ParticleSystem flame; //special case
 
@@ -118,8 +122,10 @@ public class World : MonoBehaviour
     TextMeshPro qtext_tmp;
     int qselected = -1;
 
+    double room_temp = 72; // in F
     double applied_heat = 0;
     double applied_weight = 0;
+    double ambient_pressure = 0;
 
     // Start is called before the first frame update
     void Start() {
@@ -160,6 +166,13 @@ public class World : MonoBehaviour
         double kg_corresponding_to_2mpa = thermo_present.get_surfacearea_insqr() * (2 * 1453.8/*MPa->psi*/) * 0.453592/*lb->kg*/; // 10 MPa seems way too big, sooooo... we'll just do 2 MPa.
         t = GameObject.Find("Tool_Weight").GetComponent<Tool>(); tool_weight = t; tools.Add(t); t.dial_dial.min_map = 0f; t.dial_dial.max_map = (float)kg_corresponding_to_10mpa; t.dial_dial.unit = "kg"; t.dial_dial.display_unit = t.dial_dial.unit;
         t = GameObject.Find("Tool_Balloon").GetComponent<Tool>(); tool_balloon = t; tools.Add(t); t.dial_dial.min_map = 0f; t.dial_dial.max_map = -(float)kg_corresponding_to_10mpa / 500.0f; t.dial_dial.unit = "kg"; t.dial_dial.display_unit = t.dial_dial.unit;
+        // TODO: establish logical bounds and units on the ambient pressure dial
+        t = GameObject.Find("Tool_AmbientPressure").GetComponent<Tool>(); tool_ambientPressure = t; tools.Add(t); t.dial_dial.min_map = 0f; t.dial_dial.max_map = (float)kg_corresponding_to_2mpa / 100; t.dial_dial.unit = "kPa"; t.dial_dial.display_unit = t.dial_dial.unit;
+        // TODO: allow for non-zero starting values / positions; apply relevant heat transfer between room and piston
+        t = GameObject.Find("Tool_RoomTemp").GetComponent<Tool>(); tool_roomTemp = t; tools.Add(t); t.dial_dial.min_map = -100; t.dial_dial.max_map = 200; t.dial_dial.unit = "F"; t.dial_dial.display_unit = "F";
+        t = GameObject.Find("Tool_PercentInsulation").GetComponent<Tool>(); tool_percentInsulation = t; tools.Add(t); t.dial_dial.min_map = 0f; t.dial_dial.max_map = 100; t.dial_dial.unit = "%"; t.dial_dial.display_unit = "%";
+        // t = GameObject.Find("Tool_ClampRange").GetComponent<Tool>(); tool_burner = t; tools.Add(t); t.dial_dial.min_map = 0f; t.dial_dial.max_map = 1000f * 100f; t.dial_dial.unit = "J/s"; t.dial_dial.display_unit = "kJ/s"; t.dial_dial.display_mul = 0.001f;
+
 
         //Phil 06/23/2020: I can't figure out why tool_insulator and tool_clamp are both disabled. In the editor, they appear enabled until I hit play. I can't find anywhere in code that disables them. But they get to here, and are disabled, so I'm just re-enabling them
         tool_insulator.enabled = true;
@@ -174,17 +187,24 @@ public class World : MonoBehaviour
         // set initial states of meshrenderers and transforms for our tools.
         for (int i = 0; i < tools.Count; i++) {
             t = tools[i];
-            t.active_available_meshrenderer.enabled = false;
-            t.storage_meshrenderer.enabled = false;
-            GameObject g = t.gameObject;
-            g.transform.SetParent(t.storage.gameObject.transform);
-            t.stored = true;
-            g.transform.localPosition = new Vector3(0f, 0f, 0f);
-            g.transform.localScale = new Vector3(1f, 1f, 1f);
-            g.transform.localRotation = Quaternion.identity;
-            float v = t.storage.transform.localScale.x; //can grab any dimension
-            Vector3 invscale = new Vector3(1f / v, 1f / v, 1f / v);
-            t.text.transform.localScale = invscale;
+            if (t.active_available_meshrenderer != null) {
+                t.active_available_meshrenderer.enabled = false;
+            }
+            if (t.storage_meshrenderer != null) {
+                t.storage_meshrenderer.enabled = false;
+            }
+            if (t.storage != null) {
+                GameObject g = t.gameObject;
+                g.transform.SetParent(t.storage.gameObject.transform);
+                t.stored = true;
+                g.transform.localPosition = new Vector3(0f, 0f, 0f);
+                g.transform.localScale = new Vector3(1f, 1f, 1f);
+                g.transform.localRotation = Quaternion.identity;
+                float v = t.storage.transform.localScale.x; //can grab any dimension
+                Vector3 invscale = new Vector3(1f / v, 1f / v, 1f / v);
+                t.text.transform.localScale = invscale;
+            }
+
             UpdateToolText(t);
         }
 
@@ -732,6 +752,10 @@ public class World : MonoBehaviour
             Tool t = tools[i];
             GameObject g = t.gameObject;
 
+            if (t.storage == null) {
+                continue; // tool that does not have a physical mesh
+            }
+
             if (lgrabbed == g || rgrabbed == g) {
                 //active
                 if (t.active_ghost.tintersect) {
@@ -858,10 +882,12 @@ public class World : MonoBehaviour
 
         //apply thermo
         if (!tool_clamp.engaged) {
+            ambient_pressure = tool_ambientPressure.dial_dial.map;
+            room_temp = tool_roomTemp.dial_dial.map;
             double psi_to_pascal = 6894.76;
             double neutral_pressure = 14.6959; //~1atm in psi
-            double weight_pressure = applied_weight / thermo_present.get_surfacearea_insqr(); //psi
-            weight_pressure += neutral_pressure;
+            double weight_pressure = (applied_weight) / thermo_present.get_surfacearea_insqr(); //psi
+            weight_pressure += ambient_pressure + neutral_pressure; // TODO: establish logical bounds and units on the ambient pressure dial
             weight_pressure *= psi_to_pascal; //conversion from psi to pascal
 
             //treat "applied_weight" as target, and iterate toward it, rather than applying it additively
@@ -909,6 +935,8 @@ public class World : MonoBehaviour
             if (tool_clamp.engaged) thermo_present.add_heat_constant_v_per_delta_time(applied_heat, insulation_coefficient, delta_time);    // Volume Constrained -> Insulated && Uninsulated ->  delta energy     // time eqtn 6a
             else thermo_present.add_heat_constant_p_per_delta_time(applied_heat, insulation_coefficient, delta_time);                       // Pressure Constrained -> Insulated && Uninsulated -> delta energy    // time eqtn 6b
         }
+
+        // TODO: apply heat transfer from piston to outer room and vice versa
 
         //running blended average of hand velocity (transfers this velocity on "release object" for consistent "throwing")
         lhand_vel += (lhand.transform.position - lhand_pos) / Time.fixedDeltaTime;
@@ -1047,6 +1075,9 @@ public class World : MonoBehaviour
         */
         for (int i = 0; i < tools.Count; i++) {
             t = tools[i];
+            if (t.text_fadable == null) {
+                continue;
+            }
             if (!t.text_fadable.stale) {
                 if (t.text_fadable.alpha == 0f) {
                     t.textv_meshrenderer.enabled = false;
