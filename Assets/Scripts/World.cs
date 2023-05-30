@@ -154,7 +154,7 @@ public class World : MonoBehaviour
         // As we grab them, set ranges on tool dials (sliders).
         tools = new List<Tool>();
         tool_insulator.Init(0f, 1f, "", ""); tools.Add(tool_insulator);
-        tool_clamp.Init(0f, 1f, "", ""); tools.Add(tool_clamp);
+        tool_clamp.Init(0, (float)(ThermoMath.v_max - ThermoMath.v_min), "M³/kg", "M³/kg"); tools.Add(tool_clamp);
         tool_burner.Init(0f, 1000f * 100f, "J/s", "kJ/s", 0.001f); tools.Add(tool_burner);
         tool_coil.Init(0f, -1000f * 100f, "J/s", "kJ/s", 0.001f); tools.Add(tool_coil);
         tool_weight.Init(0f, (float)kg_corresponding_to_10mpa, "kg", "kg"); tools.Add(tool_weight);
@@ -340,6 +340,10 @@ public class World : MonoBehaviour
         o.transform.SetParent(t.active.transform);
         t.touchable.grabbed = false;
         t.engaged = true;
+        if (t == tool_clamp) {
+            // thermo_present.set_clamp_objective(0, 0);
+            thermo_present.set_clamp_relative(tool_clamp.dial_dial.val);
+        }
         t.stored = false;
         t.boxcollider.isTrigger = true;
         // Not sure the two below are ever used? We don't have dials for these tools in use.
@@ -362,6 +366,9 @@ public class World : MonoBehaviour
         o.transform.SetParent(t.storage.transform);
         t.touchable.grabbed = false;
         t.engaged = false;
+        if (t == tool_clamp) {
+            thermo_present.release_clamp();
+        }
         t.stored = true;
         o.transform.localPosition = new Vector3(0f, 0f, 0f);
         o.transform.localRotation = Quaternion.identity;
@@ -380,6 +387,9 @@ public class World : MonoBehaviour
         o.transform.SetParent(t.touchable.og_parent);
         t.touchable.grabbed = false;
         t.engaged = false;
+        if (t == tool_clamp) {
+            thermo_present.release_clamp();
+        }
         t.stored = false;
         o.transform.localScale = new Vector3(1f, 1f, 1f);
         t.text.transform.localScale = new Vector3(1f, 1f, 1f);
@@ -476,7 +486,7 @@ public class World : MonoBehaviour
     }
     void UpdateToolText(Tool t) {
         if (!t.dial_dial) return;
-        if (t == tool_insulator || t == tool_clamp) return;
+        if (t == tool_insulator) return;
 
         string txt = string.Format("{0:3} " + t.dial_dial.display_unit, (float)(t.dial_dial.map * t.dial_dial.display_mul));
         //t.textv_tmpro.SetText(txt);
@@ -605,6 +615,9 @@ public class World : MonoBehaviour
                     {
                         t.audioS.Play();
                         t.engaged = false;
+                        if (t == tool_clamp) {
+                            thermo_present.release_clamp();
+                        }
                         t.stored = false;
                         ref_grabbed.transform.localScale = new Vector3(1f, 1f, 1f);
                         t.text.transform.localScale = new Vector3(1f, 1f, 1f);
@@ -904,19 +917,22 @@ public class World : MonoBehaviour
 
         double delta_time = (double)Time.fixedDeltaTime;
 
-        //apply thermo
-        if (!tool_clamp.engaged) {
-            ambient_pressure = tool_ambientPressure.dial_dial.map;
-            room_temp = tool_roomTemp.dial_dial.map;
-            double psi_to_pascal = 6894.76;
-            double neutral_pressure = 14.6959; //~1atm in psi
-            double weight_pressure = (applied_weight) / thermo_present.get_surfacearea_insqr(); //psi
-            weight_pressure += ambient_pressure + neutral_pressure; // TODO: establish logical bounds and units on the ambient pressure dial
-            weight_pressure *= psi_to_pascal; //conversion from psi to pascal
 
-            //treat "applied_weight" as target, and iterate toward it, rather than applying it additively
-            //(technically, "should" add_pressure(...) with every delta of weight on the piston, but that would result in very jumpy nonsense movements. iterating toward a target smooths it out)
-            double delta_pressure = (weight_pressure - thermo_present.get_pressure());
+        //apply thermo
+        ambient_pressure = tool_ambientPressure.dial_dial.map;
+        room_temp = tool_roomTemp.dial_dial.map;
+        double psi_to_pascal = 6894.76;
+        double neutral_pressure = 14.6959; //~1atm in psi
+        double weight_pressure = (applied_weight) / thermo_present.get_surfacearea_insqr(); //psi
+        weight_pressure += ambient_pressure + neutral_pressure; // TODO: establish logical bounds and units on the ambient pressure dial
+        weight_pressure *= psi_to_pascal; //conversion from psi to pascal
+
+        //treat "applied_weight" as target, and iterate toward it, rather than applying it additively
+        //(technically, "should" add_pressure(...) with every delta of weight on the piston, but that would result in very jumpy nonsense movements. iterating toward a target smooths it out)
+        double delta_pressure = (weight_pressure - thermo_present.get_pressure());
+
+        if (tool_clamp.engaged) {
+            // TODO: move this check to add_pressure functions, or events (not correct when adjusting volume in gas when not at max clamp
 
             bool significantChange = Mathf.Abs((float)delta_pressure * Time.fixedDeltaTime) > DELTA_PRESSURE_CUTOFF ? true : false;
             if (significantChange) {
@@ -930,11 +946,11 @@ public class World : MonoBehaviour
             else if (arrows.running) {
                 arrows.Stop();
             }
+        }
 
-            if (System.Math.Abs(delta_pressure) > 0) {
-                if (tool_insulator.engaged) thermo_present.add_pressure_insulated_per_delta_time(delta_pressure, delta_time); // Pressure Constrained -> Insulated ->  delta pressure
-                else thermo_present.add_pressure_uninsulated_per_delta_time(delta_pressure, delta_time); // Pressure Constrained -> Uninsulated ->  delta pressure
-            }
+        if (System.Math.Abs(delta_pressure) > 0) {
+            if (tool_insulator.engaged) thermo_present.add_pressure_insulated_per_delta_time(delta_pressure, delta_time, tool_clamp.engaged); // Pressure Constrained -> Insulated ->  delta pressure
+            else thermo_present.add_pressure_uninsulated_per_delta_time(delta_pressure, delta_time, tool_clamp.engaged); // Pressure Constrained -> Uninsulated ->  delta pressure
         }
 
         // stop arrows if there was a jump to another region other than gas
@@ -955,9 +971,11 @@ public class World : MonoBehaviour
             }
             else if (arrows.running) arrows.Stop();
         */
+
+        // bool at_v_bound_heat = false;
+
         if (applied_heat != 0) {
-            if (tool_clamp.engaged) thermo_present.add_heat_constant_v_per_delta_time(applied_heat, insulation_coefficient, delta_time);    // Volume Constrained -> Insulated && Uninsulated ->  delta energy     // time eqtn 6a
-            else thermo_present.add_heat_constant_p_per_delta_time(applied_heat, insulation_coefficient, delta_time);                       // Pressure Constrained -> Insulated && Uninsulated -> delta energy    // time eqtn 6b
+            thermo_present.add_heat_per_delta_time(applied_heat, insulation_coefficient, delta_time, tool_clamp.engaged);           
         }
 
         // TODO: apply heat transfer from piston to outer room and vice versa

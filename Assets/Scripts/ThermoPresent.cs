@@ -701,29 +701,19 @@ public class ThermoPresent : MonoBehaviour
         visualize_state();
     }
 
-    public void add_heat_constant_p_per_delta_time(double applied_heat, double insulation_coefficient, double delta_time) {
-        state.add_heat_constant_p_per_delta_time(applied_heat, insulation_coefficient, delta_time);
-
-        if (debug_write) {
-            debug_file.WriteLine("add_heat_constant_p({0})", applied_heat * insulation_coefficient);
-            debug_deltas();
-        }
+    public void add_heat_per_delta_time(double applied_heat, double insulation_coefficient, double delta_time, bool clamp_engaged) {
+        state.add_heat_per_delta_time(applied_heat, insulation_coefficient, delta_time, clamp_engaged);
 
         visualize_state();
     }
 
-    public void add_heat_constant_v_per_delta_time(double applied_heat, double insulation_coefficient, double delta_time) {
-        state.add_heat_constant_v_per_delta_time(applied_heat, insulation_coefficient, delta_time);
+    public void add_pressure_uninsulated_per_delta_time(double p, double delta_time, bool clamp_engaged) {
+        state.add_pressure_uninsulated_per_delta_time(p, delta_time, clamp_engaged);
         visualize_state();
     }
 
-    public void add_pressure_uninsulated_per_delta_time(double p, double delta_time) {
-        state.add_pressure_uninsulated_per_delta_time(p, delta_time);
-        visualize_state();
-    }
-
-    public void add_pressure_insulated_per_delta_time(double p, double delta_time) {
-        state.add_pressure_insulated_per_delta_time(p, delta_time);
+    public void add_pressure_insulated_per_delta_time(double p, double delta_time, bool clamp_engaged) {
+        state.add_pressure_insulated_per_delta_time(p, delta_time, clamp_engaged);
         visualize_state();
     }
 
@@ -764,6 +754,34 @@ public class ThermoPresent : MonoBehaviour
         }
         water.transform.localScale = water_lt;
         //steam.transform.localScale = -1f*steam_lt;
+    }
+
+    /// <summary>
+    /// Remove clamp volume bounds
+    /// </summary>
+    public void release_clamp() {
+        state.release_clamp();
+    }
+
+    /// <summary>
+    /// Set the clamp's min, middle, and max volume
+    /// </summary>
+    public void set_clamp_objective(double min, double max) {
+        state.set_clamp_objective(min, max);
+    }
+
+    /// <summary>
+    /// Set the clamp's min, middle, and max volume
+    /// </summary>
+    public void set_clamp_relative(float range) {
+        state.set_clamp_relative(range);
+    }
+
+    /// <summary>
+    /// Set the clamp's min and max, preserving previous midpoint
+    /// </summary>
+    public void adjust_clamp(float range) {
+        state.adjust_clamp(range);
     }
 
 

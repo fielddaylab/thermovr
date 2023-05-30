@@ -44,6 +44,12 @@ public class ThermoState : MonoBehaviour
     public double surfacearea_insqr = 38.2447935395871; //in^2 //hardcoded conversion from m^2 to in^2
     const double p_crit = 22.064; // Pa
 
+    public double v_min_clamp; // min volume, defined by adjustable clamp
+    public double v_mid_clamp; // midpoint volume, defined by adjustable clamp
+    public double v_max_clamp; // max volume, defined by adjustable clamp
+
+    private bool RELATIVE_CLAMP = true; // true if clamp is set relative to current volume, false if clamp can set any volume bounds
+
     public void reset() {
         //ensure consistent state
         pressure = ThermoMath.p_neutral[region];
@@ -67,6 +73,62 @@ public class ThermoState : MonoBehaviour
         prev_enthalpy = -1;
         prev_quality = -1;
         prev_region = -1;
+
+        release_clamp();
+    }
+
+    /// <summary>
+    /// Remove clamp volume bounds
+    /// </summary>
+    public void release_clamp() {
+        if (RELATIVE_CLAMP) {
+            v_min_clamp = v_max_clamp = -1;
+        }
+        else {
+            v_min_clamp = v_mid_clamp = v_max_clamp = -1;
+        }
+    }
+
+    /// <summary>
+    /// Set the clamp's min, middle, and max volume
+    /// </summary>
+    public void set_clamp_objective(double min, double max) {
+        v_min_clamp = min;
+        v_max_clamp = max;
+
+        // constrain clamp's values to global bounds
+        Clampd(v_min_clamp, ThermoMath.v_min, ThermoMath.v_max);
+        Clampd(v_max_clamp, ThermoMath.v_min, ThermoMath.v_max);
+    }
+
+    /// <summary>
+    /// Set the clamp's min, middle, and max volume
+    /// </summary>
+    public void set_clamp_relative(float range) {
+        v_mid_clamp = volume;
+        v_min_clamp = v_mid_clamp - range;
+        v_max_clamp = v_mid_clamp + range;
+
+        // constrain clamp's values to global bounds
+        Clampd(v_min_clamp, ThermoMath.v_min, ThermoMath.v_max);
+        Clampd(v_max_clamp, ThermoMath.v_min, ThermoMath.v_max);
+    }
+
+    /// <summary>
+    /// Set the clamp's min and max, preserving previous midpoint
+    /// </summary>
+    public void adjust_clamp(float range) {
+        if (RELATIVE_CLAMP) {
+            v_min_clamp = v_mid_clamp - range;
+            v_max_clamp = v_mid_clamp + range;
+
+            // constrain clamp's values to global bounds
+            Clampd(v_min_clamp, ThermoMath.v_min, ThermoMath.v_max);
+            Clampd(v_max_clamp, ThermoMath.v_min, ThermoMath.v_max);
+        }
+        else {
+            // only use this function when using Relative Clamp
+        }
     }
 
     public void stamp_prev() {
@@ -144,7 +206,12 @@ public class ThermoState : MonoBehaviour
         */
 
         pressure = Clampd(pressure, ThermoMath.p_min, ThermoMath.p_max);
-        volume = Clampd(volume, ThermoMath.v_min, ThermoMath.v_max);
+        if (v_min_clamp != -1) {
+            volume = Clampd(volume, v_min_clamp, v_max_clamp);
+        }
+        else {
+            volume = Clampd(volume, ThermoMath.v_min, ThermoMath.v_max);
+        }
         temperature = Clampd(temperature, ThermoMath.t_min, ThermoMath.t_max);
         internalenergy = Clampd(internalenergy, ThermoMath.u_min, ThermoMath.u_max);
         entropy = Clampd(entropy, ThermoMath.s_min, ThermoMath.s_max);
@@ -204,7 +271,28 @@ public class ThermoState : MonoBehaviour
         clamp_state();
     }
 
-    public void add_heat_constant_p_per_delta_time(double applied_heat, double insulation_coefficient, double delta_time) {
+    public void add_heat_per_delta_time(double applied_heat, double insulation_coefficient, double delta_time, bool clamp_engaged) {
+        bool constant_v = false;
+        if (clamp_engaged) {
+            if (applied_heat > 0 && volume == v_max_clamp) {
+                // volume will either increase or stay the same, but clamp is engaged
+                constant_v = true;
+            }
+            else if (applied_heat < 0 && volume == v_min_clamp){
+                // volume will either decrese or stay the same, but clamp is engaged
+                constant_v = true;
+            }
+        }
+
+        if (constant_v) {
+            add_heat_constant_v_per_delta_time(applied_heat, insulation_coefficient, delta_time);
+        }
+        else {
+            add_heat_constant_p_per_delta_time(applied_heat, insulation_coefficient, delta_time);
+        }
+    }
+
+    private void add_heat_constant_p_per_delta_time(double applied_heat, double insulation_coefficient, double delta_time) {  // Pressure Constrained -> Insulated && Uninsulated -> delta energy    // time eqtn 6b
         try {
             double delta_h = delta_time / mass * (applied_heat * insulation_coefficient);  // time eqtn 6a
 
@@ -248,7 +336,7 @@ public class ThermoState : MonoBehaviour
         clamp_state();
     }
 
-    public void add_heat_constant_v_per_delta_time(double applied_heat, double insulation_coefficient, double delta_time) {
+    private void add_heat_constant_v_per_delta_time(double applied_heat, double insulation_coefficient, double delta_time) { // Volume Constrained -> Insulated && Uninsulated ->  delta energy     // time eqtn 6a
         try {
             double delta_u = delta_time / mass * (applied_heat * insulation_coefficient); // time eqtn 6b
 
@@ -295,7 +383,17 @@ public class ThermoState : MonoBehaviour
         clamp_state();
     }
 
-    public void add_pressure_uninsulated_per_delta_time(double p, double delta_time) {
+    public void add_pressure_uninsulated_per_delta_time(double p, double delta_time, bool clamp_engaged) {
+        if (clamp_engaged) {
+            // when clamp is engaged and pressure dif would overshoot min/max volume, do not apply change
+            if (volume == v_min_clamp && p < 0) {
+                return;
+            }
+            if (volume == v_max_clamp && p > 0) {
+                return;
+            }
+        }
+
         try {
             double new_p = pressure + p * delta_time;
             if (Math.Abs(p * delta_time) < World.DELTA_PRESSURE_CUTOFF) { new_p = pressure + p; } // small enough step; finish transition
@@ -388,7 +486,16 @@ public class ThermoState : MonoBehaviour
         clamp_state();
     }
 
-    public void add_pressure_insulated_per_delta_time(double p, double delta_time) {
+    public void add_pressure_insulated_per_delta_time(double p, double delta_time, bool clamp_engaged) {
+        if (clamp_engaged) {
+            if (volume == v_min_clamp && p < 0) {
+                return;
+            }
+            if (volume == v_max_clamp && p > 0) {
+                return;
+            }
+        }
+
         try {
             double new_p = pressure + p * delta_time;
             if (Math.Abs(p * delta_time) < World.DELTA_PRESSURE_CUTOFF) { new_p = pressure + p; } // small enough step; finish transition
