@@ -36,6 +36,7 @@ public class World : MonoBehaviour
     [Space(5)]
     [Header("Thermo")]
     [SerializeField] private ThermoPresent thermo_present;
+    [SerializeField] private Touchable tablet;
 
     [Space(5)]
     [Header("Controls")]
@@ -218,6 +219,7 @@ public class World : MonoBehaviour
         movables = new List<Touchable>();
         for (int i = 0; i < tools.Count; i++) movables.Add(tools[i].touchable); //important that tools take priority, so they can be grabbed and removed
         movables.Add(clipboard.GetComponent<Touchable>());
+        movables.Add(tablet);
 
         halfer = GameObject.Find("Halfer");
         halfer_touchable = halfer.GetComponent<Touchable>();
