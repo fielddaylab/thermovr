@@ -530,7 +530,7 @@ public class World : MonoBehaviour
             Dial d = actable.GetComponent<Dial>();
             //grabbing dial
             if (d != null) {
-                Tool t = d.tool.GetComponent<Tool>();
+                Tool t = d.tool;
 
                 float dx = r_hand_pos.x - hand_pos.x;
                 float dy = r_hand_pos.y - hand_pos.y;

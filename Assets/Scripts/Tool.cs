@@ -59,6 +59,7 @@ public class Tool : MonoBehaviour
     public Touchable dial_touchable;
 
     public GameObject text;
+    [HideInInspector]
     public GameObject textv;
     [System.NonSerialized]
     public TextMeshPro textv_tmpro;
@@ -90,7 +91,7 @@ public class Tool : MonoBehaviour
     public void Init(float min_map, float max_map, string unit, string display_unit, float display_mul = 1) {
         Setup();
 
-        dial_dial.Init(min_map, max_map, unit, display_unit, display_mul);
+        dial_dial.Init(min_map, max_map, unit, display_unit, display_mul, this);
     }
 
     private void Setup() {
@@ -101,6 +102,7 @@ public class Tool : MonoBehaviour
         if (storage != null) {
             default_storage_scale = storage.transform.localScale.x; //could grab any dimension
             storage_ghost = storage.GetComponent<Ghost>();
+            storage_ghost.set_tool(this);
             storage_touchable = storage.GetComponent<Touchable>();
             storage_obj = storage_ghost.obj;
             storage_meshrenderer = storage_obj.GetComponent<MeshRenderer>();
@@ -108,6 +110,7 @@ public class Tool : MonoBehaviour
 
         if (active != null) {
             active_ghost = active.GetComponent<Ghost>();
+            active_ghost.set_tool(this);
             active_touchable = active.GetComponent<Touchable>();
             active_available = active_ghost.obj;
             active_available_meshrenderer = active_available.GetComponent<MeshRenderer>();
@@ -116,6 +119,7 @@ public class Tool : MonoBehaviour
         dial_dial = dial.GetComponent<Dial>();
         dial_touchable = dial.GetComponent<Touchable>();
 
+        textv = dial_dial.textv.gameObject;
         textv_tmpro = textv.GetComponent<TextMeshPro>();
         textv_meshrenderer = textv.GetComponent<MeshRenderer>();
         textl_tmpro = textl.GetComponent<TextMeshPro>();

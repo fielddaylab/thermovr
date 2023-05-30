@@ -4,12 +4,13 @@ using UnityEngine;
 
 public class Ghost : MonoBehaviour
 {
-    public GameObject tool;
+    [HideInInspector] public GameObject tool;
     public GameObject obj;
 
     Collider tool_c;
 
-    void Awake() {
+    public void set_tool(Tool tool) {
+        this.tool = tool.gameObject;
         tool_c = tool.GetComponent<Collider>();
     }
 

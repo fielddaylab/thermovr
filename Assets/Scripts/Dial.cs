@@ -11,6 +11,7 @@ public class Dial : MonoBehaviour
 {
     [SerializeField] private Transform max_pos;
     [SerializeField] private Transform min_pos;
+    public TextMeshPro textv;
 
     public int response_power; //sometimes, we want log mapping
     [System.NonSerialized]
@@ -33,13 +34,14 @@ public class Dial : MonoBehaviour
     public string display_unit = "";
     [System.NonSerialized]
     public float display_mul = 1.0f; //multiplied with map before displaying with display_unit
-    public GameObject tool;
+    [System.NonSerialized]
+    public Tool tool;
 
     [System.NonSerialized]
     public bool examined = false;
     GameObject meter;
 
-    public void Init(float min_map, float max_map, string unit, string display_unit, float display_mul) {
+    public void Init(float min_map, float max_map, string unit, string display_unit, float display_mul, Tool tool) {
         meter = gameObject.transform.GetChild(0).gameObject;
 
         this.min_map = min_map;
@@ -47,6 +49,7 @@ public class Dial : MonoBehaviour
         this.unit = unit;
         this.display_unit = display_unit;
         this.display_mul = display_mul;
+        this.tool = tool;
         if (min_pos == null) {
             orientation_dir = new Vector3(1, 0, 0);
         }
