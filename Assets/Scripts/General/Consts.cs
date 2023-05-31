@@ -3,7 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using BeauUtil;
 
-static public class Consts
+static public class GameEvents
 {
-    static public readonly StringHash32 ExampleEvent = "sim:example-event"; // example var type
+    static public readonly StringHash32 ActivateTool = "sim:activate-tool"; // Tool
+    static public readonly StringHash32 DetachTool = "sim:detach-tool"; // Tool
+    static public readonly StringHash32 StoreTool = "sim:store-tool"; // Tool
+    static public readonly StringHash32 UpdateToolText = "tool:update-text"; // Tool
 }

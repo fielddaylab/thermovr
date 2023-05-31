@@ -29,7 +29,7 @@ namespace ThermoVR
         }
 
         /// <summary>
-        /// Gloabl game event dispatcher.
+        /// Global game event dispatcher.
         /// </summary>
         static public EventDispatcher<object> Events {
             get { return GameMgr.I?.m_EventDispatcher; }

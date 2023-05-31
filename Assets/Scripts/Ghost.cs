@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using ThermoVR.Tools;
 using UnityEngine;
 
 public class Ghost : MonoBehaviour

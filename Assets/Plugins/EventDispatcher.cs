@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
 using BeauUtil;
 
 namespace BeauUtil.Extensions
@@ -153,8 +154,13 @@ namespace BeauUtil.Extensions
                 for (int i = 0; i < count; i++) {
                     Handler handler = m_Handlers[i];
                     // if this handler is not queued for removal
-                    if ((m_QueuedDeleteMasks[i / 32] & (1 << (i % 32))) == 0) {
-                        handler.Invoke(context);
+                    try {
+                        if ((m_QueuedDeleteMasks[i / 32] & (1 << (i % 32))) == 0) {
+                            handler.Invoke(context);
+                        }
+                    }
+                    catch (Exception e) {
+                        string thing = "";
                     }
                 }
 
@@ -287,6 +293,7 @@ namespace BeauUtil.Extensions
         /// </summary>
         public EventDispatcher<TArg> Register<U>(StringHash32 eventId, Action<U> inActionWithCastedContext, UnityEngine.Object binding = null) {
             HandlerBlock block = GetBlock(eventId, true);
+            Debug.Log("Registering handler");
             block.Add(inActionWithCastedContext, binding);
             return this;
         }

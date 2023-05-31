@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using ThermoVR.Tools;
 
 /**
  * Runs a "dial" object, which is really a slider.
@@ -29,12 +30,6 @@ public class Dial : MonoBehaviour
     [System.NonSerialized]
     public float max_map = 1.0f;
     [System.NonSerialized]
-    public string unit = "";
-    [System.NonSerialized]
-    public string display_unit = "";
-    [System.NonSerialized]
-    public float display_mul = 1.0f; //multiplied with map before displaying with display_unit
-    [System.NonSerialized]
     public Tool tool;
 
     [System.NonSerialized]
@@ -46,9 +41,6 @@ public class Dial : MonoBehaviour
 
         this.min_map = min_map;
         this.max_map = max_map;
-        this.unit = unit;
-        this.display_unit = display_unit;
-        this.display_mul = display_mul;
         this.tool = tool;
         if (min_pos == null) {
             orientation_dir = new Vector3(1, 0, 0);
@@ -94,4 +86,41 @@ public class Dial : MonoBehaviour
      * Useful for sliders whose tool's influence tends to apply too rapidly at small values.
      */
     private float mapSharp() { return min_map + (max_map - min_map) * Mathf.Pow(val, response_power); }
+
+
+    public void update_val(Vector3 hand_pos, Vector3 r_hand_pos) {
+        float dx = r_hand_pos.x - hand_pos.x;
+        float dy = r_hand_pos.y - hand_pos.y;
+        float dz = r_hand_pos.z - hand_pos.z;
+
+        Vector3 movement_vector = new Vector3(
+            (dx) * orientation_dir.x,
+            (dy) * orientation_dir.y,
+            (dz) * orientation_dir.z
+            );
+
+        movement_vector *= -10f;
+        // float dx = (r_hand_pos.x - hand_pos.x) * -10f;
+        // constrain vector to relative orientation
+        float magnitude = movement_vector.magnitude;
+
+        bool orient_positive = (orientation_dir.x + orientation_dir.y + orientation_dir.z) >= 0; // whether orientation vector is overall positively directioned
+        bool delta_positive = (dx + dy + dz) >= 0; // whether movement vector is overall positively directioned
+
+        if (orient_positive != delta_positive) {
+            // if not heading in same direction, decrease value
+            magnitude *= -1;
+        }
+
+        float prev_val = val;
+
+        float new_val = Mathf.Clamp(prev_val - magnitude, 0f, 1f);
+        //if this close to either end, assume user wants min/max
+        if (new_val < 0.005) new_val = 0f;
+        if (new_val > 0.995) new_val = 1f;
+
+        val = new_val;
+        
+        forceMap();
+    }
 }
