@@ -223,6 +223,7 @@
     <Compile Include="Assets\Oculus\SampleFramework\Usage\Passthrough\Scripts\SelectivePassthroughExperience.cs" />
     <Compile Include="Assets\Oculus\SampleFramework\Usage\HandsTrainExample\Scripts\TrackSegment.cs" />
     <Compile Include="Assets\Scripts\Utils\LineSpacer.cs" />
+    <Compile Include="Assets\Scripts\General\Consts.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Oculus\SampleFramework\Usage\HandsTrainExample\Shaders\XingLightShader.shader" />
@@ -1011,8 +1012,21 @@
     <Reference Include="UnityEditor.SpatialTracking">
       <HintPath>Library\ScriptAssemblies\UnityEditor.SpatialTracking.dll</HintPath>
     </Reference>
+    <Reference Include="BeauUtil.Parse">
+      <HintPath>Library\ScriptAssemblies\BeauUtil.Parse.dll</HintPath>
+    </Reference>
+    <Reference Include="BeauUtil.Editor">
+      <HintPath>Library\ScriptAssemblies\BeauUtil.Editor.dll</HintPath>
+    </Reference>
+    <Reference Include="BeauUtil">
+      <HintPath>Library\ScriptAssemblies\BeauUtil.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="Assembly-CSharp-firstpass.csproj">
+      <Project>{457DA21D-262F-46A2-3C8A-A7EDCD8D52C5}</Project>
+      <Name>Assembly-CSharp-firstpass</Name>
+    </ProjectReference>
     <ProjectReference Include="AssistantCoreSDKEditor.csproj">
       <Project>{EA2CB475-45FD-49A6-F6EF-F2F1D3A73837}</Project>
       <Name>AssistantCoreSDKEditor</Name>

@@ -866,8 +866,21 @@
     <Reference Include="UnityEditor.SpatialTracking">
       <HintPath>Library\ScriptAssemblies\UnityEditor.SpatialTracking.dll</HintPath>
     </Reference>
+    <Reference Include="BeauUtil.Parse">
+      <HintPath>Library\ScriptAssemblies\BeauUtil.Parse.dll</HintPath>
+    </Reference>
+    <Reference Include="BeauUtil.Editor">
+      <HintPath>Library\ScriptAssemblies\BeauUtil.Editor.dll</HintPath>
+    </Reference>
+    <Reference Include="BeauUtil">
+      <HintPath>Library\ScriptAssemblies\BeauUtil.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="Assembly-CSharp-firstpass.csproj">
+      <Project>{457DA21D-262F-46A2-3C8A-A7EDCD8D52C5}</Project>
+      <Name>Assembly-CSharp-firstpass</Name>
+    </ProjectReference>
     <ProjectReference Include="Assembly-CSharp.csproj">
       <Project>{6D946956-303F-5060-2C8E-1244C4DF2871}</Project>
       <Name>Assembly-CSharp</Name>
