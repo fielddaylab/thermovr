@@ -89,18 +89,18 @@ public class World : MonoBehaviour
 
     [Space(5)]
     [Header("Dials")]
-    // [SerializeField] private DecoupledDial dial_insulator;
-    [SerializeField] private DecoupledDial dial_stop1;
-    [SerializeField] private DecoupledDial dial_stop2;
-    [SerializeField] private DecoupledDial dial_burner;
-    [SerializeField] private DecoupledDial dial_coil;
-    [SerializeField] private DecoupledDial dial_weight;
-    [SerializeField] private DecoupledDial dial_balloon;
-    [SerializeField] private DecoupledDial dial_ambientPressure;
-    [SerializeField] private DecoupledDial dial_roomTemp;
-    [SerializeField] private DecoupledDial dial_percentInsulation;
+    // [SerializeField] private Dial dial_insulator;
+    [SerializeField] private Dial dial_stop1;
+    [SerializeField] private Dial dial_stop2;
+    [SerializeField] private Dial dial_burner;
+    [SerializeField] private Dial dial_coil;
+    [SerializeField] private Dial dial_weight;
+    [SerializeField] private Dial dial_balloon;
+    [SerializeField] private Dial dial_ambientPressure;
+    [SerializeField] private Dial dial_roomTemp;
+    [SerializeField] private Dial dial_percentInsulation;
 
-    public List<DecoupledDial> dials;
+    public List<Dial> dials;
     ParticleSystem flame; //special case
 
     [Space(5)]
@@ -200,7 +200,7 @@ public class World : MonoBehaviour
         tool_roomTemp.Init("F");
         // tool_percentInsulation.Init("%");
 
-        dials = new List<DecoupledDial> {
+        dials = new List<Dial> {
             // dial_insulator,
             dial_stop1,
             dial_stop2,
@@ -214,8 +214,8 @@ public class World : MonoBehaviour
         };
 
         // dial_insulator.Init(0f, 1f);
-        dial_stop1.Init((float)ThermoMath.v_min, (float)ThermoMath.v_max);
-        dial_stop2.Init((float)ThermoMath.v_min, (float)ThermoMath.v_max);
+        dial_stop1.Init((float)ThermoMath.v_min, (float)ThermoMath.v_max / 1000);
+        dial_stop2.Init((float)ThermoMath.v_min, (float)ThermoMath.v_max / 1000);
         dial_burner.Init(0f, 1000f * 100f);
         dial_coil.Init(0f, -1000f * 100f);
         dial_weight.Init(0f, (float)kg_corresponding_to_10mpa);
@@ -398,11 +398,6 @@ public class World : MonoBehaviour
         o.transform.SetParent(t.active.transform);
         t.touchable.grabbed = false;
         t.engaged = true;
-        if (t == tool_stop1 || t == tool_stop2) {
-            // TODO: implement stops
-            // thermo_present.set_clamp_objective(0, 0);
-            // thermo_present.set_clamp_relative(tool_clamp.dial_dial.val);
-        }
         t.stored = false;
         t.boxcollider.isTrigger = true;
         // Not sure the two below are ever used? We don't have dials for these tools in use.
@@ -410,6 +405,12 @@ public class World : MonoBehaviour
         //else if(t == tool_clamp)     t.dial_dial.val = (float)ThermoMath.percent_given_v(thermo.volume);
         GameMgr.Events?.Dispatch(GameEvents.ActivateTool, t);
         GameMgr.Events?.Dispatch(GameEvents.UpdateToolText, t);
+        if (t == tool_stop1) {
+            thermo_present.add_v_stop(tool_stop1.get_val(), t);
+        }
+        else if (t == tool_stop2) {
+            thermo_present.add_v_stop(tool_stop2.get_val(), t);
+        }
         UpdateApplyTool(t);
         o.transform.localPosition = new Vector3(0f, 0f, 0f);
         o.transform.localRotation = Quaternion.identity;
@@ -425,9 +426,11 @@ public class World : MonoBehaviour
         o.transform.SetParent(t.storage.transform);
         t.touchable.grabbed = false;
         t.engaged = false;
-        if (t == tool_stop1 || t == tool_stop2) {
-            // TODO: implement stop release
-            // thermo_present.release_clamp();
+        if (t == tool_stop1) {
+            thermo_present.release_v_stop(t);
+        }
+        else if (t == tool_stop2) {
+            thermo_present.release_v_stop(t);
         }
         t.stored = true;
         o.transform.localPosition = new Vector3(0f, 0f, 0f);
@@ -447,9 +450,11 @@ public class World : MonoBehaviour
         o.transform.SetParent(t.touchable.og_parent);
         t.touchable.grabbed = false;
         t.engaged = false;
-        if (t == tool_stop1 || t == tool_stop2) {
-            // TODO: implement stop release
-            // thermo_present.release_clamp();
+        if (t == tool_stop1) {
+            thermo_present.release_v_stop(t);
+        }
+        else if (t == tool_stop2) {
+            thermo_present.release_v_stop(t);
         }
         t.stored = false;
         o.transform.localScale = new Vector3(1f, 1f, 1f);
@@ -500,18 +505,12 @@ public class World : MonoBehaviour
             if (tool_coil.engaged) applied_heat += tool_coil.get_val();
         }
         else if (t == tool_stop1 || t == tool_stop2) {
-            // TODO: implement stops blocking weight
-            //const float MAX_WIDTH = 2.0f;
-            //const float TOP_BASE_Y_POS = 0.049f;
-            //const float MID_BASE_Y_POS = 0.0164f;
-            //var clamp_mid = GameObject.Find("clamp_mid");
-            //var clamp_mid_mesh = clamp_mid.GetComponent<MeshFilter>().mesh;
-            //var clamp_top = GameObject.Find("clamp_mid");
-            //var clamp_top_mesh = clamp_top.GetComponent<MeshFilter>().mesh;
-            //clamp_mid.transform.localScale = new Vector3(1.0f, 1.0f + MAX_WIDTH * t.dial_dial.val, 1.0f);
-            //*clamp_mid.transform.localScale.y
-            //clamp_mid.transform.position = new Vector3(clamp_mid.transform.position.x, MID_BASE_Y_POS + clamp_mid_mesh.bounds.extents.y, clamp_mid.transform.position.z);
-            //clamp_top.transform.position = new Vector3(clamp_mid.transform.position.x, TOP_BASE_Y_POS + clamp_mid_mesh.bounds.extents.y, clamp_mid.transform.position.z);
+            if (t == tool_stop1) {
+                thermo_present.update_v_stop(tool_stop1.get_val(), t);
+            }
+            if (t == tool_stop2) {
+                thermo_present.update_v_stop(tool_stop2.get_val(), t);
+            }
             applied_weight = 0;
             if (tool_weight.engaged) applied_weight += tool_weight.get_val();
             if (tool_balloon.engaged) applied_weight += tool_balloon.get_val();
@@ -581,7 +580,7 @@ public class World : MonoBehaviour
         else {
             //grabbing dial
 
-            DecoupledDial dd = actable.GetComponent<DecoupledDial>();
+            Dial dd = actable.GetComponent<Dial>();
 
             if (dd != null) {
                 dd.update_val(hand_pos, r_hand_pos);
@@ -643,9 +642,11 @@ public class World : MonoBehaviour
                     {
                         t.audioS.Play();
                         t.engaged = false;
-                        if (t == tool_stop1 || t == tool_stop2) {
-                            // TODO: implement stop release
-                            // thermo_present.release_clamp();
+                        if (t == tool_stop1) {
+                            thermo_present.release_v_stop(t);
+                        }
+                        else if (t == tool_stop2) {
+                            thermo_present.release_v_stop(t);
                         }
                         t.stored = false;
                         ref_grabbed.transform.localScale = new Vector3(1f, 1f, 1f);
@@ -978,8 +979,8 @@ public class World : MonoBehaviour
         }
 
         if (System.Math.Abs(delta_pressure) > 0) {
-            if (tool_insulator.engaged) thermo_present.add_pressure_insulated_per_delta_time(delta_pressure, delta_time, (tool_stop1.engaged || tool_stop2.engaged)); // Pressure Constrained -> Insulated ->  delta pressure
-            else thermo_present.add_pressure_uninsulated_per_delta_time(delta_pressure, delta_time, (tool_stop1.engaged || tool_stop2.engaged)); // Pressure Constrained -> Uninsulated ->  delta pressure
+            if (tool_insulator.engaged) thermo_present.add_pressure_insulated_per_delta_time(delta_pressure, delta_time); // Pressure Constrained -> Insulated ->  delta pressure
+            else thermo_present.add_pressure_uninsulated_per_delta_time(delta_pressure, delta_time); // Pressure Constrained -> Uninsulated ->  delta pressure
         }
 
         // stop arrows if there was a jump to another region other than gas
@@ -1004,7 +1005,7 @@ public class World : MonoBehaviour
         // bool at_v_bound_heat = false;
 
         if (applied_heat != 0) {
-            thermo_present.add_heat_per_delta_time(applied_heat, insulation_coefficient, delta_time, (tool_stop1.engaged || tool_stop2.engaged));
+            thermo_present.add_heat_per_delta_time(applied_heat, insulation_coefficient, delta_time);
         }
 
         // TODO: apply heat transfer from piston to outer room and vice versa
@@ -1055,7 +1056,7 @@ public class World : MonoBehaviour
         UpdateClipboard();
 
         //tooltext
-        DecoupledDial d;
+        Dial d;
         for (int i = 0; i < dials.Count; i++) {
             d = dials[i];
             d.set_examined(false);

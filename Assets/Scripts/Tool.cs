@@ -11,6 +11,17 @@ using TMPro;
 using ThermoVR.Dials;
 
 namespace ThermoVR.Tools {
+    public struct VolumeStop
+    {
+        public double Volume;
+        public Tool Source;
+
+        public VolumeStop(double volume, Tool source) {
+            Volume = volume;
+            Source = source;
+        }
+    }
+
     public class Tool : MonoBehaviour
     {
         [System.NonSerialized]
@@ -164,13 +175,13 @@ namespace ThermoVR.Tools {
                 t_free = 0.0f;
         }
 
-        public void update_val(float new_val, DecoupledDial dial) {
+        public void update_val(float new_val, Dial dial) {
             val = new_val;
 
             update_tool_text(dial);
         }
 
-        public void update_text(DecoupledDial dial) {
+        public void update_text(Dial dial) {
             update_tool_text(dial);
         }
 
@@ -190,7 +201,7 @@ namespace ThermoVR.Tools {
             this.examined = true;
         }
 
-        private void update_tool_text(DecoupledDial dial) {
+        private void update_tool_text(Dial dial) {
             // find dial
             // if (!dial_dial) return;
             // do not apply to insulator

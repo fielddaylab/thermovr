@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Collections.Specialized;
 using Oculus.Platform;
+using ThermoVR.Tools;
 
 public class ThermoState : MonoBehaviour
 {
@@ -44,11 +45,12 @@ public class ThermoState : MonoBehaviour
     public double surfacearea_insqr = 38.2447935395871; //in^2 //hardcoded conversion from m^2 to in^2
     const double p_crit = 22.064; // Pa
 
-    public double v_min_clamp; // min volume, defined by adjustable clamp
-    public double v_mid_clamp; // midpoint volume, defined by adjustable clamp
-    public double v_max_clamp; // max volume, defined by adjustable clamp
+    public double v_stop1; // volume stop specified by tool_stop1
+    public double v_stop2; // volume stop specified by tool_stop2
 
-    private bool RELATIVE_CLAMP = true; // true if clamp is set relative to current volume, false if clamp can set any volume bounds
+    private static bool RELATIVE_CLAMP = true; // true if clamp is set relative to current volume, false if clamp can set any volume bounds
+    List<VolumeStop> v_stops;
+    private static float STOP_BUFFER = 0.001f;
 
     public void reset() {
         //ensure consistent state
@@ -74,48 +76,70 @@ public class ThermoState : MonoBehaviour
         prev_quality = -1;
         prev_region = -1;
 
-        release_clamp();
+        v_stops = new List<VolumeStop>();
     }
 
     /// <summary>
     /// Remove clamp volume bounds
     /// </summary>
-    public void release_clamp() {
-        if (RELATIVE_CLAMP) {
-            v_min_clamp = v_max_clamp = -1;
+    public void release_v_stop(Tool source) {
+        if (!StopExists(source)) {
+            // TODO: handle trying to remove stop which does not exist
+            return;
         }
-        else {
-            v_min_clamp = v_mid_clamp = v_max_clamp = -1;
+
+        RemoveStop(source);
+    }
+
+    /// <summary>
+    /// Set a new clamp stop
+    /// </summary>
+    public void add_v_stop(double v_stop, Tool source) {
+        if (StopExists(source)) {
+            // TODO: handle duplicate
+            return;
+        }
+
+        // constrain stop's values to global bounds
+        v_stop = Clampd(v_stop, ThermoMath.v_min, ThermoMath.v_max);
+
+        VolumeStop new_stop = new VolumeStop(v_stop, source);
+        v_stops.Add(new_stop);
+    }
+
+    private bool StopExists(Tool source) {
+        for (int i = 0; i < v_stops.Count; i++) {
+            if (v_stops[i].Source == source) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void RemoveStop(Tool source) {
+
+        for (int i = 0; i < v_stops.Count; i++) {
+            if (v_stops[i].Source == source) {
+                v_stops.RemoveAt(i);
+                return;
+            }
         }
     }
 
-    /// <summary>
-    /// Set the clamp's min, middle, and max volume
-    /// </summary>
-    public void set_clamp_objective(double min, double max) {
-        v_min_clamp = min;
-        v_max_clamp = max;
-
-        // constrain clamp's values to global bounds
-        Clampd(v_min_clamp, ThermoMath.v_min, ThermoMath.v_max);
-        Clampd(v_max_clamp, ThermoMath.v_min, ThermoMath.v_max);
+    public void update_v_stop(double v_stop_val, Tool source) {
+        for (int i = 0; i < v_stops.Count; i++) {
+            if (v_stops[i].Source == source) {
+                VolumeStop temp_stop = v_stops[i];
+                temp_stop.Volume = v_stop_val;
+                v_stops[i] = temp_stop;
+                return;
+            }
+        }
     }
 
+    /*
     /// <summary>
-    /// Set the clamp's min, middle, and max volume
-    /// </summary>
-    public void set_clamp_relative(float range) {
-        v_mid_clamp = volume;
-        v_min_clamp = v_mid_clamp - range;
-        v_max_clamp = v_mid_clamp + range;
-
-        // constrain clamp's values to global bounds
-        Clampd(v_min_clamp, ThermoMath.v_min, ThermoMath.v_max);
-        Clampd(v_max_clamp, ThermoMath.v_min, ThermoMath.v_max);
-    }
-
-    /// <summary>
-    /// Set the clamp's min and max, preserving previous midpoint
+    /// Set the clamp's min and max
     /// </summary>
     public void adjust_clamp(float range) {
         if (RELATIVE_CLAMP) {
@@ -129,6 +153,34 @@ public class ThermoState : MonoBehaviour
         else {
             // only use this function when using Relative Clamp
         }
+    }
+    */
+
+    private double v_with_enforced_stops(double projected_v) {
+        double curr_v = volume;
+        bool volume_increasing = projected_v > curr_v;
+
+        for (int i = 0; i < v_stops.Count; i++) {
+            VolumeStop curr_stop = v_stops[i];
+            double compare_v = curr_stop.Volume;
+
+            if (volume_increasing) {
+                // when volume would increase, enforce stops above
+                if (curr_v <= compare_v && projected_v > compare_v) {
+                    projected_v = Clampd(projected_v, curr_v, compare_v - STOP_BUFFER);
+                    Debug.Log("[Stops] enforced, preventing increase");
+                }
+            }
+            else {
+                // when volume would decrease, enforce stops below
+                if (curr_v >= compare_v && projected_v < compare_v) {
+                    projected_v = Clampd(projected_v, curr_v, compare_v + STOP_BUFFER);
+                    Debug.Log("[Stops] enforced, preventing decrease");
+                }
+            }
+        }
+
+        return projected_v;
     }
 
     public void stamp_prev() {
@@ -206,12 +258,7 @@ public class ThermoState : MonoBehaviour
         */
 
         pressure = Clampd(pressure, ThermoMath.p_min, ThermoMath.p_max);
-        if (v_min_clamp != -1) {
-            volume = Clampd(volume, v_min_clamp, v_max_clamp);
-        }
-        else {
-            volume = Clampd(volume, ThermoMath.v_min, ThermoMath.v_max);
-        }
+        volume = Clampd(volume, ThermoMath.v_min, ThermoMath.v_max);
         temperature = Clampd(temperature, ThermoMath.t_min, ThermoMath.t_max);
         internalenergy = Clampd(internalenergy, ThermoMath.u_min, ThermoMath.u_max);
         entropy = Clampd(entropy, ThermoMath.s_min, ThermoMath.s_max);
@@ -271,23 +318,51 @@ public class ThermoState : MonoBehaviour
         clamp_state();
     }
 
-    public void add_heat_per_delta_time(double applied_heat, double insulation_coefficient, double delta_time, bool clamp_engaged) {
+    public void add_heat_per_delta_time(double applied_heat, double insulation_coefficient, double delta_time) {
         bool constant_v = false;
-        if (clamp_engaged) {
-            if (applied_heat > 0 && volume == v_max_clamp) {
-                // volume will either increase or stay the same, but clamp is engaged
-                constant_v = true;
-            }
-            else if (applied_heat < 0 && volume == v_min_clamp){
-                // volume will either decrese or stay the same, but clamp is engaged
-                constant_v = true;
+
+        /*
+        if (!constant_v) {
+            double delta_h = delta_time / mass * (applied_heat * insulation_coefficient);  // time eqtn 6a
+
+            double new_h = enthalpy + delta_h;
+
+            double raw_v, new_v;
+            double curr_v = volume;
+            switch (region) {
+                case ThermoMath.region_twophase:
+                    double new_x = ThermoMath.x_given_ph(pressure, new_h, region);
+                    //at this point, we have enough internal state to derive the rest
+                    clamp_state();
+                    raw_v = ThermoMath.v_given_px(pressure, new_x, region);
+                    new_v = v_with_enforced_stops(raw_v); // enforce volume stops
+                    if (new_v != raw_v || new_v == curr_v) {
+                        // hit a stop (should actually be treating at constant v); roll back to previous volume
+                        constant_v = true;
+                    }
+                    break;
+                case ThermoMath.region_liquid:
+                case ThermoMath.region_vapor:
+                    // check that h is within bounds
+                    //at this point, we have enough internal state to derive the rest
+                    raw_v = ThermoMath.v_given_ph(pressure, new_h, region);
+                    new_v = v_with_enforced_stops(raw_v); // enforce volume stops
+                    if (new_v != raw_v || new_v == curr_v) {
+                        // hit a stop (should actually be treating at constant v); roll back to previous volume
+                        constant_v = true;
+                    }
+                    break;
             }
         }
+        */
+
 
         if (constant_v) {
+            Debug.Log("[Stops] Constant V");
             add_heat_constant_v_per_delta_time(applied_heat, insulation_coefficient, delta_time);
         }
         else {
+            Debug.Log("[Stops] Constant P");
             add_heat_constant_p_per_delta_time(applied_heat, insulation_coefficient, delta_time);
         }
     }
@@ -297,18 +372,21 @@ public class ThermoState : MonoBehaviour
             double delta_h = delta_time / mass * (applied_heat * insulation_coefficient);  // time eqtn 6a
 
             double new_h = enthalpy + delta_h;
+            double new_v = volume;
 
             switch (region) {
                 case ThermoMath.region_twophase:
                     double new_x = ThermoMath.x_given_ph(pressure, new_h, region);
                     //at this point, we have enough internal state to derive the rest
-                    enthalpy = new_h;
                     clamp_state();
-                    quality = new_x;
-                    volume = ThermoMath.v_given_px(pressure, new_x, region);
+                    new_v = ThermoMath.v_given_px(pressure, new_x, region);
+                    //new_v = v_with_enforced_stops(new_v); // enforce volume stops
                     temperature = ThermoMath.tsat_given_p(pressure, region);
                     entropy = ThermoMath.s_given_px(pressure, new_x, region);
                     internalenergy = ThermoMath.u_given_px(pressure, new_x, region);
+                    enthalpy = new_h;
+                    quality = new_x;
+
                     break;
                 case ThermoMath.region_liquid:
                 case ThermoMath.region_vapor:
@@ -316,12 +394,15 @@ public class ThermoState : MonoBehaviour
                     enthalpy = new_h;
                     clamp_state();
                     //at this point, we have enough internal state to derive the rest
-                    volume = ThermoMath.v_given_ph(pressure, enthalpy, region);
+                    new_v = ThermoMath.v_given_ph(pressure, enthalpy, region);
+                    //new_v = v_with_enforced_stops(new_v); // enforce volume stops
                     temperature = ThermoMath.t_given_ph(pressure, enthalpy, region);
-                    entropy = ThermoMath.s_given_vt(volume, temperature, region);
-                    internalenergy = ThermoMath.u_given_vt(volume, temperature, region);
+                    entropy = ThermoMath.s_given_vt(new_v, temperature, region);
+                    internalenergy = ThermoMath.u_given_vt(new_v, temperature, region);
                     break;
             }
+
+            volume = new_v;
 
             region = ThermoMath.region_given_pvt(pressure, volume, temperature);
 
@@ -375,6 +456,7 @@ public class ThermoState : MonoBehaviour
                 quality = ThermoMath.x_given_pv(pressure, volume, region);
             }
 
+            // TODO: enthalpy is whack :(
             enthalpy = ThermoMath.h_given_vt(volume, temperature, region);
             entropy = ThermoMath.s_given_vt(volume, temperature, region);
         }
@@ -383,17 +465,7 @@ public class ThermoState : MonoBehaviour
         clamp_state();
     }
 
-    public void add_pressure_uninsulated_per_delta_time(double p, double delta_time, bool clamp_engaged) {
-        if (clamp_engaged) {
-            // when clamp is engaged and pressure dif would overshoot min/max volume, do not apply change
-            if (volume == v_min_clamp && p < 0) {
-                return;
-            }
-            if (volume == v_max_clamp && p > 0) {
-                return;
-            }
-        }
-
+    public void add_pressure_uninsulated_per_delta_time(double p, double delta_time) {
         try {
             double new_p = pressure + p * delta_time;
             if (Math.Abs(p * delta_time) < World.DELTA_PRESSURE_CUTOFF) { new_p = pressure + p; } // small enough step; finish transition
@@ -420,7 +492,8 @@ public class ThermoState : MonoBehaviour
 
                     // Pressure Constrained -> Insulated -> delta pressure (all phases)
                     new_v = ThermoMath.v_given_ph(new_p, enthalpy);
-                    new_u = ThermoMath.u_given_vt(new_v, temperature, region); 
+                    //new_v = v_with_enforced_stops(new_v); // enforce volume stops
+                    new_u = ThermoMath.u_given_vt(new_v, temperature, region);
 
                     //at this point, we have enough internal state to derive the rest
 
@@ -466,6 +539,7 @@ public class ThermoState : MonoBehaviour
 
                 new_x = ThermoMath.x_given_ph(new_p, enthalpy);
                 new_v = ThermoMath.v_given_px(new_p, new_x);
+                // new_v = v_with_enforced_stops(new_v); // enforce volume stops
                 new_u = ThermoMath.u_given_vt(new_v, temperature, region);
 
                 volume = new_v;
@@ -486,16 +560,7 @@ public class ThermoState : MonoBehaviour
         clamp_state();
     }
 
-    public void add_pressure_insulated_per_delta_time(double p, double delta_time, bool clamp_engaged) {
-        if (clamp_engaged) {
-            if (volume == v_min_clamp && p < 0) {
-                return;
-            }
-            if (volume == v_max_clamp && p > 0) {
-                return;
-            }
-        }
-
+    public void add_pressure_insulated_per_delta_time(double p, double delta_time) {
         try {
             double new_p = pressure + p * delta_time;
             if (Math.Abs(p * delta_time) < World.DELTA_PRESSURE_CUTOFF) { new_p = pressure + p; } // small enough step; finish transition
@@ -509,7 +574,7 @@ public class ThermoState : MonoBehaviour
                 case ThermoMath.region_twophase: //two-phase region
                 {
                         // Pressure Constrained -> Insulated -> delta pressure (liquid and two-phase)
-                        
+
 
                         new_u = ThermoMath.u_given_pt(new_p, temperature);
 
@@ -538,6 +603,7 @@ public class ThermoState : MonoBehaviour
 
                         double k = 1.27;
                         new_v = volume * Math.Pow(pressure / new_p, 1.0 / k);
+                        // new_v = v_with_enforced_stops(new_v); // enforce volume stops
                         new_u = internalenergy - ((new_p * new_v - pressure * volume) / (1 - k));
                         new_t = ThermoMath.t_given_ph(new_p, enthalpy);
 

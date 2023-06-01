@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using System.Collections.Specialized;
+using ThermoVR.Tools;
 
 //One-Off class used for ordering points in graphgen zipper phase
 class GRAPHPTCMP : IComparer<int>
@@ -701,19 +702,19 @@ public class ThermoPresent : MonoBehaviour
         visualize_state();
     }
 
-    public void add_heat_per_delta_time(double applied_heat, double insulation_coefficient, double delta_time, bool clamp_engaged) {
-        state.add_heat_per_delta_time(applied_heat, insulation_coefficient, delta_time, clamp_engaged);
+    public void add_heat_per_delta_time(double applied_heat, double insulation_coefficient, double delta_time) {
+        state.add_heat_per_delta_time(applied_heat, insulation_coefficient, delta_time);
 
         visualize_state();
     }
 
-    public void add_pressure_uninsulated_per_delta_time(double p, double delta_time, bool clamp_engaged) {
-        state.add_pressure_uninsulated_per_delta_time(p, delta_time, clamp_engaged);
+    public void add_pressure_uninsulated_per_delta_time(double p, double delta_time) {
+        state.add_pressure_uninsulated_per_delta_time(p, delta_time);
         visualize_state();
     }
 
-    public void add_pressure_insulated_per_delta_time(double p, double delta_time, bool clamp_engaged) {
-        state.add_pressure_insulated_per_delta_time(p, delta_time, clamp_engaged);
+    public void add_pressure_insulated_per_delta_time(double p, double delta_time) {
+        state.add_pressure_insulated_per_delta_time(p, delta_time);
         visualize_state();
     }
 
@@ -759,30 +760,28 @@ public class ThermoPresent : MonoBehaviour
     /// <summary>
     /// Remove clamp volume bounds
     /// </summary>
-    public void release_clamp() {
-        state.release_clamp();
+    public void release_v_stop(Tool source) {
+        state.release_v_stop(source);
     }
 
     /// <summary>
-    /// Set the clamp's min, middle, and max volume
+    /// Set the clamp's min and max volume
     /// </summary>
-    public void set_clamp_objective(double min, double max) {
-        state.set_clamp_objective(min, max);
+    public void add_v_stop(double v_stop, Tool source) {
+        state.add_v_stop(v_stop, source);
     }
 
-    /// <summary>
-    /// Set the clamp's min, middle, and max volume
-    /// </summary>
-    public void set_clamp_relative(float range) {
-        state.set_clamp_relative(range);
+    public void update_v_stop(double v_stop, Tool source) {
+        state.update_v_stop(v_stop, source);
     }
-
+    /*
     /// <summary>
     /// Set the clamp's min and max, preserving previous midpoint
     /// </summary>
     public void adjust_clamp(float range) {
         state.adjust_clamp(range);
     }
+    */
 
 
     string region_to_name(int region) //0 subcooled liquid, 1 two-phase, 2 superheated vapor
