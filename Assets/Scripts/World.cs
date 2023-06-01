@@ -398,6 +398,12 @@ public class World : MonoBehaviour
         o.transform.SetParent(t.active.transform);
         t.touchable.grabbed = false;
         t.engaged = true;
+        if (t == tool_stop1) {
+            thermo_present.add_v_stop(tool_stop1.get_val(), t);
+        }
+        else if (t == tool_stop2) {
+            thermo_present.add_v_stop(tool_stop2.get_val(), t);
+        }
         t.stored = false;
         t.boxcollider.isTrigger = true;
         // Not sure the two below are ever used? We don't have dials for these tools in use.
@@ -405,12 +411,6 @@ public class World : MonoBehaviour
         //else if(t == tool_clamp)     t.dial_dial.val = (float)ThermoMath.percent_given_v(thermo.volume);
         GameMgr.Events?.Dispatch(GameEvents.ActivateTool, t);
         GameMgr.Events?.Dispatch(GameEvents.UpdateToolText, t);
-        if (t == tool_stop1) {
-            thermo_present.add_v_stop(tool_stop1.get_val(), t);
-        }
-        else if (t == tool_stop2) {
-            thermo_present.add_v_stop(tool_stop2.get_val(), t);
-        }
         UpdateApplyTool(t);
         o.transform.localPosition = new Vector3(0f, 0f, 0f);
         o.transform.localRotation = Quaternion.identity;

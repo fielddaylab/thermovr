@@ -357,7 +357,7 @@ public class ThermoState : MonoBehaviour
         */
 
 
-        if (constant_v) {
+        if (constant_v || v_stops.Count > 0) {
             Debug.Log("[Stops] Constant V");
             add_heat_constant_v_per_delta_time(applied_heat, insulation_coefficient, delta_time);
         }
