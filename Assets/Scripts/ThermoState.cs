@@ -263,18 +263,23 @@ public class ThermoState : MonoBehaviour
         internalenergy = Clampd(internalenergy, ThermoMath.u_min, ThermoMath.u_max);
         entropy = Clampd(entropy, ThermoMath.s_min, ThermoMath.s_max);
 
+        enthalpy = ClampEnthalpy(enthalpy, pressure);
+
+        quality = Clampd(quality, ThermoMath.x_min, ThermoMath.x_max);
+    }
+
+    private double ClampEnthalpy(double new_h, double p) {
         enthalpy = Clampd(enthalpy, ThermoMath.h_min, ThermoMath.h_max);
+
         double h_min_given_p;
         double h_max_given_p;
         try {
-            IF97.h_bounds_given_p(pressure, out h_min_given_p, out h_max_given_p);
-            enthalpy = Clampd(enthalpy, h_min_given_p, h_max_given_p);
+            IF97.h_bounds_given_p(p, out h_min_given_p, out h_max_given_p);
+            new_h = Clampd(new_h, h_min_given_p, h_max_given_p);
         }
-        catch (Exception ex) {
-            Debug.Log("[Error] " + ex.Message);
-        }
+        catch (Exception e) { }
 
-        quality = Clampd(quality, ThermoMath.x_min, ThermoMath.x_max);
+        return new_h;
     }
 
     //assume starting/ending point consistent for whole API!
@@ -333,40 +338,46 @@ public class ThermoState : MonoBehaviour
     }
 
     private bool treat_as_constant_v_add_heat(double applied_heat, double insulation_coefficient, double delta_time) {
-        // project where v will be; if it would overshoot a volume stop, treat it as constant volume
-        double delta_h = delta_time / mass * (applied_heat * insulation_coefficient);  // time eqtn 6a
+        try {
+            // project where v will be; if it would overshoot a volume stop, treat it as constant volume
+            double delta_h = delta_time / mass * (applied_heat * insulation_coefficient);  // time eqtn 6a
 
-        double new_h = enthalpy + delta_h;
+            double new_h = enthalpy + delta_h;
+            new_h = ClampEnthalpy(new_h, pressure);
 
-        double raw_v, new_v;
-        double curr_v = volume;
-        switch (region) {
-            case ThermoMath.region_twophase:
-                double new_x = ThermoMath.x_given_ph(pressure, new_h, region);
-                //at this point, we have enough internal state to derive the rest
-                clamp_state();
-                raw_v = ThermoMath.v_given_px(pressure, new_x, region);
-                new_v = v_with_enforced_stops(raw_v); // enforce volume stops
-                if (new_v != raw_v) {
-                    // hit a stop (should actually be treating at constant v); roll back to previous volume
-                    volume = new_v;
-                    return true;
-                }
-                break;
-            case ThermoMath.region_liquid:
-            case ThermoMath.region_vapor:
-                // check that h is within bounds
-                //at this point, we have enough internal state to derive the rest
-                raw_v = ThermoMath.v_given_ph(pressure, new_h, region);
-                new_v = v_with_enforced_stops(raw_v); // enforce volume stops
-                if (new_v != raw_v) {
-                    // hit a stop (should actually be treating at constant v); roll back to previous volume
-                    volume = new_v;
-                    return true;
-                }
-                break;
+            double raw_v, new_v;
+            switch (region) {
+                case ThermoMath.region_twophase:
+                    double new_x = ThermoMath.x_given_ph(pressure, new_h, region);
+                    //at this point, we have enough internal state to derive the rest
+                    clamp_state();
+                    raw_v = ThermoMath.v_given_px(pressure, new_x, region);
+                    new_v = v_with_enforced_stops(raw_v); // enforce volume stops
+                    if (new_v != raw_v) {
+                        // hit a stop (should actually be treating at constant v); roll back to previous volume
+                        volume = new_v;
+                        return true;
+                    }
+                    break;
+                case ThermoMath.region_liquid:
+                case ThermoMath.region_vapor:
+                    // check that h is within bounds
+                    //at this point, we have enough internal state to derive the rest
+                    clamp_state();
+                    raw_v = ThermoMath.v_given_ph_projected(pressure, new_h, region);
+                    new_v = v_with_enforced_stops(raw_v); // enforce volume stops
+                    if (new_v != raw_v) {
+                        // hit a stop (should actually be treating at constant v); roll back to previous volume
+                        volume = new_v;
+                        return true;
+                    }
+                    break;
+            }
+            return false;
         }
-        return false;
+        catch (Exception e) { }
+
+        return true; // since an error was thrown when projecting volume, treating it as constant p will not work
     }
 
     private void add_heat_constant_p_per_delta_time(double applied_heat, double insulation_coefficient, double delta_time) {  // Pressure Constrained -> Insulated && Uninsulated -> delta energy    // time eqtn 6b
@@ -374,6 +385,7 @@ public class ThermoState : MonoBehaviour
             double delta_h = delta_time / mass * (applied_heat * insulation_coefficient);  // time eqtn 6a
 
             double new_h = enthalpy + delta_h;
+            new_h = ClampEnthalpy(new_h, pressure);
             double new_v = volume;
 
             switch (region) {
@@ -393,11 +405,13 @@ public class ThermoState : MonoBehaviour
                 case ThermoMath.region_liquid:
                 case ThermoMath.region_vapor:
                     // check that h is within bounds
-                    enthalpy = new_h;
+                    new_h = ClampEnthalpy(new_h, pressure);
                     clamp_state();
                     //at this point, we have enough internal state to derive the rest
-                    new_v = ThermoMath.v_given_ph(pressure, enthalpy, region);
+                    new_v = ThermoMath.v_given_ph(pressure, enthalpy, region); // TODO: throwing error (temperature out of range) when nearing tMin
                     //new_v = v_with_enforced_stops(new_v); // enforce volume stops
+
+                    enthalpy = new_h;
                     temperature = ThermoMath.t_given_ph(pressure, enthalpy, region);
                     entropy = ThermoMath.s_given_vt(new_v, temperature, region);
                     internalenergy = ThermoMath.u_given_vt(new_v, temperature, region);
@@ -458,8 +472,8 @@ public class ThermoState : MonoBehaviour
                 quality = ThermoMath.x_given_pv(pressure, volume, region);
             }
 
-            // issue is enthalpy should rise to match new volume? May need to revisit
-            // enthalpy = ThermoMath.h_given_vt(volume, temperature, region);
+            // TODO: issue is enthalpy should rise to match new volume? May need to revisit
+            enthalpy = ThermoMath.h_given_vt(volume, temperature, region);
             entropy = ThermoMath.s_given_vt(volume, temperature, region);
         }
         catch (Exception e) { }

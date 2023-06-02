@@ -320,6 +320,17 @@ public static class ThermoMath
         }
     }
 
+    public static double v_given_ph_projected(double p, double h, int fallback_region = 0) {
+        try {
+            return 1.0 / IF97.rhomass_phmass(p / 1000000.0, h / 1000.0);
+        }
+        catch (Exception ex) {
+            Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, v_neutral[fallback_region]));
+            Debug.Log("[Error] " + ex.Message);
+            throw ex;
+        }
+    }
+
     public static double v_given_px(double p, double x, int fallback_region = 0) //ONLY USE IN VAPOR DOME
     {
         try {
