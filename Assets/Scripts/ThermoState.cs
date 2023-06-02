@@ -319,45 +319,10 @@ public class ThermoState : MonoBehaviour
     }
 
     public void add_heat_per_delta_time(double applied_heat, double insulation_coefficient, double delta_time) {
-        bool constant_v = false;
 
-        /*
-        if (!constant_v) {
-            double delta_h = delta_time / mass * (applied_heat * insulation_coefficient);  // time eqtn 6a
+        bool constant_v = treat_as_constant_v_add_heat(applied_heat, insulation_coefficient, delta_time);
 
-            double new_h = enthalpy + delta_h;
-
-            double raw_v, new_v;
-            double curr_v = volume;
-            switch (region) {
-                case ThermoMath.region_twophase:
-                    double new_x = ThermoMath.x_given_ph(pressure, new_h, region);
-                    //at this point, we have enough internal state to derive the rest
-                    clamp_state();
-                    raw_v = ThermoMath.v_given_px(pressure, new_x, region);
-                    new_v = v_with_enforced_stops(raw_v); // enforce volume stops
-                    if (new_v != raw_v || new_v == curr_v) {
-                        // hit a stop (should actually be treating at constant v); roll back to previous volume
-                        constant_v = true;
-                    }
-                    break;
-                case ThermoMath.region_liquid:
-                case ThermoMath.region_vapor:
-                    // check that h is within bounds
-                    //at this point, we have enough internal state to derive the rest
-                    raw_v = ThermoMath.v_given_ph(pressure, new_h, region);
-                    new_v = v_with_enforced_stops(raw_v); // enforce volume stops
-                    if (new_v != raw_v || new_v == curr_v) {
-                        // hit a stop (should actually be treating at constant v); roll back to previous volume
-                        constant_v = true;
-                    }
-                    break;
-            }
-        }
-        */
-
-
-        if (constant_v || v_stops.Count > 0) {
+        if (constant_v) {
             Debug.Log("[Stops] Constant V");
             add_heat_constant_v_per_delta_time(applied_heat, insulation_coefficient, delta_time);
         }
@@ -365,6 +330,43 @@ public class ThermoState : MonoBehaviour
             Debug.Log("[Stops] Constant P");
             add_heat_constant_p_per_delta_time(applied_heat, insulation_coefficient, delta_time);
         }
+    }
+
+    private bool treat_as_constant_v_add_heat(double applied_heat, double insulation_coefficient, double delta_time) {
+        // project where v will be; if it would overshoot a volume stop, treat it as constant volume
+        double delta_h = delta_time / mass * (applied_heat * insulation_coefficient);  // time eqtn 6a
+
+        double new_h = enthalpy + delta_h;
+
+        double raw_v, new_v;
+        double curr_v = volume;
+        switch (region) {
+            case ThermoMath.region_twophase:
+                double new_x = ThermoMath.x_given_ph(pressure, new_h, region);
+                //at this point, we have enough internal state to derive the rest
+                clamp_state();
+                raw_v = ThermoMath.v_given_px(pressure, new_x, region);
+                new_v = v_with_enforced_stops(raw_v); // enforce volume stops
+                if (new_v != raw_v) {
+                    // hit a stop (should actually be treating at constant v); roll back to previous volume
+                    volume = new_v;
+                    return true;
+                }
+                break;
+            case ThermoMath.region_liquid:
+            case ThermoMath.region_vapor:
+                // check that h is within bounds
+                //at this point, we have enough internal state to derive the rest
+                raw_v = ThermoMath.v_given_ph(pressure, new_h, region);
+                new_v = v_with_enforced_stops(raw_v); // enforce volume stops
+                if (new_v != raw_v) {
+                    // hit a stop (should actually be treating at constant v); roll back to previous volume
+                    volume = new_v;
+                    return true;
+                }
+                break;
+        }
+        return false;
     }
 
     private void add_heat_constant_p_per_delta_time(double applied_heat, double insulation_coefficient, double delta_time) {  // Pressure Constrained -> Insulated && Uninsulated -> delta energy    // time eqtn 6b
@@ -456,8 +458,8 @@ public class ThermoState : MonoBehaviour
                 quality = ThermoMath.x_given_pv(pressure, volume, region);
             }
 
-            // TODO: enthalpy is whack :(
-            enthalpy = ThermoMath.h_given_vt(volume, temperature, region);
+            // issue is enthalpy should rise to match new volume? May need to revisit
+            // enthalpy = ThermoMath.h_given_vt(volume, temperature, region);
             entropy = ThermoMath.s_given_vt(volume, temperature, region);
         }
         catch (Exception e) { }
@@ -465,7 +467,63 @@ public class ThermoState : MonoBehaviour
         clamp_state();
     }
 
+    // May need major reworking, or find alternative
+    private bool treat_as_constant_v_add_p_uninsulated(double p, double delta_time) {
+        try {
+            double new_p = pressure + p * delta_time;
+            if (Math.Abs(p * delta_time) < World.DELTA_PRESSURE_CUTOFF) { new_p = pressure + p; } // small enough step; finish transition
+
+            //default guess
+            double new_u = internalenergy;
+            double new_v = volume;
+
+            double new_s = entropy;
+            double new_h = enthalpy;
+
+            double new_x = quality;
+            double curr_v = volume;
+
+
+            switch (region) {
+                case ThermoMath.region_liquid: //subcooled liquid
+                case ThermoMath.region_vapor: //vapor region
+                    // Pressure Constrained -> Insulated -> delta pressure (all phases)
+                    double raw_v = ThermoMath.v_given_ph(new_p, enthalpy);
+                    new_v = v_with_enforced_stops(raw_v); // enforce volume stops
+                    if (new_v != raw_v) {
+                        // hit a stop (should actually be treating at constant v); roll back to previous volume
+                        volume = new_v;
+                        return true;
+                    }
+
+                    break;
+                default:
+                    break;
+            }
+
+            if (region == ThermoMath.region_twophase) //two-phase region, either newly or all along
+             {
+                new_x = ThermoMath.x_given_ph(new_p, enthalpy);
+                double raw_v = ThermoMath.v_given_px(new_p, new_x);
+                new_v = v_with_enforced_stops(raw_v); // enforce volume stops
+                if (new_v != raw_v) {
+                    // hit a stop (should actually be treating at constant v); roll back to previous volume
+                    volume = new_v;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+        catch (Exception e) { }
+        return false;
+    }
+
     public void add_pressure_uninsulated_per_delta_time(double p, double delta_time) {
+        if (treat_as_constant_v_add_p_uninsulated(p, delta_time)) {
+            return;
+        }
+
         try {
             double new_p = pressure + p * delta_time;
             if (Math.Abs(p * delta_time) < World.DELTA_PRESSURE_CUTOFF) { new_p = pressure + p; } // small enough step; finish transition
@@ -492,7 +550,7 @@ public class ThermoState : MonoBehaviour
 
                     // Pressure Constrained -> Insulated -> delta pressure (all phases)
                     new_v = ThermoMath.v_given_ph(new_p, enthalpy);
-                    //new_v = v_with_enforced_stops(new_v); // enforce volume stops
+                    // new_v = v_with_enforced_stops(new_v); // enforce volume stops
                     new_u = ThermoMath.u_given_vt(new_v, temperature, region);
 
                     //at this point, we have enough internal state to derive the rest
@@ -560,7 +618,52 @@ public class ThermoState : MonoBehaviour
         clamp_state();
     }
 
+    // May need major reworking, or find alternative
+    private bool treat_as_constant_v_add_p_insulated(double p, double delta_time) {
+        try {
+            double new_p = pressure + p * delta_time;
+            if (Math.Abs(p * delta_time) < World.DELTA_PRESSURE_CUTOFF) { new_p = pressure + p; } // small enough step; finish transition
+
+            double new_h = enthalpy;
+            double new_u = internalenergy;
+            double new_t = temperature;
+
+            switch (region) {
+                case ThermoMath.region_liquid: //subcooled liquid
+                case ThermoMath.region_twophase: //two-phase region
+                {
+                        return true;
+                }
+                case ThermoMath.region_vapor: //superheated vapor
+                {
+                        //default guess
+                        new_t = temperature;
+                        new_u = internalenergy;
+                        double new_v = volume;
+
+                        double k = 1.27;
+                        double raw_v = volume * Math.Pow(pressure / new_p, 1.0 / k);
+                        new_v = v_with_enforced_stops(raw_v); // enforce volume stops
+                        double curr_v = volume;
+                        if (new_v != raw_v) {
+                            // hit a stop (should actually be treating at constant v); roll back to previous volume
+                            volume = new_v;
+                            return true;
+                        }
+
+                    }
+                    break;
+            }
+        }
+        catch (Exception e) { }
+        return false;
+    }
+
     public void add_pressure_insulated_per_delta_time(double p, double delta_time) {
+        if (treat_as_constant_v_add_p_insulated(p, delta_time)) {
+            return;
+        }
+
         try {
             double new_p = pressure + p * delta_time;
             if (Math.Abs(p * delta_time) < World.DELTA_PRESSURE_CUTOFF) { new_p = pressure + p; } // small enough step; finish transition
