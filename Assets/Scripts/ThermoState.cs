@@ -368,7 +368,7 @@ public class ThermoState : MonoBehaviour
                     // check that h is within bounds
                     //at this point, we have enough internal state to derive the rest
                     clamp_state();
-                    raw_v = ThermoMath.v_given_ph_projected(pressure, new_h, region);
+                    raw_v = ThermoMath.v_given_ph(pressure, new_h, region);
                     new_v = v_with_enforced_stops(raw_v, out hit_stop); // enforce volume stops
                     if (hit_stop) {
                         // hit a stop (should actually be treating at constant v); roll back to previous volume
@@ -539,15 +539,28 @@ public class ThermoState : MonoBehaviour
         return false;
     }
 
+    private bool enthalpy_bounded(double new_p, double curr_h) {
+        try {
+            ThermoMath.v_given_ph_projected(new_p, curr_h);
+        } catch {
+            // enthalpy out of range
+            return true;
+        }
+        return false;
+    }
+
     public void add_pressure_uninsulated_per_delta_time(double p, double delta_time) {
+        double new_p = pressure + p * delta_time;
+        if (Math.Abs(p * delta_time) < World.DELTA_PRESSURE_CUTOFF) { new_p = pressure + p; } // small enough step; finish transition
+
+        if (enthalpy_bounded(new_p, enthalpy)) {
+            return;
+        }
         if (treat_as_constant_v_add_p_uninsulated(p, delta_time)) {
             return;
         }
 
         try {
-            double new_p = pressure + p * delta_time;
-            if (Math.Abs(p * delta_time) < World.DELTA_PRESSURE_CUTOFF) { new_p = pressure + p; } // small enough step; finish transition
-
             //default guess
             double new_u = internalenergy;
             double new_v = volume;
@@ -681,14 +694,16 @@ public class ThermoState : MonoBehaviour
     }
 
     public void add_pressure_insulated_per_delta_time(double p, double delta_time) {
+        double new_p = pressure + p * delta_time;
+        if (Math.Abs(p * delta_time) < World.DELTA_PRESSURE_CUTOFF) { new_p = pressure + p; } // small enough step; finish transition
+        if (enthalpy_bounded(new_p, enthalpy)) {
+            return;
+        }
         if (treat_as_constant_v_add_p_insulated(p, delta_time)) {
             return;
         }
 
         try {
-            double new_p = pressure + p * delta_time;
-            if (Math.Abs(p * delta_time) < World.DELTA_PRESSURE_CUTOFF) { new_p = pressure + p; } // small enough step; finish transition
-
             double new_h = enthalpy;
             double new_u = internalenergy;
             double new_t = temperature;

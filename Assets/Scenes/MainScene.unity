@@ -8374,7 +8374,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 379004096}
-  m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0.001, y: -0.009, z: 0.384}
   m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 0
@@ -8382,7 +8382,7 @@ Transform:
   - {fileID: 1751325311}
   m_Father: {fileID: 511830934}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &379004100
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10099,6 +10099,26 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 352734246}
     m_Modifications:
+    - target: {fileID: 3880890575070334148, guid: 7485dca858d2f234ea7e8804b66bf92f,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0.0199
+      objectReference: {fileID: 0}
+    - target: {fileID: 3880890575070334148, guid: 7485dca858d2f234ea7e8804b66bf92f,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: -0.0719
+      objectReference: {fileID: 0}
+    - target: {fileID: 3880890575070334148, guid: 7485dca858d2f234ea7e8804b66bf92f,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -0.0956
+      objectReference: {fileID: 0}
+    - target: {fileID: 3880890575070334152, guid: 7485dca858d2f234ea7e8804b66bf92f,
+        type: 3}
+      propertyPath: m_text
+      value: Stop 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3880890576578896916, guid: 7485dca858d2f234ea7e8804b66bf92f,
         type: 3}
       propertyPath: m_RootOrder
@@ -11260,7 +11280,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 666732606}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.3087, y: 0.1, z: 0.4832}
+  m_LocalPosition: {x: 0.3192, y: 0.1, z: 0.5159}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -13986,7 +14006,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 901446653}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.3087, y: 0.1052, z: 0.4272}
+  m_LocalPosition: {x: 0.3192, y: 0.1052, z: 0.4599}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -14215,6 +14235,26 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 352734246}
     m_Modifications:
+    - target: {fileID: 3880890575070334148, guid: 7485dca858d2f234ea7e8804b66bf92f,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0.0154
+      objectReference: {fileID: 0}
+    - target: {fileID: 3880890575070334148, guid: 7485dca858d2f234ea7e8804b66bf92f,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: -0.0499
+      objectReference: {fileID: 0}
+    - target: {fileID: 3880890575070334148, guid: 7485dca858d2f234ea7e8804b66bf92f,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -0.0515
+      objectReference: {fileID: 0}
+    - target: {fileID: 3880890575070334152, guid: 7485dca858d2f234ea7e8804b66bf92f,
+        type: 3}
+      propertyPath: m_text
+      value: Stop 2
+      objectReference: {fileID: 0}
     - target: {fileID: 3880890576578896916, guid: 7485dca858d2f234ea7e8804b66bf92f,
         type: 3}
       propertyPath: m_RootOrder
@@ -15384,6 +15424,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 352734246}
     m_Modifications:
+    - target: {fileID: 3880890575070334148, guid: 7485dca858d2f234ea7e8804b66bf92f,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0.101
+      objectReference: {fileID: 0}
     - target: {fileID: 3880890575070334152, guid: 7485dca858d2f234ea7e8804b66bf92f,
         type: 3}
       propertyPath: m_text
@@ -17226,7 +17271,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1240312898}
-  m_LocalRotation: {x: 0, y: 1, z: 0, w: 0}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0.033, y: -0.001, z: 0.572}
   m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 0
@@ -17234,7 +17279,7 @@ Transform:
   - {fileID: 1507200102}
   m_Father: {fileID: 511830934}
   m_RootOrder: 3
-  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1240312902
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -18338,6 +18383,11 @@ PrefabInstance:
       value: 'Room
 
         Temperature'
+      objectReference: {fileID: 0}
+    - target: {fileID: 3880890575070334159, guid: 7485dca858d2f234ea7e8804b66bf92f,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3880890576578896916, guid: 7485dca858d2f234ea7e8804b66bf92f,
         type: 3}
@@ -20258,6 +20308,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 352734246}
     m_Modifications:
+    - target: {fileID: 3880890575070334148, guid: 7485dca858d2f234ea7e8804b66bf92f,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0.112
+      objectReference: {fileID: 0}
     - target: {fileID: 3880890575070334152, guid: 7485dca858d2f234ea7e8804b66bf92f,
         type: 3}
       propertyPath: m_text
@@ -23139,6 +23194,21 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 352734246}
     m_Modifications:
+    - target: {fileID: 3880890575070334148, guid: 7485dca858d2f234ea7e8804b66bf92f,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0.0597
+      objectReference: {fileID: 0}
+    - target: {fileID: 3880890575070334148, guid: 7485dca858d2f234ea7e8804b66bf92f,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: -0.0025
+      objectReference: {fileID: 0}
+    - target: {fileID: 3880890575070334148, guid: 7485dca858d2f234ea7e8804b66bf92f,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0.1159
+      objectReference: {fileID: 0}
     - target: {fileID: 3880890575070334152, guid: 7485dca858d2f234ea7e8804b66bf92f,
         type: 3}
       propertyPath: m_text
@@ -24217,6 +24287,11 @@ PrefabInstance:
       value: 'Ambient
 
         Pressure'
+      objectReference: {fileID: 0}
+    - target: {fileID: 3880890575070334159, guid: 7485dca858d2f234ea7e8804b66bf92f,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3880890576578896916, guid: 7485dca858d2f234ea7e8804b66bf92f,
         type: 3}

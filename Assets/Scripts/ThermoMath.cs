@@ -320,6 +320,13 @@ public static class ThermoMath
         }
     }
 
+    /// <summary>
+    ///  Same as above, but used for projecting purposes. Does not set error state, since it is only a hypothetical.
+    /// </summary>
+    /// <param name="p"></param>
+    /// <param name="h"></param>
+    /// <param name="fallback_region"></param>
+    /// <returns></returns>
     public static double v_given_ph_projected(double p, double h, int fallback_region = 0) {
         try {
             return 1.0 / IF97.rhomass_phmass(p / 1000000.0, h / 1000.0);
