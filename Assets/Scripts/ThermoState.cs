@@ -470,11 +470,13 @@ public class ThermoState : MonoBehaviour
                 pressure = new_p;
                 temperature = new_t;
                 quality = ThermoMath.x_given_pv(pressure, volume, region);
+                ThermoMath.h_given_percent(quality);
+                ThermoMath.s_given_percent(quality);
             }
-
-            // TODO: issue is enthalpy should rise to match new volume? May need to revisit
-            enthalpy = ThermoMath.h_given_vt(volume, temperature, region);
-            entropy = ThermoMath.s_given_vt(volume, temperature, region);
+            else {
+                enthalpy = ThermoMath.h_given_vt(volume, temperature, region);
+                entropy = ThermoMath.s_given_vt(volume, temperature, region);
+            }
         }
         catch (Exception e) { }
 
