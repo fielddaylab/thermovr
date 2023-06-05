@@ -22,12 +22,12 @@ namespace ThermoVR.Dials
     [Serializable]
     public struct EffectResponse {
         public Effect Effect;
-        public float ResponsePower;
+        public float Modifier;
         public EffectTrigger Trigger;
 
-        public EffectResponse(Effect effect, float response, EffectTrigger trigger) {
+        public EffectResponse(Effect effect, float modifier, EffectTrigger trigger) {
             Effect = effect;
-            ResponsePower = response;
+            Modifier = modifier;
             Trigger = trigger;
         }
     }
@@ -229,7 +229,7 @@ namespace ThermoVR.Dials
                                 tool.update_val(map, this);
                                 break;
                             case Effect.Movement:
-                                tool.move((new_val - prev_val) * effectResponse.ResponsePower);
+                                tool.move((new_val - prev_val) * effectResponse.Modifier);
                                 break;
                             default:
                                 break;

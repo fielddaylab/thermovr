@@ -50,7 +50,7 @@ public class ThermoState : MonoBehaviour
 
     private static bool RELATIVE_CLAMP = true; // true if clamp is set relative to current volume, false if clamp can set any volume bounds
     List<VolumeStop> v_stops;
-    private static float STOP_BUFFER = 0.001f;
+    private static float STOP_BUFFER = 0.00005f;
 
     public void reset() {
         //ensure consistent state
@@ -156,9 +156,10 @@ public class ThermoState : MonoBehaviour
     }
     */
 
-    private double v_with_enforced_stops(double projected_v) {
+    private double v_with_enforced_stops(double projected_v, out bool hit_stop) {
         double curr_v = volume;
         bool volume_increasing = projected_v > curr_v;
+        hit_stop = false;
 
         for (int i = 0; i < v_stops.Count; i++) {
             VolumeStop curr_stop = v_stops[i];
@@ -168,6 +169,7 @@ public class ThermoState : MonoBehaviour
                 // when volume would increase, enforce stops above
                 if (curr_v <= compare_v && projected_v > compare_v) {
                     projected_v = Clampd(projected_v, curr_v, compare_v - STOP_BUFFER);
+                    hit_stop = true;
                     Debug.Log("[Stops] enforced, preventing increase");
                 }
             }
@@ -175,6 +177,7 @@ public class ThermoState : MonoBehaviour
                 // when volume would decrease, enforce stops below
                 if (curr_v >= compare_v && projected_v < compare_v) {
                     projected_v = Clampd(projected_v, curr_v, compare_v + STOP_BUFFER);
+                    hit_stop = true;
                     Debug.Log("[Stops] enforced, preventing decrease");
                 }
             }
@@ -346,14 +349,15 @@ public class ThermoState : MonoBehaviour
             new_h = ClampEnthalpy(new_h, pressure);
 
             double raw_v, new_v;
+            bool hit_stop;
             switch (region) {
                 case ThermoMath.region_twophase:
                     double new_x = ThermoMath.x_given_ph(pressure, new_h, region);
                     //at this point, we have enough internal state to derive the rest
                     clamp_state();
                     raw_v = ThermoMath.v_given_px(pressure, new_x, region);
-                    new_v = v_with_enforced_stops(raw_v); // enforce volume stops
-                    if (new_v != raw_v) {
+                    new_v = v_with_enforced_stops(raw_v, out hit_stop); // enforce volume stops
+                    if (hit_stop) {
                         // hit a stop (should actually be treating at constant v); roll back to previous volume
                         volume = new_v;
                         return true;
@@ -365,8 +369,8 @@ public class ThermoState : MonoBehaviour
                     //at this point, we have enough internal state to derive the rest
                     clamp_state();
                     raw_v = ThermoMath.v_given_ph_projected(pressure, new_h, region);
-                    new_v = v_with_enforced_stops(raw_v); // enforce volume stops
-                    if (new_v != raw_v) {
+                    new_v = v_with_enforced_stops(raw_v, out hit_stop); // enforce volume stops
+                    if (hit_stop) {
                         // hit a stop (should actually be treating at constant v); roll back to previous volume
                         volume = new_v;
                         return true;
@@ -499,14 +503,14 @@ public class ThermoState : MonoBehaviour
             double new_x = quality;
             double curr_v = volume;
 
-
+            bool hit_stop;
             switch (region) {
                 case ThermoMath.region_liquid: //subcooled liquid
                 case ThermoMath.region_vapor: //vapor region
                     // Pressure Constrained -> Insulated -> delta pressure (all phases)
                     double raw_v = ThermoMath.v_given_ph(new_p, enthalpy);
-                    new_v = v_with_enforced_stops(raw_v); // enforce volume stops
-                    if (new_v != raw_v) {
+                    new_v = v_with_enforced_stops(raw_v, out hit_stop); // enforce volume stops
+                    if (hit_stop) {
                         // hit a stop (should actually be treating at constant v); roll back to previous volume
                         volume = new_v;
                         return true;
@@ -521,8 +525,8 @@ public class ThermoState : MonoBehaviour
              {
                 new_x = ThermoMath.x_given_ph(new_p, enthalpy);
                 double raw_v = ThermoMath.v_given_px(new_p, new_x);
-                new_v = v_with_enforced_stops(raw_v); // enforce volume stops
-                if (new_v != raw_v) {
+                new_v = v_with_enforced_stops(raw_v, out hit_stop); // enforce volume stops
+                if (hit_stop) {
                     // hit a stop (should actually be treating at constant v); roll back to previous volume
                     volume = new_v;
                     return true;
@@ -659,9 +663,10 @@ public class ThermoState : MonoBehaviour
 
                         double k = 1.27;
                         double raw_v = volume * Math.Pow(pressure / new_p, 1.0 / k);
-                        new_v = v_with_enforced_stops(raw_v); // enforce volume stops
+                        bool hit_stop;
+                        new_v = v_with_enforced_stops(raw_v, out hit_stop); // enforce volume stops
                         double curr_v = volume;
-                        if (new_v != raw_v) {
+                        if (hit_stop) {
                             // hit a stop (should actually be treating at constant v); roll back to previous volume
                             volume = new_v;
                             return true;

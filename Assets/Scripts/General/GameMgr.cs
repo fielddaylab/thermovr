@@ -11,12 +11,14 @@ namespace ThermoVR
         private readonly EventDispatcher<object> m_EventDispatcher = new EventDispatcher<object>();
 
         [SerializeField] private World m_world;
+        [SerializeField] private ThermoPresent m_thermo_present;
 
         protected override void Awake() {
             base.Awake();
         }
 
         private void Start() {
+            m_thermo_present.Init();
             m_world.Init();
         }
 

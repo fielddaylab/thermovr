@@ -79,7 +79,7 @@ public class ThermoPresent : MonoBehaviour
     }
 
     // Start is called before the first frame update
-    void Start() {
+    public void Init() {
         if (debug_write) debug_file = File.CreateText("debug.txt");
 
         //(these are just used to detect editor deltas on a frame boundary)

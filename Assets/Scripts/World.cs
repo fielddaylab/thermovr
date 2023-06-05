@@ -214,12 +214,12 @@ public class World : MonoBehaviour
         };
 
         // dial_insulator.Init(0f, 1f);
-        dial_stop1.Init((float)ThermoMath.v_min, (float)ThermoMath.v_max / 500);
-        dial_stop2.Init((float)ThermoMath.v_min, (float)ThermoMath.v_max / 500);
+        dial_stop1.Init((float)ThermoMath.v_min, (float)ThermoMath.v_max);
+        dial_stop2.Init((float)ThermoMath.v_min, (float)ThermoMath.v_max);
         dial_burner.Init(0f, 1000f * 100f);
         dial_coil.Init(0f, -1000f * 100f);
         dial_weight.Init(0f, (float)kg_corresponding_to_10mpa);
-        dial_balloon.Init(0f, -(float)kg_corresponding_to_10mpa / 500.0f);
+        dial_balloon.Init(0f, -(float)kg_corresponding_to_10mpa / 100.0f); // 500.0f
         // TODO: establish logical bounds and units on the ambient pressure dial
         dial_ambientPressure.Init(0f, (float)kg_corresponding_to_2mpa / 500);
         dial_roomTemp.Init(-100, 200);
