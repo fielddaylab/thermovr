@@ -30,18 +30,28 @@ public class DirectionalIndicator : MonoBehaviour
         flow_coefficient = 1.0f;
         running = true;
         this.Stop(); // we start the game stopped.
+
+        GameMgr.Events?.Register<double>(GameEvents.UpdateVaporFlow, HandleUpdateVaporFlow, this);
+    }
+
+    private void HandleUpdateVaporFlow(double delta_pressure) {
+        if (Mathf.Abs((float)delta_pressure) > 0) {
+            Go(delta_pressure < 0.0f);
+            SetFlow(delta_pressure);
+        }
+        else {
+            Stop();
+        }
     }
 
     /*
      * Function to stop the indicator, if heat is no longer actually flowing.
      */
-    public void Stop() {
-        if (running) {
-            running = false;
-            MeshRenderer[] mr_list = gameObject.GetComponentsInChildren<MeshRenderer>();
-            foreach (MeshRenderer mr in mr_list) {
-                mr.enabled = false;
-            }
+    private void Stop() {
+        running = false;
+        MeshRenderer[] mr_list = gameObject.GetComponentsInChildren<MeshRenderer>();
+        foreach (MeshRenderer mr in mr_list) {
+            mr.enabled = false;
         }
     }
 
@@ -68,7 +78,7 @@ public class DirectionalIndicator : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update() {
+    public void ManualFixedUpdate() {
         if (running) {
             float increment = flow_coefficient * BASE_FRAME_RATE * BASE_RATE_SCALING; // / BASE_FRAME_PER_CYCLE;
             current_offset += increment;
@@ -78,6 +88,11 @@ public class DirectionalIndicator : MonoBehaviour
             }
             indicator_material.SetTextureOffset("_MainTex", new Vector2(current_offset, 0.0f));
         }
+        else {
+            Stop();
+        }
+
+        running = false;
     }
 
     public void SetFlow(double coefficient) {

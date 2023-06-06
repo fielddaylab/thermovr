@@ -14,6 +14,7 @@ using UnityEngine;
 using System.Collections.Specialized;
 using Oculus.Platform;
 using ThermoVR.Tools;
+using ThermoVR;
 
 public class ThermoState : MonoBehaviour
 {
@@ -583,6 +584,9 @@ public class ThermoState : MonoBehaviour
 
                     // Pressure Constrained -> Insulated -> delta pressure (all phases)
                     new_v = ThermoMath.v_given_ph(new_p, enthalpy);
+                    if (region == ThermoMath.region_vapor) {
+                        update_vapor_vis(pressure - new_p);
+                    }
                     // new_v = v_with_enforced_stops(new_v); // enforce volume stops
                     new_u = ThermoMath.u_given_vt(new_v, temperature, region);
 
@@ -742,6 +746,7 @@ public class ThermoState : MonoBehaviour
 
                         double k = 1.27;
                         new_v = volume * Math.Pow(pressure / new_p, 1.0 / k);
+                        update_vapor_vis(pressure - new_p);
                         // new_v = v_with_enforced_stops(new_v); // enforce volume stops
                         new_u = internalenergy - ((new_p * new_v - pressure * volume) / (1 - k));
                         new_t = ThermoMath.t_given_ph(new_p, enthalpy);
@@ -761,6 +766,12 @@ public class ThermoState : MonoBehaviour
         catch (Exception e) { }
 
         clamp_state();
+    }
+
+    private void update_vapor_vis(double delta_pressure) {
+        if (Mathf.Abs((float)delta_pressure) > World.DELTA_PRESSURE_CUTOFF) {
+            GameMgr.Events.Dispatch(GameEvents.UpdateVaporFlow, delta_pressure);
+        }
     }
 
 }

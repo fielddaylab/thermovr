@@ -939,6 +939,8 @@ public class World : MonoBehaviour
      * as far as I can tell.
      */
     public void ManualFixedUpdate() {
+        arrows.ManualFixedUpdate(); // reset arrows for next instruction
+
         //hands keep trying to run away- no idea why (this is a silly way to keep them still)
         lhand.actualhand.transform.localPosition = new Vector3(0f, 0f, 0f);
         lhand.actualhand.transform.localEulerAngles = new Vector3(0f, 0f, 90f);
@@ -961,31 +963,9 @@ public class World : MonoBehaviour
         //(technically, "should" add_pressure(...) with every delta of weight on the piston, but that would result in very jumpy nonsense movements. iterating toward a target smooths it out)
         double delta_pressure = (weight_pressure - thermo_present.get_pressure());
 
-        if (!tool_stop1.engaged && !tool_stop2.engaged) {
-            // TODO: move this check to add_pressure functions, or events (not correct when adjusting volume in gas when not at max clamp
-
-            bool significantChange = Mathf.Abs((float)delta_pressure * Time.fixedDeltaTime) > DELTA_PRESSURE_CUTOFF ? true : false;
-            if (significantChange) {
-                // we only are applying pressure added/released if we are in gas region.
-                // if this ever changes, adapt this "if" check as needed.
-                if (thermo_present.get_region() == 2) {
-                    arrows.Go(delta_pressure > 0.0f);
-                    arrows.SetFlow(delta_pressure);
-                }
-            }
-            else if (arrows.running) {
-                arrows.Stop();
-            }
-        }
-
         if (System.Math.Abs(delta_pressure) > 0) {
             if (tool_insulator.engaged) thermo_present.add_pressure_insulated_per_delta_time(delta_pressure, delta_time); // Pressure Constrained -> Insulated ->  delta pressure
             else thermo_present.add_pressure_uninsulated_per_delta_time(delta_pressure, delta_time); // Pressure Constrained -> Uninsulated ->  delta pressure
-        }
-
-        // stop arrows if there was a jump to another region other than gas
-        if (thermo_present.get_region() != 2 && arrows.running) {
-            arrows.Stop();
         }
 
         double insulation_coefficient = tool_insulator.engaged ? 1.0f : CONTAINER_INSULATION_COEFFICIENT;
