@@ -56,27 +56,44 @@
     <Analyzer Include="C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\Extensions\Microsoft\Visual Studio Tools for Unity\Analyzers\Microsoft.Unity.Analyzers.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\Oculus\Voice\Lib\Wit.ai\Lib\Conduit\Editor\IWitHttp.cs" />
     <Compile Include="Assets\Oculus\Voice\Lib\Wit.ai\Lib\Conduit\Editor\IConduitAssembly.cs" />
     <Compile Include="Assets\Oculus\Voice\Lib\Wit.ai\Lib\Conduit\Editor\AssemblyMiner.cs" />
     <Compile Include="Assets\Oculus\Voice\Lib\Wit.ai\Lib\Conduit\Editor\Training\IProcessStep.cs" />
+    <Compile Include="Assets\Oculus\Voice\Lib\Wit.ai\Lib\Conduit\Editor\Data\WitTrainingStatus.cs" />
+    <Compile Include="Assets\Oculus\Voice\Lib\Wit.ai\Lib\Conduit\Editor\Training\TrainUtterances.cs" />
+    <Compile Include="Assets\Oculus\Voice\Lib\Wit.ai\Lib\Conduit\Editor\Training\Payload.cs" />
+    <Compile Include="Assets\Oculus\Voice\Lib\Wit.ai\Lib\Conduit\Editor\Training\SyncWitEntitiesStep.cs" />
     <Compile Include="Assets\Oculus\Voice\Lib\Wit.ai\Lib\Conduit\Editor\FileIo.cs" />
+    <Compile Include="Assets\Oculus\Voice\Lib\Wit.ai\Lib\Conduit\Editor\Data\WitEntity.cs" />
     <Compile Include="Assets\Oculus\Voice\Lib\Wit.ai\Lib\Conduit\Editor\SourceCodeMapper.cs" />
+    <Compile Include="Assets\Oculus\Voice\Lib\Wit.ai\Lib\Conduit\Editor\WitHttp.cs" />
     <Compile Include="Assets\Oculus\Voice\Lib\Wit.ai\Lib\Conduit\Editor\Training\EnumCodeWrapper.cs" />
     <Compile Include="Assets\Oculus\Voice\Lib\Wit.ai\Lib\Conduit\Editor\AssemblyWalker.cs" />
     <Compile Include="Assets\Oculus\Voice\Lib\Wit.ai\Lib\Conduit\Editor\AssemblyInfo.cs" />
+    <Compile Include="Assets\Oculus\Voice\Lib\Wit.ai\Lib\Conduit\Editor\Data\WitTrainingEntity.cs" />
     <Compile Include="Assets\Oculus\Voice\Lib\Wit.ai\Lib\Conduit\Editor\Training\EntitiesDelta.cs" />
     <Compile Include="Assets\Oculus\Voice\Lib\Wit.ai\Lib\Conduit\Editor\IParameterValidator.cs" />
+    <Compile Include="Assets\Oculus\Voice\Lib\Wit.ai\Lib\Conduit\Editor\Training\StepRunner.cs" />
     <Compile Include="Assets\Oculus\Voice\Lib\Wit.ai\Lib\Conduit\Editor\IFileIo.cs" />
+    <Compile Include="Assets\Oculus\Voice\Lib\Wit.ai\Lib\Conduit\Editor\Data\WitTrainingUtterance.cs" />
+    <Compile Include="Assets\Oculus\Voice\Lib\Wit.ai\Lib\Conduit\Editor\Data\WitRole.cs" />
     <Compile Include="Assets\Oculus\Voice\Lib\Wit.ai\Lib\Conduit\Editor\IAssemblyMiner.cs" />
     <Compile Include="Assets\Oculus\Voice\Lib\Wit.ai\Lib\Conduit\Editor\Training\KeywordsDelta.cs" />
+    <Compile Include="Assets\Oculus\Voice\Lib\Wit.ai\Lib\Conduit\Editor\Training\WitTrainer.cs" />
     <Compile Include="Assets\Oculus\Voice\Lib\Wit.ai\Lib\Conduit\Editor\ManifestGenerator.cs" />
+    <Compile Include="Assets\Oculus\Voice\Lib\Wit.ai\Lib\Conduit\Editor\Training\EnsureWitIntentsStep.cs" />
     <Compile Include="Assets\Oculus\Voice\Lib\Wit.ai\Lib\Conduit\Editor\Training\EnumSynchronizer.cs" />
+    <Compile Include="Assets\Oculus\Voice\Lib\Wit.ai\Lib\Conduit\Editor\Data\WitOutgoingEntity.cs" />
     <Compile Include="Assets\Oculus\Voice\Lib\Wit.ai\Lib\Conduit\Editor\ConduitStatistics.cs" />
     <Compile Include="Assets\Oculus\Voice\Lib\Wit.ai\Lib\Conduit\Editor\PersistenceLayer.cs" />
     <Compile Include="Assets\Oculus\Voice\Lib\Wit.ai\Lib\Conduit\Editor\ConduitAssembly.cs" />
     <Compile Include="Assets\Oculus\Voice\Lib\Wit.ai\Lib\Conduit\Editor\IAssemblyWalker.cs" />
     <Compile Include="Assets\Oculus\Voice\Lib\Wit.ai\Lib\Conduit\Editor\IParameterFilter.cs" />
+    <Compile Include="Assets\Oculus\Voice\Lib\Wit.ai\Lib\Conduit\Editor\Training\ObtainIdmData.cs" />
     <Compile Include="Assets\Oculus\Voice\Lib\Wit.ai\Lib\Conduit\Editor\IPersistenceLayer.cs" />
+    <Compile Include="Assets\Oculus\Voice\Lib\Wit.ai\Lib\Conduit\Editor\Training\ProcessStep.cs" />
+    <Compile Include="Assets\Oculus\Voice\Lib\Wit.ai\Lib\Conduit\Editor\Data\WitIncomingEntity.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Oculus\Voice\Lib\Wit.ai\Lib\Conduit\Editor\Facebook.Wit.Conduit.Editor.asmdef" />
