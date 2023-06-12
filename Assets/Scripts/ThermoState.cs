@@ -399,8 +399,8 @@ public class ThermoState : MonoBehaviour
                 pressure = new_p;
                 temperature = new_t;
                 quality = ThermoMath.x_given_pv(pressure, volume, region);
-                enthalpy = ThermoMath.h_given_vt(volume, temperature, region); // enthalpy way off
-                entropy = ThermoMath.s_given_vt(volume, temperature, region);
+                // enthalpy = ThermoMath.h_given_vt(volume, temperature, region); // enthalpy way off
+                // entropy = ThermoMath.s_given_vt(volume, temperature, region);
             }
             else {
                 enthalpy = ThermoMath.h_given_vt(volume, temperature, region);
@@ -542,8 +542,6 @@ public class ThermoState : MonoBehaviour
                 case ThermoMath.region_twophase: //two-phase region
                 {
                         // Pressure Constrained -> Insulated -> delta pressure (liquid and two-phase)
-
-
                         new_u = ThermoMath.u_given_pt(new_p, temperature);
 
                         if (region == ThermoMath.region_twophase) {
