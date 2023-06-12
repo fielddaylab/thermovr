@@ -413,15 +413,16 @@ public class ThermoState : MonoBehaviour
     }
 
     public void add_pressure_uninsulated_per_delta_time(double p, double delta_time) {
-        double new_p = pressure + p * delta_time;
-        if (Math.Abs(p * delta_time) < World.DELTA_PRESSURE_CUTOFF) { new_p = pressure + p; } // small enough step; finish transition
-
+        double new_p = pressure + p; // * delta_time;
+        // if (Math.Abs(p * delta_time) < World.DELTA_PRESSURE_CUTOFF) { new_p = pressure + p; } // small enough step; finish transition
+        /*
         if (enthalpy_bounded(new_p, enthalpy)) {
             return;
         }
         if (treat_as_constant_v_add_p_uninsulated(p, delta_time)) {
             return;
         }
+        */
 
         try {
             //default guess
@@ -501,7 +502,7 @@ public class ThermoState : MonoBehaviour
 
                 volume = new_v;
                 entropy = ThermoMath.s_given_px(new_p, new_x, region);
-                // enthalpy = ThermoMath.h_given_vt(volume, temperature, region);
+                enthalpy = ThermoMath.h_given_vt(volume, temperature, region);
                 internalenergy = new_u;
                 quality = new_x;
 
@@ -519,8 +520,8 @@ public class ThermoState : MonoBehaviour
     }
 
     public void add_pressure_insulated_per_delta_time(double p, double delta_time) {
-        double new_p = pressure + p * delta_time;
-        if (Math.Abs(p * delta_time) < World.DELTA_PRESSURE_CUTOFF) { new_p = pressure + p; } // small enough step; finish transition
+        double new_p = pressure + p; // * delta_time;
+        // if (Math.Abs(p * delta_time) < World.DELTA_PRESSURE_CUTOFF) { new_p = pressure + p; } // small enough step; finish transition
         /*
         if (enthalpy_bounded(new_p, enthalpy)) {
             return;
