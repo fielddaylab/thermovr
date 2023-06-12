@@ -155,6 +155,7 @@ public class World : MonoBehaviour
     double room_temp = 72; // in F
     double applied_heat = 0;
     double applied_weight = 0;
+    double iterative_weight = 0;
     double ambient_pressure = 0;
 
     #region Initialization
@@ -959,13 +960,31 @@ public class World : MonoBehaviour
         weight_pressure += ambient_pressure + neutral_pressure; // TODO: establish logical bounds and units on the ambient pressure dial
         weight_pressure *= psi_to_pascal; //conversion from psi to pascal
 
+        /*
+        // get the amount of weight to apply, based on the difference between the total weight to be applied and how much is currently applied
+        double delta_weight = (weight_pressure - iterative_weight);
+        if (System.Math.Abs(weight_pressure - iterative_weight) < World.DELTA_PRESSURE_CUTOFF) {
+            // small enough step; finish transition
+        }
+        else {
+            delta_weight *= delta_time * 10;
+        }
+
+        // apply the change in weight to the current application
+        iterative_weight += delta_weight;
+        */
+
         //treat "applied_weight" as target, and iterate toward it, rather than applying it additively
         //(technically, "should" add_pressure(...) with every delta of weight on the piston, but that would result in very jumpy nonsense movements. iterating toward a target smooths it out)
-        double delta_pressure = (weight_pressure - thermo_present.get_pressure());
+        double delta_pressure = (weight_pressure - thermo_present.get_pressure()); // here: when the sim increases internal pressure, it makes delta_pressure depressurize
 
         if (System.Math.Abs(delta_pressure) > 0) {
-            if (tool_insulator.engaged) thermo_present.add_pressure_insulated_per_delta_time(delta_pressure, delta_time); // Pressure Constrained -> Insulated ->  delta pressure
-            else thermo_present.add_pressure_uninsulated_per_delta_time(delta_pressure, delta_time); // Pressure Constrained -> Uninsulated ->  delta pressure
+            if (tool_insulator.engaged) {
+                thermo_present.add_pressure_insulated_per_delta_time(delta_pressure, delta_time); // Pressure Constrained -> Insulated ->  delta pressure
+            }
+            else {
+                thermo_present.add_pressure_uninsulated_per_delta_time(delta_pressure, delta_time); // Pressure Constrained -> Uninsulated ->  delta pressure
+            }
         }
 
         double insulation_coefficient = tool_insulator.engaged ? 1.0f : CONTAINER_INSULATION_COEFFICIENT;
