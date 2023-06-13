@@ -261,9 +261,21 @@ public class ThermoState : MonoBehaviour
             enthalpy = ThermoMath.h_given_vt(volume, temperature, region);
 
             switch (region) {
-                case ThermoMath.region_liquid: quality = 0; internalenergy = ThermoMath.u_given_vt(volume, temperature, region); break;
-                case ThermoMath.region_twophase: quality = ThermoMath.x_given_pv(pressure, volume, region); internalenergy = ThermoMath.u_given_px(pressure, quality, region); break;
-                case ThermoMath.region_vapor: quality = 1; internalenergy = ThermoMath.u_given_vt(volume, temperature, region); break;
+                case ThermoMath.region_liquid: {
+                        quality = 0;
+                        internalenergy = ThermoMath.u_given_vt(volume, temperature, region);
+                        break;
+                    }
+                case ThermoMath.region_twophase: {
+                        quality = ThermoMath.x_given_pv(pressure, volume, region);
+                        internalenergy = ThermoMath.u_given_px(pressure, quality, region);
+                        break;
+                    }
+                case ThermoMath.region_vapor:{
+                        quality = 1;
+                        internalenergy = ThermoMath.u_given_vt(volume, temperature, region);
+                        break; 
+                    }
             }
         }
         catch (Exception e) {
@@ -319,7 +331,7 @@ public class ThermoState : MonoBehaviour
 
             switch (region) {
                 case ThermoMath.region_twophase:
-                    double new_x = ThermoMath.x_given_ph(pressure, new_h, region);
+                    double new_x = ThermoMath.x_given_ph(pressure, new_h, region); // jumping straight to 0 after warp_pvt
                     //at this point, we have enough internal state to derive the rest
                     clamp_state();
                     new_v = ThermoMath.v_given_px(pressure, new_x, region);
@@ -422,10 +434,10 @@ public class ThermoState : MonoBehaviour
 
         // if (Math.Abs(p * delta_time) < World.DELTA_PRESSURE_CUTOFF) { new_p = pressure + p; } // small enough step; finish transition
 
-        /*
         if (enthalpy_bounded(new_p, enthalpy)) {
             return;
         }
+        /*
         if (treat_as_constant_v_add_p_uninsulated(p, delta_time)) {
             return;
         }
@@ -566,11 +578,9 @@ public class ThermoState : MonoBehaviour
         double new_p = pressure + p; // * delta_time;
         // if (Math.Abs(p * delta_time) < World.DELTA_PRESSURE_CUTOFF) { new_p = pressure + p; } // small enough step; finish transition
 
-        /*
         if (enthalpy_bounded(new_p, enthalpy)) {
             return;
         }
-        */
         /*
         if (treat_as_constant_v_add_p_insulated(p, delta_time)) { // needed for stops because it prevents broken enthalpy calculation, but breaks "add pressure insulated"
             return;
