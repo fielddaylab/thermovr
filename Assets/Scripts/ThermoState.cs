@@ -52,6 +52,7 @@ public class ThermoState : MonoBehaviour
     private static bool RELATIVE_CLAMP = true; // true if clamp is set relative to current volume, false if clamp can set any volume bounds
     List<VolumeStop> v_stops;
     private static float STOP_BUFFER = 0.00005f;
+    public double iterative_weight = 0;
 
     public void reset() {
         //ensure consistent state
@@ -414,7 +415,9 @@ public class ThermoState : MonoBehaviour
 
     public void add_pressure_uninsulated_per_delta_time(double p, double delta_time) {
         double new_p = pressure + p; // * delta_time;
+
         // if (Math.Abs(p * delta_time) < World.DELTA_PRESSURE_CUTOFF) { new_p = pressure + p; } // small enough step; finish transition
+
         /*
         if (enthalpy_bounded(new_p, enthalpy)) {
             return;
@@ -423,6 +426,8 @@ public class ThermoState : MonoBehaviour
             return;
         }
         */
+
+        iterative_weight += p;
 
         try {
             //default guess
@@ -499,10 +504,12 @@ public class ThermoState : MonoBehaviour
                 new_v = ThermoMath.v_given_px(new_p, new_x);
                 // new_v = v_with_enforced_stops(new_v); // enforce volume stops
                 new_u = ThermoMath.u_given_vt(new_v, temperature, region);
+                // new_u = ThermoMath.u_given_px(new_p, new_x, region);
 
+                // pressure = new_p;
                 volume = new_v;
                 entropy = ThermoMath.s_given_px(new_p, new_x, region);
-                enthalpy = ThermoMath.h_given_vt(volume, temperature, region);
+                // enthalpy = ThermoMath.h_given_vt(volume, temperature, region); // enthalpy is way off
                 internalenergy = new_u;
                 quality = new_x;
 
@@ -522,6 +529,7 @@ public class ThermoState : MonoBehaviour
     public void add_pressure_insulated_per_delta_time(double p, double delta_time) {
         double new_p = pressure + p; // * delta_time;
         // if (Math.Abs(p * delta_time) < World.DELTA_PRESSURE_CUTOFF) { new_p = pressure + p; } // small enough step; finish transition
+
         /*
         if (enthalpy_bounded(new_p, enthalpy)) {
             return;
@@ -532,6 +540,9 @@ public class ThermoState : MonoBehaviour
             return;
         }
         */
+
+        iterative_weight += p;
+
 
         try {
             double new_h = enthalpy;

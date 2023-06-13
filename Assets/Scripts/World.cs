@@ -155,7 +155,6 @@ public class World : MonoBehaviour
     double room_temp = 72; // in F
     double applied_heat = 0;
     double applied_weight = 0;
-    double iterative_weight = 0;
     double ambient_pressure = 0;
 
     #region Initialization
@@ -961,19 +960,18 @@ public class World : MonoBehaviour
         weight_pressure *= psi_to_pascal; //conversion from psi to pascal
 
         // get the amount of weight to apply, based on the difference between the total weight to be applied and how much is currently applied
-        double delta_weight = (weight_pressure - iterative_weight);
+        double delta_weight = (weight_pressure - thermo_present.get_iterative_weight());
         if (System.Math.Abs(delta_weight * delta_time) < World.DELTA_PRESSURE_CUTOFF) {
             // small enough step; finish transition
         }
         else {
             delta_weight *= delta_time;
-            if (iterative_weight > weight_pressure) {
+            if (thermo_present.get_iterative_weight() > weight_pressure) {
                 delta_weight *= 1; // reducing dial affects changes slower for some reason; this counteracts it
             }
         }
 
-        // apply the change in weight to the current application
-        iterative_weight += delta_weight;
+        // check if weight was applied
 
         //treat "delta_pressure" as target, and iterate toward it, rather than applying it additively
         //(technically, "should" add_pressure(...) with every delta of weight on the piston, but that would result in very jumpy nonsense movements. iterating toward a target smooths it out)

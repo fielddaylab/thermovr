@@ -242,6 +242,10 @@ public class ThermoPresent : MonoBehaviour
         return state.region;
     }
 
+    public double get_iterative_weight() {
+        return state.iterative_weight;
+    }
+
     void genMesh() {
         GameObject old_gm = GameObject.Find("graph_mesh");
         if (old_gm != null) Destroy(old_gm);
