@@ -454,25 +454,7 @@ public class ThermoState : MonoBehaviour
                         }
                     }
 
-                    // Pressure Constrained -> Uninsulated -> delta pressure (all phases)
-                    new_v = ThermoMath.v_given_ph(new_p, enthalpy);
-                    if (region == ThermoMath.region_vapor) {
-                        update_vapor_vis(pressure - new_p);
-                    }
-                    // new_v = v_with_enforced_stops(new_v); // enforce volume stops
-                    new_u = ThermoMath.u_given_vt(new_v, temperature, region);
-
-                    //at this point, we have enough internal state to derive the rest
-
-                    new_s = ThermoMath.s_given_vt(new_v, temperature, region);
-                    new_h = ThermoMath.h_given_vt(new_v, temperature, region);
-
-                    pressure = new_p;
-                    volume = new_v;
-                    internalenergy = new_u;
-
-                    entropy = new_s;
-                    enthalpy = new_h;
+                    helper_add_p_uninsulated_lv(new_p);
 
                     region = ThermoMath.region_given_pvt(pressure, volume, temperature);
 
@@ -563,21 +545,10 @@ public class ThermoState : MonoBehaviour
                 }
 
                 if (switched) { // from two-phase to another region
-                    new_v = ThermoMath.v_given_ph(virtual_p, enthalpy);
-                    // new_v = v_with_enforced_stops(new_v); // enforce volume stops
-                    new_u = ThermoMath.u_given_vt(new_v, temperature, region);
+                    // taken from switch region above
+                    helper_add_p_uninsulated_lv(virtual_p);
 
-                    //at this point, we have enough internal state to derive the rest
-
-                    new_s = ThermoMath.s_given_vt(new_v, temperature, region);
-                    new_h = ThermoMath.h_given_vt(new_v, temperature, region);
-
-                    pressure = new_p;
-                    volume = new_v;
-                    internalenergy = new_u;
-
-                    entropy = new_s;
-                    enthalpy = new_h;
+                    // iterative_weight = 0;
                 }
             }
         }
@@ -665,6 +636,43 @@ public class ThermoState : MonoBehaviour
     }
 
     #endregion // Apply Heat/PressureM
+
+    #region Helpers
+
+    /// <summary>
+    ///  Helper for adding pressure uninsulated in liquid and vapor
+    /// </summary>
+    /// <param name="new_p"></param>
+    private void helper_add_p_uninsulated_lv(double new_p) {
+        //default guess
+        double new_u = internalenergy;
+        double new_v = volume;
+
+        double new_s = entropy;
+        double new_h = enthalpy;
+
+        // Pressure Constrained -> Uninsulated -> delta pressure (all phases)
+        new_v = ThermoMath.v_given_ph(new_p, enthalpy);
+        if (region == ThermoMath.region_vapor) {
+            update_vapor_vis(pressure - new_p);
+        }
+        // new_v = v_with_enforced_stops(new_v); // enforce volume stops
+        new_u = ThermoMath.u_given_vt(new_v, temperature, region);
+
+        //at this point, we have enough internal state to derive the rest
+
+        new_s = ThermoMath.s_given_vt(new_v, temperature, region);
+        new_h = ThermoMath.h_given_vt(new_v, temperature, region);
+
+        pressure = new_p;
+        volume = new_v;
+        internalenergy = new_u;
+
+        entropy = new_s;
+        enthalpy = new_h;
+    }
+
+    #endregion // Helpers
 
     #region Projections
 
