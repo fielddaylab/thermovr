@@ -449,7 +449,8 @@ public class ThermoState : MonoBehaviour
                     if (ThermoMath.region_given_ps(new_p, entropy) != region) { // check for transition into 2-phase from other states (currently only works when leaving liquid)
                         if (ThermoMath.region_given_ps(new_p, entropy) == ThermoMath.region_twophase) {
                             region = ThermoMath.region_twophase;
-                            pressure = new_p;
+                            // TODO: occasionally this wants to switch to two-phase even when it is solidly in vapor
+                            // pressure = new_p;
                             break;
                         }
                     }
@@ -527,6 +528,10 @@ public class ThermoState : MonoBehaviour
 
                 // region = ThermoMath.region_given_pvt(pressure, volume, temperature);
                 region = ThermoMath.region_given_ps(virtual_p, entropy);
+
+                if (quality == 1) {
+                    region = ThermoMath.region_vapor;
+                }
 
                 bool switched = false;
                 switch (region) {

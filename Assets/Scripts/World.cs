@@ -966,9 +966,11 @@ public class World : MonoBehaviour
         }
         else {
             delta_weight *= delta_time;
+            /*
             if (thermo_present.get_iterative_weight() > weight_pressure) {
                 delta_weight *= 1; // reducing dial affects changes slower for some reason; this counteracts it
             }
+            */
         }
 
         // check if weight was applied
