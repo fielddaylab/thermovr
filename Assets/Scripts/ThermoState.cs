@@ -299,8 +299,6 @@ public class ThermoState : MonoBehaviour
 
         bool constant_v = treat_as_constant_v_add_heat(applied_heat, insulation_coefficient, delta_time);
 
-        // TODO: must assign volume correctly by here, and calculate state!
-
         if (constant_v) {
             Debug.Log("[Stops] Constant V");
             add_heat_constant_v_per_delta_time(applied_heat, insulation_coefficient, delta_time);
@@ -416,6 +414,12 @@ public class ThermoState : MonoBehaviour
     public void add_pressure_uninsulated_per_delta_time(double p, double delta_time) {
         double new_p = pressure + p; // * delta_time;
 
+        double p_dif = 0;
+        if (new_p < ThermoMath.p_min) {
+            p_dif = new_p - ThermoMath.p_min;
+            new_p = ThermoMath.p_min;
+        }
+
         // if (Math.Abs(p * delta_time) < World.DELTA_PRESSURE_CUTOFF) { new_p = pressure + p; } // small enough step; finish transition
 
         /*
@@ -427,7 +431,7 @@ public class ThermoState : MonoBehaviour
         }
         */
 
-        iterative_weight += p;
+        iterative_weight += (p - p_dif);
 
         try {
             //default guess
@@ -450,7 +454,7 @@ public class ThermoState : MonoBehaviour
                         }
                     }
 
-                    // Pressure Constrained -> Insulated -> delta pressure (all phases)
+                    // Pressure Constrained -> Uninsulated -> delta pressure (all phases)
                     new_v = ThermoMath.v_given_ph(new_p, enthalpy);
                     if (region == ThermoMath.region_vapor) {
                         update_vapor_vis(pressure - new_p);
@@ -500,16 +504,34 @@ public class ThermoState : MonoBehaviour
                  * If the conductivity of the wall is less than infinity (insulation % > 0), this same process will occur, although at a slower rate. 
                  */
                 double virtual_p = new_p + iterative_weight - p;
+                if (virtual_p < ThermoMath.p_min) {
+                    virtual_p = ThermoMath.p_min;
+                }
+
                 // TODO: may need an additional "pending_weight" during two-phase 
 
-                new_x = ThermoMath.x_given_ph(virtual_p, enthalpy); // x not increasing as much as one would expect
-                new_v = ThermoMath.v_given_px(virtual_p, new_x);
+                //new_x = ThermoMath.x_given_ph(virtual_p, enthalpy, region); // x not increasing as much as one would expect
+                //new_v = ThermoMath.v_given_px(virtual_p, new_x, region); // or v is increasing too quickly
+
+
+                new_x = ThermoMath.x_given_ph(virtual_p, enthalpy, region);
+                new_v = ThermoMath.v_given_px(virtual_p, new_x, region);
+
+                // ------------------
 
                 /*
                 new_v = ThermoMath.v_given_ph(virtual_p, enthalpy);
-                new_x = ThermoMath.x_given_pv(virtual_p, new_v);
+                new_x = ThermoMath.x_given_pv(pressure, new_v);
+
+                if (new_x > 1) {
+                    region = ThermoMath.region_vapor;
+                    entropy = ThermoMath.s_given_px(new_p, new_x, region);
+                    return;
+                }
                 */
-                
+
+                // ------------------
+
                 // new_v = v_with_enforced_stops(new_v); // enforce volume stops
                 // new_u = ThermoMath.u_given_vt(new_v, temperature, region);
                 new_u = ThermoMath.u_given_px(virtual_p, new_x, region);
@@ -518,16 +540,44 @@ public class ThermoState : MonoBehaviour
                 // temperature = temperature; // T = T_old
                 // pressure = pressure; // P = P_old
                 entropy = ThermoMath.s_given_px(virtual_p, new_x, region);
-                // enthalpy = ThermoMath.h_given_vt(volume, temperature, region); // enthalpy is way off
                 internalenergy = new_u;
                 quality = new_x;
 
-                // region = ThermoMath.region_given_pvt(virtual_p, volume, temperature);
+                // region = ThermoMath.region_given_pvt(pressure, volume, temperature);
                 region = ThermoMath.region_given_ps(virtual_p, entropy);
 
+                bool switched = false;
                 switch (region) {
-                    case ThermoMath.region_liquid: quality = 0; pressure = virtual_p;  break;
-                    case ThermoMath.region_vapor: quality = 1; pressure = virtual_p; break;
+                    case ThermoMath.region_liquid: {
+                            quality = 0;
+                            //enthalpy = ThermoMath.h_given_vt(volume, temperature, region);
+                            switched = true;
+                            break;
+                        }
+                    case ThermoMath.region_vapor: {
+                            quality = 1;
+                            //enthalpy = ThermoMath.h_given_vt(volume, temperature, region);
+                            switched = true;
+                            break;
+                        }
+                }
+
+                if (switched) { // from two-phase to another region
+                    new_v = ThermoMath.v_given_ph(virtual_p, enthalpy);
+                    // new_v = v_with_enforced_stops(new_v); // enforce volume stops
+                    new_u = ThermoMath.u_given_vt(new_v, temperature, region);
+
+                    //at this point, we have enough internal state to derive the rest
+
+                    new_s = ThermoMath.s_given_vt(new_v, temperature, region);
+                    new_h = ThermoMath.h_given_vt(new_v, temperature, region);
+
+                    pressure = new_p;
+                    volume = new_v;
+                    internalenergy = new_u;
+
+                    entropy = new_s;
+                    enthalpy = new_h;
                 }
             }
         }
@@ -614,7 +664,7 @@ public class ThermoState : MonoBehaviour
         clamp_state();
     }
 
-    #endregion // Apply Heat/Pressure
+    #endregion // Apply Heat/PressureM
 
     #region Projections
 
@@ -789,7 +839,8 @@ public class ThermoState : MonoBehaviour
     private bool enthalpy_bounded(double new_p, double curr_h) {
         try {
             ThermoMath.v_given_ph_projected(new_p, curr_h);
-        } catch {
+        }
+        catch {
             // enthalpy out of range
             return true;
         }
