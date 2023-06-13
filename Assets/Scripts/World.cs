@@ -954,9 +954,9 @@ public class World : MonoBehaviour
         ambient_pressure = tool_ambientPressure.get_val();
         room_temp = tool_roomTemp.get_val();
         double psi_to_pascal = 6894.76;
-        double neutral_pressure = 14.6959; //~1atm in psi
+        // double neutral_pressure = 14.6959; //~1atm in psi
         double weight_pressure = (applied_weight) / thermo_present.get_surfacearea_insqr(); //psi
-        weight_pressure += ambient_pressure + neutral_pressure; // TODO: establish logical bounds and units on the ambient pressure dial
+        weight_pressure += ambient_pressure; //+ neutral_pressure; // TODO: establish logical bounds and units on the ambient pressure dial
         weight_pressure *= psi_to_pascal; //conversion from psi to pascal
 
         // get the amount of weight to apply, based on the difference between the total weight to be applied and how much is currently applied

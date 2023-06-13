@@ -98,7 +98,7 @@ public static class ThermoMath
         //Pa
         p_min = IF97.get_Pmin() * 1000000.0; // 611.213
         p_max = IF97.get_Pmax() * 1000000.0; // 100000000
-        p_neutral = new double[] { 101325.0, 3142, 3142 };
+        p_neutral = new double[] { 101325.0, 3142, 3142 }; 
         p_smallstep = 1.0;
 
         //Pa

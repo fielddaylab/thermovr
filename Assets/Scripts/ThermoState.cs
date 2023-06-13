@@ -499,25 +499,26 @@ public class ThermoState : MonoBehaviour
                  * 
                  * If the conductivity of the wall is less than infinity (insulation % > 0), this same process will occur, although at a slower rate. 
                  */
-
-                new_x = ThermoMath.x_given_ph(new_p, enthalpy);
-                new_v = ThermoMath.v_given_px(new_p, new_x);
+                double virtual_p = new_p + iterative_weight - p;
+                new_x = ThermoMath.x_given_ph(virtual_p, enthalpy);
+                new_v = ThermoMath.v_given_px(virtual_p, new_x);
                 // new_v = v_with_enforced_stops(new_v); // enforce volume stops
-                new_u = ThermoMath.u_given_vt(new_v, temperature, region);
-                // new_u = ThermoMath.u_given_px(new_p, new_x, region);
+                // new_u = ThermoMath.u_given_vt(new_v, temperature, region);
+                new_u = ThermoMath.u_given_px(new_p, new_x, region);
 
                 // pressure = new_p;
                 volume = new_v;
-                entropy = ThermoMath.s_given_px(new_p, new_x, region);
+                entropy = ThermoMath.s_given_px(virtual_p, new_x, region);
                 // enthalpy = ThermoMath.h_given_vt(volume, temperature, region); // enthalpy is way off
                 internalenergy = new_u;
                 quality = new_x;
 
-                region = ThermoMath.region_given_ps(new_p, entropy);
+                // region = ThermoMath.region_given_pvt(virtual_p, volume, temperature);
+                region = ThermoMath.region_given_ps(virtual_p, entropy);
 
                 switch (region) {
-                    case ThermoMath.region_liquid: quality = 0; break;
-                    case ThermoMath.region_vapor: quality = 1; break;
+                    case ThermoMath.region_liquid: quality = 0; pressure = new_p;  break;
+                    case ThermoMath.region_vapor: quality = 1; pressure = new_p; break;
                 }
             }
         }
