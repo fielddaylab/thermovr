@@ -19,6 +19,7 @@ public class Touchable : MonoBehaviour
     [System.NonSerialized]
     public Transform og_parent;
     private Lightable[] lightables;
+    public bool has_lightables = true;
 
     void Awake() {
         lhand = GameObject.Find("LeftControllerAnchor");
@@ -29,7 +30,12 @@ public class Touchable : MonoBehaviour
         rhand_c = GameObject.Find("RightControllerAnchor").GetComponent<SphereCollider>();
         og_parent = gameObject.transform.parent;
 
-        lightables = gameObject.GetComponentsInChildren<Lightable>();
+        if (has_lightables) {
+            lightables = gameObject.GetComponentsInChildren<Lightable>();
+        }
+        else {
+            lightables = new Lightable[0];
+        }
     }
 
     /*

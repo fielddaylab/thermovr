@@ -143,6 +143,7 @@
     <Compile Include="Assets\Oculus\SampleFramework\Core\Locomotion\Scripts\TeleportAimHandlerLaser.cs" />
     <Compile Include="Assets\Oculus\SampleFramework\Usage\Passthrough\Scripts\PassthroughBrush.cs" />
     <Compile Include="Assets\Oculus\SampleFramework\Usage\Passthrough\Scripts\PassthroughController.cs" />
+    <Compile Include="Assets\Scripts\PhysicalButton.cs" />
     <Compile Include="Assets\Oculus\SampleFramework\Core\HandsInteraction\Scripts\ColliderZone.cs" />
     <Compile Include="Assets\Oculus\SampleFramework\Core\Video\Scripts\MoviePlayerSampleControls.cs" />
     <Compile Include="Assets\Scripts\Tab.cs" />
@@ -224,7 +225,14 @@
     <Compile Include="Assets\Oculus\SampleFramework\Usage\Passthrough\Scripts\SelectivePassthroughExperience.cs" />
     <Compile Include="Assets\Scripts\Utils\LineSpacer.cs" />
     <Compile Include="Assets\Oculus\SampleFramework\Usage\HandsTrainExample\Scripts\TrackSegment.cs" />
-    <Compile Include="Assets\Scripts\PhysicalButton.cs" />
+    <Compile Include="Assets\Scripts\Tablet.cs" />
+    <Compile Include="Assets\Scripts\UI\UIHub.cs" />
+    <Compile Include="Assets\Scripts\UI\Modules\UIModule.cs" />
+    <Compile Include="Assets\Scripts\UI\Modules\IUIModule.cs" />
+    <Compile Include="Assets\Scripts\UI\Modules\ReadoutModule.cs" />
+    <Compile Include="Assets\Scripts\UI\Modules\GraphModule.cs" />
+    <Compile Include="Assets\Scripts\UI\Modules\SandboxModule.cs" />
+    <Compile Include="Assets\Scripts\UI\Modules\QuizModule.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Oculus\SampleFramework\Usage\HandsTrainExample\Shaders\XingLightShader.shader" />

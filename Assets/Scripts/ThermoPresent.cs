@@ -11,6 +11,8 @@ using UnityEngine;
 using TMPro;
 using System.Collections.Specialized;
 using ThermoVR.Tools;
+using ThermoVR;
+using ThermoVR.State;
 
 //One-Off class used for ordering points in graphgen zipper phase
 class GRAPHPTCMP : IComparer<int>
@@ -58,14 +60,6 @@ public class ThermoPresent : MonoBehaviour
     GameObject state_dot;
     public Material graph_material;
     public Material graph_material_lit;
-    TextMeshPro text_pressure;
-    TextMeshPro text_temperature;
-    TextMeshPro text_volume;
-    TextMeshPro text_internalenergy;
-    TextMeshPro text_entropy;
-    TextMeshPro text_enthalpy;
-    TextMeshPro text_quality;
-    TextMeshPro text_region;
 
     public Flasher error_flasher;
     public TextMeshProUGUI error_message;
@@ -635,15 +629,6 @@ public class ThermoPresent : MonoBehaviour
 
         graph = GameObject.Find("gmodel");
         state_dot = GameObject.Find("gstate");
-
-        text_pressure = GameObject.Find("text_pressure").GetComponent<TextMeshPro>();
-        text_temperature = GameObject.Find("text_temperature").GetComponent<TextMeshPro>();
-        text_volume = GameObject.Find("text_volume").GetComponent<TextMeshPro>();
-        text_internalenergy = GameObject.Find("text_internalenergy").GetComponent<TextMeshPro>();
-        text_entropy = GameObject.Find("text_entropy").GetComponent<TextMeshPro>();
-        text_enthalpy = GameObject.Find("text_enthalpy").GetComponent<TextMeshPro>();
-        text_quality = GameObject.Find("text_quality").GetComponent<TextMeshPro>();
-        text_region = GameObject.Find("text_region").GetComponent<TextMeshPro>();
     }
 
     public void debug_deltas() {
@@ -807,20 +792,25 @@ public class ThermoPresent : MonoBehaviour
         plot_lbase_prev = plot_lbase;
         if (modified) genMesh();
 
-        if (Math.Abs(state.pressure - state.prev_pressure) > ThermoMath.p_smallstep) text_pressure.SetText(string.Format("P: {0:#.##e+0} kPa", (float)state.pressure / 1000f));
-        if (Math.Abs(state.temperature - state.prev_temperature) > ThermoMath.t_smallstep) text_temperature.SetText("T: {0:3}°K ({1:3}°C)", (float)state.temperature, (float)state.temperature - 273.15f);
-        if (Math.Abs(state.volume - state.prev_volume) > ThermoMath.v_smallstep) text_volume.SetText(string.Format("v: {0:#.##e+0} m³/kg", (float)state.volume));
-        if (Math.Abs(state.internalenergy - state.prev_internalenergy) > ThermoMath.u_smallstep) text_internalenergy.SetText(string.Format("u: {0:#.##e+0} kJ/kg", (float)state.internalenergy / 1000f));
-        if (Math.Abs(state.entropy - state.prev_entropy) > ThermoMath.s_smallstep) text_entropy.SetText("s: {0:3} kJ/kgK", (float)state.entropy / 1000f);
-        if (Math.Abs(state.enthalpy - state.prev_enthalpy) > ThermoMath.h_smallstep) text_enthalpy.SetText(string.Format("h: {0:#.##e+0} kJ/kg", (float)state.enthalpy / 1000f));
-        if (state.region == 1 && Math.Abs(state.quality - state.prev_quality) > ThermoMath.x_smallstep) text_quality.SetText("x: {0:3}%", (float)(state.quality * 100f));
+        string update_text = "";
+        if (Math.Abs(state.pressure - state.prev_pressure) > ThermoMath.p_smallstep) { update_text = string.Format("P: {0:#.##e+0} kPa", (float)state.pressure / 1000f); GameMgr.Events.Dispatch(GameEvents.UpdateVarText, new VarUpdate(VarID.Pressure, update_text)); Debug.Log("Sending " + update_text); }
+        if (Math.Abs(state.temperature - state.prev_temperature) > ThermoMath.t_smallstep) { update_text = string.Format("T: {0:0.000}°K ({1:3}°C)", (float)state.temperature, (float)state.temperature - 273.15f); DispatchText(update_text, VarID.Temperature); }
+        if (Math.Abs(state.volume - state.prev_volume) > ThermoMath.v_smallstep) { update_text = string.Format("v: {0:#.##e+0} m³/kg", (float)state.volume); DispatchText(update_text, VarID.Volume); }
+        if (Math.Abs(state.internalenergy - state.prev_internalenergy) > ThermoMath.u_smallstep) { update_text = string.Format("u: {0:#.##e+0} kJ/kg", (float)state.internalenergy / 1000f); DispatchText(update_text, VarID.InternalEnergy); }
+        if (Math.Abs(state.entropy - state.prev_entropy) > ThermoMath.s_smallstep) { update_text = string.Format("s: {0:0.000} kJ/kgK", (float)state.entropy / 1000f); DispatchText(update_text, VarID.Entropy); }
+        if (Math.Abs(state.enthalpy - state.prev_enthalpy) > ThermoMath.h_smallstep) { update_text = string.Format("h: {0:#.##e+0} kJ/kg", (float)state.enthalpy / 1000f); DispatchText(update_text, VarID.Enthalpy); }
+        if (state.region == 1 && Math.Abs(state.quality - state.prev_quality) > ThermoMath.x_smallstep) { update_text = string.Format("x: {0:3}%", (float)(state.quality * 100f)); DispatchText(update_text, VarID.Quality); }
         if (state.region != state.prev_region) {
-            text_region.SetText("region: " + region_to_name(state.region));
-            if (state.region == 1) text_quality.SetText("x: {0:3}%", (float)(state.quality * 100f));
-            else text_quality.SetText("x: Undefined");
+            update_text = "region: " + region_to_name(state.region); DispatchText(update_text, VarID.Region);
+            if (state.region == 1) { update_text = string.Format("x: {0:0.000}%", (float)(state.quality * 100f)); DispatchText(update_text, VarID.Quality); }
+            else { update_text = "x: Undefined"; DispatchText(update_text, VarID.Quality); }
         }
 
         state.stamp_prev();
+    }
+
+    private void DispatchText(string update_text, VarID varId) {
+        GameMgr.Events.Dispatch(GameEvents.UpdateVarText, new VarUpdate(varId, update_text));
     }
 
 }

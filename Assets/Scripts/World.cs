@@ -42,7 +42,7 @@ public class World : MonoBehaviour
     [Space(5)]
     [Header("Thermo")]
     [SerializeField] private ThermoPresent thermo_present;
-    [SerializeField] private Touchable tablet;
+    [SerializeField] private Tablet tablet;
 
     [Space(5)]
     [Header("Controls")]
@@ -234,6 +234,7 @@ public class World : MonoBehaviour
         reset_button.OnPress += HandleResetPressed;
         halfer_button.OnPress += HandleHalferPressed;
 
+        tablet.Init();
 
         flame = GameObject.Find("Flame").GetComponent<ParticleSystem>();
 
@@ -284,7 +285,7 @@ public class World : MonoBehaviour
         movables = new List<Touchable>();
         for (int i = 0; i < tools.Count; i++) movables.Add(tools[i].touchable); //important that tools take priority, so they can be grabbed and removed
         movables.Add(clipboard.GetComponent<Touchable>());
-        movables.Add(tablet);
+        movables.Add(tablet.touchable);
 
         halfables = new List<Halfable>();
         halfables.Add(GameObject.Find("Container").GetComponent<Halfable>());
@@ -764,6 +765,9 @@ public class World : MonoBehaviour
             // Check if pressing buttons
             halfer_button.CheckForPress(left_hand);
             reset_button.CheckForPress(left_hand);
+
+            // Check buttons on tablet
+            tablet.CheckButtonsForPress(left_hand);
         }
 
         //centerer
@@ -844,6 +848,9 @@ public class World : MonoBehaviour
         // Buttons
         halfer_button.SetFingerTouches(ref ltouch, ref rtouch);
         reset_button.SetFingerTouches(ref ltouch, ref rtouch);
+
+        // Buttons on tablet
+        tablet.SetFingerTouches(ref ltouch, ref rtouch);
 
         //Other
         handle_workspace_touchable.SetFingerTouches(ref ltouch, ref rtouch);
