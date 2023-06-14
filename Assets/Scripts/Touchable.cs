@@ -60,6 +60,16 @@ public class Touchable : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="queryingLeft">true if querying the left finger, false if the right finger</param>
+    /// <returns></returns>
+    public void SetFingerTouches(ref bool ltouch, ref bool rtouch) {
+        if (this.ltouch) { ltouch = true; }
+        if (this.rtouch) { rtouch = true; }
+    }
+
     protected virtual void OnTriggerEnter(Collider c) {
         deltaTouch(c, true);
     }

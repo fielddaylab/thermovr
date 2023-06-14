@@ -17,6 +17,7 @@ using BeauUtil;
 using ThermoVR.Tools;
 using UnityEngine.UIElements;
 using ThermoVR;
+using static OVRInput;
 
 public class World : MonoBehaviour
 {
@@ -113,6 +114,8 @@ public class World : MonoBehaviour
     GameObject reset;
     Touchable reset_touchable;
     FingerToggleable reset_fingertoggleable;
+    [SerializeField] PhysicalButton reset_button;
+    [SerializeField] PhysicalButton halfer_button;
 
     [Space(5)]
     [Header("Dot Placement")]
@@ -225,6 +228,12 @@ public class World : MonoBehaviour
         dial_roomTemp.Init(-100, 200);
         dial_percentInsulation.Init(0f, 100);
 
+        // Initialize Buttons
+        reset_button.Init();
+        halfer_button.Init();
+        reset_button.OnPress += HandleResetPressed;
+        halfer_button.OnPress += HandleHalferPressed;
+
 
         flame = GameObject.Find("Flame").GetComponent<ParticleSystem>();
 
@@ -277,12 +286,6 @@ public class World : MonoBehaviour
         movables.Add(clipboard.GetComponent<Touchable>());
         movables.Add(tablet);
 
-        halfer = GameObject.Find("Halfer");
-        halfer_touchable = halfer.GetComponent<Touchable>();
-        halfer_fingertoggleable = halfer.GetComponent<FingerToggleable>();
-        reset = GameObject.Find("Reset");
-        reset_touchable = reset.GetComponent<Touchable>();
-        reset_fingertoggleable = reset.GetComponent<FingerToggleable>();
         halfables = new List<Halfable>();
         halfables.Add(GameObject.Find("Container").GetComponent<Halfable>());
         halfables.Add(GameObject.Find("Tool_Insulator").GetComponent<Halfable>());
@@ -758,37 +761,9 @@ public class World : MonoBehaviour
 
         if (ref_grabbed == null) //still not holding anything
         {
-            if (halfer_fingertoggleable.finger) //finger hitting halfer object
-            {
-                if ( //we're currently checking the correct hand
-                  (left_hand && halfer_fingertoggleable.lfinger) ||
-                  (!left_hand && halfer_fingertoggleable.rfinger)
-                ) { //halfer state
-                    if (halfer_fingertoggleable.on) {
-                        halfer.GetComponent<AudioSource>().Play();
-                        SetAllHalfed(!halfed);
-                        halfer_fingertoggleable.on = false;
-                    }
-                }
-            }
-            else halfer_fingertoggleable.on = false;
-
-            if (reset_fingertoggleable.finger) //finger hitting reset object
-            {
-                if ( //we're currently checking the correct hand
-                  (left_hand && reset_fingertoggleable.lfinger) ||
-                  (!left_hand && reset_fingertoggleable.rfinger)
-                ) { //reset state
-                    if (reset_fingertoggleable.on) {
-                        reset.GetComponent<AudioSource>().Play();
-                        for (int i = 0; i < tools.Count; i++)
-                            if (tools[i].engaged) DetachTool(tools[i], new Vector3(0.0f, 0.0f, 0.0f));
-                        thermo_present.Reset();
-                        reset_fingertoggleable.on = false;
-                    }
-                }
-            }
-            else reset_fingertoggleable.on = false;
+            // Check if pressing buttons
+            halfer_button.CheckForPress(left_hand);
+            reset_button.CheckForPress(left_hand);
         }
 
         //centerer
@@ -849,32 +824,33 @@ public class World : MonoBehaviour
             }
         }
 
-        Touchable gr;
         bool ltouch = false;
         bool rtouch = false;
-        for (int i = 0; i < movables.Count; i++) {
-            gr = movables[i];
-            if (gr.ltouch) ltouch = true;
-            if (gr.rtouch) rtouch = true;
-        }
-        for (int i = 0; i < dials.Count; i++) {
-            gr = dials[i].touchable;
-            if (gr.ltouch) ltouch = true;
-            if (gr.rtouch) rtouch = true;
-        }
-        gr = handle_workspace_touchable;
-        if (gr.ltouch) ltouch = true;
-        if (gr.rtouch) rtouch = true;
-        gr = graph_touchable;
-        if (gr.ltouch) ltouch = true;
-        if (gr.rtouch) rtouch = true;
-        Touchable press_gr = halfer_touchable;
-        if (press_gr.ltouch) ltouch = true;
-        if (press_gr.rtouch) rtouch = true;
-        press_gr = reset_touchable;
-        if (press_gr.ltouch) ltouch = true;
-        if (press_gr.rtouch) rtouch = true;
+        update_touches(ref ltouch, ref rtouch);
+        update_meshes(ref ltouch, ref rtouch);
+    }
 
+    private void update_touches(ref bool ltouch, ref bool rtouch) {
+        // Movables
+        for (int i = 0; i < movables.Count; i++) {
+            movables[i].SetFingerTouches(ref ltouch, ref rtouch);
+        }
+
+        // Dials
+        for (int i = 0; i < dials.Count; i++) {
+            dials[i].touchable.SetFingerTouches(ref ltouch, ref rtouch);
+        }
+
+        // Buttons
+        halfer_button.SetFingerTouches(ref ltouch, ref rtouch);
+        reset_button.SetFingerTouches(ref ltouch, ref rtouch);
+
+        //Other
+        handle_workspace_touchable.SetFingerTouches(ref ltouch, ref rtouch);
+        graph_touchable.SetFingerTouches(ref ltouch, ref rtouch);
+    }
+
+    private void update_meshes(ref bool ltouch, ref bool rtouch) {
         if (lgrabbed) lhand.meshrenderer.materials = hand_grabbings;
         else if (ltouch) lhand.meshrenderer.materials = hand_touchings;
         else lhand.meshrenderer.materials = hand_emptys;
@@ -1175,6 +1151,21 @@ public class World : MonoBehaviour
                 break;
         }
     }
+
+    #region Handlers
+
+    private void HandleResetPressed(object sender, System.EventArgs args) {
+        for (int i = 0; i < tools.Count; i++) {
+            if (tools[i].engaged) DetachTool(tools[i], new Vector3(0.0f, 0.0f, 0.0f));
+        }
+        thermo_present.Reset();
+    }
+
+    private void HandleHalferPressed(object sender, System.EventArgs args) {
+        SetAllHalfed(!halfed);
+    }
+
+    #endregion // Handlers
 
 }
 
