@@ -111,14 +111,8 @@ public class World : MonoBehaviour
     [Header("Halfables")]
     bool halfed = false;
     List<Halfable> halfables;
-    GameObject halfer;
-    Touchable halfer_touchable;
-    FingerToggleable halfer_fingertoggleable;
-    GameObject reset;
-    Touchable reset_touchable;
-    FingerToggleable reset_fingertoggleable;
-    [SerializeField] PhysicalButton reset_button;
-    [SerializeField] PhysicalButton halfer_button;
+    [SerializeField] Pressable reset_button;
+    [SerializeField] Pressable halfer_button;
 
     [Space(5)]
     [Header("Dot Placement")]
@@ -163,7 +157,13 @@ public class World : MonoBehaviour
     double applied_weight = 0;
     double ambient_pressure = 0;
 
+    private List<Pressable> m_pressables; // pressables register themselves with this on event
+
     #region Initialization
+    private void Awake() {
+        GameMgr.Events?.Register<Pressable>(GameEvents.RegisterPressable, HandleRegisterPressable);
+    }
+
 
     public void Init() {
         // All this code does, at end of day, is find all the objects to manage,
@@ -231,6 +231,10 @@ public class World : MonoBehaviour
         dial_roomTemp.Init(-100, 200);
         dial_percentInsulation.Init(0f, 100);
 
+        // gather pressables
+        m_pressables = new List<Pressable>();
+        GameMgr.Events.Dispatch(GameEvents.GatherPressables);
+
         // Initialize Buttons
         reset_button.Init();
         halfer_button.Init();
@@ -239,11 +243,6 @@ public class World : MonoBehaviour
 
         // Initialize Tablet (and corresponding buttons)
         tablet.Init();
-
-        // Initialize graph elements
-        for (int i = 0; i < graph_elements.Length; i++) {
-            graph_elements[i].Init();
-        }
 
         flame = GameObject.Find("Flame").GetComponent<ParticleSystem>();
 
@@ -771,12 +770,16 @@ public class World : MonoBehaviour
 
         if (ref_grabbed == null) //still not holding anything
         {
+            GameMgr.Events.Dispatch(GameEvents.CheckForPress, left_hand);
+
+            /*
             // Check if pressing buttons
             halfer_button.CheckForPress(left_hand);
             reset_button.CheckForPress(left_hand);
 
             // Check buttons on tablet
             tablet.CheckButtonsForPress(left_hand);
+            */
         }
 
         //centerer
@@ -844,6 +847,13 @@ public class World : MonoBehaviour
     }
 
     private void update_touches(ref bool ltouch, ref bool rtouch) {
+        for (int i = 0; i < m_pressables.Count; i++) {
+            Pressable pressable = m_pressables[i];
+            pressable.SetFingerTouches(ref ltouch, ref rtouch);
+            continue;
+        }
+
+        /*
         // Movables
         for (int i = 0; i < movables.Count; i++) {
             movables[i].SetFingerTouches(ref ltouch, ref rtouch);
@@ -861,9 +871,12 @@ public class World : MonoBehaviour
         // Buttons on tablet
         tablet.SetFingerTouches(ref ltouch, ref rtouch);
 
+
         //Other
         handle_workspace_touchable.SetFingerTouches(ref ltouch, ref rtouch);
         graph_touchable.SetFingerTouches(ref ltouch, ref rtouch);
+        */
+
     }
 
     private void update_meshes(ref bool ltouch, ref bool rtouch) {
@@ -1179,6 +1192,12 @@ public class World : MonoBehaviour
 
     private void HandleHalferPressed(object sender, System.EventArgs args) {
         SetAllHalfed(!halfed);
+    }
+
+    private void HandleRegisterPressable(Pressable pressable) {
+        if (!m_pressables.Contains(pressable)) {
+            m_pressables.Add(pressable);
+        }
     }
 
     #endregion // Handlers

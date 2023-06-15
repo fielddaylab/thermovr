@@ -34,7 +34,7 @@ public class Touchable : MonoBehaviour
             lightables = gameObject.GetComponentsInChildren<Lightable>();
         }
         else {
-            lightables = new Lightable[0];
+            lightables = null;
         }
     }
 
@@ -61,8 +61,10 @@ public class Touchable : MonoBehaviour
 
         touch = (ltouch || rtouch);
 
-        foreach (Lightable light in lightables) {
-            light.SetLit(touch);
+        if (lightables != null) {
+            foreach (Lightable light in lightables) {
+                light.SetLit(touch);
+            }
         }
     }
 

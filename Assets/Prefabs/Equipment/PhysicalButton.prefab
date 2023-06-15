@@ -52,6 +52,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: afd6f79acab78f847a707c9fa9d91272, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_touchTime: 0.1
 --- !u!65 &4608346533408481559
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -93,6 +94,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ebcac9b616909a4380a72e50249cee2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  has_lightables: 1
   ltouch: 0
   rtouch: 0
   touch: 0

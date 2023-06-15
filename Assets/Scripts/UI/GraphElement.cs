@@ -27,8 +27,11 @@ namespace ThermoVR.UI.GraphElements
     public class GraphElement : MonoBehaviour
     {
         [SerializeField] private GraphElementID m_elementID;
+        [SerializeField] private bool m_startVisible = false;
 
-        public void Init() {
+        private void Awake() {
+            // start invisible
+            this.gameObject.SetActive(m_startVisible);
             GameMgr.Events?.Register<GraphSettingUpdate>(GameEvents.UpdateGraphSetting, HandleUpdateGraphSetting);
         }
 

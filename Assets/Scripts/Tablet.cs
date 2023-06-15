@@ -19,16 +19,16 @@ namespace ThermoVR
 
         [Space(5)]
         [Header("Tabs")]
-        [SerializeField] private PhysicalButton m_readoutTabButton;
-        [SerializeField] private PhysicalButton m_sandboxTabButton;
-        [SerializeField] private PhysicalButton m_quizTabButton;
-        [SerializeField] private PhysicalButton m_graphTabButton;
+        [SerializeField] private Pressable m_readoutTabButton;
+        [SerializeField] private Pressable m_sandboxTabButton;
+        [SerializeField] private Pressable m_quizTabButton;
+        [SerializeField] private Pressable m_graphTabButton;
 
-        private List<PhysicalButton> m_tabButtons;
+        private List<Pressable> m_tabButtons;
 
         public void Init() {
             // Add buttons to list
-            m_tabButtons = new List<PhysicalButton> {
+            m_tabButtons = new List<Pressable> {
                 m_readoutTabButton,
                 m_sandboxTabButton,
                 m_quizTabButton,
@@ -58,11 +58,13 @@ namespace ThermoVR
             }
         }
 
+        /*
         public void CheckButtonsForPress(bool left_hand) {
             for (int i = 0; i < m_tabButtons.Count; i++) {
                 m_tabButtons[i].CheckForPress(left_hand);
             }
         }
+        */
 
         #endregion // World Interactions
 
