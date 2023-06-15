@@ -18,17 +18,19 @@ public class GraphModule : UIModule
     [SerializeField] private ThermoToggle m_gridLinesToggle;
     [SerializeField] private ThermoToggle m_regionLabelsToggle;
     [SerializeField] private ThermoToggle m_constantLinesToggle;
+    [SerializeField] private ThermoToggle m_axisTrackersToggle;
 
     private ThermoToggle[] m_toggles;
 
     public override void Init() {
         base.Init();
 
-        m_toggles = new ThermoToggle[4] {
+        m_toggles = new ThermoToggle[5] {
             m_axisNumbersToggle,
             m_gridLinesToggle,
             m_regionLabelsToggle,
-            m_constantLinesToggle
+            m_constantLinesToggle,
+            m_axisTrackersToggle
         };
 
         for (int i = 0; i < m_toggles.Length; i++) {
@@ -60,6 +62,7 @@ public class GraphModule : UIModule
         m_gridLinesToggle.Pressable.PressCompleted += HandleGridLinesToggle;
         m_regionLabelsToggle.Pressable.PressCompleted += HandleRegionLabelsToggle;
         m_constantLinesToggle.Pressable.PressCompleted += HandleConstantLinesToggle;
+        m_axisTrackersToggle.Pressable.PressCompleted += HandleAxisTrackersToggle;
     }
 
     private void RemoveListeners() {
@@ -67,6 +70,7 @@ public class GraphModule : UIModule
         m_gridLinesToggle.Pressable.PressCompleted -= HandleGridLinesToggle;
         m_regionLabelsToggle.Pressable.PressCompleted -= HandleRegionLabelsToggle;
         m_constantLinesToggle.Pressable.PressCompleted -= HandleConstantLinesToggle;
+        m_axisTrackersToggle.Pressable.PressCompleted -= HandleAxisTrackersToggle;
     }
 
     #endregion // Helpers
@@ -93,6 +97,11 @@ public class GraphModule : UIModule
     private void HandleConstantLinesToggle(object sender, EventArgs args) {
         bool val = m_constantLinesToggle.IsOn();
         GameMgr.Events.Dispatch(GameEvents.UpdateGraphSetting, new GraphSettingUpdate(GraphElementID.ConstantLines, val));
+    }
+
+    private void HandleAxisTrackersToggle(object sender, EventArgs args) {
+        bool val = m_axisTrackersToggle.IsOn();
+        GameMgr.Events.Dispatch(GameEvents.UpdateGraphSetting, new GraphSettingUpdate(GraphElementID.AxisTrackers, val));
     }
 
     #endregion // Handlers

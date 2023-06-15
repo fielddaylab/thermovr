@@ -123,6 +123,7 @@ public class World : MonoBehaviour
     Vector3 placement_thermo;
     bool placement_thermo_reasonable;
     GameObject challenge_dot;
+
     GameObject clipboard;
 
     ChallengeBall challenge_ball_collide;
@@ -194,17 +195,17 @@ public class World : MonoBehaviour
             // tool_percentInsulation
         };
 
-        tool_insulator.Init("%");
-        tool_stop1.Init("M³/kg");
-        tool_stop2.Init("M³/kg");
-        tool_burner.Init("kJ/s", 0.001f);
-        tool_coil.Init("kJ/s", 0.001f);
-        tool_weight.Init("kg");
-        tool_balloon.Init("kg");
+        tool_insulator.Init(Units.Quality);
+        tool_stop1.Init(Units.Volume);
+        tool_stop2.Init(Units.Volume);
+        tool_burner.Init(Units.Heat, 0.001f);
+        tool_coil.Init(Units.Heat, 0.001f);
+        tool_weight.Init(Units.Weight);
+        tool_balloon.Init(Units.Weight);
         // TODO: establish logical bounds and units on the ambient pressure tool
-        tool_ambientPressure.Init("kPa");
-        tool_roomTemp.Init("F");
-        // tool_percentInsulation.Init("%");
+        tool_ambientPressure.Init(Units.Pressure);
+        tool_roomTemp.Init(Units.TemperatureK);
+        // tool_percentInsulation.Init(Units.Percent);
 
         dials = new List<Dial> {
             // dial_insulator,
@@ -231,7 +232,7 @@ public class World : MonoBehaviour
         dial_roomTemp.Init(-100, 200);
         dial_percentInsulation.Init(0f, 100);
 
-        // gather pressables
+        // Gather pressables
         m_pressables = new List<Pressable>();
         GameMgr.Events.Dispatch(GameEvents.GatherPressables);
 

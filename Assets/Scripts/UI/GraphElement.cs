@@ -9,7 +9,8 @@ namespace ThermoVR.UI.GraphElements
         AxisNumbers,
         RegionLabels,
         GridLines,
-        ConstantLines
+        ConstantLines,
+        AxisTrackers
     }
 
     public struct GraphSettingUpdate
@@ -39,6 +40,7 @@ namespace ThermoVR.UI.GraphElements
 
         private void HandleUpdateGraphSetting(GraphSettingUpdate update) {
             if (update.GraphElementID == m_elementID) {
+
                 SetActive(update.ToggleVal);
             }
         }

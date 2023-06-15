@@ -21,3 +21,19 @@ static public class ObjectIDs
 {
     static public readonly string CenterEyeAnchor = "CenterEyeAnchor";
 }
+
+static public class Units
+{
+    static public readonly string Weight = "kg";
+    static public readonly string Heat = "kJ/s";
+    static public readonly string TemperatureK = "°K";
+    static public readonly string TemperatureC = "°C";
+    static public readonly string Percent = "%";
+
+    static public readonly string Pressure = "kPa";
+    static public readonly string Volume = "M³/kg";
+    static public readonly string InternalEnergy = "kJ/kg";
+    static public readonly string Entropy = "kJ/kgK";
+    static public readonly string Enthalpy = "kJ/kg";
+    static public readonly string Quality = "%";
+}

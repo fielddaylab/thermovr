@@ -58,6 +58,9 @@ public class ThermoPresent : MonoBehaviour
     //mesh
     GameObject graph;
     GameObject state_dot;
+    [SerializeField] private GameObject dot_x_tracker;
+    [SerializeField] private GameObject dot_y_tracker;
+    [SerializeField] private GameObject dot_z_tracker;
     public Material graph_material;
     public Material graph_material_lit;
 
@@ -710,6 +713,8 @@ public class ThermoPresent : MonoBehaviour
     void visualize_state() {
         state_dot.transform.localPosition = plot(state.pressure, state.volume, state.temperature);
 
+        update_tracker_pos();
+
         float height = (float)(state.volume / state.surfacearea); //M
         float reductionFactor = 0.02f; //hack to reduce overall volume; do all calculations assuming 1.0kg of water, do all visualizations assuming reductionFactor*1.0kg of water. Assuming volume is linearly proportional to molarity (I _think_ it is?), we should be good. If not, we're still better than altering the behavior of vapor at an arbitrary threshhold
         height *= reductionFactor;
@@ -744,6 +749,20 @@ public class ThermoPresent : MonoBehaviour
         }
         water.transform.localScale = water_lt;
         //steam.transform.localScale = -1f*steam_lt;
+    }
+
+    private void update_tracker_pos() {
+        Vector3 state_pos = state_dot.transform.position;
+
+        Vector3 tracker_pos = dot_x_tracker.transform.position;
+        dot_x_tracker.transform.position = new Vector3(tracker_pos.x, tracker_pos.y, state_pos.z); // x_tracker and z_tracker are reversed in global calculations, somehow
+
+        tracker_pos = dot_y_tracker.transform.position;
+        // dot_y_tracker.transform.SetPositionAndRotation(new Vector3(tracker_pos.x, state_pos.y, tracker_pos.z), Quaternion.identity);
+        dot_y_tracker.transform.position = new Vector3(tracker_pos.x, state_pos.y, tracker_pos.z);
+
+        tracker_pos = dot_z_tracker.transform.position;
+        dot_z_tracker.transform.position = new Vector3(state_pos.x, tracker_pos.y, tracker_pos.z); // x_tracker and z_tracker are reversed in global calculations, somehow
     }
 
     /// <summary>
@@ -793,16 +812,16 @@ public class ThermoPresent : MonoBehaviour
         if (modified) genMesh();
 
         string update_text = "";
-        if (Math.Abs(state.pressure - state.prev_pressure) > ThermoMath.p_smallstep) { update_text = string.Format("P: {0:#.##e+0} kPa", (float)state.pressure / 1000f); GameMgr.Events.Dispatch(GameEvents.UpdateVarText, new VarUpdate(VarID.Pressure, update_text)); Debug.Log("Sending " + update_text); }
-        if (Math.Abs(state.temperature - state.prev_temperature) > ThermoMath.t_smallstep) { update_text = string.Format("T: {0:0.000}°K ({1:3}°C)", (float)state.temperature, (float)state.temperature - 273.15f); DispatchText(update_text, VarID.Temperature); }
-        if (Math.Abs(state.volume - state.prev_volume) > ThermoMath.v_smallstep) { update_text = string.Format("v: {0:#.##e+0} m³/kg", (float)state.volume); DispatchText(update_text, VarID.Volume); }
-        if (Math.Abs(state.internalenergy - state.prev_internalenergy) > ThermoMath.u_smallstep) { update_text = string.Format("u: {0:#.##e+0} kJ/kg", (float)state.internalenergy / 1000f); DispatchText(update_text, VarID.InternalEnergy); }
-        if (Math.Abs(state.entropy - state.prev_entropy) > ThermoMath.s_smallstep) { update_text = string.Format("s: {0:0.000} kJ/kgK", (float)state.entropy / 1000f); DispatchText(update_text, VarID.Entropy); }
-        if (Math.Abs(state.enthalpy - state.prev_enthalpy) > ThermoMath.h_smallstep) { update_text = string.Format("h: {0:#.##e+0} kJ/kg", (float)state.enthalpy / 1000f); DispatchText(update_text, VarID.Enthalpy); }
-        if (state.region == 1 && Math.Abs(state.quality - state.prev_quality) > ThermoMath.x_smallstep) { update_text = string.Format("x: {0:3}%", (float)(state.quality * 100f)); DispatchText(update_text, VarID.Quality); }
+        if (Math.Abs(state.pressure - state.prev_pressure) > ThermoMath.p_smallstep) { update_text = string.Format("P: {0:#.##e+0} " + Units.Pressure, (float)state.pressure / 1000f); GameMgr.Events.Dispatch(GameEvents.UpdateVarText, new VarUpdate(VarID.Pressure, update_text)); }
+        if (Math.Abs(state.temperature - state.prev_temperature) > ThermoMath.t_smallstep) { update_text = string.Format("T: {0:0.000}" + Units.TemperatureK + " ({1:3}" + Units.TemperatureC + ")", (float)state.temperature, (float)state.temperature - 273.15f); DispatchText(update_text, VarID.Temperature); }
+        if (Math.Abs(state.volume - state.prev_volume) > ThermoMath.v_smallstep) { update_text = string.Format("v: {0:#.##e+0} " + Units.Volume, (float)state.volume); DispatchText(update_text, VarID.Volume); }
+        if (Math.Abs(state.internalenergy - state.prev_internalenergy) > ThermoMath.u_smallstep) { update_text = string.Format("u: {0:#.##e+0} " + Units.InternalEnergy, (float)state.internalenergy / 1000f); DispatchText(update_text, VarID.InternalEnergy); }
+        if (Math.Abs(state.entropy - state.prev_entropy) > ThermoMath.s_smallstep) { update_text = string.Format("s: {0:0.000} " + Units.Entropy, (float)state.entropy / 1000f); DispatchText(update_text, VarID.Entropy); }
+        if (Math.Abs(state.enthalpy - state.prev_enthalpy) > ThermoMath.h_smallstep) { update_text = string.Format("h: {0:#.##e+0} " + Units.Enthalpy, (float)state.enthalpy / 1000f); DispatchText(update_text, VarID.Enthalpy); }
+        if (state.region == 1 && Math.Abs(state.quality - state.prev_quality) > ThermoMath.x_smallstep) { update_text = string.Format("x: {0:3}" + Units.Quality, (float)(state.quality * 100f)); DispatchText(update_text, VarID.Quality); }
         if (state.region != state.prev_region) {
             update_text = "region: " + region_to_name(state.region); DispatchText(update_text, VarID.Region);
-            if (state.region == 1) { update_text = string.Format("x: {0:0.000}%", (float)(state.quality * 100f)); DispatchText(update_text, VarID.Quality); }
+            if (state.region == 1) { update_text = string.Format("x: {0:0.000}" + Units.Quality, (float)(state.quality * 100f)); DispatchText(update_text, VarID.Quality); }
             else { update_text = "x: Undefined"; DispatchText(update_text, VarID.Quality); }
         }
 
