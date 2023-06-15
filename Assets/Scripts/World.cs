@@ -985,16 +985,27 @@ public class World : MonoBehaviour
         //(technically, "should" add_pressure(...) with every delta of weight on the piston, but that would result in very jumpy nonsense movements. iterating toward a target smooths it out)
         // double delta_pressure = (weight_pressure - thermo_present.get_pressure()); // here: when the sim increases internal pressure, it results in depressurization.
 
+        double insulation_coefficient;
+
+        if (tool_insulator.engaged) {
+            insulation_coefficient = 1.0f;
+            // insulation_coefficient = dial_percentInsulation.val;
+        }
+        else {
+            insulation_coefficient = CONTAINER_INSULATION_COEFFICIENT;
+            // insulation_coefficient = 0;
+        }
+
         if (System.Math.Abs(delta_weight) > 0) {
-            if (tool_insulator.engaged) {
+            // TODO: check that == 1 is correct check
+            if (insulation_coefficient == 1.0f) {
                 thermo_present.add_pressure_insulated_per_delta_time(delta_weight, delta_time); // Pressure Constrained -> Insulated ->  delta pressure
             }
             else {
-                thermo_present.add_pressure_uninsulated_per_delta_time(delta_weight, delta_time); // Pressure Constrained -> Uninsulated ->  delta pressure
+                thermo_present.add_pressure_uninsulated_per_delta_time(delta_weight, delta_time, insulation_coefficient); // Pressure Constrained -> Uninsulated ->  delta pressure
             }
         }
 
-        double insulation_coefficient = tool_insulator.engaged ? 1.0f : CONTAINER_INSULATION_COEFFICIENT;
 
         /*
             if (!tool_insulator.engaged) //heat leak

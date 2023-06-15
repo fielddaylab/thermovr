@@ -448,8 +448,8 @@ namespace ThermoVR.State
             clamp_state();
         }
 
-        public void add_pressure_uninsulated_per_delta_time(double p, double delta_time) {
-            double new_p = pressure + p; // * delta_time;
+        public void add_pressure_uninsulated_per_delta_time(double p, double delta_time, double insulation_coefficient) {
+            double new_p = pressure + p; // - p * insulation_coefficient; // * delta_time;
 
             double p_dif = 0;
             if (new_p < ThermoMath.p_min) {
