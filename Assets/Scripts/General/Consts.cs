@@ -10,7 +10,8 @@ static public class GameEvents
     static public readonly StringHash32 StoreTool = "sim:store-tool"; // Tool
     static public readonly StringHash32 UpdateToolText = "tool:update-text"; // Tool
     static public readonly StringHash32 UpdateVaporFlow = "sim:vapor-update-flow"; // double
-    static public readonly StringHash32 UpdateVarText = "sim:update-var-text"; // VarID, string
+    static public readonly StringHash32 UpdateVarText = "sim:update-var-text"; // VarUpdate
+    static public readonly StringHash32 UpdateGraphSetting = "sim:update-graph-setting"; // GraphSettingUpdate
 }
 
 static public class ObjectIDs

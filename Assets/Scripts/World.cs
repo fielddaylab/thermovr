@@ -18,6 +18,7 @@ using ThermoVR.Tools;
 using UnityEngine.UIElements;
 using ThermoVR;
 using static OVRInput;
+using ThermoVR.UI.GraphElements;
 
 public class World : MonoBehaviour
 {
@@ -43,6 +44,8 @@ public class World : MonoBehaviour
     [Header("Thermo")]
     [SerializeField] private ThermoPresent thermo_present;
     [SerializeField] private Tablet tablet;
+    // TODO: assign these
+    [SerializeField] private GraphElement[] graph_elements; // visual aid overlays on graph (region labels, number lines, etc.)
 
     [Space(5)]
     [Header("Controls")]
@@ -234,7 +237,13 @@ public class World : MonoBehaviour
         reset_button.OnPress += HandleResetPressed;
         halfer_button.OnPress += HandleHalferPressed;
 
+        // Initialize Tablet (and corresponding buttons)
         tablet.Init();
+
+        // Initialize graph elements
+        for (int i = 0; i < graph_elements.Length; i++) {
+            graph_elements[i].Init();
+        }
 
         flame = GameObject.Find("Flame").GetComponent<ParticleSystem>();
 

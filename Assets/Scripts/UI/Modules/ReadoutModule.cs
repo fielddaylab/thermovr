@@ -9,6 +9,8 @@ using TMPro;
 
 public class ReadoutModule : UIModule
 {
+    #region Inspector
+
     [SerializeField] private TextMeshPro text_pressure;
     [SerializeField] private TextMeshPro text_temperature;
     [SerializeField] private TextMeshPro text_volume;
@@ -17,6 +19,10 @@ public class ReadoutModule : UIModule
     [SerializeField] private TextMeshPro text_enthalpy;
     [SerializeField] private TextMeshPro text_quality;
     [SerializeField] private TextMeshPro text_region;
+
+    #endregion // Inspector
+
+    #region IUIModule
 
     public override void Init() {
         base.Init();
@@ -31,6 +37,8 @@ public class ReadoutModule : UIModule
     public override void Close() {
         base.Close();
     }
+
+    #endregion // IUIModule
 
     #region Handlers
 

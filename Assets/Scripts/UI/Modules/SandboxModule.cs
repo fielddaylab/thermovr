@@ -6,6 +6,8 @@ using UnityEngine;
 
 public class SandboxModule : UIModule
 {
+    #region IUIModule
+
     public override void Open() {
         base.Open();
     }
@@ -13,4 +15,6 @@ public class SandboxModule : UIModule
     public override void Close() {
         base.Close();
     }
+
+    #endregion // IUIModule
 }

@@ -6,6 +6,8 @@ using UnityEngine;
 
 public class QuizModule : UIModule
 {
+    #region IUIModule
+
     public override void Open() {
         base.Open();
     }
@@ -13,4 +15,6 @@ public class QuizModule : UIModule
     public override void Close() {
         base.Close();
     }
+
+    #endregion // IUIModule
 }
