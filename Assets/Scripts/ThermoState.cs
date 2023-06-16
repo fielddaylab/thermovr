@@ -285,6 +285,8 @@ namespace ThermoVR.State
                 entropy = ThermoMath.s_given_vt(volume, temperature, region);
                 enthalpy = ThermoMath.h_given_vt(volume, temperature, region);
 
+                // region = ThermoMath.region_given_ps(pressure, entropy);
+
                 switch (region) {
                     case ThermoMath.region_liquid: {
                             quality = 0;
@@ -292,8 +294,13 @@ namespace ThermoVR.State
                             break;
                         }
                     case ThermoMath.region_twophase: {
+                            /*
                             quality = ThermoMath.x_given_pv(pressure, volume, region);
+                            entropy = ThermoMath.s_given_px(pressure, quality, region);
                             internalenergy = ThermoMath.u_given_px(pressure, quality, region);
+                            */
+                            // We've never quite gotten warp_pv to work in two-phase. So for now, disallow it.
+                            revert_state();
                             break;
                         }
                     case ThermoMath.region_vapor: {
@@ -304,15 +311,19 @@ namespace ThermoVR.State
                 }
             }
             catch (Exception e) {
-                temperature = prev_temperature;
-                pressure = prev_pressure;
-                volume = prev_volume;
-                region = prev_region;
-                entropy = prev_entropy;
-                enthalpy = prev_enthalpy;
-                internalenergy = prev_internalenergy;
+                revert_state();
             }
             clamp_state();
+        }
+
+        private void revert_state() {
+            temperature = prev_temperature;
+            pressure = prev_pressure;
+            volume = prev_volume;
+            region = prev_region;
+            entropy = prev_entropy;
+            enthalpy = prev_enthalpy;
+            internalenergy = prev_internalenergy;
         }
 
         public void stamp_prev() {
@@ -349,6 +360,8 @@ namespace ThermoVR.State
         private void add_heat_constant_p_per_delta_time(double applied_heat, double insulation_coefficient, double delta_time) {  // Pressure Constrained -> Insulated && Uninsulated -> delta energy    // time eqtn 6b
             try {
                 double delta_h = delta_time / mass * (applied_heat * insulation_coefficient);  // time eqtn 6a
+
+                // TODO: when in two-phase (and uninsulated?), add iterative pressure!
 
                 double new_h = enthalpy + delta_h;
                 new_h = ClampEnthalpy(new_h, pressure);
@@ -459,7 +472,7 @@ namespace ThermoVR.State
 
             // if (Math.Abs(p * delta_time) < World.DELTA_PRESSURE_CUTOFF) { new_p = pressure + p; } // small enough step; finish transition
 
-            if (enthalpy_bounded(new_p, enthalpy)) {
+            if (enthalpy_bounded(new_p, enthalpy) && region != ThermoMath.region_twophase) {
                 return;
             }
             /*
@@ -602,7 +615,9 @@ namespace ThermoVR.State
         public void add_pressure_insulated_per_delta_time(double p, double delta_time) {
             double new_p = pressure + p; // * delta_time;
                                          // if (Math.Abs(p * delta_time) < World.DELTA_PRESSURE_CUTOFF) { new_p = pressure + p; } // small enough step; finish transition
+            
             if (enthalpy_bounded(new_p, enthalpy) && region != ThermoMath.region_twophase) {
+                // heads-off various graph boundary errors
                 return;
             }
             /*
