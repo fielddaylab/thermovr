@@ -235,6 +235,10 @@ public class ThermoPresent : MonoBehaviour
         return state.pressure;
     }
 
+    public double get_temperature() {
+        return state.temperature;
+    }
+
     public int get_region() {
         return state.region;
     }
@@ -814,7 +818,7 @@ public class ThermoPresent : MonoBehaviour
 
         string update_text = "";
         if (Math.Abs(state.pressure - state.prev_pressure) > ThermoMath.p_smallstep) { update_text = string.Format("P: {0:#.##e+0} " + Units.Pressure, (float)state.pressure / 1000f); GameMgr.Events.Dispatch(GameEvents.UpdateVarText, new VarUpdate(VarID.Pressure, update_text)); }
-        if (Math.Abs(state.temperature - state.prev_temperature) > ThermoMath.t_smallstep) { update_text = string.Format("T: {0:0.000}" + Units.TemperatureK + " ({1:3}" + Units.TemperatureC + ")", (float)state.temperature, (float)state.temperature - 273.15f); DispatchText(update_text, VarID.Temperature); }
+        if (Math.Abs(state.temperature - state.prev_temperature) > ThermoMath.t_smallstep) { update_text = string.Format("T: {0:0.00}" + Units.TemperatureK + " ({1:0.00}" + Units.TemperatureC + ")", (float)state.temperature, (float)state.temperature - 273.15f); DispatchText(update_text, VarID.Temperature); }
         if (Math.Abs(state.volume - state.prev_volume) > ThermoMath.v_smallstep) { update_text = string.Format("v: {0:#.##e+0} " + Units.Volume, (float)state.volume); DispatchText(update_text, VarID.Volume); }
         if (Math.Abs(state.internalenergy - state.prev_internalenergy) > ThermoMath.u_smallstep) { update_text = string.Format("u: {0:#.##e+0} " + Units.InternalEnergy, (float)state.internalenergy / 1000f); DispatchText(update_text, VarID.InternalEnergy); }
         if (Math.Abs(state.entropy - state.prev_entropy) > ThermoMath.s_smallstep) { update_text = string.Format("s: {0:0.000} " + Units.Entropy, (float)state.entropy / 1000f); DispatchText(update_text, VarID.Entropy); }

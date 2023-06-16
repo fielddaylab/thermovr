@@ -112,6 +112,7 @@ namespace ThermoVR.Dials
                 .Register<Tool>(GameEvents.StoreTool, HandleStoreTool, this)
                 .Register<Tool>(GameEvents.UpdateToolText, HandleUpdateToolText, this);
 
+            Reset();
         }
 
         // Update is called once per frame, and after val updated

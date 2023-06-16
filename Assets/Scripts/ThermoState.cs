@@ -350,11 +350,9 @@ namespace ThermoVR.State
             bool constant_v = treat_as_constant_v_add_heat(applied_heat, insulation_coefficient, delta_time);
 
             if (constant_v) {
-                Debug.Log("[Stops] Constant V");
                 add_heat_constant_v_per_delta_time(applied_heat, insulation_coefficient, delta_time);
             }
             else {
-                Debug.Log("[Stops] Constant P");
                 add_heat_constant_p_per_delta_time(applied_heat, insulation_coefficient, delta_time);
             }
         }
@@ -464,7 +462,7 @@ namespace ThermoVR.State
         }
 
         public void add_pressure_uninsulated_per_delta_time(double p, double delta_time, double insulation_coefficient) {
-            double added_p = p - p * insulation_coefficient;
+            double added_p = p * insulation_coefficient;
             double new_p = pressure + added_p; // * delta_time;
 
             double p_dif = 0;

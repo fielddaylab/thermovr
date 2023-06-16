@@ -19,6 +19,7 @@ using UnityEngine.UIElements;
 using ThermoVR;
 using static OVRInput;
 using ThermoVR.UI.GraphElements;
+using ThermoVR.UI;
 
 public class World : MonoBehaviour
 {
@@ -104,6 +105,8 @@ public class World : MonoBehaviour
     [SerializeField] private Dial dial_roomTemp;
     [SerializeField] private Dial dial_percentInsulation;
 
+    [SerializeField] private ThermoToggle toggle_heatTransfer;
+
     public List<Dial> dials;
     ParticleSystem flame; //special case
 
@@ -153,7 +156,7 @@ public class World : MonoBehaviour
     int qselected = -1;
 
     // sim variables
-    double room_temp = 72; // in F
+    double room_temp = 292; // in K
     double applied_heat = 0;
     double applied_weight = 0;
     double ambient_pressure = 0;
@@ -229,8 +232,10 @@ public class World : MonoBehaviour
         dial_balloon.Init(0f, -(float)kg_corresponding_to_10mpa / 500.0f); // 500.0f
         // TODO: establish logical bounds and units on the ambient pressure dial
         dial_ambientPressure.Init(0f, (float)kg_corresponding_to_2mpa / 500);
-        dial_roomTemp.Init(-100, 200);
+        dial_roomTemp.Init(200, 366); // -100 to 200 fahrenheit // default val of 0.55 sets to 292 kelvin (72 degrees fahrenheit)
         dial_percentInsulation.Init(0f, 100);
+
+        room_temp = tool_roomTemp.get_val(); // in K
 
         // Gather pressables
         m_pressables = new List<Pressable>();
@@ -241,6 +246,9 @@ public class World : MonoBehaviour
         halfer_button.Init();
         reset_button.OnPress += HandleResetPressed;
         halfer_button.OnPress += HandleHalferPressed;
+
+        toggle_heatTransfer.Init();
+        toggle_heatTransfer.Pressable.PressCompleted += HandleHeatTransferToggle;
 
         // Initialize Tablet (and corresponding buttons)
         tablet.Init();
@@ -997,6 +1005,8 @@ public class World : MonoBehaviour
             // insulation_coefficient = 0;
         }
 
+        insulation_coefficient = 1 - insulation_coefficient; // insulation is inversely proportional to the rate of heat transfer
+
         if (System.Math.Abs(delta_weight) > 0) {
             // TODO: check that == 1 is correct check
             if (insulation_coefficient == 1.0f) {
@@ -1020,13 +1030,20 @@ public class World : MonoBehaviour
             else if (arrows.running) arrows.Stop();
         */
 
-        // bool at_v_bound_heat = false;
+        if (!tool_burner.engaged && !tool_coil.engaged) {
+            applied_heat = 0;
+        }
+
+        double transfer_rate_mod = 100f;
+        if (toggle_heatTransfer.IsOn()) {
+            double thermo_temp = thermo_present.get_temperature();
+            double heat_transfer_delta = (room_temp - thermo_present.get_temperature()) * insulation_coefficient * transfer_rate_mod;
+            applied_heat += heat_transfer_delta;
+        }
 
         if (applied_heat != 0) {
             thermo_present.add_heat_per_delta_time(applied_heat, insulation_coefficient, delta_time);
         }
-
-        // TODO: apply heat transfer from piston to outer room and vice versa
 
         //running blended average of hand velocity (transfers this velocity on "release object" for consistent "throwing")
         lhand.vel += (lhand.transform.position - lhand.pos) / Time.fixedDeltaTime;
@@ -1211,6 +1228,11 @@ public class World : MonoBehaviour
         if (!m_pressables.Contains(pressable)) {
             m_pressables.Add(pressable);
         }
+    }
+
+    private void HandleHeatTransferToggle(object sender, System.EventArgs args) {
+        // nothing yet; potentially dispatch an event
+
     }
 
     #endregion // Handlers
