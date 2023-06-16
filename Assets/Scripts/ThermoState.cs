@@ -602,8 +602,7 @@ namespace ThermoVR.State
         public void add_pressure_insulated_per_delta_time(double p, double delta_time) {
             double new_p = pressure + p; // * delta_time;
                                          // if (Math.Abs(p * delta_time) < World.DELTA_PRESSURE_CUTOFF) { new_p = pressure + p; } // small enough step; finish transition
-
-            if (enthalpy_bounded(new_p, enthalpy)) {
+            if (enthalpy_bounded(new_p, enthalpy) && region != ThermoMath.region_twophase) {
                 return;
             }
             /*

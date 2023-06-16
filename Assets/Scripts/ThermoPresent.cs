@@ -516,7 +516,7 @@ public class ThermoPresent : MonoBehaviour
         mesh_triangles.Add(right_orphans[right_orphans.Count - 1]);
         mesh_triangles.Add(highest_y_i);
 
-        //fill in dome
+        //fill in vapor dome
         int triangle_inner_dome_region = mesh_triangles.Count;
         int position_inner_dome_region = mesh_positions.Count;
         for (int i = position_dome_region; i < position_inner_dome_region; i++) //duplicate inner positions so each can have own normal at seam
@@ -531,6 +531,7 @@ public class ThermoPresent : MonoBehaviour
             mesh_triangles.Add(position_inner_dome_region + y * 2 + 2);
             mesh_triangles.Add(position_inner_dome_region + y * 2 + 3);
         }
+
 
         //set normals
         mesh_normals = new List<Vector3>(new Vector3[mesh_positions.Count]);
