@@ -103,6 +103,8 @@ namespace ThermoVR.State
             prev_quality = -1;
             prev_region = -1;
 
+            iterative_weight = 0;
+
             v_stops = new List<VolumeStop>();
         }
 
@@ -462,7 +464,8 @@ namespace ThermoVR.State
         }
 
         public void add_pressure_uninsulated_per_delta_time(double p, double delta_time, double insulation_coefficient) {
-            double new_p = pressure + p; // - p * insulation_coefficient; // * delta_time;
+            double added_p = p - p * insulation_coefficient;
+            double new_p = pressure + added_p; // * delta_time;
 
             double p_dif = 0;
             if (new_p < ThermoMath.p_min) {
@@ -481,7 +484,7 @@ namespace ThermoVR.State
             }
             */
 
-            iterative_weight += (p - p_dif);
+            iterative_weight += (added_p - p_dif);
 
             try {
                 //default guess
@@ -536,7 +539,7 @@ namespace ThermoVR.State
                      * 
                      * If the conductivity of the wall is less than infinity (insulation % > 0), this same process will occur, although at a slower rate. 
                      */
-                    double virtual_p = new_p + iterative_weight - p;
+                    double virtual_p = new_p + iterative_weight - added_p;
                     if (virtual_p < ThermoMath.p_min) {
                         virtual_p = ThermoMath.p_min;
                     }
@@ -618,6 +621,7 @@ namespace ThermoVR.State
             
             if (enthalpy_bounded(new_p, enthalpy) && region != ThermoMath.region_twophase) {
                 // heads-off various graph boundary errors
+                // TODO: halts heat on edge after some discrepancy in two-phase
                 return;
             }
             /*

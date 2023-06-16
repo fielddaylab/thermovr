@@ -22,7 +22,7 @@ using ThermoVR.UI.GraphElements;
 
 public class World : MonoBehaviour
 {
-    const float CONTAINER_INSULATION_COEFFICIENT = 0.1f; // Not really based on a physical material, just a way to roughly simulate imperfect insulation.
+    const float CONTAINER_INSULATION_COEFFICIENT = 0.0f; // 0.1f; // Not really based on a physical material, just a way to roughly simulate imperfect insulation.
     const bool QUIZ_ENABLED = false;
     const bool CHALLENGE_ENABLED = false;
     public const double DELTA_PRESSURE_CUTOFF = 100.0;
@@ -988,8 +988,9 @@ public class World : MonoBehaviour
         double insulation_coefficient;
 
         if (tool_insulator.engaged) {
-            insulation_coefficient = 1.0f;
-            // insulation_coefficient = dial_percentInsulation.val;
+            // insulation_coefficient = 1.0f;
+            insulation_coefficient = dial_percentInsulation.val;
+            Debug.Log("[Insul] Current insulation %: " + insulation_coefficient);
         }
         else {
             insulation_coefficient = CONTAINER_INSULATION_COEFFICIENT;

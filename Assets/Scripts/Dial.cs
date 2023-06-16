@@ -57,7 +57,6 @@ namespace ThermoVR.Dials
         public float val = 0.0f; //abstract 0-1 representing knob position
         [System.NonSerialized]
         public float prev_val = 0.0f;
-        [System.NonSerialized]
         public float default_val = 0;
         [System.NonSerialized]
         public Vector3 orientation_dir;
