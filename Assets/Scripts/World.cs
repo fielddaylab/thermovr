@@ -207,7 +207,7 @@ public class World : MonoBehaviour
         dial_weight.Init(0f, (float)kg_corresponding_to_10mpa / 5.0f);
         dial_balloon.Init(0f, -(float)kg_corresponding_to_10mpa / 500.0f); // 500.0f
         // TODO: establish logical bounds and units on the ambient pressure dial
-        dial_ambientPressure.Init(0f, (float)kg_corresponding_to_2mpa / 500);
+        dial_ambientPressure.Init(0f, 14.6959f * 2); // ~2 atm in psi
         dial_roomTemp.Init(200, 366); // -100 to 200 fahrenheit // default val of 0.55 sets to 292 kelvin (72 degrees fahrenheit)
         dial_percentInsulation.Init(0f, 100);
 
@@ -829,9 +829,8 @@ public class World : MonoBehaviour
         ambient_pressure = tool_ambientPressure.get_val();
         room_temp = tool_roomTemp.get_val();
         double psi_to_pascal = 6894.76;
-        // double neutral_pressure = 14.6959; //~1atm in psi
         double weight_pressure = (applied_weight) / thermo_present.get_surfacearea_insqr(); //psi
-        weight_pressure += ambient_pressure; //+ neutral_pressure; // TODO: establish logical bounds and units on the ambient pressure dial
+        weight_pressure += ambient_pressure;
         weight_pressure *= psi_to_pascal; //conversion from psi to pascal
 
         // get the amount of weight to apply, based on the difference between the total weight to be applied and how much is currently applied

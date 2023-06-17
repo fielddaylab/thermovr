@@ -36,6 +36,11 @@ public class GraphModule : UIModule
         for (int i = 0; i < m_toggles.Length; i++) {
             m_toggles[i].Init();
         }
+
+        Array settings = Enum.GetValues(typeof(GraphElementID));
+        for (int i = 0; i < settings.Length; i++) {
+            DispatchSettingUpdate((GraphElementID)settings.GetValue(i));
+        }
     }
     #endregion // Inspector
 
@@ -73,6 +78,33 @@ public class GraphModule : UIModule
         m_axisTrackersToggle.Pressable.PressCompleted -= HandleAxisTrackersToggle;
     }
 
+    private void DispatchSettingUpdate(GraphElementID id) {
+        ThermoToggle toggle;
+
+        switch (id) {
+            case GraphElementID.AxisNumbers:
+                toggle = m_axisNumbersToggle;
+                break;
+            case GraphElementID.RegionLabels:
+                toggle = m_regionLabelsToggle;
+                break;
+            case GraphElementID.GridLines:
+                toggle = m_gridLinesToggle;
+                break;
+            case GraphElementID.ConstantLines:
+                toggle = m_constantLinesToggle;
+                break;
+            case GraphElementID.AxisTrackers:
+                toggle = m_axisTrackersToggle;
+                break;
+            default:
+                return;
+        }
+
+        bool val = toggle.IsOn();
+        GameMgr.Events.Dispatch(GameEvents.UpdateGraphSetting, new GraphSettingUpdate(id, val));
+    }
+
     #endregion // Helpers
 
     #region Handlers
@@ -80,28 +112,23 @@ public class GraphModule : UIModule
     // Also see if you can disconnect toggles from general touch checking; otherwise incorporate into touch pipeline
 
     private void HandleAxisNumbersToggle(object sender, EventArgs args) {
-        bool val = m_axisNumbersToggle.IsOn();
-        GameMgr.Events.Dispatch(GameEvents.UpdateGraphSetting, new GraphSettingUpdate(GraphElementID.AxisNumbers, val));
+        DispatchSettingUpdate(GraphElementID.AxisNumbers);
     }
 
     private void HandleGridLinesToggle(object sender, EventArgs args) {
-        bool val = m_gridLinesToggle.IsOn();
-        GameMgr.Events.Dispatch(GameEvents.UpdateGraphSetting, new GraphSettingUpdate(GraphElementID.GridLines, val));
+        DispatchSettingUpdate(GraphElementID.GridLines);
     }
 
     private void HandleRegionLabelsToggle(object sender, EventArgs args) {
-        bool val = m_regionLabelsToggle.IsOn();
-        GameMgr.Events.Dispatch(GameEvents.UpdateGraphSetting, new GraphSettingUpdate(GraphElementID.RegionLabels, val));
+        DispatchSettingUpdate(GraphElementID.RegionLabels);
     }
 
     private void HandleConstantLinesToggle(object sender, EventArgs args) {
-        bool val = m_constantLinesToggle.IsOn();
-        GameMgr.Events.Dispatch(GameEvents.UpdateGraphSetting, new GraphSettingUpdate(GraphElementID.ConstantLines, val));
+        DispatchSettingUpdate(GraphElementID.ConstantLines);
     }
 
     private void HandleAxisTrackersToggle(object sender, EventArgs args) {
-        bool val = m_axisTrackersToggle.IsOn();
-        GameMgr.Events.Dispatch(GameEvents.UpdateGraphSetting, new GraphSettingUpdate(GraphElementID.AxisTrackers, val));
+        DispatchSettingUpdate(GraphElementID.AxisTrackers);
     }
 
     #endregion // Handlers
