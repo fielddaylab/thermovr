@@ -101,7 +101,7 @@ namespace ThermoVR.State
             prev_entropy = -1;
             prev_enthalpy = -1;
             prev_quality = -1;
-            prev_region = -1;
+            prev_region = region;
 
             iterative_weight = 0;
 
@@ -618,11 +618,9 @@ namespace ThermoVR.State
             double new_p = pressure + p; // * delta_time;
                                          // if (Math.Abs(p * delta_time) < World.DELTA_PRESSURE_CUTOFF) { new_p = pressure + p; } // small enough step; finish transition
 
-            /*
             if (enthalpy_bounded(new_p, enthalpy) && region != ThermoMath.region_twophase) {
                 return;
             }
-            */
             if (treat_as_constant_v_add_p_insulated(p, delta_time)) {
                 return;
             }
@@ -654,7 +652,7 @@ namespace ThermoVR.State
                             pressure = new_p;
                             temperature = new_t;
                             internalenergy = new_u;
-                            enthalpy = ThermoMath.h_given_vt(volume, temperature, region); // enthalpy way off
+                            enthalpy = ThermoMath.h_given_vt(volume, temperature, region); // enthalpy seems way off for two-phase
 
                             region = ThermoMath.region_given_pvt(pressure, volume, temperature);
                         }
