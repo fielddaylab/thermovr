@@ -23,7 +23,7 @@ using ThermoVR.UI;
 
 public class World : MonoBehaviour
 {
-    const float CONTAINER_INSULATION_COEFFICIENT = 0.0f; // 0.1f; // Not really based on a physical material, just a way to roughly simulate imperfect insulation.
+    const float CONTAINER_INSULATION_COEFFICIENT = 0.1f; // 0.1f; // Not really based on a physical material, just a way to roughly simulate imperfect insulation.
     public const double DELTA_PRESSURE_CUTOFF = 100.0;
 
     public Material hand_empty;
@@ -842,7 +842,7 @@ public class World : MonoBehaviour
             delta_weight *= delta_time;
             /*
             if (thermo_present.get_iterative_weight() > weight_pressure) {
-                delta_weight *= 1; // reducing dial affects changes slower for some reason; this counteracts it
+                delta_weight *= 3; // reducing dial affects changes slower for some reason; this counteracts it
             }
             */
         }
@@ -857,7 +857,7 @@ public class World : MonoBehaviour
             insulation_coefficient = CONTAINER_INSULATION_COEFFICIENT;
         }
 
-        insulation_coefficient = 1 - insulation_coefficient; // insulation is inversely proportional to the rate of heat transfer
+        insulation_coefficient = 1 - insulation_coefficient; // invert proportion
 
         // check if weight was applied
 
@@ -866,23 +866,25 @@ public class World : MonoBehaviour
                 thermo_present.add_pressure_insulated_per_delta_time(delta_weight, delta_time); // Pressure Constrained -> Insulated ->  delta pressure
             }
             else {
+                // insulation is inversely proportional to the rate of weight application
                 thermo_present.add_pressure_uninsulated_per_delta_time(delta_weight, delta_time, insulation_coefficient); // Pressure Constrained -> Uninsulated ->  delta pressure
             }
-        }
-
-        if (!tool_burner.engaged && !tool_coil.engaged) {
-            applied_heat = 0;
         }
 
         // heat leak
         double transfer_rate_mod = 100f;
         if (toggle_heatTransfer.IsOn()) {
             double heat_transfer_delta = (room_temp - thermo_present.get_temperature()) * insulation_coefficient * transfer_rate_mod;
-            applied_heat += heat_transfer_delta;
+            if (heat_transfer_delta != 0) {
+                // insulation is inversely proportional to the rate of heat transfer (outside insulation)
+                thermo_present.add_heat_per_delta_time(heat_transfer_delta, insulation_coefficient, delta_time);
+            }
         }
 
+        // tool heat
         if (applied_heat != 0) {
-            thermo_present.add_heat_per_delta_time(applied_heat, insulation_coefficient, delta_time);
+            // insulation is inversely proportional to the rate of heat transfer (within insulation)
+            thermo_present.add_heat_per_delta_time(applied_heat, (1 - insulation_coefficient), delta_time);
         }
 
         //running blended average of hand velocity (transfers this velocity on "release object" for consistent "throwing")
