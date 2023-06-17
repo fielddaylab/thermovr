@@ -24,8 +24,6 @@ using ThermoVR.UI;
 public class World : MonoBehaviour
 {
     const float CONTAINER_INSULATION_COEFFICIENT = 0.0f; // 0.1f; // Not really based on a physical material, just a way to roughly simulate imperfect insulation.
-    const bool QUIZ_ENABLED = false;
-    const bool CHALLENGE_ENABLED = false;
     public const double DELTA_PRESSURE_CUTOFF = 100.0;
 
     public Material hand_empty;
@@ -55,9 +53,11 @@ public class World : MonoBehaviour
     [SerializeField] private ControllerAnchor lhand;
     [SerializeField] private ControllerAnchor rhand;
 
+    /*
     GameObject vrcenter;
     FingerToggleable vrcenter_fingertoggleable;
     MeshRenderer vrcenter_backing_meshrenderer;
+    */
 
     //[Space(5)]
     //[Header("Moveables")]
@@ -125,35 +125,11 @@ public class World : MonoBehaviour
     GameObject placement_dot;
     Vector3 placement_thermo;
     bool placement_thermo_reasonable;
-    GameObject challenge_dot;
-
-    GameObject clipboard;
-
-    ChallengeBall challenge_ball_collide;
 
     bool lhtrigger = false;
     bool rhtrigger = false;
     bool litrigger = false;
     bool ritrigger = false;
-
-    [Space(5)]
-    [Header("Quiz")]
-    GameObject instructions_parent;
-    GameObject challenge_parent;
-    GameObject quiz_parent;
-    List<Tab> mode_tabs;
-    int board_mode = 0; //0- instructions, 1- challenge, 2- quiz, 3- congrats
-    int question = 0;
-    List<string> questions;
-    List<string> options;
-    List<int> answers;
-    List<int> givens;
-    List<Tab> option_tabs;
-    Tab qconfirm_tab;
-    bool qconfirmed = false;
-    GameObject board;
-    TextMeshPro qtext_tmp;
-    int qselected = -1;
 
     // sim variables
     double room_temp = 292; // in K
@@ -290,18 +266,15 @@ public class World : MonoBehaviour
         placement_dot = GameObject.Find("tstate");
         placement_dot.GetComponent<Renderer>().enabled = false;
         placement_thermo_reasonable = false;
-        challenge_dot = GameObject.Find("cstate");
-        clipboard = GameObject.Find("Clipboard");
 
-        challenge_ball_collide = challenge_dot.GetComponent<ChallengeBall>();
-
+        /*
         vrcenter = GameObject.Find("VRCenter");
         vrcenter_fingertoggleable = vrcenter.GetComponent<FingerToggleable>();
         vrcenter_backing_meshrenderer = vrcenter.transform.GetChild(1).GetComponent<MeshRenderer>();
+        */
 
         movables = new List<Touchable>();
         for (int i = 0; i < tools.Count; i++) movables.Add(tools[i].touchable); //important that tools take priority, so they can be grabbed and removed
-        movables.Add(clipboard.GetComponent<Touchable>());
         movables.Add(tablet.touchable);
 
         halfables = new List<Halfable>();
@@ -309,92 +282,11 @@ public class World : MonoBehaviour
         halfables.Add(GameObject.Find("Tool_Insulator").GetComponent<Halfable>());
         halfables.Add(GameObject.Find("Tool_Coil").GetComponent<Halfable>());
 
-        // A bunch of stuff related to initializing clipboard.
-        instructions_parent = GameObject.Find("Instructions");
-        challenge_parent = GameObject.Find("Challenge");
-        quiz_parent = GameObject.Find("Quiz");
-
-        mode_tabs = new List<Tab>();
-        mode_tabs.Add(GameObject.Find("ModeInstructions").GetComponent<Tab>());
-        if (CHALLENGE_ENABLED) mode_tabs.Add(GameObject.Find("ModeChallenge").GetComponent<Tab>());
-        if (QUIZ_ENABLED) mode_tabs.Add(GameObject.Find("ModeQuiz").GetComponent<Tab>());
-        InitializeQuiz();
-
-        SetChallengeBall();
-
         SetAllHalfed(true);
-    }
-
-    void InitializeQuiz() {
-        questions = new List<string>();
-        options = new List<string>();
-        answers = new List<int>(); //the correct answer
-        givens = new List<int>(); //the recorded answer given by the user (default -1)
-
-        questions.Add("Here is an example question- in what region is the water?");
-        options.Add("A. Solid");
-        options.Add("B. Liquid");
-        options.Add("C. Vapor");
-        options.Add("D. Two Phase");
-        answers.Add(2);
-        givens.Add(-1);
-
-        questions.Add("Here is an example question- in what region is the water?");
-        options.Add("A. Solid");
-        options.Add("B. Liquid");
-        options.Add("C. Vapor");
-        options.Add("D. Two Phase");
-        answers.Add(2);
-        givens.Add(-1);
-
-        questions.Add("Here is an example question- in what region is the water?");
-        options.Add("A. Solid");
-        options.Add("B. Liquid");
-        options.Add("C. Vapor");
-        options.Add("D. Two Phase");
-        answers.Add(2);
-        givens.Add(-1);
-
-        questions.Add("Here is an example question- in what region is the water?");
-        options.Add("A. Solid");
-        options.Add("B. Liquid");
-        options.Add("C. Vapor");
-        options.Add("D. Two Phase");
-        answers.Add(2);
-        givens.Add(-1);
-
-        questions.Add("Here is an example question- in what region is the water?");
-        options.Add("A. Solid");
-        options.Add("B. Liquid");
-        options.Add("C. Vapor");
-        options.Add("D. Two Phase");
-        answers.Add(2);
-        givens.Add(-1);
-
-        option_tabs = new List<Tab>();
-        option_tabs.Add(GameObject.Find("QA").GetComponent<Tab>());
-        option_tabs.Add(GameObject.Find("QB").GetComponent<Tab>());
-        option_tabs.Add(GameObject.Find("QC").GetComponent<Tab>());
-        option_tabs.Add(GameObject.Find("QD").GetComponent<Tab>());
-        qconfirm_tab = GameObject.Find("QConfirm").GetComponent<Tab>();
-        board = GameObject.Find("Board");
-        qtext_tmp = GameObject.Find("Qtext").GetComponent<TextMeshPro>();
-        SetQuizText();
     }
 
     #endregion // Initialization
 
-    void SetQuizText() {
-        qtext_tmp.SetText(questions[question]);
-        for (int i = 0; i < 4; i++) option_tabs[i].tmp.SetText(options[question * 4 + i]);
-    }
-
-    void SetChallengeBall() {
-        double volume = ThermoMath.v_given_percent(Random.Range(0.1f, 0.9f));
-        double temperature = ThermoMath.t_given_percent(Random.Range(0.1f, 0.9f));
-        double pressure = ThermoMath.p_given_vt(volume, temperature);
-        challenge_dot.transform.localPosition = thermo_present.plot(pressure, volume, temperature);
-    }
 
     void SetAllHalfed(bool h) {
         halfed = h;
@@ -779,18 +671,12 @@ public class World : MonoBehaviour
 
         if (ref_grabbed == null) //still not holding anything
         {
-            GameMgr.Events.Dispatch(GameEvents.CheckForPress, left_hand);
-
-            /*
             // Check if pressing buttons
-            halfer_button.CheckForPress(left_hand);
-            reset_button.CheckForPress(left_hand);
 
-            // Check buttons on tablet
-            tablet.CheckButtonsForPress(left_hand);
-            */
+            GameMgr.Events.Dispatch(GameEvents.CheckForPress, left_hand);
         }
 
+        /*
         //centerer
         if (vrcenter_fingertoggleable.finger) //finger hitting vrcenter object
         {
@@ -808,7 +694,7 @@ public class World : MonoBehaviour
             else vrcenter_backing_meshrenderer.material = tab_hi;
         }
         else vrcenter_backing_meshrenderer.material = tab_default;
-
+        */
     }
 
     /*                 
@@ -861,31 +747,6 @@ public class World : MonoBehaviour
             pressable.SetFingerTouches(ref ltouch, ref rtouch);
             continue;
         }
-
-        /*
-        // Movables
-        for (int i = 0; i < movables.Count; i++) {
-            movables[i].SetFingerTouches(ref ltouch, ref rtouch);
-        }
-
-        // Dials
-        for (int i = 0; i < dials.Count; i++) {
-            dials[i].touchable.SetFingerTouches(ref ltouch, ref rtouch);
-        }
-
-        // Buttons
-        halfer_button.SetFingerTouches(ref ltouch, ref rtouch);
-        reset_button.SetFingerTouches(ref ltouch, ref rtouch);
-
-        // Buttons on tablet
-        tablet.SetFingerTouches(ref ltouch, ref rtouch);
-
-
-        //Other
-        handle_workspace_touchable.SetFingerTouches(ref ltouch, ref rtouch);
-        graph_touchable.SetFingerTouches(ref ltouch, ref rtouch);
-        */
-
     }
 
     private void update_meshes(ref bool ltouch, ref bool rtouch) {
@@ -987,28 +848,21 @@ public class World : MonoBehaviour
             */
         }
 
-        // check if weight was applied
-
-        //treat "delta_pressure" as target, and iterate toward it, rather than applying it additively
-        //(technically, "should" add_pressure(...) with every delta of weight on the piston, but that would result in very jumpy nonsense movements. iterating toward a target smooths it out)
-        // double delta_pressure = (weight_pressure - thermo_present.get_pressure()); // here: when the sim increases internal pressure, it results in depressurization.
-
         double insulation_coefficient;
 
         if (tool_insulator.engaged) {
-            // insulation_coefficient = 1.0f;
             insulation_coefficient = dial_percentInsulation.val;
             Debug.Log("[Insul] Current insulation %: " + insulation_coefficient);
         }
         else {
             insulation_coefficient = CONTAINER_INSULATION_COEFFICIENT;
-            // insulation_coefficient = 0;
         }
 
         insulation_coefficient = 1 - insulation_coefficient; // insulation is inversely proportional to the rate of heat transfer
 
+        // check if weight was applied
+
         if (System.Math.Abs(delta_weight) > 0) {
-            // TODO: check that == 1 is correct check
             if (insulation_coefficient == 1.0f) {
                 thermo_present.add_pressure_insulated_per_delta_time(delta_weight, delta_time); // Pressure Constrained -> Insulated ->  delta pressure
             }
@@ -1017,26 +871,13 @@ public class World : MonoBehaviour
             }
         }
 
-
-        /*
-            if (!tool_insulator.engaged) //heat leak
-            {
-              double room_temp = 295.372f;
-              double diff = room_temp - thermo.temperature;
-              heat_joules += diff * 100 * (double)Time.fixedDeltaTime; //nonsense calculation
-              arrows.Go(diff < 0);
-              arrows.SetFlow(diff / 100.0f);
-            }
-            else if (arrows.running) arrows.Stop();
-        */
-
         if (!tool_burner.engaged && !tool_coil.engaged) {
             applied_heat = 0;
         }
 
+        // heat leak
         double transfer_rate_mod = 100f;
         if (toggle_heatTransfer.IsOn()) {
-            double thermo_temp = thermo_present.get_temperature();
             double heat_transfer_delta = (room_temp - thermo_present.get_temperature()) * insulation_coefficient * transfer_rate_mod;
             applied_heat += heat_transfer_delta;
         }
@@ -1087,8 +928,6 @@ public class World : MonoBehaviour
         TryHand(false, rhandt, rindext, rhand.transform.position, rhand.vel, ref rhtrigger, ref ritrigger, ref rhtrigger_delta, ref ritrigger_delta, ref rpos, ref rhand.obj, ref rgrabbed, ref lhand.obj, ref lgrabbed); //right hand
 
         UpdateGrabVis();
-
-        UpdateClipboard();
 
         //tooltext
         Dial d;
@@ -1149,68 +988,6 @@ public class World : MonoBehaviour
         thermo_present.UpdateErrorState();
     }
 
-    private void UpdateClipboard() {
-        //clipboard
-        int old_board_mode = board_mode;
-        board_mode = reconcileDependentSelectables(board_mode, mode_tabs);
-        if (board_mode == -1) board_mode = old_board_mode;
-        updateSelectableVis(board_mode, mode_tabs);
-
-        if (!CHALLENGE_ENABLED && board_mode == 1) board_mode = 0;
-        if (!QUIZ_ENABLED && board_mode == 2) board_mode = 0;
-        switch (board_mode) {
-            case 0: //instructions
-                if (!instructions_parent.activeSelf) instructions_parent.SetActive(true);
-                if (challenge_parent.activeSelf) { challenge_parent.SetActive(false); challenge_dot.SetActive(false); }
-                if (quiz_parent.activeSelf) quiz_parent.SetActive(false);
-                break;
-            case 1: //challenge
-                if (instructions_parent.activeSelf) instructions_parent.SetActive(false);
-                if (!challenge_parent.activeSelf) { challenge_parent.SetActive(true); challenge_dot.SetActive(true); }
-                if (quiz_parent.activeSelf) quiz_parent.SetActive(false);
-
-                if (challenge_ball_collide.win) {
-                    challenge_ball_collide.win = false;
-                    SetChallengeBall();
-                }
-                break;
-            case 2: //quiz
-                if (instructions_parent.activeSelf) instructions_parent.SetActive(false);
-                if (challenge_parent.activeSelf) { challenge_parent.SetActive(false); challenge_dot.SetActive(false); }
-                if (!quiz_parent.activeSelf) quiz_parent.SetActive(true);
-                qselected = reconcileDependentSelectables(qselected, option_tabs);
-                updateSelectableVis(qselected, option_tabs);
-                if (qselected != -1) //answer selected, can be confirmed
-                {
-                    if (qconfirm_tab.fingertoggleable.finger) qconfirm_tab.backing_meshrenderer.material = tab_hisel; //touching
-                    else qconfirm_tab.backing_meshrenderer.material = tab_sel;   //not touching
-
-                    if (!qconfirmed && qconfirm_tab.fingertoggleable.finger) //newly hit
-                    {
-                        qconfirmed = true;
-                        if (qselected == answers[question])
-                            ; //correct
-                        else
-                            ; //incorrect
-                        givens[question] = qselected;
-                        question++;
-                        SetQuizText();
-                    }
-                }
-                else //no answer selected- can't confirm
-                {
-                    if (qconfirm_tab.fingertoggleable.finger) qconfirm_tab.backing_meshrenderer.material = tab_hi;      //touching
-                    else qconfirm_tab.backing_meshrenderer.material = tab_default; //not touching
-
-                    qconfirmed = false;
-                }
-                break;
-            case 3: //congratulations
-                board_mode = 2; //immediately return back to quiz until this section is actually implemented
-                break;
-        }
-    }
-
     #region Handlers
 
     private void HandleResetPressed(object sender, System.EventArgs args) {
@@ -1232,7 +1009,6 @@ public class World : MonoBehaviour
 
     private void HandleHeatTransferToggle(object sender, System.EventArgs args) {
         // nothing yet; potentially dispatch an event
-
     }
 
     #endregion // Handlers

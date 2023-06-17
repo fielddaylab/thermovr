@@ -493,6 +493,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ebcac9b616909a4380a72e50249cee2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  has_lightables: 1
   ltouch: 0
   rtouch: 0
   touch: 0
@@ -512,8 +513,10 @@ MonoBehaviour:
   min_pos: {fileID: 7546416110445245067}
   textv: {fileID: 6030497067206319096}
   response_power: 1
+  default_val: 0
   m_effect_map: []
   meter: {fileID: 6030497067503597911}
+  touchable: {fileID: 0}
 --- !u!1 &6030497067206319103
 GameObject:
   m_ObjectHideFlags: 0
