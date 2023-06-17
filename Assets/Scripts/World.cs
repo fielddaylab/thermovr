@@ -862,7 +862,8 @@ public class World : MonoBehaviour
         // check if weight was applied
 
         if (System.Math.Abs(delta_weight) > 0) {
-            if (insulation_coefficient == 1.0f) {
+            if (insulation_coefficient == 0) {
+                // perfect insulation
                 thermo_present.add_pressure_insulated_per_delta_time(delta_weight, delta_time); // Pressure Constrained -> Insulated ->  delta pressure
             }
             else {

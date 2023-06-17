@@ -500,8 +500,6 @@ namespace ThermoVR.State
                         if (ThermoMath.region_given_ps(new_p, entropy) != region) { // check for transition into 2-phase from other states (currently only works when leaving liquid)
                             if (ThermoMath.region_given_ps(new_p, entropy) == ThermoMath.region_twophase) {
                                 region = ThermoMath.region_twophase;
-                                // TODO: occasionally this wants to switch to two-phase even when it is solidly in vapor
-                                // pressure = new_p;
                                 break;
                             }
                         }
@@ -617,11 +615,11 @@ namespace ThermoVR.State
             double new_p = pressure + p; // * delta_time;
                                          // if (Math.Abs(p * delta_time) < World.DELTA_PRESSURE_CUTOFF) { new_p = pressure + p; } // small enough step; finish transition
             
+            /*
             if (enthalpy_bounded(new_p, enthalpy) && region != ThermoMath.region_twophase) {
-                // heads-off various graph boundary errors
-                // TODO: halts heat on edge after some discrepancy in two-phase
                 return;
             }
+            */
             /*
             if (treat_as_constant_v_add_p_insulated(p, delta_time)) { // needed for stops because it prevents broken enthalpy calculation, but breaks "add pressure insulated"
                 return;
