@@ -851,7 +851,6 @@ public class World : MonoBehaviour
 
         if (tool_insulator.engaged) {
             insulation_coefficient = dial_percentInsulation.val;
-            Debug.Log("[Insul] Current insulation %: " + insulation_coefficient);
         }
         else {
             insulation_coefficient = CONTAINER_INSULATION_COEFFICIENT;

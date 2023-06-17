@@ -369,8 +369,11 @@ namespace ThermoVR.State
 
                 switch (region) {
                     case ThermoMath.region_twophase:
+                        // TODO: jumping straight to 0 when adding weight and heat insulated
                         double new_x = ThermoMath.x_given_ph(pressure, new_h, region); // jumping straight to 0 after warp_pvt
-                                                                                       //at this point, we have enough internal state to derive the rest
+                                                                                       
+                        
+                        //at this point, we have enough internal state to derive the rest
                         clamp_state();
                         new_v = ThermoMath.v_given_px(pressure, new_x, region);
                         //new_v = v_with_enforced_stops(new_v); // enforce volume stops
@@ -471,18 +474,18 @@ namespace ThermoVR.State
                 new_p = ThermoMath.p_min;
             }
 
+            double iterative_dif = (added_p - p_dif);
+
             // if (Math.Abs(p * delta_time) < World.DELTA_PRESSURE_CUTOFF) { new_p = pressure + p; } // small enough step; finish transition
 
             if (enthalpy_bounded(new_p, enthalpy) && region != ThermoMath.region_twophase) {
                 return;
             }
-            /*
-            if (treat_as_constant_v_add_p_uninsulated(p, delta_time)) {
+            if (treat_as_constant_v_add_p_uninsulated(new_p, added_p, iterative_dif, delta_time)) {
                 return;
             }
-            */
 
-            iterative_weight += (added_p - p_dif);
+            iterative_weight += iterative_dif;
 
             try {
                 //default guess
@@ -614,17 +617,15 @@ namespace ThermoVR.State
         public void add_pressure_insulated_per_delta_time(double p, double delta_time) {
             double new_p = pressure + p; // * delta_time;
                                          // if (Math.Abs(p * delta_time) < World.DELTA_PRESSURE_CUTOFF) { new_p = pressure + p; } // small enough step; finish transition
-            
+
             /*
             if (enthalpy_bounded(new_p, enthalpy) && region != ThermoMath.region_twophase) {
                 return;
             }
             */
-            /*
-            if (treat_as_constant_v_add_p_insulated(p, delta_time)) { // needed for stops because it prevents broken enthalpy calculation, but breaks "add pressure insulated"
+            if (treat_as_constant_v_add_p_insulated(p, delta_time)) {
                 return;
             }
-            */
 
             iterative_weight += p;
 
@@ -789,11 +790,8 @@ namespace ThermoVR.State
         /// <param name="insulation_coefficient"></param>
         /// <param name="delta_time"></param>
         /// <returns></returns>
-        private bool treat_as_constant_v_add_p_uninsulated(double p, double delta_time) {
+        private bool treat_as_constant_v_add_p_uninsulated(double new_p, double added_p, double iterative_dif, double delta_time) {
             try {
-                double new_p = pressure + p * delta_time;
-                if (Math.Abs(p * delta_time) < World.DELTA_PRESSURE_CUTOFF) { new_p = pressure + p; } // small enough step; finish transition
-
                 //default guess
                 double new_u = internalenergy;
                 double new_v = volume;
@@ -802,7 +800,6 @@ namespace ThermoVR.State
                 double new_h = enthalpy;
 
                 double new_x = quality;
-                double curr_v = volume;
 
                 bool hit_stop;
                 switch (region) {
@@ -824,17 +821,23 @@ namespace ThermoVR.State
 
                 if (region == ThermoMath.region_twophase) //two-phase region, either newly or all along
                  {
-                    new_x = ThermoMath.x_given_ph(new_p, enthalpy);
-                    double raw_v = ThermoMath.v_given_px(new_p, new_x);
+                    double virtual_p = new_p + iterative_weight + iterative_dif - added_p;
+                    if (virtual_p < ThermoMath.p_min) {
+                        virtual_p = ThermoMath.p_min;
+                    }
+
+                    new_x = ThermoMath.x_given_ph(virtual_p, enthalpy, region);
+                    double raw_v = ThermoMath.v_given_px(virtual_p, new_x, region);
+
                     new_v = v_with_enforced_stops(raw_v, out hit_stop); // enforce volume stops
                     if (hit_stop) {
                         // hit a stop (should actually be treating at constant v); roll back to previous volume
                         volume = new_v;
                         return true;
                     }
+
                 }
 
-                return false;
             }
             catch (Exception e) { }
             return false;
@@ -859,11 +862,11 @@ namespace ThermoVR.State
                 switch (region) {
                     case ThermoMath.region_liquid: //subcooled liquid
                         {
-                            return true;
+                            return false;
                         }
                     case ThermoMath.region_twophase: //two-phase region
                     {
-                            return true;
+                            return false;
                         }
                     case ThermoMath.region_vapor: //superheated vapor
                     {
