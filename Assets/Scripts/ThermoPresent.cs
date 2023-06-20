@@ -807,6 +807,13 @@ public class ThermoPresent : MonoBehaviour
         return "Undefined";
     }
 
+    private void Start() {
+        string update_text = "";
+        update_text = "region: " + region_to_name(state.region); DispatchText(update_text, VarID.Region);
+        if (state.region == 1) { update_text = string.Format("x: {0:0.000}" + Units.Quality, (float)(state.quality * 100f)); DispatchText(update_text, VarID.Quality); }
+        else { update_text = "x: Undefined"; DispatchText(update_text, VarID.Quality); }
+    }
+
     // Update is called once per frame
     void Update() {
         //detect editor graphgen modifications

@@ -14,11 +14,11 @@ public class GraphTextMgr : MonoBehaviour
 
 
     public void Start() {
-        p_min_text.SetText(string.Format("{0:0.00} " + Units.Pressure, ThermoMath.p_min));
-        p_max_text.SetText(string.Format("{0:0} " + Units.Pressure, ThermoMath.p_max));
-        v_min_text.SetText(string.Format("{0:0.0000} " + Units.Volume, ThermoMath.v_min));
-        v_max_text.SetText(string.Format("{0:0} \n" + Units.Volume, ThermoMath.v_max));
-        t_min_text.SetText(string.Format("{0:0.00} " + Units.TemperatureK, ThermoMath.t_min));
-        t_max_text.SetText(string.Format("{0:0.00} " + Units.TemperatureK, ThermoMath.t_max));
+        p_min_text.SetText(string.Format("{0:#.0e+0} " + Units.Pressure, ThermoMath.p_min));
+        p_max_text.SetText(string.Format("{0:#.0e+0} " + Units.Pressure, ThermoMath.p_max));
+        v_min_text.SetText(string.Format("{0:#.0e+0} " + Units.Volume, ThermoMath.v_min));
+        v_max_text.SetText(string.Format("{0:#.0e+0} \n" + Units.Volume, ThermoMath.v_max));
+        t_min_text.SetText(string.Format("{0:#.0e+0} " + Units.TemperatureK, ThermoMath.t_min));
+        t_max_text.SetText(string.Format("{0:#.0e+0} " + Units.TemperatureK, ThermoMath.t_max));
     }
 }

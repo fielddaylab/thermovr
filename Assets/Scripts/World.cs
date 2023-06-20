@@ -182,7 +182,7 @@ public class World : MonoBehaviour
         tool_weight.Init(Units.Weight);
         tool_balloon.Init(Units.Weight);
         // TODO: establish logical bounds and units on the ambient pressure tool
-        tool_ambientPressure.Init(Units.Pressure);
+        tool_ambientPressure.Init(Units.AmbientPressure);
         tool_roomTemp.Init(Units.TemperatureK);
         // tool_percentInsulation.Init(Units.Percent);
 
