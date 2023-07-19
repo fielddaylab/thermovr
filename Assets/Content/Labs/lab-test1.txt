@@ -1,0 +1,37 @@
+|| LAB-NAME: Test 1
+
+|| TASK
+
+|ToolInfo: [insulator, burner, coil, ambient-pressure, room-temperature, balloon, weight, stops]
+|SetInfo: [(p:5), (v:5), (t:5)]
+|LimitInfo: [(p:10:upper), (p:1:lower)]
+|TargetInfo (property, value, valid-range): [{(p:9:2)}, {(p:4:2)}, {(p:5:2), (v:4:2)}]
+|QuizInfo: [var-p, var-v, var-t, var-u, var-s, var-h, var-x; (p:101:2); region-liquid, region-twophase, region-vapor; key-"yes", key-"linear", key-"inversely proportional"]
+|EfficiencyInfo: [TBD]
+
+
+|| TASK
+
+
+|ToolInfo: 2
+|SetInfo: 2
+|LimitInfo: 2
+|TargetInfo (property, value, valid-range): 2
+|QuizInfo: 2
+|EfficiencyInfo: 2
+
+
+|| TASK
+
+|ToolInfo: 3
+|SetInfo: 3
+|LimitInfo: 3
+|TargetInfo (property, value, valid-range): 3
+|QuizInfo: 3
+|EfficiencyInfo: 3
+
+
+|| END
+
+
+
