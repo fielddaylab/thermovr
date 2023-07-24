@@ -765,9 +765,8 @@ namespace ThermoVR.State
             double k = 1.27;
             new_v = volume * Math.Pow(pressure / new_p, 1.0 / k);
             update_vapor_vis(pressure - new_p, insulation_coefficient);
-            // new_v = v_with_enforced_stops(new_v); // enforce volume stops
             new_u = internalenergy - ((new_p * new_v - pressure * volume) / (1 - k));
-            new_t = ThermoMath.t_given_ph(new_p, enthalpy);
+            new_t = ThermoMath.iterate_t_given_pv(temperature, new_p, new_v, region);
 
             //at this point, we have enough internal state to derive the rest
             pressure = new_p;
@@ -775,7 +774,7 @@ namespace ThermoVR.State
             temperature = new_t;
             internalenergy = new_u;
             enthalpy = ThermoMath.h_given_vt(volume, temperature, region);
-            // entropy = ThermoMath.s_given_vt(volume, temperature, region); // apparently this shouldn't change...
+            // entropy = ThermoMath.s_given_vt(volume, temperature, region); // s = constant with 100% insulation
             region = ThermoMath.region_given_pvt(pressure, volume, temperature);
         }
 
