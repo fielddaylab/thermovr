@@ -831,7 +831,7 @@ public class ThermoPresent : MonoBehaviour
         if (Math.Abs(state.entropy - state.prev_entropy) > ThermoMath.s_smallstep) { update_text = string.Format("s: {0:0.000} " + Units.Entropy, (float)state.entropy / 1000f); DispatchText(update_text, VarID.Entropy); }
         if (Math.Abs(state.enthalpy - state.prev_enthalpy) > ThermoMath.h_smallstep) { update_text = string.Format("h: {0:#.##e+0} " + Units.Enthalpy, (float)state.enthalpy / 1000f); DispatchText(update_text, VarID.Enthalpy); }
         if (state.region == 1 && Math.Abs(state.quality - state.prev_quality) > ThermoMath.x_smallstep) { update_text = string.Format("x: {0:3}" + Units.Quality, (float)(state.quality * 100f)); DispatchText(update_text, VarID.Quality); }
-        if (state.region != state.prev_region) {
+        if (true /*state.region != state.prev_region*/) {
             update_text = "region: " + region_to_name(state.region); DispatchText(update_text, VarID.Region);
             if (state.region == 1) { update_text = string.Format("x: {0:0.000}" + Units.Quality, (float)(state.quality * 100f)); DispatchText(update_text, VarID.Quality); }
             else { update_text = "x: Undefined"; DispatchText(update_text, VarID.Quality); }

@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using ThermoVR;
 using UnityEngine;
@@ -31,13 +32,15 @@ public class DirectionalIndicator : MonoBehaviour
         running = true;
         this.Stop(); // we start the game stopped.
 
-        GameMgr.Events?.Register<double>(GameEvents.UpdateVaporFlow, HandleUpdateVaporFlow, this);
+        GameMgr.Events?.Register<Tuple<double, double>>(GameEvents.UpdateVaporFlow, HandleUpdateVaporFlow, this);
     }
 
-    private void HandleUpdateVaporFlow(double delta_pressure) {
+    private void HandleUpdateVaporFlow(Tuple<double, double> vaporInfo) {
+        double delta_pressure = vaporInfo.Item1;
+        double insulation_coefficient = vaporInfo.Item2;
         if (Mathf.Abs((float)delta_pressure) > 0) {
             Go(delta_pressure < 0.0f);
-            SetFlow(delta_pressure);
+            SetFlow(delta_pressure * insulation_coefficient);
         }
         else {
             Stop();

@@ -16,11 +16,13 @@ public class LabLoader : MonoBehaviour
     private static string GROUP_DELIM = "||";
     private static string TASK_INFO_DELIM = "|";
 
-    [SerializeField] private TextAsset m_initialLab;
+    [SerializeField] private TextAsset[] m_initialLabs;
     [SerializeField] private bool m_verboseDebug = false;
 
     private void Start() {
-        LoadLab(m_initialLab);
+        for (int i = 0; i < m_initialLabs.Length; i++) {
+            LoadLab(m_initialLabs[i]);
+        }
     }
 
     private void LoadLab(TextAsset labInfo) {

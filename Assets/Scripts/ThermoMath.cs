@@ -115,7 +115,7 @@ public static class ThermoMath
         t_min = IF97.get_Tmin(); // 273.15
         t_max = IF97.get_Tmax(); // 1073.15
         t_neutral = new double[] { 293.0, 298.0, 400.0 };
-        t_smallstep = 0.001;
+        t_smallstep = 0.01;
 
         //J/kg
         u_min = 123.8;
