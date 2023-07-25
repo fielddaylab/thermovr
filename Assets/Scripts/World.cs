@@ -25,6 +25,7 @@ public class World : MonoBehaviour
 {
     const float CONTAINER_INSULATION_COEFFICIENT = 0.1f; // 0.1f; // Not really based on a physical material, just a way to roughly simulate imperfect insulation.
     public const double DELTA_PRESSURE_CUTOFF = 100.0;
+    const double PSI_TO_PASCAL = 6894.76;
 
     public Material hand_empty;
     Material[] hand_emptys;
@@ -656,7 +657,16 @@ public class World : MonoBehaviour
                 }
                 if (ref_grabbed == graph) {
                     placement_dot.GetComponent<Renderer>().enabled = false;
-                    if (placement_thermo_reasonable) thermo_present.warp_pv(placement_thermo.y, placement_thermo.x, placement_thermo.z);
+
+                    if (placement_thermo_reasonable) {
+                        for (int i = 0; i < tools.Count; i++) {
+                            Tool toDetach = tools[i];
+                            if (toDetach.engaged) {
+                                DetachTool(toDetach, popVector());
+                            }
+                        }
+                        thermo_present.warp_pv(placement_thermo.y, placement_thermo.x, placement_thermo.z, ambient_pressure * PSI_TO_PASCAL);
+                    }
                     state_dot.GetComponent<Renderer>().enabled = true;
                 }
             }
@@ -828,10 +838,9 @@ public class World : MonoBehaviour
         //apply thermo
         ambient_pressure = tool_ambientPressure.get_val();
         room_temp = tool_roomTemp.get_val();
-        double psi_to_pascal = 6894.76;
         double weight_pressure = (applied_weight) / thermo_present.get_surfacearea_insqr(); //psi
         weight_pressure += ambient_pressure;
-        weight_pressure *= psi_to_pascal; //conversion from psi to pascal
+        weight_pressure *= PSI_TO_PASCAL; //conversion from psi to pascal
 
         // get the amount of weight to apply, based on the difference between the total weight to be applied and how much is currently applied
         double delta_weight = (weight_pressure - thermo_present.get_iterative_weight());

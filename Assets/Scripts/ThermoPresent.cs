@@ -694,8 +694,8 @@ public class ThermoPresent : MonoBehaviour
         return plot;
     }
 
-    public void warp_pv(double p, double v, double t) {
-        state.warp_pv(p, v, t);
+    public void warp_pv(double p, double v, double t, double ambient_pressure) {
+        state.warp_pv(p, v, t, ambient_pressure);
         visualize_state();
     }
 
