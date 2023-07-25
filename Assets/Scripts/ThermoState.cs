@@ -372,7 +372,7 @@ namespace ThermoVR.State
                         new_h = ClampEnthalpy(new_h, pressure);
                         clamp_state();
                         //at this point, we have enough internal state to derive the rest
-                        new_v = ThermoMath.v_given_ph(pressure, enthalpy, region); // TODO: throwing error (temperature out of range) when nearing tMin
+                        new_v = ThermoMath.v_given_ph(pressure, enthalpy, region);
 
                         if (region == ThermoMath.region_liquid) {
                             if (new_v > 0.002) {
@@ -819,7 +819,7 @@ namespace ThermoVR.State
                         raw_v = ThermoMath.v_given_px(pressure, new_x, region);
                         new_v = v_with_enforced_stops(raw_v, out hit_stop); // enforce volume stops
                         if (hit_stop) {
-                            // hit a stop (should actually be treating at constant v); roll back to previous volume
+                            // hit a stop (should actually be treating as constant v); roll back to previous volume
                             // volume = new_v;
                             // calculate new delta_h
                             return true;
@@ -833,7 +833,7 @@ namespace ThermoVR.State
                         raw_v = ThermoMath.v_given_ph(pressure, new_h, region);
                         new_v = v_with_enforced_stops(raw_v, out hit_stop); // enforce volume stops
                         if (hit_stop) {
-                            // hit a stop (should actually be treating at constant v); roll back to previous volume
+                            // hit a stop (should actually be treating as constant v); roll back to previous volume
                             // volume = new_v;
                             return true;
                         }
@@ -869,10 +869,11 @@ namespace ThermoVR.State
                     case ThermoMath.region_liquid: //subcooled liquid
                     case ThermoMath.region_vapor: //vapor region
                                                   // Pressure Constrained -> Insulated -> delta pressure (all phases)
+                                                  // TODO: here
                         double raw_v = ThermoMath.v_given_ph(new_p, enthalpy);
                         new_v = v_with_enforced_stops(raw_v, out hit_stop); // enforce volume stops
                         if (hit_stop) {
-                            // hit a stop (should actually be treating at constant v); roll back to previous volume
+                            // hit a stop (should actually be treating as constant v); roll back to previous volume
                             volume = new_v;
                             return true;
                         }
@@ -884,6 +885,7 @@ namespace ThermoVR.State
 
                 if (region == ThermoMath.region_twophase) //two-phase region, either newly or all along
                  {
+                    // TODO: here
                     double virtual_p = new_p + iterative_weight + iterative_dif - added_p;
                     if (virtual_p < ThermoMath.p_min) {
                         virtual_p = ThermoMath.p_min;
@@ -894,7 +896,7 @@ namespace ThermoVR.State
 
                     new_v = v_with_enforced_stops(raw_v, out hit_stop); // enforce volume stops
                     if (hit_stop) {
-                        // hit a stop (should actually be treating at constant v); roll back to previous volume
+                        // hit a stop (should actually be treating as constant v); roll back to previous volume
                         volume = new_v;
                         return true;
                     }
@@ -915,8 +917,8 @@ namespace ThermoVR.State
         /// <returns></returns>
         private bool treat_as_constant_v_add_p_insulated(double p, double delta_time) {
             try {
-                double new_p = pressure + p * delta_time;
-                if (Math.Abs(p * delta_time) < World.DELTA_PRESSURE_CUTOFF) { new_p = pressure + p; } // small enough step; finish transition
+                double new_p = pressure + p; //  * delta_time;
+                // if (Math.Abs(p) < World.DELTA_PRESSURE_CUTOFF) { new_p = pressure + p; } // small enough step; finish transition
 
                 double new_h = enthalpy;
                 double new_u = internalenergy;
@@ -929,10 +931,62 @@ namespace ThermoVR.State
                         }
                     case ThermoMath.region_twophase: //two-phase region
                     {
+                            double insulation_coefficient = 1;
+
+                            double old_t = temperature;
+                            new_t = ThermoMath.tsat_given_p(new_p, region);
+
+                            double delta_t = new_t - old_t;
+                            double delta_h = delta_time / mass * (delta_t * insulation_coefficient);  // time eqtn 6a
+                            new_h = enthalpy + delta_h;
+
+                            double new_x = quality;
+                            double new_v = volume;
+
+                            int new_region = region;
+
+                            // either newly or all along
+                            if (region == ThermoMath.region_twophase) {
+                                new_x = ThermoMath.x_given_ph(new_p, new_h, region);
+                                if (new_x <= 0.0f) {
+                                    new_region = ThermoMath.region_liquid;
+
+                                    double raw_v = ThermoMath.vliq_given_p(new_p, new_region);
+                                    bool hit_stop;
+                                    new_v = v_with_enforced_stops(raw_v, out hit_stop); // enforce volume stops
+                                    double curr_v = volume;
+                                    if (hit_stop) {
+                                        // hit a stop (should actually be treating as constant v); roll back to previous volume
+                                        volume = new_v;
+                                        // accept new region? or stay in old?
+                                        return true;
+                                    }
+                                }
+                                else if (new_x > 1.0f) {
+                                    // TODO: this sticks to the edge of two-phase and vapor instead of transitioning
+                                    new_region = ThermoMath.region_vapor;
+                                    // new_v = ThermoMath.vvap_given_p(new_p, region);
+                                    // new_u = ThermoMath.u_given_px(new_p, new_x, region);
+                                }
+                                else {
+                                    // ClampEnthalpy
+                                    double raw_v = ThermoMath.v_given_px(new_p, new_x, region);
+                                    bool hit_stop;
+                                    new_v = v_with_enforced_stops(raw_v, out hit_stop); // enforce volume stops
+                                    double curr_v = volume;
+                                    if (hit_stop) {
+                                        // hit a stop (should actually be treating as constant v); roll back to previous volume
+                                        volume = new_v;
+                                        return true;
+                                    }
+                                }
+                            }
+
                             return false;
                         }
                     case ThermoMath.region_vapor: //superheated vapor
                     {
+                            // TODO: here
                             //default guess
                             new_t = temperature;
                             new_u = internalenergy;
@@ -944,7 +998,7 @@ namespace ThermoVR.State
                             new_v = v_with_enforced_stops(raw_v, out hit_stop); // enforce volume stops
                             double curr_v = volume;
                             if (hit_stop) {
-                                // hit a stop (should actually be treating at constant v); roll back to previous volume
+                                // hit a stop (should actually be treating as constant v); roll back to previous volume
                                 volume = new_v;
                                 return true;
                             }

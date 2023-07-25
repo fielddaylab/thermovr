@@ -38,7 +38,7 @@ public class DirectionalIndicator : MonoBehaviour
     private void HandleUpdateVaporFlow(Tuple<double, double> vaporInfo) {
         double delta_pressure = vaporInfo.Item1;
         double insulation_coefficient = vaporInfo.Item2;
-        if (Mathf.Abs((float)delta_pressure) > 0) {
+        if (insulation_coefficient != 1 && Mathf.Abs((float)delta_pressure) > 0) {
             Go(delta_pressure < 0.0f);
             SetFlow(delta_pressure * insulation_coefficient);
         }
