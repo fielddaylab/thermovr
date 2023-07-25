@@ -469,7 +469,7 @@ namespace ThermoVR.State
         }
 
         public void add_pressure_uninsulated_per_delta_time(double p, double delta_time, double insulation_coefficient) {
-            double added_p = p * insulation_coefficient;
+            double added_p = p;
             double new_p = pressure + added_p; // * delta_time;
 
             double p_dif = 0;
@@ -695,8 +695,9 @@ namespace ThermoVR.State
                                 new_v = ThermoMath.v_given_pt(new_p, new_t, region);
                                 new_u = ThermoMath.u_given_pt(new_p, new_t, region);
 
-                                if (new_v > 0.002) {
+                                if (new_v > 0.002 || (ThermoMath.region_given_pvt(new_p, new_v, new_t) == ThermoMath.region_vapor && new_p < p_crit)) {
                                     region = ThermoMath.region_twophase;
+                                    new_t = ThermoMath.tsat_given_p(new_p, region);
                                 }
                             }
                             // TODO: does the two-phase -> vapor case require any special handling?
@@ -706,6 +707,7 @@ namespace ThermoVR.State
                             if (region == ThermoMath.region_twophase) {
                                 new_x = ThermoMath.x_given_ph(new_p, new_h, region);
                                 if (new_x <= 0.0f) {
+                                    Debug.Log("[weight] two-phase to liquid");
                                     region = ThermoMath.region_liquid;
                                     new_v = ThermoMath.vliq_given_p(new_p, region);
                                     new_u = ThermoMath.u_given_px(new_p, new_x, region);
