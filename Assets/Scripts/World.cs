@@ -209,7 +209,7 @@ public class World : MonoBehaviour
         dial_balloon.Init(0f, -(float)kg_corresponding_to_10mpa / 500.0f); // 500.0f
         // TODO: establish logical bounds and units on the ambient pressure dial
         dial_ambientPressure.Init(0f, 14.6959f * 2); // ~2 atm in psi
-        dial_roomTemp.Init(200, 366); // -100 to 200 fahrenheit // default val of 0.55 sets to 292 kelvin (72 degrees fahrenheit)
+        dial_roomTemp.Init(273, 366); // -100 to 200 fahrenheit // default val of 0.55 sets to 292 kelvin (72 degrees fahrenheit)
         dial_percentInsulation.Init(0f, 100);
 
         room_temp = tool_roomTemp.get_val(); // in K
