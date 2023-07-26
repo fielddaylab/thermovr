@@ -6,19 +6,20 @@ using ThermoVR.UI;
 using ThermoVR.UI.Interfaces;
 using UnityEngine;
 using TMPro;
+using ThermoVR.Lab;
 
 public class ReadoutModule : UIModule
 {
     #region Inspector
 
-    [SerializeField] private TextMeshPro text_pressure;
-    [SerializeField] private TextMeshPro text_temperature;
-    [SerializeField] private TextMeshPro text_volume;
-    [SerializeField] private TextMeshPro text_internalenergy;
-    [SerializeField] private TextMeshPro text_entropy;
-    [SerializeField] private TextMeshPro text_enthalpy;
-    [SerializeField] private TextMeshPro text_quality;
-    [SerializeField] private TextMeshPro text_region;
+    [SerializeField] private SensorReadout readout_pressure;
+    [SerializeField] private SensorReadout readout_temperature;
+    [SerializeField] private SensorReadout readout_volume;
+    [SerializeField] private SensorReadout readout_internalenergy;
+    [SerializeField] private SensorReadout readout_entropy;
+    [SerializeField] private SensorReadout readout_enthalpy;
+    [SerializeField] private SensorReadout readout_quality;
+    [SerializeField] private SensorReadout readout_region;
 
     #endregion // Inspector
 
@@ -43,31 +44,31 @@ public class ReadoutModule : UIModule
     #region Handlers
 
     private void HandleUpdateVarText(VarUpdate update) {
-        TextMeshPro toUpdate = null;
+        SensorReadout toUpdate = null;
         switch (update.ID) {
             case VarID.Pressure:
-                toUpdate = text_pressure;
+                toUpdate = readout_pressure;
                 break;
             case VarID.Temperature:
-                toUpdate = text_temperature;
+                toUpdate = readout_temperature;
                 break;
             case VarID.Volume:
-                toUpdate = text_volume;
+                toUpdate = readout_volume;
                 break;
             case VarID.InternalEnergy:
-                toUpdate = text_internalenergy;
+                toUpdate = readout_internalenergy;
                 break;
             case VarID.Entropy:
-                toUpdate = text_entropy;
+                toUpdate = readout_entropy;
                 break;
             case VarID.Enthalpy:
-                toUpdate = text_enthalpy;
+                toUpdate = readout_enthalpy;
                 break;
             case VarID.Quality:
-                toUpdate = text_quality;
+                toUpdate = readout_quality;
                 break;
             case VarID.Region:
-                toUpdate = text_region;
+                toUpdate = readout_region;
                 break;
             default:
                 // No matching id found!
@@ -75,7 +76,11 @@ public class ReadoutModule : UIModule
         }
 
         if (toUpdate!= null) {
-            toUpdate.SetText(update.NewText);
+            toUpdate.TMP.SetText(update.NewText);
+            Debug.Log("Set text: " + update.NewText);
+
+            // TextMeshPro thing;
+            // thing.SetText(update.NewText);
         }
     }
 

@@ -40,7 +40,9 @@ namespace ThermoVR.UI
                     toOpen = currModule;
                 }
                 else {
-                    currModule.Close();
+                    if (!currModule.AlwaysAvailable) {
+                        currModule.Close();
+                    }
                 }
             }
 
