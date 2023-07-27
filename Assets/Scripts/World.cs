@@ -579,6 +579,11 @@ public class World : MonoBehaviour
                         v.stored = false;
                         v.rigidbody.isKinematic = true;
                     }
+
+                    Cartridge c = ref_grabbed.GetComponent<Cartridge>();
+                    if (c) { // newly grabbed object is a cartridge
+                        GameMgr.Events.Dispatch(GameEvents.ColliderGrabbed, c.GetComponent<Collider>());
+                    }
                 }
             }
             //then dials

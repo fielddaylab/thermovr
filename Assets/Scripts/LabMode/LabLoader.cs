@@ -31,9 +31,6 @@ namespace ThermoVR.Lab
             for (int i = 0; i < m_initialLabs.Length; i++) {
                 LoadLab(m_initialLabs[i]);
             }
-
-            GameMgr.Events?.Register<Cartridge>(GameEvents.ActivateCartridge, HandleActivateCartridge);
-
         }
 
         private void LoadLab(TextAsset labInfoAsset) {
@@ -123,23 +120,5 @@ namespace ThermoVR.Lab
 
             // TODO: labInfo.etc = etcInfo
         }
-
-
-        #region Handlers
-
-        private void HandleActivateCartridge(Cartridge cartridge) {
-            switch (cartridge.GetCartridgeType()) {
-                case Cartridge.CartridgeType.Lab:
-                    Debug.Log("[Cartridge] Lab " + cartridge.GetInfo().Name + " loaded!");
-                    break;
-                case Cartridge.CartridgeType.Sandbox:
-                    Debug.Log("[Cartridge] Sandbox loaded!");
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        #endregion // Handlers
     }
 }

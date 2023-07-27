@@ -7,7 +7,8 @@ using UnityEngine;
 
 public class Ghost : MonoBehaviour
 {
-    private enum GhostType {
+    private enum GhostType
+    {
         Tool,
         Tag
     }
@@ -16,20 +17,34 @@ public class Ghost : MonoBehaviour
     [SerializeField] private string triggerTag;
     [HideInInspector] public GameObject tool;
 
+    [System.NonSerialized]
+    public bool tintersect = false;
+
     public GameObject obj;
 
     Collider tool_c;
 
-    private MeshRenderer m_mr;
+    private MeshRenderer[] m_mrs;
+    private BoxCollider[] m_bcs;
     private Collider m_intersector;
+    private bool m_occupied;
+
+    #region Unity Callbacks
 
     private void Awake() {
-        m_mr = GetComponent<MeshRenderer>();
+        m_mrs = GetComponentsInChildren<MeshRenderer>();
+        m_bcs = GetComponentsInChildren<BoxCollider>();
 
+        if (m_ghostType == GhostType.Tag) {
+            // Disable initially by default, until a relevant tool is picked up
+            SetEnabled(false);
+            m_occupied = false;
+        }
     }
 
     private void Start() {
         GameMgr.Events?.Register<Collider>(GameEvents.ColliderReleased, HandleColliderReleased);
+        GameMgr.Events?.Register<Collider>(GameEvents.ColliderGrabbed, HandleColliderGrabbed);
     }
 
     public void set_tool(Tool tool) {
@@ -37,19 +52,16 @@ public class Ghost : MonoBehaviour
         tool_c = tool.GetComponent<Collider>();
     }
 
-    [System.NonSerialized]
-    public bool tintersect = false;
-
     private void Update() {
         if (m_ghostType == GhostType.Tag) {
             if (tintersect) {
-                if (m_mr.material != GameDB.Instance.SnapMat) {
-                    m_mr.material = GameDB.Instance.SnapMat;
+                if (CurrMat() != GameDB.Instance.SnapMat) {
+                    SetMat(GameDB.Instance.SnapMat);
                 }
             }
             else {
-                if (m_mr.material != GameDB.Instance.AvailableMat) {
-                    m_mr.material = GameDB.Instance.AvailableMat;
+                if (CurrMat() != GameDB.Instance.AvailableMat) {
+                    SetMat(GameDB.Instance.AvailableMat);
                 }
             }
         }
@@ -88,28 +100,73 @@ public class Ghost : MonoBehaviour
         }
     }
 
+    #endregion // Unity Callbacks
+
     #region Handlers
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="c"></param>
     private void HandleColliderReleased(Collider c) {
         switch (m_ghostType) {
             case GhostType.Tool:
                 return;
             case GhostType.Tag:
-                if (c != null && c == m_intersector) {
-                    // released
+                if (c != null) {
+                    if (c.gameObject.tag == triggerTag) {
+                        if (c == m_intersector) {
+                            // released
+                            // cartridge was released onto cartridge slot
 
-                    if (c.gameObject.tag == "Cartridge") {
-                        // cartridge was released onto cartridge slot
+                            // Make cartridge a child of cartridge slot
+                            c.transform.SetParent(this.transform);
+                            c.transform.localPosition = new Vector3(0f, 0f, 0f);
+                            c.transform.localRotation = Quaternion.identity;
+                            c.transform.localScale = new Vector3(1f, 1f, 1f);
 
-                        // Make cartridge a child of cartridge slot
+                            // Hide this ghost
+                            SetEnabled(false);
+                            m_occupied = true;
+                            // m_bc.isTrigger = false;
 
-                        // Activate relevant lab
-                        Cartridge cartridge = c.GetComponent<Cartridge>();
-                        GameMgr.Events.Dispatch(GameEvents.ActivateCartridge, cartridge);
+                            // Activate relevant lab
+                            Cartridge cartridge = c.GetComponent<Cartridge>();
+                            GameMgr.Events.Dispatch(GameEvents.ActivateCartridge, cartridge);
+                        }
+                        else {
+                            // Hide this ghost
+                            SetEnabled(false);
+                        }
+                    }
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void HandleColliderGrabbed(Collider c) {
+        switch (m_ghostType) {
+            case GhostType.Tool:
+                return;
+            case GhostType.Tag:
+                if (c != null) {
+                    if (c.gameObject.tag == triggerTag) {
+                        if (c == m_intersector) {
+                            // Previously inserted cartridge has been removed
+
+                            Debug.Log("[Cartridge] Cartridge removed");
+
+                            // Re-enable active ghost
+                            SetEnabled(true);
+                            m_occupied = false;
+
+                            Cartridge cartridge = c.GetComponent<Cartridge>();
+                            GameMgr.Events.Dispatch(GameEvents.DeactivateCartridge, cartridge);
+                        }
+                        else {
+                            // Highlight active ghost if not occupied
+                            if (!m_occupied) {
+                                SetEnabled(true);
+                            }
+                        }
                     }
                 }
                 break;
@@ -119,5 +176,28 @@ public class Ghost : MonoBehaviour
     }
 
     #endregion // Handlers
+
+    /// <summary>
+    /// Sets the mesh renderers and box colliders of ghost to enabled/disabled state
+    /// </summary>
+    /// <param name="enabled"></param>
+    private void SetEnabled(bool enabled) {
+        for (int i = 0; i < m_mrs.Length; i++) {
+            m_mrs[i].enabled = enabled;
+        }
+        for (int i = 0; i < m_bcs.Length; i++) {
+            m_bcs[i].enabled = enabled;
+        }
+    }
+
+    private Material CurrMat() {
+        return m_mrs[0].material;
+    }
+
+    private void SetMat(Material mat) {
+        for (int i = 0; i < m_mrs.Length; i++) {
+            m_mrs[i].material = mat;
+        }
+    }
 }
 

@@ -10,8 +10,10 @@ static public class GameEvents
     static public readonly StringHash32 RegisterMovable = "world:register-movable"; // Touchable
     static public readonly StringHash32 CheckForPress = "world:check-for-press"; // bool
     static public readonly StringHash32 LabLoaded = "world:lab-loaded"; // LabInfo
-    static public readonly StringHash32 ColliderReleased = "world:cartridge-released"; // Collider
+    static public readonly StringHash32 ColliderReleased = "world:collider-released"; // Collider
+    static public readonly StringHash32 ColliderGrabbed = "world:collider-grabbed"; // Collider
     static public readonly StringHash32 ActivateCartridge = "world:activate-cartridge"; // Cartridge
+    static public readonly StringHash32 DeactivateCartridge = "world:deactivate-cartridge"; // Cartridge
     static public readonly StringHash32 ActivateTool = "sim:activate-tool"; // Tool
     static public readonly StringHash32 DetachTool = "sim:detach-tool"; // Tool
     static public readonly StringHash32 StoreTool = "sim:store-tool"; // Tool
