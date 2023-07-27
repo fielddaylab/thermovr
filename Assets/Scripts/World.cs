@@ -20,6 +20,7 @@ using ThermoVR;
 using static OVRInput;
 using ThermoVR.UI.GraphElements;
 using ThermoVR.UI;
+using ThermoVR.Lab;
 
 public class World : MonoBehaviour
 {
@@ -143,6 +144,9 @@ public class World : MonoBehaviour
     #region Initialization
     private void Awake() {
         GameMgr.Events?.Register<Pressable>(GameEvents.RegisterPressable, HandleRegisterPressable);
+        GameMgr.Events?.Register<Touchable>(GameEvents.RegisterMovable, HandleRegisterMovable);
+
+        movables = new List<Touchable>();
     }
 
 
@@ -274,14 +278,14 @@ public class World : MonoBehaviour
         vrcenter_backing_meshrenderer = vrcenter.transform.GetChild(1).GetComponent<MeshRenderer>();
         */
 
-        movables = new List<Touchable>();
         for (int i = 0; i < tools.Count; i++) movables.Add(tools[i].touchable); //important that tools take priority, so they can be grabbed and removed
         movables.Add(tablet.touchable);
 
-        halfables = new List<Halfable>();
-        halfables.Add(GameObject.Find("Container").GetComponent<Halfable>());
-        halfables.Add(GameObject.Find("Tool_Insulator").GetComponent<Halfable>());
-        halfables.Add(GameObject.Find("Tool_Coil").GetComponent<Halfable>());
+        halfables = new List<Halfable> {
+            GameObject.Find("Container").GetComponent<Halfable>(),
+            GameObject.Find("Tool_Insulator").GetComponent<Halfable>(),
+            GameObject.Find("Tool_Coil").GetComponent<Halfable>()
+        };
 
         SetAllHalfed(true);
     }
@@ -669,6 +673,14 @@ public class World : MonoBehaviour
                     }
                     state_dot.GetComponent<Renderer>().enabled = true;
                 }
+                /* TODO: separate out returning functionality from tools, then add to cartridges
+                Cartridge c = ref_grabbed.GetComponent<Cartridge>();
+                if (c != null) {
+                    c.GetComponent<Rigidbody>().isKinematic = false;
+                    c.GetComponent<Rigidbody>().velocity = hand_vel;
+                    c.GetComponent<Touchable>().grabbed = false;
+                }
+                */
             }
 
             ref_grabbed.GetComponent<Touchable>().grabbed = false;
@@ -1014,6 +1026,12 @@ public class World : MonoBehaviour
     private void HandleRegisterPressable(Pressable pressable) {
         if (!m_pressables.Contains(pressable)) {
             m_pressables.Add(pressable);
+        }
+    }
+
+    private void HandleRegisterMovable(Touchable touchable) {
+        if (!movables.Contains(touchable)) {
+            movables.Add(touchable);
         }
     }
 

@@ -7,7 +7,9 @@ static public class GameEvents
 {
     static public readonly StringHash32 GatherPressables = "world:gather-pressables";
     static public readonly StringHash32 RegisterPressable = "world:register-pressable"; // Pressable
+    static public readonly StringHash32 RegisterMovable = "world:register-movable"; // Touchable
     static public readonly StringHash32 CheckForPress = "world:check-for-press"; // bool
+    static public readonly StringHash32 LabLoaded = "world:lab-loaded"; // LabInfo
     static public readonly StringHash32 ActivateTool = "sim:activate-tool"; // Tool
     static public readonly StringHash32 DetachTool = "sim:detach-tool"; // Tool
     static public readonly StringHash32 StoreTool = "sim:store-tool"; // Tool
