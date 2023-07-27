@@ -9,6 +9,11 @@ namespace ThermoVR.Lab
     [RequireComponent(typeof(Touchable))]
     public class Cartridge : MonoBehaviour
     {
+        public enum CartridgeType {
+            Lab,
+            Sandbox
+        }
+
         private Touchable m_touchable;
 
         [SerializeField] private string m_initialLabel;
@@ -20,6 +25,9 @@ namespace ThermoVR.Lab
         #endregion // Inspector
 
         private bool m_beingGrabbed; // if object is currently being grabbed
+
+        [SerializeField] private CartridgeType m_cartridgeType;
+        private LabInfo m_info;
 
         #region Unity Callbacks
 
@@ -61,6 +69,7 @@ namespace ThermoVR.Lab
         #endregion // Unity Callbacks
 
         public void SetInfo(LabInfo newInfo) {
+            m_info = newInfo;
             SetLabels(newInfo.Name);
         }
 
@@ -68,6 +77,14 @@ namespace ThermoVR.Lab
             for (int i = 0; i < m_labels.Length; i++) {
                 m_labels[i].SetText(newLabel);
             }
+        }
+
+        public CartridgeType GetCartridgeType() {
+            return m_cartridgeType;
+        }
+
+        public LabInfo GetInfo() {
+            return m_info;
         }
     }
 }

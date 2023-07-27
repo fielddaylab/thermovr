@@ -673,8 +673,15 @@ public class World : MonoBehaviour
                     }
                     state_dot.GetComponent<Renderer>().enabled = true;
                 }
-                /* TODO: separate out returning functionality from tools, then add to cartridges
+
+                // newly released is a cartridge
                 Cartridge c = ref_grabbed.GetComponent<Cartridge>();
+
+                if (c != null) {
+                    GameMgr.Events.Dispatch(GameEvents.ColliderReleased, c.GetComponent<Collider>());
+                }
+
+                /* TODO: separate out returning functionality from tools, then add to cartridges
                 if (c != null) {
                     c.GetComponent<Rigidbody>().isKinematic = false;
                     c.GetComponent<Rigidbody>().velocity = hand_vel;

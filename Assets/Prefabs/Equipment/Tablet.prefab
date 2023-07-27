@@ -30,7 +30,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6425986024841353617}
-  - {fileID: 856690020029684358}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: -233, z: 0}
@@ -82,7 +81,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 1.0100002, z: 0}
   m_LocalScale: {x: 0.18000002, y: 0.18, z: 0.36000004}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 856690020029684358}
   m_Father: {fileID: 6425986024841353617}
   m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -161,7 +161,7 @@ GameObject:
   - component: {fileID: 783132620113065242}
   - component: {fileID: 6617704238657087559}
   m_Layer: 0
-  m_Name: Cartridge (1)
+  m_Name: Port
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -244,16 +244,14 @@ GameObject:
   - component: {fileID: 403562375778999768}
   - component: {fileID: 2479692992649688194}
   - component: {fileID: 4780455615310965058}
-  - component: {fileID: 3511257118734537679}
-  - component: {fileID: 228237288634781188}
-  - component: {fileID: 3614083747154085413}
+  - component: {fileID: 1272362679841757905}
   m_Layer: 0
   m_Name: Cartridge_Ghost
-  m_TagString: Cartridge
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &856690020029684358
 Transform:
   m_ObjectHideFlags: 0
@@ -262,13 +260,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5215565046713486384}
   m_LocalRotation: {x: 0.5, y: -0.5, z: 0.5, w: 0.5}
-  m_LocalPosition: {x: 0, y: 1.3180037, z: 0}
-  m_LocalScale: {x: 0.17623994, y: 0.09376, z: 0.39999983}
+  m_LocalPosition: {x: -0, y: 2.41, z: 0}
+  m_LocalScale: {x: 0.77382344, y: 0.59202, z: 3.5377493}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 129323986936139145}
-  m_Father: {fileID: 5421072824984601977}
-  m_RootOrder: 1
+  m_Father: {fileID: 3422126221378878476}
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 90, y: -90, z: 0}
 --- !u!33 &403562375778999768
 MeshFilter:
@@ -328,28 +326,12 @@ BoxCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5215565046713486384}
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!54 &3511257118734537679
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5215565046713486384}
-  serializedVersion: 2
-  m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0.05
-  m_UseGravity: 1
-  m_IsKinematic: 1
-  m_Interpolate: 0
-  m_Constraints: 0
-  m_CollisionDetection: 0
---- !u!114 &228237288634781188
+--- !u!114 &1272362679841757905
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -358,27 +340,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 5215565046713486384}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5ebcac9b616909a4380a72e50249cee2, type: 3}
+  m_Script: {fileID: 11500000, guid: 76eee94994f4d034dad8cdc8103ba6bd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  has_lightables: 0
-  ltouch: 0
-  rtouch: 0
-  touch: 0
---- !u!114 &3614083747154085413
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5215565046713486384}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1a42e826b5ac3d14c94aa38c89046db8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_initialLabel: 
-  m_labels: []
+  m_ghostType: 1
+  triggerTag: Cartridge
+  tool: {fileID: 0}
+  obj: {fileID: 0}
 --- !u!1 &6701198451115315520
 GameObject:
   m_ObjectHideFlags: 0
