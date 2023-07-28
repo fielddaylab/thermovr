@@ -17,6 +17,8 @@ public class QuizModule : UIModule
     [SerializeField] private TMP_Text m_activeText;
     [SerializeField] private ThermoButton m_beginButton;
 
+    [SerializeField] private GameObject LabTabBar;
+
     private Cartridge m_activeCartridge;
 
     #endregion // Inspector
@@ -34,6 +36,9 @@ public class QuizModule : UIModule
 
     public override void Open() {
         base.Open();
+
+        m_headerText.gameObject.SetActive(true);
+        HideLabTabScreen();
 
         if (m_activeCartridge) {
             DisplayLoadedScreen();
@@ -64,6 +69,8 @@ public class QuizModule : UIModule
             case Cartridge.CartridgeType.Sandbox:
                 Debug.Log("[Cartridge] Sandbox activated!");
                 m_activeText.SetText("LOADED: \n" + "Sandbox");
+                m_activeCartridge = cartridge;
+                DisplayLoadedScreen();
                 break;
             default:
                 break;
@@ -77,20 +84,26 @@ public class QuizModule : UIModule
             m_activeCartridge = null;
         }
 
+        m_headerText.gameObject.SetActive(true);
+        HideLoadedScreen();
+        HideLabTabScreen();
+
         m_activeText.SetText("");
     }
 
     private void HandleBeginPressed(object sender, EventArgs args) {
-        Debug.Log("[Press] Begin Pressed!");
         HideLoadedScreen();
+        DisplayLabTabScreen();
+        m_headerText.gameObject.SetActive(false);
     }
 
     #endregion // Handlers
 
     private void DisplayLoadedScreen() {
-        m_beginButton.OnButtonPressed += HandleBeginPressed;
-
-        m_beginButton.gameObject.SetActive(true);
+        if (m_activeCartridge.GetCartridgeType() != Cartridge.CartridgeType.Sandbox) {
+            m_beginButton.OnButtonPressed += HandleBeginPressed;
+            m_beginButton.gameObject.SetActive(true);
+        }
         m_activeText.gameObject.SetActive(true);
     }
 
@@ -99,5 +112,14 @@ public class QuizModule : UIModule
 
         m_beginButton.gameObject.SetActive(false);
         m_activeText.gameObject.SetActive(false);
+    }
+
+    private void DisplayLabTabScreen() {
+        m_headerText.gameObject.SetActive(true);
+        LabTabBar.SetActive(true);
+    }
+
+    private void HideLabTabScreen() {
+        LabTabBar.SetActive(false);
     }
 }
