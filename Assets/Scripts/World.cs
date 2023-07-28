@@ -223,8 +223,8 @@ public class World : MonoBehaviour
         GameMgr.Events.Dispatch(GameEvents.GatherPressables);
 
         // Initialize Buttons
-        reset_button.Init();
-        halfer_button.Init();
+        // reset_button.Init();
+        // halfer_button.Init();
         reset_button.OnPress += HandleResetPressed;
         halfer_button.OnPress += HandleHalferPressed;
 
@@ -938,6 +938,17 @@ public class World : MonoBehaviour
         float lindext = OVRInput.Get(OVRInput.RawAxis1D.LIndexTrigger);
         float rhandt = OVRInput.Get(OVRInput.RawAxis1D.RHandTrigger);
         float rindext = OVRInput.Get(OVRInput.RawAxis1D.RIndexTrigger);
+
+        bool rhandraytoggle = OVRInput.GetDown(OVRInput.Button.One);
+        bool lhandraytoggle = OVRInput.GetDown(OVRInput.Button.Three);
+
+        if (rhandraytoggle) {
+            rhand.ray.enabled = !rhand.ray.enabled;
+        }
+        if (lhandraytoggle) {
+            lhand.ray.enabled = !lhand.ray.enabled;
+
+        }
 
         /*
             //index compatibility

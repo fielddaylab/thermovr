@@ -24,14 +24,17 @@ namespace ThermoVR
         #region Unity Callbacks
 
         private void Awake() {
-            GameMgr.Events?.Register(GameEvents.GatherPressables, HandleGatherPressables);
-            GameMgr.Events?.Register<bool>(GameEvents.CheckForPress, HandleCheckForPress);
-
             m_touchable = GetComponent<Touchable>();
             m_fingerToggleable = GetComponent<FingerToggleable>();
             m_audioSrc = GetComponent<AudioSource>();
 
             m_touchTimer = 0;
+        }
+
+        private void Start() {
+            GameMgr.Events?.Register(GameEvents.GatherPressables, HandleGatherPressables);
+            GameMgr.Events?.Register<bool>(GameEvents.CheckForPress, HandleCheckForPress);
+
         }
 
         private void FixedUpdate() {
@@ -42,7 +45,12 @@ namespace ThermoVR
 
         #endregion // Unity Callbacks
 
-        public void Init() {
+        public void OnEnable() {
+            OnPress += HandlePress;
+            PressCompleted += HandlePressCompleted;
+        }
+
+        public void OnDisable() {
             OnPress += HandlePress;
             PressCompleted += HandlePressCompleted;
         }
@@ -53,7 +61,10 @@ namespace ThermoVR
                 PressCompleted?.Invoke(this, EventArgs.Empty);
                 m_touchTimer = m_touchTime;
             }
+        }
 
+        public void PressByProxy() {
+            Press();
         }
 
         #region Queries

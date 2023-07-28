@@ -37,7 +37,7 @@ namespace ThermoVR
 
             // Initialize buttons
             for (int i = 0; i < m_tabButtons.Count; i++) {
-                m_tabButtons[i].Init();
+                // m_tabButtons[i].Init();
             }
 
             // Register button press responses

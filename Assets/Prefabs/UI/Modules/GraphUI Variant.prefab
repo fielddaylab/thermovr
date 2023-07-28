@@ -286,6 +286,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4192371893091607203, guid: 2a0b64184e1cffc4e8bf44e0305bf60b,
         type: 3}
+      propertyPath: m_RootOrder
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 4192371893091607203, guid: 2a0b64184e1cffc4e8bf44e0305bf60b,
+        type: 3}
       propertyPath: m_LocalPosition.z
       value: -0
       objectReference: {fileID: 0}
@@ -435,6 +440,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_id: 3
+  AlwaysAvailable: 0
   m_axisNumbersToggle: {fileID: 2182302411932250374}
   m_gridLinesToggle: {fileID: 8831476253087726230}
   m_regionLabelsToggle: {fileID: 846723306951156202}

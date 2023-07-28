@@ -124,7 +124,6 @@ public class Ghost : MonoBehaviour
                             // Hide this ghost
                             SetEnabled(false);
                             m_occupied = true;
-                            // m_bc.isTrigger = false;
 
                             // Activate relevant lab
                             Cartridge cartridge = c.GetComponent<Cartridge>();

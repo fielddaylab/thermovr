@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.XR.Interaction.Toolkit;
 
 namespace ThermoVR.Controls
 {
@@ -8,6 +9,7 @@ namespace ThermoVR.Controls
     {
         public GameObject obj;
         public GameObject actualhand;
+        public XRRayInteractor ray;
         [HideInInspector] public Vector3 pos;
         [HideInInspector] public Vector3 vel;
         public SkinnedMeshRenderer meshrenderer;
