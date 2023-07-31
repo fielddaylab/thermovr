@@ -85,7 +85,7 @@
     <Compile Include="Assets\Oculus\SampleFramework\Usage\HandsTrainExample\Scripts\TrainButtonVisualController.cs" />
     <Compile Include="Assets\Oculus\SampleFramework\Usage\TouchPro\Scripts\Ui\UiBoolInspector.cs" />
     <Compile Include="Assets\Oculus\SampleFramework\Usage\Passthrough\Scripts\GrabObject.cs" />
-    <Compile Include="Assets\Scripts\LabMode\LabTask.cs" />
+    <Compile Include="Assets\Scripts\LabMode\LabTaskFrame.cs" />
     <Compile Include="Assets\Oculus\SampleFramework\Core\Locomotion\Scripts\SimpleCapsuleWithStickMovement.cs" />
     <Compile Include="Assets\Scripts\General\Consts.cs" />
     <Compile Include="Assets\Oculus\SampleFramework\Usage\Passthrough\Scripts\AugmentedObject.cs" />
@@ -248,6 +248,12 @@
     <Compile Include="Assets\Oculus\SampleFramework\Usage\HandsTrainExample\Scripts\TrackSegment.cs" />
     <Compile Include="Assets\Scripts\UI\Modules\QuizUI\QuizLoadedModule.cs" />
     <Compile Include="Assets\Scripts\UI\Modules\GenericModule.cs" />
+    <Compile Include="Assets\Scripts\LabMode\MultipleChoiceHub.cs" />
+    <Compile Include="Assets\Scripts\LabMode\WordBank.cs" />
+    <Compile Include="Assets\Scripts\LabMode\AnswerEvaluator.cs" />
+    <Compile Include="Assets\Scripts\LabMode\IEvaluable.cs" />
+    <Compile Include="Assets\Scripts\LabMode\Evaluable.cs" />
+    <Compile Include="Assets\Scripts\LabMode\MultipleChoiceOption.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Oculus\SampleFramework\Usage\HandsTrainExample\Shaders\XingLightShader.shader" />

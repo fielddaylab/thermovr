@@ -77,7 +77,6 @@ public class ReadoutModule : UIModule
 
         if (toUpdate!= null) {
             toUpdate.TMP.SetText(update.NewText);
-            Debug.Log("Set text: " + update.NewText);
 
             // TextMeshPro thing;
             // thing.SetText(update.NewText);

@@ -9,6 +9,8 @@ public class GameDB : MonoBehaviour
     public Material AvailableMat;
     public Material SnapMat;
 
+    public Sprite MCFill, MCCorrect, MCIncorrect;
+
     private void Awake() {
         Instance = this;
     }
