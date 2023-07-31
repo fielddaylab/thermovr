@@ -19,6 +19,10 @@ namespace ThermoVR.Lab
             m_taskReset.OnButtonPressed -= HandleResetPressed;
         }
 
+        public Evaluable[] GetEvaluables() {
+            return m_evaluables;
+        }
+
         private void HandleResetPressed(object sender, EventArgs args) {
             for (int i = 0; i < m_evaluables.Length; i++) {
                 m_evaluables[i].ResetState();

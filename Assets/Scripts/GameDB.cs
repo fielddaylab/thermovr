@@ -14,6 +14,4 @@ public class GameDB : MonoBehaviour
     private void Awake() {
         Instance = this;
     }
-
-
 }

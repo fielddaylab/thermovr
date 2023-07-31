@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -14,6 +15,7 @@ namespace ThermoVR.UI
         public event EventHandler OnButtonPressed; // Wrapper for the Pressable event
         private Pressable Pressable;
         [SerializeField] private Button m_button;
+        [SerializeField] private TMP_Text m_text;
 
         public void OnEnable() {
             // Register physical touch
@@ -34,6 +36,10 @@ namespace ThermoVR.UI
         public void OnDisable() {
             Pressable.OnPress -= HandlePress;
             m_button.onClick.RemoveListener(HandleClick);
+        }
+
+        public void SetText(string text) {
+            m_text.text = text;
         }
 
         #region Handlers

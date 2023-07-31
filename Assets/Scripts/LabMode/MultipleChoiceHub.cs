@@ -1,7 +1,9 @@
 using BeauUtil;
+using JetBrains.Annotations;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using ThermoVR.UI;
 using TMPro;
 using UnityEngine;
@@ -23,19 +25,21 @@ namespace ThermoVR.Lab
         Incorrect
     }
 
+    public struct MultipleChoiceDefinition
+    {
+        public string QuestionText;
+        public string[] OptionTexts;
+        public uint CorrectID; // between 0 and number of options - 1
+
+        public MultipleChoiceDefinition(string qText, string[] optionTexts, uint id) {
+            QuestionText = qText;
+            OptionTexts = optionTexts;
+            CorrectID = id;
+        }
+    }
+
     public class MultipleChoiceHub : Evaluable
     {
-        public struct MultipleChoiceDefinition {
-            public string QuestionText;
-            public string[] OptionTexts;
-            public uint CorrectID; // between 0 and number of options - 1
-
-            public MultipleChoiceDefinition(string qText, string[] optionTexts, uint id) {
-                QuestionText = qText;
-                OptionTexts = optionTexts;
-                CorrectID = id;
-            }
-        }
 
         [SerializeField] private TMP_Text m_questionText;
         [SerializeField] private MultipleChoiceOption[] m_options; // option "slots"; not all questions will use all slots
@@ -50,20 +54,11 @@ namespace ThermoVR.Lab
         #region Unity Callbacks
 
         private void OnEnable() {
-            // TODO: Set this dynamically
-            // load a question with 4 options where the second option is correct
-            MultipleChoiceDefinition def = new MultipleChoiceDefinition(
-                "This is a test question.",
-                new string[] { "Incorrect 1", "Correct", "Incorrect 2", "Incorrect 3" },
-                1);
-
-            SetDefinition(def);
-
             if (m_evaluated) {
                 // no need to re-order or re-load
             }
             else {
-                ResetState();
+                // ResetState();
             }
         }
 
@@ -74,8 +69,7 @@ namespace ThermoVR.Lab
 
             // show options equal to number of options
             for (int i = 0; i < m_options.Length; i++) {
-
-                if (i > m_definition.OptionTexts.Length) {
+                if (i >= m_definition.OptionTexts.Length) {
                     // Hide option
                     m_options[i].gameObject.SetActive(false);
                     continue;
@@ -99,6 +93,8 @@ namespace ThermoVR.Lab
 
         public void SetDefinition(MultipleChoiceDefinition def) {
             m_definition = def;
+
+            ResetState();
         }
 
         #region IEvaluable

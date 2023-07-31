@@ -86,6 +86,8 @@ public class QuizModule : UIModule
 
     private void HandleBeginLab() {
         m_hub.OpenUI(UIID.QuizLabTasks);
+
+        // Pass in cartridge data
     }
 
     #endregion // Handlers
