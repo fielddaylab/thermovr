@@ -543,6 +543,11 @@ public class World : MonoBehaviour
             ref_itrigger = false;
         }
 
+        // fine-selection (used to extract data from UI)
+        if (ref_itrigger_delta == 1 && ref_htrigger_delta != 1) {
+            // TODO: this
+        }
+
         //find new grabs
         if (ref_grabbed == null && ref_htrigger_delta == 1) {
             //first try movables

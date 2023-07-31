@@ -12,15 +12,14 @@ namespace ThermoVR.UI
 
         public bool AlwaysAvailable = false;
 
-        private Canvas m_mainCanvas;
+        protected UIHub m_hub;
 
         public UIID ID {
             get { return m_id; }
         }
 
         public virtual void Init() {
-            //m_mainCanvas = GetComponent<Canvas>();
-            //m_mainCanvas.worldCamera = GameObject.Find(ObjectIDs.CenterEyeAnchor).GetComponent<Camera>();
+            m_hub = this.GetComponent<UIHub>();
         }
 
         public virtual void Close() {

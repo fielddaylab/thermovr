@@ -63,9 +63,11 @@ namespace ThermoVR
             }
         }
 
+        /*
         public void PressByProxy() {
             Press();
         }
+        */
 
         #region Queries
 

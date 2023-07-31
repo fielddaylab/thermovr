@@ -7,10 +7,16 @@ namespace ThermoVR.UI
 {
     public enum UIID : byte
     {
+        // PVT Tablet
         Readout,
         Sandbox,
         Quiz,
-        Graph
+        Graph,
+
+        // Quiz UI
+        QuizDefault,
+        QuizLoaded,
+        QuizLabTasks
     }
 
 
@@ -21,14 +27,16 @@ namespace ThermoVR.UI
     {
         [SerializeField] private UIModule[] m_registered;
 
-        [SerializeField] private UIID m_initialUI;
+        [SerializeField] private UIModule m_initialUI;
 
-        public void Init() {
+        public void Awake() {
             for (int i = 0; i < m_registered.Length; i++) {
                 m_registered[i].Init();
             }
 
-            OpenUI(m_initialUI);
+            if (m_initialUI) {
+                OpenUI(m_initialUI.ID);
+            }
         }
 
         public void OpenUI(UIID id) {

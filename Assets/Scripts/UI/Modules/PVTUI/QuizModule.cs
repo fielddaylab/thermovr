@@ -15,13 +15,11 @@ public class QuizModule : UIModule
 
     [SerializeField] private TMP_Text m_headerText;
     [SerializeField] private TMP_Text m_activeText;
-    [SerializeField] private ThermoButton m_beginButton;
 
-    [SerializeField] private GameObject LabTabBar;
+    #endregion // Inspector
 
     private Cartridge m_activeCartridge;
 
-    #endregion // Inspector
 
     #region IUIModule
 
@@ -32,26 +30,23 @@ public class QuizModule : UIModule
 
         GameMgr.Events?.Register<Cartridge>(GameEvents.ActivateCartridge, HandleActivateCartridge);
         GameMgr.Events?.Register<Cartridge>(GameEvents.DeactivateCartridge, HandleDeactivateCartridge);
+
+        GameMgr.Events?.Register(GameEvents.BeginLab, HandleBeginLab);
     }
 
     public override void Open() {
         base.Open();
 
-        m_headerText.gameObject.SetActive(true);
-        HideLabTabScreen();
-
         if (m_activeCartridge) {
-            DisplayLoadedScreen();
+            m_hub.OpenUI(UIID.QuizLoaded);
         }
         else {
-            HideLoadedScreen();
+            m_hub.OpenUI(UIID.QuizDefault);
         }
     }
 
     public override void Close() {
         base.Close();
-
-        m_beginButton.OnButtonPressed -= HandleBeginPressed;
     }
 
     #endregion // IUIModule
@@ -64,13 +59,15 @@ public class QuizModule : UIModule
                 Debug.Log("[Cartridge] Lab " + cartridge.GetInfo().Name + " activated!");
                 m_activeText.SetText("LOADED: \n" + cartridge.GetInfo().Name);
                 m_activeCartridge = cartridge;
-                DisplayLoadedScreen();
+                m_hub.OpenUI(UIID.QuizLoaded);
                 break;
             case Cartridge.CartridgeType.Sandbox:
+                /*
                 Debug.Log("[Cartridge] Sandbox activated!");
                 m_activeText.SetText("LOADED: \n" + "Sandbox");
                 m_activeCartridge = cartridge;
-                DisplayLoadedScreen();
+                m_hub.OpenUI(UIID.QuizLoaded);
+                */
                 break;
             default:
                 break;
@@ -84,42 +81,12 @@ public class QuizModule : UIModule
             m_activeCartridge = null;
         }
 
-        m_headerText.gameObject.SetActive(true);
-        HideLoadedScreen();
-        HideLabTabScreen();
-
-        m_activeText.SetText("");
+        m_hub.OpenUI(UIID.QuizDefault);
     }
 
-    private void HandleBeginPressed(object sender, EventArgs args) {
-        HideLoadedScreen();
-        DisplayLabTabScreen();
-        m_headerText.gameObject.SetActive(false);
+    private void HandleBeginLab() {
+        m_hub.OpenUI(UIID.QuizLabTasks);
     }
 
     #endregion // Handlers
-
-    private void DisplayLoadedScreen() {
-        if (m_activeCartridge.GetCartridgeType() != Cartridge.CartridgeType.Sandbox) {
-            m_beginButton.OnButtonPressed += HandleBeginPressed;
-            m_beginButton.gameObject.SetActive(true);
-        }
-        m_activeText.gameObject.SetActive(true);
-    }
-
-    private void HideLoadedScreen() {
-        m_beginButton.OnButtonPressed -= HandleBeginPressed;
-
-        m_beginButton.gameObject.SetActive(false);
-        m_activeText.gameObject.SetActive(false);
-    }
-
-    private void DisplayLabTabScreen() {
-        m_headerText.gameObject.SetActive(true);
-        LabTabBar.SetActive(true);
-    }
-
-    private void HideLabTabScreen() {
-        LabTabBar.SetActive(false);
-    }
 }

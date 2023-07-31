@@ -921,6 +921,10 @@
       <Project>{B7F10075-A158-C5A1-03B9-9DCDC3A81D4A}</Project>
       <Name>Facebook.Wit.Dictation</Name>
     </ProjectReference>
+    <ProjectReference Include="Unity.XR.Interaction.Toolkit.Samples.StarterAssets.csproj">
+      <Project>{E7BDDB18-188A-67E4-B809-401A8C7F0553}</Project>
+      <Name>Unity.XR.Interaction.Toolkit.Samples.StarterAssets</Name>
+    </ProjectReference>
     <ProjectReference Include="Oculus.VR.csproj">
       <Project>{282B50D3-0CD4-D7F0-C89B-20E8EB044AAB}</Project>
       <Name>Oculus.VR</Name>
@@ -1028,10 +1032,6 @@
     <ProjectReference Include="Oculus.Platform.Editor.csproj">
       <Project>{FD110C64-4866-EF66-1F00-6B7A630D4993}</Project>
       <Name>Oculus.Platform.Editor</Name>
-    </ProjectReference>
-    <ProjectReference Include="Unity.XR.Interaction.Toolkit.Samples.StarterAssets.csproj">
-      <Project>{E7BDDB18-188A-67E4-B809-401A8C7F0553}</Project>
-      <Name>Unity.XR.Interaction.Toolkit.Samples.StarterAssets</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

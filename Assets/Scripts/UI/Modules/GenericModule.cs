@@ -1,10 +1,9 @@
-using System.Collections;
-using System.Collections.Generic;
 using ThermoVR.UI;
-using ThermoVR.UI.Interfaces;
-using UnityEngine;
 
-public class SandboxModule : UIModule
+/// <summary>
+/// Useful for screens that only open and close
+/// </summary>
+public class GenericModule : UIModule
 {
     #region IUIModule
 

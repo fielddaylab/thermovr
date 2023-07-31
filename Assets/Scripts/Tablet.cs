@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using ThermoVR.Controls;
 using ThermoVR.State;
 using ThermoVR.UI;
+using TMPro;
 using UnityEngine;
 using static OVRInput;
 
@@ -23,6 +24,15 @@ namespace ThermoVR
         [SerializeField] private Pressable m_sandboxTabButton;
         [SerializeField] private Pressable m_quizTabButton;
         [SerializeField] private Pressable m_graphTabButton;
+
+        [Header("Pullout")]
+        [SerializeField] private Pressable m_expandToggleButton;
+        [SerializeField] private GameObject m_expandedModel;
+        [SerializeField] private GameObject m_collapsedModel;
+        [SerializeField] private TextMeshPro m_toggleText;
+
+
+        private bool m_isExpanded;
 
         private List<Pressable> m_tabButtons;
 
@@ -46,8 +56,11 @@ namespace ThermoVR
             m_quizTabButton.OnPress += HandleQuizTabPress;
             m_graphTabButton.OnPress += HandleGraphTabPress;
 
-            // Initialize UI hub, display starting screen
-            m_hub.Init();
+            m_expandToggleButton.OnPress += HandleExpandToggleButtonPress;
+
+            m_isExpanded = false;
+
+            ToggleExpandedModel();
         }
 
         #region World Interactions
@@ -90,6 +103,26 @@ namespace ThermoVR
             m_hub.OpenUI(UIID.Graph);
         }
 
+        private void HandleExpandToggleButtonPress(object sender, EventArgs args) {
+            ToggleExpandedModel();
+        }
+
         #endregion // Handlers
+
+        private void ToggleExpandedModel() {
+            // expand / collapse readouts
+            m_isExpanded = !m_isExpanded;
+
+            m_expandedModel.SetActive(m_isExpanded);
+            m_collapsedModel.SetActive(!m_isExpanded);
+
+            if (m_isExpanded) {
+                m_toggleText.SetText(">");
+            }
+            else
+            {
+                m_toggleText.SetText("<");
+            }
+        }
     }
 }
