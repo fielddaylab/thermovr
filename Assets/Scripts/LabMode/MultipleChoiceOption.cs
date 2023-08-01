@@ -67,6 +67,8 @@ namespace ThermoVR
 
         private void HandleButtonPressed(object sender, EventArgs args) {
             OnChoiceSelected?.Invoke(this, new IDEventArgs(m_choiceID));
+
+            Debug.Log("[Q] Choice selected from button: " + m_choiceID);
         }
 
         #endregion // Handlers

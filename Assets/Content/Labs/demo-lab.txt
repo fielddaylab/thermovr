@@ -13,7 +13,6 @@
 "a. Bunsen Burner
 Which property is held constant?"
 	Answers: ["Pressure"(c), "Volume", "Temperature", "Entropy", "Enthalpy"]
-	Other: [var-p, var-v, var-t, var-u, var-s, var-h, var-x; (p:101:2); region-liquid, region-twophase, region-vapor; key-"yes", key-"linear", key-"inversely proportional"]
 |EfficiencyInfo:
 
 
@@ -29,7 +28,6 @@ Which property is held constant?"
 "a. Cooling Coil
 Which property is held constant?"
 	Answers: ["Pressure"(c), "Volume", "Temperature", "Entropy", "Enthalpy"]
-	Other: [var-p, var-v, var-t, var-u, var-s, var-h, var-x; (p:101:2); region-liquid, region-twophase, region-vapor; key-"yes", key-"linear", key-"inversely proportional"]
 |EfficiencyInfo:
 
 
@@ -45,7 +43,6 @@ Which property is held constant?"
 "a. Weight
 Adjust the weight in the liquid or vapor regions. Which property is held constant?"
 	Answers: ["Pressure", "Volume", "Temperature"(c), "Entropy", "Enthalpy"]
-	Other: [var-p, var-v, var-t, var-u, var-s, var-h, var-x; (p:101:2); region-liquid, region-twophase, region-vapor; key-"yes", key-"linear", key-"inversely proportional"]
 |EfficiencyInfo:
 
 
@@ -61,7 +58,6 @@ Adjust the weight in the liquid or vapor regions. Which property is held constan
 "a. Balloon
 Adjust the balloon in the liquid or vapor regions. Which property is held constant?"
 	Answers: ["Pressure", "Volume", "Temperature"(c), "Entropy", "Enthalpy"]
-	Other: [var-p, var-v, var-t, var-u, var-s, var-h, var-x; (p:101:2); region-liquid, region-twophase, region-vapor; key-"yes", key-"linear", key-"inversely proportional"]
 |EfficiencyInfo:
 
 
@@ -78,7 +74,6 @@ Adjust the balloon in the liquid or vapor regions. Which property is held consta
 Apply a stop in the two-phase or vapor region. Apply heat until the simulation volume reaches the volume of the stop.
 As you continue to apply heat, which property is held constant?"
 	Answers: ["Pressure", "Volume"(c), "Temperature", "Entropy", "Enthalpy"]
-	Other: [var-p, var-v, var-t, var-u, var-s, var-h, var-x; (p:101:2); region-liquid, region-twophase, region-vapor; key-"yes", key-"linear", key-"inversely proportional"]
 |EfficiencyInfo:
 
 
@@ -92,7 +87,6 @@ As you continue to apply heat, which property is held constant?"
 |QuizInfo: 
 	Question:"What region will the ball be in if T = 373.15 K and P < P_sat?"
 	Answers: ["Subcooled Liquid", "Two-Phase"(c), "Superheated Vapor"]
-	Other: [var-p, var-v, var-t, var-u, var-s, var-h, var-x; (p:101:2); region-liquid, region-twophase, region-vapor; key-"yes", key-"linear", key-"inversely proportional"]
 |EfficiencyInfo:
 
 
@@ -107,7 +101,6 @@ As you continue to apply heat, which property is held constant?"
 |QuizInfo: 
 	Question:"What region will the ball be in if T = 373.15 K and P > P_sat?"
 	Answers: ["Subcooled Liquid"(c), "Two-Phase", "Superheated Vapor"]
-	Other: [var-p, var-v, var-t, var-u, var-s, var-h, var-x; (p:101:2); region-liquid, region-twophase, region-vapor; key-"yes", key-"linear", key-"inversely proportional"]
 |EfficiencyInfo:
 
 
@@ -121,7 +114,6 @@ As you continue to apply heat, which property is held constant?"
 |QuizInfo: 
 	Question:"What region will the ball be in if P = 101 kPa and T > 373.15 K?"
 	Answers: ["Subcooled Liquid", "Two-Phase", "Superheated Vapor"(c)]
-	Other: [var-p, var-v, var-t, var-u, var-s, var-h, var-x; (p:101:2); region-liquid, region-twophase, region-vapor; key-"yes", key-"linear", key-"inversely proportional"]
 |EfficiencyInfo:
 
 
@@ -135,7 +127,6 @@ As you continue to apply heat, which property is held constant?"
 |QuizInfo: 
 	Question:"What region will the ball be in if P = 101 kPa and T < 373.15 K?"
 	Answers: ["Subcooled Liquid"(c), "Two-Phase", "Superheated Vapor"]
-	Other: [var-p, var-v, var-t, var-u, var-s, var-h, var-x; (p:101:2); region-liquid, region-twophase, region-vapor; key-"yes", key-"linear", key-"inversely proportional"]
 |EfficiencyInfo:
 
 

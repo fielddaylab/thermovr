@@ -15,13 +15,14 @@ namespace ThermoVR.Lab
         public TaskType TaskType;
         public string TaskQuestion;
         public List<string> SecondaryTexts;
-        public uint CorrectID;
+        public List<uint> CorrectIDs;
     }
 
     public enum TaskType {
-        MultipleChoice,
+        MultipleChoice, // single-select multiple choice
         WordBank,
-        ReachState // reach a given state in the sim
+        ReachState, // reach a given state in the sim
+        MultipleChoiceMulti // multi-select multiple choice
     }
 
     public class LabLoader : MonoBehaviour
@@ -45,6 +46,7 @@ namespace ThermoVR.Lab
         private static string MC_KEY = "multiple-choice";
         private static string WORD_BANK_KEY = "word-bank";
         private static string REACH_STATE_KEY = "reach-state";
+        private static string MC_MULTI_KEY = "multi-select-choice";
 
         [SerializeField] private TextAsset[] m_initialLabs;
         [SerializeField] private bool m_verboseDebug = false;
@@ -112,6 +114,7 @@ namespace ThermoVR.Lab
         private void ParseTaskInfo(string group, ref LabInfo labInfo) {
             TaskInfo newTaskInfo = new TaskInfo();
             newTaskInfo.SecondaryTexts = new List<string>();
+            newTaskInfo.CorrectIDs = new List<uint>();
 
             string[] sections = group.Split(TASK_INFO_DELIM);
 
@@ -124,6 +127,9 @@ namespace ThermoVR.Lab
             string typeInfo = sections[TYPE_INDEX].Trim();
             if (typeInfo.Contains(MC_KEY)) {
                 newTaskInfo.TaskType = TaskType.MultipleChoice;
+            }
+            else if (typeInfo.Contains(MC_MULTI_KEY)) {
+                newTaskInfo.TaskType = TaskType.MultipleChoiceMulti;
             }
             else if (typeInfo.Contains(WORD_BANK_KEY)) {
                 newTaskInfo.TaskType = TaskType.WordBank;
@@ -156,10 +162,11 @@ namespace ThermoVR.Lab
             if (quizInfo.Contains("Question:")) {
                 int preIndex = quizInfo.IndexOf("Question:");
                 iterateQuizInfo = quizInfo.Substring(preIndex);
-                int startIndex = iterateQuizInfo.IndexOf('"');
-                iterateQuizInfo = iterateQuizInfo.Substring(startIndex + 1);
+                int startIndex = iterateQuizInfo.IndexOf('"') + 1;
+                iterateQuizInfo = iterateQuizInfo.Substring(startIndex);
                 int endIndex = iterateQuizInfo.IndexOf('"');
-                iterateQuizInfo = iterateQuizInfo.Substring(0, endIndex);
+                int length = endIndex;
+                iterateQuizInfo = iterateQuizInfo.Substring(0, length);
                 newTaskInfo.TaskQuestion = iterateQuizInfo;
                 if (m_verboseDebug) { Debug.Log("[LabLoad] Task Question: " + newTaskInfo.TaskQuestion); }
             }
@@ -167,10 +174,10 @@ namespace ThermoVR.Lab
             if (quizInfo.Contains("Answers:")) {
                 int preIndex = quizInfo.IndexOf("Answers:");
                 iterateQuizInfo = quizInfo.Substring(preIndex);
-                int startIndex = iterateQuizInfo.IndexOf('[');
+                int startIndex = iterateQuizInfo.IndexOf('[') + 1;
                 int endIndex = iterateQuizInfo.IndexOf(']');
-                Debug.Log("[LabLoad] pre: " + preIndex + " || start: " + startIndex + " || end: " + endIndex + " || string: " + iterateQuizInfo + " length + " + iterateQuizInfo.Length);
-                iterateQuizInfo = iterateQuizInfo.Substring(startIndex + 1, endIndex);
+                int length = endIndex - startIndex;
+                iterateQuizInfo = iterateQuizInfo.Substring(startIndex, length);
                 string[] rawAnswers = iterateQuizInfo.Split(QUIZ_ANSWER_DELIM);
 
                 for (int i = 0; i < rawAnswers.Length; i++) {
@@ -178,15 +185,15 @@ namespace ThermoVR.Lab
 
                     if (rawAnswers[i].ToLower().Contains(CORRECT_MARKER)) {
                         int correctIndex = i;
-                        newTaskInfo.CorrectID = (uint)correctIndex;
+                        newTaskInfo.CorrectIDs.Add((uint)correctIndex);
                         if (m_verboseDebug) { Debug.Log("[LabLoad] correct index: " + correctIndex); }
-
                     }
 
-                    int startAnswerIndex = rawAnswers[i].IndexOf('"');
-                    rawAnswers[i] = rawAnswers[i].Substring(startAnswerIndex + 1);
+                    int startAnswerIndex = rawAnswers[i].IndexOf('"') + 1;
+                    rawAnswers[i] = rawAnswers[i].Substring(startAnswerIndex);
                     int endAnswerIndex = rawAnswers[i].IndexOf('"');
-                    string parsedAnswer = rawAnswers[i].Substring(0, endAnswerIndex);
+                    length = endAnswerIndex;
+                    string parsedAnswer = rawAnswers[i].Substring(0, length);
                     newTaskInfo.SecondaryTexts.Add(parsedAnswer);
                 }
                 if (m_verboseDebug) { Debug.Log("[LabLoad] Question Answers: " + newTaskInfo.SecondaryTexts); }

@@ -10,6 +10,7 @@ namespace ThermoVR.Lab
         [SerializeField] private RectTransform m_tabContainer;
         [SerializeField] private GameObject m_tabPrefab;
         [SerializeField] private GameObject m_taskFramePrefabMC;
+        [SerializeField] private GameObject m_taskFramePrefabMCMulti;
         [SerializeField] private GameObject m_taskFramePrefabWordBank;
         [SerializeField] private GameObject m_taskFramePrefabReachState;
 
@@ -29,7 +30,6 @@ namespace ThermoVR.Lab
             GameMgr.Events?.Register<Cartridge>(GameEvents.ActivateCartridge, HandleActivateCartridge);
             GameMgr.Events?.Register<Cartridge>(GameEvents.DeactivateCartridge, HandleDeactivateCartridge);
 
-            Debug.Log("[Q] Init");
             m_tabs = new List<LabTab>();
             m_frames = new List<LabTaskFrame>();
             m_activeTabIndex = -1;
@@ -74,8 +74,6 @@ namespace ThermoVR.Lab
         public override void Close() {
             base.Close();
 
-            Debug.Log("[Q] Close");
-
             for (int i = 0; i < m_tabs.Count; i++) {
                 Destroy(m_tabs[i].gameObject);
             }
@@ -99,7 +97,6 @@ namespace ThermoVR.Lab
             bool framePopulated = true;
             Evaluable[] evaluables = null;
 
-
             switch (taskInfo.TaskType) {
                 case TaskType.MultipleChoice:
                     // populate multiple choice
@@ -112,7 +109,24 @@ namespace ThermoVR.Lab
                         MultipleChoiceDefinition newDef = new MultipleChoiceDefinition();
                         newDef.QuestionText = taskInfo.TaskQuestion;
                         newDef.OptionTexts = taskInfo.SecondaryTexts.ToArray();
-                        newDef.CorrectID = taskInfo.CorrectID;
+                        newDef.CorrectIDs = taskInfo.CorrectIDs;
+
+                        mcHub.SetDefinition(newDef);
+                    }
+
+                    break;
+                case TaskType.MultipleChoiceMulti:
+                    // populate multiple choice
+                    newFrameObj = Instantiate(m_taskFramePrefabMCMulti, this.transform);
+                    newFrame = newFrameObj.GetComponent<LabTaskFrame>();
+                    evaluables = newFrame.GetEvaluables();
+                    for (int i = 0; i < evaluables.Length; i++) {
+                        MultipleChoiceHubMulti mcHub = evaluables[i].GetComponent<MultipleChoiceHubMulti>();
+
+                        MultipleChoiceDefinition newDef = new MultipleChoiceDefinition();
+                        newDef.QuestionText = taskInfo.TaskQuestion;
+                        newDef.OptionTexts = taskInfo.SecondaryTexts.ToArray();
+                        newDef.CorrectIDs = taskInfo.CorrectIDs;
 
                         mcHub.SetDefinition(newDef);
                     }
@@ -129,7 +143,7 @@ namespace ThermoVR.Lab
                         WordBankDefinition newDef = new WordBankDefinition();
                         newDef.QuestionText = taskInfo.TaskQuestion;
                         newDef.OptionTexts = taskInfo.SecondaryTexts.ToArray();
-                        newDef.CorrectID = taskInfo.CorrectID;
+                        newDef.CorrectID = taskInfo.CorrectIDs[0];
 
                         wordBankHub.SetDefinition(newDef);
                     }

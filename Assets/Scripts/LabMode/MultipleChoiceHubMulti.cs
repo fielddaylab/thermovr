@@ -7,39 +7,11 @@ using System.Diagnostics.CodeAnalysis;
 using ThermoVR.UI;
 using TMPro;
 using UnityEngine;
+using UnityEngine.InputSystem.LowLevel;
 
 namespace ThermoVR.Lab
 {
-    public class IDEventArgs : EventArgs
-    {
-        public uint ID;
-
-        public IDEventArgs(uint id) {
-            ID = id;
-        }
-    }
-
-    public enum EvalState
-    {
-        Pending,
-        Correct,
-        Incorrect
-    }
-
-    public struct MultipleChoiceDefinition
-    {
-        public string QuestionText;
-        public string[] OptionTexts;
-        public List<uint> CorrectIDs; // between 0 and number of options - 1
-
-        public MultipleChoiceDefinition(string qText, string[] optionTexts, List<uint> ids) {
-            QuestionText = qText;
-            OptionTexts = optionTexts;
-            CorrectIDs = ids;
-        }
-    }
-
-    public class MultipleChoiceHub : Evaluable
+    public class MultipleChoiceHubMulti : Evaluable
     {
 
         [SerializeField] private TMP_Text m_questionText;
@@ -48,7 +20,7 @@ namespace ThermoVR.Lab
 
         private MultipleChoiceDefinition m_definition;
 
-        private uint m_selectedID;
+        private List<uint> m_selectedIDs;
 
         private uint[] m_order;
 
@@ -60,6 +32,10 @@ namespace ThermoVR.Lab
             }
             else {
                 // ResetState();
+            }
+
+            if (m_selectedIDs == null) {
+                m_selectedIDs = new List<uint>();
             }
         }
 
@@ -81,6 +57,7 @@ namespace ThermoVR.Lab
 
             // Load options in the new order
             for (int i = 0; i < order.Length; i++) {
+                m_options[i].OnChoiceSelected -= HandleChoiceSelected;
                 m_options[i].OnChoiceSelected += HandleChoiceSelected;
 
                 // set option text and id according to order
@@ -91,6 +68,7 @@ namespace ThermoVR.Lab
         }
 
         public void SetDefinition(MultipleChoiceDefinition def) {
+            Debug.Log("[Q] Setting definition");
             m_definition = def;
 
             ResetState();
@@ -99,17 +77,24 @@ namespace ThermoVR.Lab
         #region IEvaluable
 
         public override bool IsCorrect() {
+            bool mismatchFound = false;
+
+            // for each response id
             for (int i = 0; i < m_definition.OptionTexts.Length; i++) {
-                if (m_definition.CorrectIDs[0] == m_selectedID) {
-                    return true;
+                uint optionID = m_options[i].GetChoiceID();
+
+                // see if it was selected; if so, see if it is correct; if not, see if not correct
+                if (m_definition.CorrectIDs.Contains(optionID) != m_selectedIDs.Contains(optionID)) {
+                    mismatchFound = true;
+                    break;
                 }
             }
 
-            return false;
+            return !mismatchFound;
         }
 
         public override bool AnswerSelected() {
-            return m_selectedID != uint.MaxValue;
+            return m_selectedIDs.Count > 0;
         }
 
         public override void ResetState() {
@@ -118,7 +103,7 @@ namespace ThermoVR.Lab
             SetOrder(m_randomOrder);
             m_questionText.SetText(m_definition.QuestionText);
             UpdateOptions(m_order);
-            m_selectedID = uint.MaxValue;
+            m_selectedIDs.Clear();
         }
 
         public override void HandleEvaluation(bool correct) {
@@ -127,10 +112,21 @@ namespace ThermoVR.Lab
                 return;
             }
 
+            // for each response id
             for (int i = 0; i < m_order.Length; i++) {
-                if (m_options[i].GetChoiceID() == m_selectedID) {
-                    EvalState newState = correct ? EvalState.Correct : EvalState.Incorrect;
-                    m_options[i].SetEvaluatedState(newState);
+                uint optionID = m_options[m_order[i]].GetChoiceID();
+
+                // see if it was selected; if so, see if it is correct; if not, see if not correct
+                if (m_definition.CorrectIDs.Contains(optionID) == m_selectedIDs.Contains(optionID)) {
+                    m_options[m_order[i]].SetEvaluatedState(EvalState.Correct);
+                }
+                else if (m_definition.CorrectIDs.Contains(optionID) || m_selectedIDs.Contains(optionID)){
+                    m_options[m_order[i]].SetEvaluatedState(EvalState.Incorrect);
+                }
+                else {
+                    // not selected, and didn't need to be selected.
+                    //  No change, or mark incorrect?
+                    m_options[m_order[i]].SetEvaluatedState(EvalState.Incorrect);
                 }
             }
 
@@ -161,11 +157,24 @@ namespace ThermoVR.Lab
                 return;
             }
 
-            m_selectedID = args.ID;
+            bool selectedState = false;
+            if (m_selectedIDs.Contains(args.ID)) {
+                m_selectedIDs.Remove(args.ID);
+                selectedState = false;
+                Debug.Log("[Q] choice removed");
 
-            // Reset selected state
+            }
+            else {
+                m_selectedIDs.Add(args.ID);
+                selectedState = true;
+                Debug.Log("[Q] choice added");
+            }
+
             for (int i = 0; i < m_order.Length; i++) {
-                m_options[i].SetSelected(m_options[i].GetChoiceID() == m_selectedID);
+                if (m_options[i].GetChoiceID() == args.ID) {
+                    Debug.Log("[Q] choice  match found");
+                    m_options[i].SetSelected(selectedState);
+                }
             }
         }
 
