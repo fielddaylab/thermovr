@@ -3,16 +3,130 @@
 
 || TASK
 
-|Type: [word-bank]
+|Type: [multiple-choice]
 |ToolInfo:
 |SetInfo:
 |LimitInfo:
 |TargetInfo:
 |QuizInfo: 
 	Question:
-"a. Bunsen Burner
-Which property is held constant?"
-	Answers: ["Pressure"(c), "Volume", "Temperature", "Entropy", "Enthalpy"]
+"First, we’ll try out each feature of the simulator. Determine which property (P,V,T) is being held constant and which one(s) are changing and in what way.
+	a. Bunsen Burner
+	Which property is held constant?"
+	Answers: ["Pressure"(c), "Volume", "Temperature", "None of the above"]
+|EfficiencyInfo:
+
+
+|| TASK
+
+|Type: [multi-select-choice]
+|ToolInfo:
+|SetInfo:
+|LimitInfo:
+|TargetInfo:
+|QuizInfo: 
+	Question:
+"First, we’ll try out each feature of the simulator. Determine which property (P,V,T) is being held constant and which one(s) are changing and in what way.
+	a. Bunsen Burner
+	Which properties are changing?"
+	Answers: ["Pressure", "Volume"(c), "Temperature"(c), "None of the above"]
+|EfficiencyInfo:
+
+
+|| TASK
+
+|Type: [multiple-choice]
+|ToolInfo:
+|SetInfo:
+|LimitInfo:
+|TargetInfo:
+|QuizInfo: 
+	Question:
+"First, we’ll try out each feature of the simulator. Determine which property (P,V,T) is being held constant and which one(s) are changing and in what way.
+	b. Cooling Coil
+	Which property is held constant?"
+	Answers: ["Pressure"(c), "Volume", "Temperature", "None of the above"]
+|EfficiencyInfo:
+
+
+|| TASK
+
+|Type: [multi-select-choice]
+|ToolInfo:
+|SetInfo:
+|LimitInfo:
+|TargetInfo:
+|QuizInfo: 
+	Question:
+"First, we’ll try out each feature of the simulator. Determine which property (P,V,T) is being held constant and which one(s) are changing and in what way.
+	b. Cooling Coil
+	Which properties are changing?"
+	Answers: ["Pressure", "Volume"(c), "Temperature"(c), "None of the above"]
+|EfficiencyInfo:
+
+
+|| TASK
+
+|Type: [multiple-choice]
+|ToolInfo:
+|SetInfo:
+|LimitInfo:
+|TargetInfo:
+|QuizInfo: 
+	Question:
+"First, we’ll try out each feature of the simulator. Determine which property (P,V,T) is being held constant and which one(s) are changing and in what way.
+	c. Weight
+	Which property is held constant?"
+	Answers: ["Pressure", "Volume", "Temperature", "None of the above"(c)]
+|EfficiencyInfo:
+
+
+|| TASK
+
+|Type: [multi-select-choice]
+|ToolInfo:
+|SetInfo:
+|LimitInfo:
+|TargetInfo:
+|QuizInfo: 
+	Question:
+"First, we’ll try out each feature of the simulator. Determine which property (P,V,T) is being held constant and which one(s) are changing and in what way.
+	c. Weight
+	Which properties are changing?"
+	Answers: ["Pressure"(c), "Volume"(c), "Temperature"(c), "None of the above"]
+|EfficiencyInfo:
+
+
+
+|| TASK
+
+|Type: [multiple-choice]
+|ToolInfo:
+|SetInfo:
+|LimitInfo:
+|TargetInfo:
+|QuizInfo: 
+	Question:
+"First, we’ll try out each feature of the simulator. Determine which property (P,V,T) is being held constant and which one(s) are changing and in what way.
+	d. Balloon
+	Which property is held constant?"
+	Answers: ["Pressure", "Volume", "Temperature", "None of the above"(c)]
+|EfficiencyInfo:
+
+
+|| TASK
+
+|Type: [multi-select-choice]
+|ToolInfo:
+|SetInfo:
+|LimitInfo:
+|TargetInfo:
+|QuizInfo: 
+	Question:
+"First, we’ll try out each feature of the simulator. Determine which property (P,V,T) is being held constant and which one(s) are changing and in what way.
+	d. Balloon
+	Which properties are changing?"
+	Answers: ["Pressure"(c), "Volume"(c), "Temperature"(c), "None of the above"]
 |EfficiencyInfo:
 
 
@@ -25,52 +139,7 @@ Which property is held constant?"
 |TargetInfo:
 |QuizInfo: 
 	Question:
-"a. Cooling Coil
-Which property is held constant?"
-	Answers: ["Pressure"(c), "Volume", "Temperature", "Entropy", "Enthalpy"]
-|EfficiencyInfo:
-
-
-|| TASK
-
-|Type: [word-bank]
-|ToolInfo:
-|SetInfo:
-|LimitInfo:
-|TargetInfo:
-|QuizInfo: 
-	Question:
-"a. Weight
-Adjust the weight in the liquid or vapor regions. Which property is held constant?"
-	Answers: ["Pressure", "Volume", "Temperature"(c), "Entropy", "Enthalpy"]
-|EfficiencyInfo:
-
-
-|| TASK
-
-|Type: [word-bank]
-|ToolInfo:
-|SetInfo:
-|LimitInfo:
-|TargetInfo:
-|QuizInfo: 
-	Question:
-"a. Balloon
-Adjust the balloon in the liquid or vapor regions. Which property is held constant?"
-	Answers: ["Pressure", "Volume", "Temperature"(c), "Entropy", "Enthalpy"]
-|EfficiencyInfo:
-
-
-|| TASK
-
-|Type: [word-bank]
-|ToolInfo:
-|SetInfo:
-|LimitInfo:
-|TargetInfo:
-|QuizInfo: 
-	Question:
-"a. Stops
+"e. Stops
 Apply a stop in the two-phase or vapor region. Apply heat until the simulation volume reaches the volume of the stop.
 As you continue to apply heat, which property is held constant?"
 	Answers: ["Pressure", "Volume"(c), "Temperature", "Entropy", "Enthalpy"]
@@ -85,7 +154,7 @@ As you continue to apply heat, which property is held constant?"
 |LimitInfo:
 |TargetInfo:
 |QuizInfo: 
-	Question:"What region will the ball be in if T = 373.15 K and P < P_sat?"
+	Question: "What region will the ball be in if T = 373.15 K and P < P_sat?"
 	Answers: ["Subcooled Liquid", "Two-Phase"(c), "Superheated Vapor"]
 |EfficiencyInfo:
 
@@ -99,7 +168,7 @@ As you continue to apply heat, which property is held constant?"
 |LimitInfo:
 |TargetInfo:
 |QuizInfo: 
-	Question:"What region will the ball be in if T = 373.15 K and P > P_sat?"
+	Question: "What region will the ball be in if T = 373.15 K and P > P_sat?"
 	Answers: ["Subcooled Liquid"(c), "Two-Phase", "Superheated Vapor"]
 |EfficiencyInfo:
 
@@ -112,7 +181,7 @@ As you continue to apply heat, which property is held constant?"
 |LimitInfo:
 |TargetInfo:
 |QuizInfo: 
-	Question:"What region will the ball be in if P = 101 kPa and T > 373.15 K?"
+	Question: "What region will the ball be in if P = 101 kPa and T > 373.15 K?"
 	Answers: ["Subcooled Liquid", "Two-Phase", "Superheated Vapor"(c)]
 |EfficiencyInfo:
 
@@ -125,7 +194,7 @@ As you continue to apply heat, which property is held constant?"
 |LimitInfo:
 |TargetInfo:
 |QuizInfo: 
-	Question:"What region will the ball be in if P = 101 kPa and T < 373.15 K?"
+	Question: "What region will the ball be in if P = 101 kPa and T < 373.15 K?"
 	Answers: ["Subcooled Liquid"(c), "Two-Phase", "Superheated Vapor"]
 |EfficiencyInfo:
 

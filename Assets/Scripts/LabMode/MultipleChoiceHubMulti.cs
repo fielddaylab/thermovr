@@ -124,9 +124,7 @@ namespace ThermoVR.Lab
                     m_options[m_order[i]].SetEvaluatedState(EvalState.Incorrect);
                 }
                 else {
-                    // not selected, and didn't need to be selected.
-                    //  No change, or mark incorrect?
-                    m_options[m_order[i]].SetEvaluatedState(EvalState.Incorrect);
+                    // not selected, and didn't need to be selected. No change.
                 }
             }
 
