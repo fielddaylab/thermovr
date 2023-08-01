@@ -9,6 +9,9 @@ namespace ThermoVR {
 
         public abstract bool AnswerSelected();
 
+        public abstract bool HasBeenEvaluated();
+
+
         public abstract void ResetState();
 
         public abstract void HandleEvaluation(bool correct);

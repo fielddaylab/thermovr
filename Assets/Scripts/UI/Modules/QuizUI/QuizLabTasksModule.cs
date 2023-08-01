@@ -155,7 +155,13 @@ namespace ThermoVR.Lab
                     newFrame = newFrameObj.GetComponent<LabTaskFrame>();
                     evaluables = newFrame.GetEvaluables();
                     for (int i = 0; i < evaluables.Length; i++) {
-                        // Get Reach State Component
+                        ReachStateHub reachStateHub = evaluables[i].GetComponent<ReachStateHub>();
+
+                        ReachStateDefinition newDef = new ReachStateDefinition();
+                        newDef.QuestionText = taskInfo.TaskQuestion;
+                        newDef.Targets = taskInfo.Targets;
+
+                        reachStateHub.SetDefinition(newDef);
                     }
 
 

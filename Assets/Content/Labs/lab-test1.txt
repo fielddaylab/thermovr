@@ -42,6 +42,31 @@
 	Other: 3
 |EfficiencyInfo: 3
 
+|| TASK
+
+|Type: [reach-state]
+|ToolInfo:
+|SetInfo:
+|LimitInfo:
+|TargetInfo:
+|QuizInfo:
+	Question: "Reach a pressure of 200 kPa (+/- 20)"
+	Requirements: [(Pressure:200:20)]
+|EfficiencyInfo: 3
+
+
+|| TASK
+
+|Type: [reach-state]
+|ToolInfo:
+|SetInfo:
+|LimitInfo:
+|TargetInfo:
+|QuizInfo:
+	Question: "Reach a pressure of 200 kPa (+/- 20), and a temperature of 320 K (+/- 5)"
+	Requirements: [(Pressure:200:20), (Temperature:320:5)]
+|EfficiencyInfo: 3
+
 
 || END
 

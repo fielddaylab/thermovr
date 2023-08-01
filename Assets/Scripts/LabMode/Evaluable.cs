@@ -15,6 +15,10 @@ namespace ThermoVR.Lab
 
         public abstract bool AnswerSelected();
 
+        public virtual bool HasBeenEvaluated() {
+            return m_evaluated;
+        }
+
         public virtual void ResetState() {
             m_evaluated = false;
         }

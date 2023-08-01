@@ -1,5 +1,19 @@
 || LAB-NAME: Demo Lab
 
+|| TASK
+
+|Type: [reach-state]
+|ToolInfo:
+|SetInfo:
+|LimitInfo:
+|TargetInfo:
+|QuizInfo:
+	Question:
+"First, we’ll try out each feature of the simulator. Determine which property (P,V,T) is being held constant and which one(s) are changing and in what way.
+	a. Bunsen Burner
+	Apply heat using the Bunsen Burner until T ≈ 320 K."
+	Requirements: [(Temperature:320:5)]
+|EfficiencyInfo:
 
 || TASK
 
@@ -32,6 +46,20 @@
 	Answers: ["Pressure", "Volume"(c), "Temperature"(c), "None of the above"]
 |EfficiencyInfo:
 
+|| TASK
+
+|Type: [reach-state]
+|ToolInfo:
+|SetInfo:
+|LimitInfo:
+|TargetInfo:
+|QuizInfo:
+	Question:
+"First, we’ll try out each feature of the simulator. Determine which property (P,V,T) is being held constant and which one(s) are changing and in what way.
+	a. Cooling Coil
+	Apply the cooling coil until T ≈ 300 K."
+	Requirements: [(Temperature:300:5)]
+|EfficiencyInfo:
 
 || TASK
 
@@ -197,6 +225,7 @@ As you continue to apply heat, which property is held constant?"
 	Question: "What region will the ball be in if P = 101 kPa and T < 373.15 K?"
 	Answers: ["Subcooled Liquid"(c), "Two-Phase", "Superheated Vapor"]
 |EfficiencyInfo:
+
 
 
 || END

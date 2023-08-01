@@ -43,6 +43,8 @@ public class ThermoPresent : MonoBehaviour
 
     [SerializeField] ThermoState state;
 
+    public static ThermoPresent Instance;
+
     //vessel
     GameObject vessel;
     GameObject container;
@@ -70,6 +72,14 @@ public class ThermoPresent : MonoBehaviour
     public float size_p;
 
     void Awake() {
+        if (Instance == null) {
+            Instance = this;
+        }
+        else if (this != Instance) {
+            Destroy(this.gameObject);
+            return;
+        }
+
         ThermoMath.Init();
         state = this.GetComponent<ThermoState>();
         state.reset();
@@ -245,6 +255,35 @@ public class ThermoPresent : MonoBehaviour
 
     public double get_iterative_weight() {
         return state.iterative_weight;
+    }
+
+    /// <summary>
+    ///  Used for Reach State lab questions
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+   public double get_state_var(VarID id) {
+        switch (id) {
+            case VarID.Region:
+                return state.region;
+            case VarID.Pressure:
+                return state.pressure / 1000; // in kPa
+            case VarID.Temperature:
+                return state.temperature;
+            case VarID.Volume:
+                return state.volume;
+            case VarID.InternalEnergy:
+                return state.internalenergy;
+            case VarID.Entropy:
+                return state.entropy;
+            case VarID.Enthalpy:
+                return state.enthalpy;
+            case VarID.Quality:
+                return state.quality;
+            default:
+                return -1;
+        }
+
     }
 
     void genMesh() {

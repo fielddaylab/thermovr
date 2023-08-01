@@ -2,6 +2,7 @@ using BeauUtil;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using ThermoVR.State;
 using UnityEngine;
 
 namespace ThermoVR.Lab
@@ -12,10 +13,16 @@ namespace ThermoVR.Lab
     }
 
     public struct TaskInfo {
+        // Common
         public TaskType TaskType;
         public string TaskQuestion;
+
+        // Multiple choice, word bank, multi-select
         public List<string> SecondaryTexts;
         public List<uint> CorrectIDs;
+
+        // Reach State
+        public List<SimStateTarget> Targets;
     }
 
     public enum TaskType {
@@ -40,6 +47,8 @@ namespace ThermoVR.Lab
         private static string GROUP_DELIM = "||";
         private static string TASK_INFO_DELIM = "|";
         private static string QUIZ_ANSWER_DELIM = ",";
+        private static string STATE_REQ_GROUP_DELIM = ",";
+        private static string STATE_REQ_CHUNK_DELIM = ":";
         private static string CORRECT_MARKER = "(c)";
 
 
@@ -120,6 +129,7 @@ namespace ThermoVR.Lab
             TaskInfo newTaskInfo = new TaskInfo();
             newTaskInfo.SecondaryTexts = new List<string>();
             newTaskInfo.CorrectIDs = new List<uint>();
+            newTaskInfo.Targets = new List<SimStateTarget>();
 
             string[] sections = group.Split(TASK_INFO_DELIM);
 
@@ -200,6 +210,35 @@ namespace ThermoVR.Lab
                     length = endAnswerIndex;
                     string parsedAnswer = rawAnswers[i].Substring(0, length);
                     newTaskInfo.SecondaryTexts.Add(parsedAnswer);
+                }
+                if (m_verboseDebug) { Debug.Log("[LabLoad] Question Answers: " + newTaskInfo.SecondaryTexts); }
+            }
+            // get reach state requirements
+            else if (quizInfo.Contains("Requirements:")) {
+                int preIndex = quizInfo.IndexOf("Requirements:");
+                iterateQuizInfo = quizInfo.Substring(preIndex);
+                int startIndex = iterateQuizInfo.IndexOf('[') + 1;
+                int endIndex = iterateQuizInfo.IndexOf(']');
+                int length = endIndex - startIndex;
+                iterateQuizInfo = iterateQuizInfo.Substring(startIndex, length);
+                string[] rawReqs = iterateQuizInfo.Split(STATE_REQ_GROUP_DELIM);
+
+                for (int i = 0; i < rawReqs.Length; i++) {
+                    if (m_verboseDebug) { Debug.Log("[LabLoad] Parsing requirements: " + rawReqs[i]); }
+
+                    int startAnswerIndex = rawReqs[i].IndexOf('(') + 1;
+                    rawReqs[i] = rawReqs[i].Substring(startAnswerIndex);
+                    int endAnswerIndex = rawReqs[i].IndexOf(')');
+                    length = endAnswerIndex;
+                    string reqGroup = rawReqs[i].Substring(0, length);
+
+                    string[] reqChunks = reqGroup.Split(STATE_REQ_CHUNK_DELIM);
+                    VarID reqID = (VarID)System.Enum.Parse(typeof(VarID), reqChunks[0]);
+                    float reqVal = float.Parse(reqChunks[1]);
+                    float reqRange = float.Parse(reqChunks[2]);
+
+                    SimStateTarget newTarget = new SimStateTarget(reqID, reqVal, reqRange);
+                    newTaskInfo.Targets.Add(newTarget);
                 }
                 if (m_verboseDebug) { Debug.Log("[LabLoad] Question Answers: " + newTaskInfo.SecondaryTexts); }
             }
