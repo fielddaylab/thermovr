@@ -53,10 +53,10 @@ namespace ThermoVR
                     m_fill.sprite = GameDB.Instance?.MCFill;
                     break;
                 case EvalState.Correct:
-                    m_fill.sprite = GameDB.Instance?.MCCorrect;
+                    m_fill.sprite = GameDB.Instance?.Correct;
                     break;
                 case EvalState.Incorrect:
-                    m_fill.sprite = GameDB.Instance?.MCIncorrect;
+                    m_fill.sprite = GameDB.Instance?.Incorrect;
                     break;
                 default:
                     break;

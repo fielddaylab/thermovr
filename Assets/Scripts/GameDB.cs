@@ -9,7 +9,11 @@ public class GameDB : MonoBehaviour
     public Material AvailableMat;
     public Material SnapMat;
 
-    public Sprite MCFill, MCCorrect, MCIncorrect;
+    public Sprite MCFill;
+    public Sprite SocketEmpty;
+    public Sprite Correct, Incorrect;
+
+    public Color TabSelectedColor, TabDefaultColor;
 
     private void Awake() {
         Instance = this;

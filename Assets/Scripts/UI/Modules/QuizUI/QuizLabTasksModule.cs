@@ -15,7 +15,7 @@ namespace ThermoVR.Lab
 
         [SerializeField] private float m_xSpacing;
 
-        private List<GameObject> m_tabs; // TODO: make these pools
+        private List<LabTab> m_tabs; // TODO: make these pools
         private List<LabTaskFrame> m_frames;
         private List<TaskInfo> m_tasks;
 
@@ -30,7 +30,7 @@ namespace ThermoVR.Lab
             GameMgr.Events?.Register<Cartridge>(GameEvents.DeactivateCartridge, HandleDeactivateCartridge);
 
             Debug.Log("[Q] Init");
-            m_tabs = new List<GameObject>();
+            m_tabs = new List<LabTab>();
             m_frames = new List<LabTaskFrame>();
             m_activeTabIndex = -1;
         }
@@ -43,21 +43,31 @@ namespace ThermoVR.Lab
             }
 
             for (int i = 0; i < m_tasks.Count; i++) {
-                GameObject newTab = Instantiate(m_tabPrefab, m_tabContainer.transform);
-                newTab.transform.localPosition += new Vector3(m_xSpacing * i, 0, 0);
+                GameObject newTabObj = Instantiate(m_tabPrefab, m_tabContainer.transform);
+                newTabObj.transform.localPosition += new Vector3(m_xSpacing * i, 0, 0);
+
+                LabTab newTab = newTabObj.GetComponent<LabTab>();
                 m_tabs.Add(newTab);
 
-                ThermoButton button = newTab.GetComponent<ThermoButton>();
-                button.SetText("Task " + (i + 1));
+                newTab.Button.SetText("Task " + (i + 1));
                 int tabIndex = i;
-                button.OnButtonPressed += delegate { HandleLabTabPressed(tabIndex); };
+                newTab.Button.OnButtonPressed += delegate { HandleLabTabPressed(tabIndex); };
 
-                PopulateLabTaskFrame(m_tasks[tabIndex]);
+                LabTaskFrame newFrame = PopulateLabTaskFrame(m_tasks[tabIndex]);
 
                 float startingOffset = 0.1f;
-                RectTransform tabRect = newTab.GetComponent<RectTransform>();
+                RectTransform tabRect = newTabObj.GetComponent<RectTransform>();
                 float tabBuffer = m_xSpacing - tabRect.sizeDelta.x * tabRect.localScale.x;
                 m_tabContainer.sizeDelta = new Vector2((startingOffset + tabRect.sizeDelta.x * tabRect.localScale.x + tabBuffer) * m_tasks.Count, m_tabContainer.sizeDelta.y);
+
+                if (newFrame != null) {
+                    newTab.RegisterFrame(newFrame);
+                }
+            }
+
+            // Open first tab
+            if (m_tabs.Count > 0) {
+                HandleLabTabPressed(0);
             }
         }
 
@@ -67,7 +77,7 @@ namespace ThermoVR.Lab
             Debug.Log("[Q] Close");
 
             for (int i = 0; i < m_tabs.Count; i++) {
-                Destroy(m_tabs[i]);
+                Destroy(m_tabs[i].gameObject);
             }
             m_tabs.Clear();
 
@@ -82,7 +92,7 @@ namespace ThermoVR.Lab
 
         #endregion // IUIModule
 
-        private void PopulateLabTaskFrame(TaskInfo taskInfo) {
+        private LabTaskFrame PopulateLabTaskFrame(TaskInfo taskInfo) {
             GameObject newFrameObj = null;
             LabTaskFrame newFrame = null;
 
@@ -145,6 +155,8 @@ namespace ThermoVR.Lab
                 newFrameObj.SetActive(false);
                 m_frames.Add(newFrame);
             }
+
+            return newFrame;
         }
 
         #region Handlers
@@ -168,23 +180,33 @@ namespace ThermoVR.Lab
         private void HandleLabTabPressed(int newTabIndex) {
             if (m_activeTabIndex == -1) {
                 // no tab activated yet; activate new tab
-                m_frames[newTabIndex].gameObject.SetActive(true);
+                ActivateTab(newTabIndex);
             }
             else if (m_activeTabIndex == newTabIndex) {
                 // same as current tab; no change needed
             }
             else {
                 // hide existing tab
-                m_frames[m_activeTabIndex].gameObject.SetActive(false);
+                DeactivateTab(m_activeTabIndex);
 
                 // activate new tab
-                m_frames[newTabIndex].gameObject.SetActive(true);
+                ActivateTab(newTabIndex);
             }
 
             m_activeTabIndex = newTabIndex;
         }
 
         #endregion // Handlers
+
+        private void ActivateTab(int index) {
+            m_frames[index].gameObject.SetActive(true);
+            m_tabs[index].Button.SetColor(GameDB.Instance.TabSelectedColor);
+        }
+
+        private void DeactivateTab(int index) {
+            m_frames[index].gameObject.SetActive(false);
+            m_tabs[index].Button.SetColor(GameDB.Instance.TabDefaultColor);
+        }
     }
 
 }

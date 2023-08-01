@@ -8,15 +8,17 @@ namespace ThermoVR.Lab
 {
     public class LabTaskFrame : MonoBehaviour
     {
-        [SerializeField] private ThermoButton m_taskReset;
+        public AnswerEvaluator AnswerEvaluator;
+        public ThermoButton TaskResetButton;
+
         [SerializeField] private Evaluable[] m_evaluables;
 
         private void OnEnable() {
-            m_taskReset.OnButtonPressed += HandleResetPressed;
+            TaskResetButton.OnButtonPressed += HandleResetPressed;
         }
 
         private void OnDisable() {
-            m_taskReset.OnButtonPressed -= HandleResetPressed;
+            TaskResetButton.OnButtonPressed -= HandleResetPressed;
         }
 
         public Evaluable[] GetEvaluables() {

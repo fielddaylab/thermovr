@@ -6,10 +6,20 @@ using UnityEngine;
 
 namespace ThermoVR.Lab
 {
+    public class BoolEventArgs : EventArgs {
+        public bool Value;
+
+        public BoolEventArgs(bool value) {
+            Value = value; 
+        }
+    }
+
     public class AnswerEvaluator : MonoBehaviour
     {
         [SerializeField] private Evaluable[] m_toEvaluate;
         [SerializeField] private ThermoButton m_submitButton;
+
+        public EventHandler<BoolEventArgs> OnEvaluationUpdated;
 
         private void OnEnable() {
             m_submitButton.OnButtonPressed += HandleSubmitPressed;
@@ -36,6 +46,7 @@ namespace ThermoVR.Lab
                 }
 
                 m_toEvaluate[i].HandleEvaluation(m_toEvaluate[i].IsCorrect());
+                OnEvaluationUpdated?.Invoke(this, new BoolEventArgs(m_toEvaluate[i].IsCorrect()));
             }
 
             if (allCorrect) {
