@@ -20,6 +20,13 @@ namespace ThermoVR.Lab
         }
 
         private void HandleSubmitPressed(object sender, EventArgs args) {
+            // Only submit when answers have been selected
+            for (int i = 0; i < m_toEvaluate.Length; i++) {
+                if (!m_toEvaluate[i].AnswerSelected()) {
+                    return;
+                }
+            }
+
             bool allCorrect = true;
 
             for (int i = 0; i < m_toEvaluate.Length; i++) {

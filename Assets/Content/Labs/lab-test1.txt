@@ -31,13 +31,14 @@
 
 || TASK
 
-|Type: [multiple-choice, word-bank, reach-state]
+|Type: [word-bank]
 |ToolInfo: 3
 |SetInfo: 3
 |LimitInfo: 3
 |TargetInfo (property, value, valid-range): 3
 |QuizInfo:
-	Question: "This is the question for the third task."
+	Question: "This is a word bank for the third task."
+	Answers: ["Subcooled Liquid"(c), "Two-Phase", "Superheated Vapor"]
 	Other: 3
 |EfficiencyInfo: 3
 

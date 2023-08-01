@@ -79,6 +79,7 @@ namespace ThermoVR.Lab
             bool framePopulated = true;
             Evaluable[] evaluables = null;
 
+
             switch (taskInfo.TaskType) {
                 case TaskType.MultipleChoice:
                     // populate multiple choice
@@ -103,9 +104,15 @@ namespace ThermoVR.Lab
                     newFrame = newFrameObj.GetComponent<LabTaskFrame>();
                     evaluables = newFrame.GetEvaluables();
                     for (int i = 0; i < evaluables.Length; i++) {
-                        WordBank wordBankHub = evaluables[i].GetComponent<WordBank>();
-                    }
+                        WordBankHub wordBankHub = evaluables[i].GetComponent<WordBankHub>();
 
+                        WordBankDefinition newDef = new WordBankDefinition();
+                        newDef.QuestionText = taskInfo.TaskQuestion;
+                        newDef.OptionTexts = taskInfo.SecondaryTexts.ToArray();
+                        newDef.CorrectID = taskInfo.CorrectID;
+
+                        wordBankHub.SetDefinition(newDef);
+                    }
 
                     break;
                 case TaskType.ReachState:

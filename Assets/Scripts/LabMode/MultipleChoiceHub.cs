@@ -42,7 +42,7 @@ namespace ThermoVR.Lab
     {
 
         [SerializeField] private TMP_Text m_questionText;
-        [SerializeField] private MultipleChoiceOption[] m_options; // option "slots"; not all questions will use all slots
+        [SerializeField] private MultipleChoiceOption[] m_options; // option "slots"; not all questions will use all slots // TODO: make pools
         [SerializeField] private bool m_randomOrder = false;
 
         private MultipleChoiceDefinition m_definition;
@@ -65,8 +65,6 @@ namespace ThermoVR.Lab
         #endregion // Unity Callbacks
 
         private void UpdateOptions(uint[] order) {
-            m_questionText.SetText(m_definition.QuestionText);
-
             // show options equal to number of options
             for (int i = 0; i < m_options.Length; i++) {
                 if (i >= m_definition.OptionTexts.Length) {
@@ -109,11 +107,17 @@ namespace ThermoVR.Lab
             return false;
         }
 
+        public override bool AnswerSelected() {
+            return m_selectedID != uint.MaxValue;
+        }
+
         public override void ResetState() {
             base.ResetState();
 
             SetOrder(m_randomOrder);
+            m_questionText.SetText(m_definition.QuestionText);
             UpdateOptions(m_order);
+            m_selectedID = uint.MaxValue;
         }
 
         public override void HandleEvaluation(bool correct) {
