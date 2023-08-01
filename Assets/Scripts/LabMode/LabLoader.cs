@@ -51,9 +51,14 @@ namespace ThermoVR.Lab
         [SerializeField] private TextAsset[] m_initialLabs;
         [SerializeField] private bool m_verboseDebug = false;
 
+        [SerializeField] private bool m_alphaRelease = true; // temp solution to managing alpha release channel
+
         private void Start() {
-            for (int i = 0; i < m_initialLabs.Length; i++) {
-                LoadLab(m_initialLabs[i]);
+            if (m_alphaRelease) {
+                // enable lab mode
+                for (int i = 0; i < m_initialLabs.Length; i++) {
+                    LoadLab(m_initialLabs[i]);
+                }
             }
         }
 

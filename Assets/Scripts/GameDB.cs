@@ -11,7 +11,7 @@ public class GameDB : MonoBehaviour
 
     public Sprite MCFill;
     public Sprite SocketEmpty;
-    public Sprite Correct, Incorrect;
+    public Sprite Correct, Incorrect, Missed;
 
     public Color TabSelectedColor, TabDefaultColor;
 

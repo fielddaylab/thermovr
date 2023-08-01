@@ -68,7 +68,6 @@ namespace ThermoVR.Lab
         }
 
         public void SetDefinition(MultipleChoiceDefinition def) {
-            Debug.Log("[Q] Setting definition");
             m_definition = def;
 
             ResetState();
@@ -120,11 +119,17 @@ namespace ThermoVR.Lab
                 if (m_definition.CorrectIDs.Contains(optionID) == m_selectedIDs.Contains(optionID)) {
                     m_options[m_order[i]].SetEvaluatedState(EvalState.Correct);
                 }
-                else if (m_definition.CorrectIDs.Contains(optionID) || m_selectedIDs.Contains(optionID)){
+                else if (m_definition.CorrectIDs.Contains(optionID) && !m_selectedIDs.Contains(optionID)) {
+                    m_options[m_order[i]].SetEvaluatedState(EvalState.Missed);
+                    m_options[i].SetSelected(true);
+
+                }
+                else if (m_selectedIDs.Contains(optionID)) {
                     m_options[m_order[i]].SetEvaluatedState(EvalState.Incorrect);
                 }
                 else {
                     // not selected, and didn't need to be selected. No change.
+
                 }
             }
 
@@ -159,18 +164,14 @@ namespace ThermoVR.Lab
             if (m_selectedIDs.Contains(args.ID)) {
                 m_selectedIDs.Remove(args.ID);
                 selectedState = false;
-                Debug.Log("[Q] choice removed");
-
             }
             else {
                 m_selectedIDs.Add(args.ID);
                 selectedState = true;
-                Debug.Log("[Q] choice added");
             }
 
             for (int i = 0; i < m_order.Length; i++) {
                 if (m_options[i].GetChoiceID() == args.ID) {
-                    Debug.Log("[Q] choice  match found");
                     m_options[i].SetSelected(selectedState);
                 }
             }

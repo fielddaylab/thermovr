@@ -23,7 +23,8 @@ namespace ThermoVR.Lab
     {
         Pending,
         Correct,
-        Incorrect
+        Incorrect,
+        Missed
     }
 
     public struct MultipleChoiceDefinition
