@@ -29,6 +29,7 @@ namespace ThermoVR.Lab
             GameMgr.Events?.Register<Cartridge>(GameEvents.ActivateCartridge, HandleActivateCartridge);
             GameMgr.Events?.Register<Cartridge>(GameEvents.DeactivateCartridge, HandleDeactivateCartridge);
 
+            Debug.Log("[Q] Init");
             m_tabs = new List<GameObject>();
             m_frames = new List<LabTaskFrame>();
             m_activeTabIndex = -1;
@@ -58,6 +59,8 @@ namespace ThermoVR.Lab
         public override void Close() {
             base.Close();
 
+            Debug.Log("[Q] Close");
+
             for (int i = 0; i < m_tabs.Count; i++) {
                 Destroy(m_tabs[i]);
             }
@@ -68,6 +71,8 @@ namespace ThermoVR.Lab
                 Destroy(m_frames[i].gameObject);
             }
             m_frames.Clear();
+
+            m_activeTabIndex = -1;
         }
 
         #endregion // IUIModule

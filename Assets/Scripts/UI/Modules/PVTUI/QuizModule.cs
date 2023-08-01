@@ -32,6 +32,8 @@ public class QuizModule : UIModule
         GameMgr.Events?.Register<Cartridge>(GameEvents.DeactivateCartridge, HandleDeactivateCartridge);
 
         GameMgr.Events?.Register(GameEvents.BeginLab, HandleBeginLab);
+
+        m_hub.InitializeRegistered();
     }
 
     public override void Open() {

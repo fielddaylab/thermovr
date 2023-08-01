@@ -29,14 +29,26 @@ namespace ThermoVR.UI
 
         [SerializeField] private UIModule m_initialUI;
 
+        private bool m_initialized = false;
+
         public void Awake() {
-            for (int i = 0; i < m_registered.Length; i++) {
-                m_registered[i].Init();
-            }
+            InitializeRegistered();
 
             if (m_initialUI) {
                 OpenUI(m_initialUI.ID);
             }
+        }
+
+        public void InitializeRegistered() {
+            if (m_initialized) {
+                return;
+            }
+
+            for (int i = 0; i < m_registered.Length; i++) {
+                m_registered[i].Init();
+            }
+
+            m_initialized = true;
         }
 
         public void OpenUI(UIID id) {
