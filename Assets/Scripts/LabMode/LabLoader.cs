@@ -169,6 +169,7 @@ namespace ThermoVR.Lab
                 iterateQuizInfo = quizInfo.Substring(preIndex);
                 int startIndex = iterateQuizInfo.IndexOf('[');
                 int endIndex = iterateQuizInfo.IndexOf(']');
+                Debug.Log("[LabLoad] pre: " + preIndex + " || start: " + startIndex + " || end: " + endIndex + " || string: " + iterateQuizInfo + " length + " + iterateQuizInfo.Length);
                 iterateQuizInfo = iterateQuizInfo.Substring(startIndex + 1, endIndex);
                 string[] rawAnswers = iterateQuizInfo.Split(QUIZ_ANSWER_DELIM);
 
