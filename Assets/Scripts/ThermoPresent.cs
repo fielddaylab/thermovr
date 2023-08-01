@@ -43,8 +43,6 @@ public class ThermoPresent : MonoBehaviour
 
     [SerializeField] ThermoState state;
 
-    public static ThermoPresent Instance;
-
     //vessel
     GameObject vessel;
     GameObject container;
@@ -72,14 +70,6 @@ public class ThermoPresent : MonoBehaviour
     public float size_p;
 
     void Awake() {
-        if (Instance == null) {
-            Instance = this;
-        }
-        else if (this != Instance) {
-            Destroy(this.gameObject);
-            return;
-        }
-
         ThermoMath.Init();
         state = this.GetComponent<ThermoState>();
         state.reset();
@@ -281,9 +271,9 @@ public class ThermoPresent : MonoBehaviour
             case VarID.Quality:
                 return state.quality;
             default:
+                // VolumeStop
                 return -1;
         }
-
     }
 
     void genMesh() {

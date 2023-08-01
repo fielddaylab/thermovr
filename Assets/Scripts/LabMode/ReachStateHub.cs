@@ -26,6 +26,7 @@ namespace ThermoVR.Lab
         public VarID TargetID;
         public float TargetVal;
         public float TargetRange;
+        // TODO: targetComparison; ( less than, equal to, greater than, etc.)
 
         public SimStateTarget(VarID id, float val, float range) {
             TargetID = id;
@@ -77,11 +78,23 @@ namespace ThermoVR.Lab
             for (int i = 0; i < m_definition.Targets.Count; i++) {
                 SimStateTarget currTarget = m_definition.Targets[i];
 
-                double varVal = ThermoPresent.Instance.get_state_var(currTarget.TargetID);
+                if (currTarget.TargetID == VarID.VolumeStop) {
+                    bool eitherCorrect = false;
+                    Tuple<double, double> stopVals = World.Instance.get_stop_vals();
+                    bool stop1OutOfRange = (stopVals.Item1 < currTarget.TargetVal - currTarget.TargetRange || stopVals.Item1 > currTarget.TargetVal + currTarget.TargetRange);
+                    bool stop2OutOfRange = (stopVals.Item2 < currTarget.TargetVal - currTarget.TargetRange || stopVals.Item2 > currTarget.TargetVal + currTarget.TargetRange);
+                    if (stop1OutOfRange && stop2OutOfRange) {
+                        // both stops are outside of limits
+                        return false;
+                    }
+                }
+                else {
+                    double varVal = World.Instance.get_state_var(currTarget.TargetID);
 
-                if (varVal < currTarget.TargetVal - currTarget.TargetRange || varVal > currTarget.TargetVal + currTarget.TargetRange) {
-                    // is outside of limits
-                    return false;
+                    if (varVal < currTarget.TargetVal - currTarget.TargetRange || varVal > currTarget.TargetVal + currTarget.TargetRange) {
+                        // is outside of limits
+                        return false;
+                    }
                 }
             }
 

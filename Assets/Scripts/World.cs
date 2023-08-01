@@ -21,12 +21,16 @@ using static OVRInput;
 using ThermoVR.UI.GraphElements;
 using ThermoVR.UI;
 using ThermoVR.Lab;
+using ThermoVR.State;
+using System;
 
 public class World : MonoBehaviour
 {
     const float CONTAINER_INSULATION_COEFFICIENT = 0.1f; // 0.1f; // Not really based on a physical material, just a way to roughly simulate imperfect insulation.
     public const double DELTA_PRESSURE_CUTOFF = 100.0;
     const double PSI_TO_PASCAL = 6894.76;
+
+    public static World Instance;
 
     public Material hand_empty;
     Material[] hand_emptys;
@@ -143,6 +147,14 @@ public class World : MonoBehaviour
 
     #region Initialization
     private void Awake() {
+        if (Instance == null) {
+            Instance = this;
+        }
+        else if (this != Instance) {
+            Destroy(this.gameObject);
+            return;
+        }
+
         GameMgr.Events?.Register<Pressable>(GameEvents.RegisterPressable, HandleRegisterPressable);
         GameMgr.Events?.Register<Touchable>(GameEvents.RegisterMovable, HandleRegisterMovable);
 
@@ -292,6 +304,24 @@ public class World : MonoBehaviour
 
     #endregion // Initialization
 
+    /// <summary>
+    ///  Used for Reach State lab questions
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    public double get_state_var(VarID id) {
+        switch (id) {
+            case VarID.VolumeStop:
+                return -1; // should be handled previously
+            default:
+                return thermo_present.get_state_var(id);
+        }
+    }
+
+    public Tuple<double, double> get_stop_vals() {
+        return new Tuple<double, double>(tool_stop1.get_val(), tool_stop2.get_val());
+    }
+
 
     void SetAllHalfed(bool h) {
         halfed = h;
@@ -303,7 +333,7 @@ public class World : MonoBehaviour
     }
 
     Vector3 popVector() {
-        return new Vector3(Random.Range(-1f, 1f), 1f, Random.Range(-1f, 1f));
+        return new Vector3(UnityEngine.Random.Range(-1f, 1f), 1f, UnityEngine.Random.Range(-1f, 1f));
     }
 
     #region Tools

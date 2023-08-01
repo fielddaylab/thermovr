@@ -27,7 +27,8 @@ namespace ThermoVR.State
         InternalEnergy,
         Entropy,
         Enthalpy,
-        Quality
+        Quality,
+        VolumeStop
     }
 
     public struct VarUpdate
