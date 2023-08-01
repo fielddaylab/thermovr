@@ -62,6 +62,8 @@
     <Compile Include="Assets\Oculus\SampleFramework\Usage\Firebase\StartCrashlytics.cs" />
     <Compile Include="Assets\Oculus\SampleFramework\Usage\HandsTrainExample\Scripts\HandsActiveChecker.cs" />
     <Compile Include="Assets\Scripts\Touchable.cs" />
+    <Compile Include="Assets\Scripts\LabMode\MultipleChoiceHub.cs" />
+    <Compile Include="Assets\Scripts\LabMode\IEvaluable.cs" />
     <Compile Include="Assets\Oculus\SampleFramework\Usage\SceneManager\Scripts\BouncingBallMgr.cs" />
     <Compile Include="Assets\Scripts\UI\UIHub.cs" />
     <Compile Include="Assets\Scripts\GameDB.cs" />
@@ -70,12 +72,15 @@
     <Compile Include="Assets\Oculus\SampleFramework\Usage\Passthrough\Scripts\HandMeshUI.cs" />
     <Compile Include="Assets\Scripts\UI\ThermoButton.cs" />
     <Compile Include="Assets\ResonanceAudio\Scripts\ResonanceAudioAcousticMesh.cs" />
+    <Compile Include="Assets\Scripts\UI\Modules\QuizUI\QuizLoadedModule.cs" />
     <Compile Include="Assets\Oculus\SampleFramework\Usage\SceneManager\Scripts\VolumeAndPlaneSwitcher.cs" />
+    <Compile Include="Assets\Scripts\LabMode\Evaluable.cs" />
     <Compile Include="Assets\Oculus\SampleFramework\Core\CustomHands\Scripts\HandPose.cs" />
     <Compile Include="Assets\Oculus\SampleFramework\Core\HandsInteraction\Scripts\Tools\InteractableTool.cs" />
     <Compile Include="Assets\Oculus\SampleFramework\Usage\Passthrough\Scripts\EnableUnpremultipliedAlpha.cs" />
     <Compile Include="Assets\Oculus\SampleFramework\Core\Video\Plugins\Android\NativeVideoPlayer.cs" />
     <Compile Include="Assets\Oculus\SampleFramework\Core\Locomotion\Scripts\TeleportAimVisualLaser.cs" />
+    <Compile Include="Assets\Scripts\LabMode\WordBankHub.cs" />
     <Compile Include="Assets\Oculus\SampleFramework\Usage\TouchPro\Scripts\Ui\UiAxis1dInspector.cs" />
     <Compile Include="Assets\Oculus\Voice\Lib\Wit.ai\AssemblyInfo.cs" />
     <Compile Include="Assets\Oculus\SampleFramework\Core\Video\Scripts\MoviePlayerSample.cs" />
@@ -152,9 +157,11 @@
     <Compile Include="Assets\ResonanceAudio\Scripts\ResonanceAudio.cs" />
     <Compile Include="Assets\Oculus\SampleFramework\Core\Video\Scripts\ButtonDownListener.cs" />
     <Compile Include="Assets\Oculus\SampleFramework\Core\Locomotion\Scripts\TeleportAimHandlerLaser.cs" />
+    <Compile Include="Assets\Scripts\LabMode\WordBankOption.cs" />
     <Compile Include="Assets\Oculus\SampleFramework\Usage\Passthrough\Scripts\PassthroughBrush.cs" />
     <Compile Include="Assets\Oculus\SampleFramework\Usage\Passthrough\Scripts\PassthroughController.cs" />
     <Compile Include="Assets\Scripts\Pressable.cs" />
+    <Compile Include="Assets\Scripts\UI\Modules\GenericModule.cs" />
     <Compile Include="Assets\Oculus\SampleFramework\Core\HandsInteraction\Scripts\ColliderZone.cs" />
     <Compile Include="Assets\Oculus\SampleFramework\Core\Video\Scripts\MoviePlayerSampleControls.cs" />
     <Compile Include="Assets\Scripts\Tab.cs" />
@@ -180,6 +187,7 @@
     <Compile Include="Assets\Scripts\ThermoMath.cs" />
     <Compile Include="Assets\Oculus\SampleFramework\Usage\Firebase\AnalyticsUI.cs" />
     <Compile Include="Assets\Scripts\UI\Modules\UIModule.cs" />
+    <Compile Include="Assets\Scripts\LabMode\MultipleChoiceOption.cs" />
     <Compile Include="Assets\Scripts\Splash.cs" />
     <Compile Include="Assets\Scripts\LabMode\Cartridge.cs" />
     <Compile Include="Assets\Oculus\SampleFramework\Core\HandsInteraction\Scripts\BoneCapsuleTriggerLogic.cs" />
@@ -197,6 +205,7 @@
     <Compile Include="Assets\Oculus\SampleFramework\Core\Locomotion\Scripts\TeleportOrientationHandlerThumbstick.cs" />
     <Compile Include="Assets\Oculus\SampleFramework\Usage\HandsTrainExample\Scripts\TrainCrossingController.cs" />
     <Compile Include="Assets\Oculus\SampleFramework\Usage\StartScene\Scripts\StartMenu.cs" />
+    <Compile Include="Assets\Scripts\LabMode\AnswerEvaluator.cs" />
     <Compile Include="Assets\Oculus\SampleFramework\Usage\Passthrough\Scripts\HandMeshMask.cs" />
     <Compile Include="Assets\Oculus\SampleFramework\Usage\SceneManager\Scripts\FurnitureSpawner.cs" />
     <Compile Include="Assets\ResonanceAudio\Scripts\ResonanceAudioListener.cs" />
@@ -220,6 +229,7 @@
     <Compile Include="Assets\Oculus\SampleFramework\Core\HandsInteraction\Scripts\InteractableToolsInputRouter.cs" />
     <Compile Include="Assets\Scripts\ThermoState.cs" />
     <Compile Include="Assets\Oculus\SampleFramework\Usage\Passthrough\Scripts\ObjectManipulator.cs" />
+    <Compile Include="Assets\Scripts\UI\Modules\QuizUI\QuizLabTasksModule.cs" />
     <Compile Include="Assets\Scripts\UI\GridGenerator.cs" />
     <Compile Include="Assets\Oculus\SampleFramework\Usage\Passthrough\Scripts\OverlayPassthrough.cs" />
     <Compile Include="Assets\Oculus\SampleFramework\Core\Locomotion\Scripts\LocomotionTeleport.cs" />
@@ -246,16 +256,6 @@
     <Compile Include="Assets\Oculus\SampleFramework\Usage\Passthrough\Scripts\SelectivePassthroughExperience.cs" />
     <Compile Include="Assets\Scripts\Utils\LineSpacer.cs" />
     <Compile Include="Assets\Oculus\SampleFramework\Usage\HandsTrainExample\Scripts\TrackSegment.cs" />
-    <Compile Include="Assets\Scripts\UI\Modules\QuizUI\QuizLoadedModule.cs" />
-    <Compile Include="Assets\Scripts\UI\Modules\QuizUI\QuizLabTasksModule.cs" />
-    <Compile Include="Assets\Scripts\UI\Modules\GenericModule.cs" />
-    <Compile Include="Assets\Scripts\LabMode\MultipleChoiceHub.cs" />
-    <Compile Include="Assets\Scripts\LabMode\WordBankHub.cs" />
-    <Compile Include="Assets\Scripts\LabMode\AnswerEvaluator.cs" />
-    <Compile Include="Assets\Scripts\LabMode\IEvaluable.cs" />
-    <Compile Include="Assets\Scripts\LabMode\Evaluable.cs" />
-    <Compile Include="Assets\Scripts\LabMode\MultipleChoiceOption.cs" />
-    <Compile Include="Assets\Scripts\LabMode\WordBankOption.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Oculus\SampleFramework\Usage\HandsTrainExample\Shaders\XingLightShader.shader" />

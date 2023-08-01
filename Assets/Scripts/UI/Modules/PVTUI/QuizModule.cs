@@ -33,7 +33,7 @@ public class QuizModule : UIModule
 
         GameMgr.Events?.Register(GameEvents.BeginLab, HandleBeginLab);
 
-        m_hub.InitializeRegistered();
+        m_hub.InitializeRegistered(); //TODO: move away from Init(). This is a bit wonky
     }
 
     public override void Open() {

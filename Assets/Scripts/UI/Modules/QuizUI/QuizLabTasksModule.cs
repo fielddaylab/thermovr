@@ -7,7 +7,7 @@ namespace ThermoVR.Lab
     // Manages loading of task tabs
     public class QuizLabTasksModule : UIModule
     {
-        [SerializeField] private GameObject m_tabContainer;
+        [SerializeField] private RectTransform m_tabContainer;
         [SerializeField] private GameObject m_tabPrefab;
         [SerializeField] private GameObject m_taskFramePrefabMC;
         [SerializeField] private GameObject m_taskFramePrefabWordBank;
@@ -53,6 +53,11 @@ namespace ThermoVR.Lab
                 button.OnButtonPressed += delegate { HandleLabTabPressed(tabIndex); };
 
                 PopulateLabTaskFrame(m_tasks[tabIndex]);
+
+                float startingOffset = 0.1f;
+                RectTransform tabRect = newTab.GetComponent<RectTransform>();
+                float tabBuffer = m_xSpacing - tabRect.sizeDelta.x * tabRect.localScale.x;
+                m_tabContainer.sizeDelta = new Vector2((startingOffset + tabRect.sizeDelta.x * tabRect.localScale.x + tabBuffer) * m_tasks.Count, m_tabContainer.sizeDelta.y);
             }
         }
 
