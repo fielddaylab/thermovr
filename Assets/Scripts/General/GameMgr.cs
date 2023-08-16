@@ -8,6 +8,8 @@ namespace ThermoVR
 {
     public class GameMgr : Singleton<GameMgr>
     {
+        public bool IsAlphaRelease = true; // temp solution to managing alpha release channel
+
         private readonly EventDispatcher<object> m_EventDispatcher = new EventDispatcher<object>();
 
         [SerializeField] private World m_world;
