@@ -235,8 +235,6 @@ public class World : MonoBehaviour
         GameMgr.Events.Dispatch(GameEvents.GatherPressables);
 
         // Initialize Buttons
-        // reset_button.Init();
-        // halfer_button.Init();
         reset_button.OnPress += HandleResetPressed;
         halfer_button.OnPress += HandleHalferPressed;
 
@@ -283,12 +281,6 @@ public class World : MonoBehaviour
         placement_dot = GameObject.Find("tstate");
         placement_dot.GetComponent<Renderer>().enabled = false;
         placement_thermo_reasonable = false;
-
-        /*
-        vrcenter = GameObject.Find("VRCenter");
-        vrcenter_fingertoggleable = vrcenter.GetComponent<FingerToggleable>();
-        vrcenter_backing_meshrenderer = vrcenter.transform.GetChild(1).GetComponent<MeshRenderer>();
-        */
 
         for (int i = 0; i < tools.Count; i++) movables.Add(tools[i].touchable); //important that tools take priority, so they can be grabbed and removed
         movables.Add(tablet.touchable);

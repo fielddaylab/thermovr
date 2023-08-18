@@ -18,6 +18,9 @@ using ThermoVR;
 
 namespace ThermoVR.State
 {
+    /// <summary>
+    /// Unique identifiers for simulation variables.
+    /// </summary>
     public enum VarID : byte
     {
         Region,
@@ -31,6 +34,9 @@ namespace ThermoVR.State
         VolumeStop
     }
 
+    /// <summary>
+    /// Struct for updating a simulation variable readout
+    /// </summary>
     public struct VarUpdate
     {
         public VarID ID;
@@ -75,12 +81,13 @@ namespace ThermoVR.State
         public double v_stop1; // volume stop specified by tool_stop1
         public double v_stop2; // volume stop specified by tool_stop2
 
-        private static bool RELATIVE_CLAMP = true; // true if clamp is set relative to current volume, false if clamp can set any volume bounds
         List<VolumeStop> v_stops;
         private static float STOP_BUFFER = 0.00005f;
         public double iterative_weight = 0;
 
         public void reset() {
+            prev_region = region;
+            region = 0;
             //ensure consistent state
             pressure = ThermoMath.p_neutral[region];
             temperature = ThermoMath.t_neutral[region];
