@@ -29,6 +29,8 @@ public class World : MonoBehaviour
     const float CONTAINER_INSULATION_COEFFICIENT = 0.1f; // 0.1f; // Not really based on a physical material, just a way to roughly simulate imperfect insulation.
     public const double DELTA_PRESSURE_CUTOFF = 100.0;
     const double PSI_TO_PASCAL = 6894.76;
+    const double SPECIFIC_HEAT_CAPACITY_LIQ = 4184; // how many J it takes to heat 1 kg of water liquid 1 Kelvin
+    const double SPECIFIC_HEAT_CAPACITY_VAP = 1.996; // how many J it takes to heat 1 kg of water vapor 1 Kelvin
 
     public static World Instance;
 
@@ -931,10 +933,15 @@ public class World : MonoBehaviour
             }
         }
 
+
         // heat leak
-        double transfer_rate_mod = 100f;
         if (toggle_heatTransfer.IsOn()) {
-            double heat_transfer_delta = (room_temp - thermo_present.get_temperature()) * insulation_coefficient * transfer_rate_mod;
+            double heat_transfer_delta =
+                (room_temp - thermo_present.get_temperature()) // total temperature difference
+                * insulation_coefficient // what percentage of that difference is shielded by insulation
+                * SPECIFIC_HEAT_CAPACITY_LIQ // how much heat is required to raise 1 kg of water 1 Kelvin
+                / delta_time / 2; // halve the immediacy effect so that simulation can handle the change
+
             if (heat_transfer_delta != 0) {
                 // insulation is inversely proportional to the rate of heat transfer (outside insulation)
                 thermo_present.add_heat_per_delta_time(heat_transfer_delta, insulation_coefficient, delta_time);

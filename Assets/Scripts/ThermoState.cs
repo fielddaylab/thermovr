@@ -357,6 +357,8 @@ namespace ThermoVR.State
 
             bool constant_v = treat_as_constant_v_add_heat(applied_heat, insulation_coefficient, delta_time);
 
+            // TODO: In case of large heat shifts (i.e. no insulation), calculate max applied_heat that would still be within range?
+
             if (constant_v) {
                 add_heat_constant_v_per_delta_time(applied_heat, insulation_coefficient, delta_time);
             }
