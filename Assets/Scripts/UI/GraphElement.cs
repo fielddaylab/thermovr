@@ -31,7 +31,6 @@ namespace ThermoVR.UI.GraphElements
         [SerializeField] private bool m_startVisible = false;
 
         private void Awake() {
-            // start invisible
             this.gameObject.SetActive(m_startVisible);
             GameMgr.Events?.Register<GraphSettingUpdate>(GameEvents.UpdateGraphSetting, HandleUpdateGraphSetting);
         }
@@ -40,7 +39,6 @@ namespace ThermoVR.UI.GraphElements
 
         private void HandleUpdateGraphSetting(GraphSettingUpdate update) {
             if (update.GraphElementID == m_elementID) {
-
                 SetActive(update.ToggleVal);
             }
         }
