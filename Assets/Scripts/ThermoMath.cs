@@ -21,6 +21,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using ThermoVR.State;
 using UnityEngine;
 
 public static class ThermoMath
@@ -191,21 +192,27 @@ public static class ThermoMath
     //region: 0 subcooled liquid, 1 two-phase, 2 superheated vapor
     public static int region_given_pvt(double p, double v, double t) {
         //broad check w/ t
-        if (t - t_smallstep > IF97.Tsat97(p / 1000000.0)) return region_vapor;
-        if (t + t_smallstep < IF97.Tsat97(p / 1000000.0)) return region_liquid;
+        if (p <= ThermoMath.psat_max) {
+            if (t - t_smallstep > IF97.Tsat97(p / 1000000.0)) return region_vapor;
+            if (t + t_smallstep < IF97.Tsat97(p / 1000000.0)) return region_liquid;
 
-        //broad check w/ p - unneeded
-        //if(p-p_smallstep > IF97.psat97(t)) return liq;
-        //if(p+p_smallstep < IF97.psat97(t)) return vapor;
+            //broad check w/ p - unneeded
+            //if(p-p_smallstep > IF97.psat97(t)) return liq;
+            //if(p+p_smallstep < IF97.psat97(t)) return vapor;
 
-        //fine check w/ v
-        //f means saturated liquid,
-        //g means saturated gas
-        double vf = 1.0 / IF97.rholiq_p(p / 1000000.0);
-        if (v <= vf) return region_liquid;
-        double vg = 1.0 / IF97.rhovap_p(p / 1000000.0);
-        if (v >= vg) return region_vapor;
-        return region_twophase;
+            //fine check w/ v
+            //f means saturated liquid,
+            //g means saturated gas
+            double vf = 1.0 / IF97.rholiq_p(p / 1000000.0);
+            if (v <= vf) return region_liquid;
+            double vg = 1.0 / IF97.rhovap_p(p / 1000000.0);
+            if (v >= vg) return region_vapor;
+            return region_twophase;
+        }
+        else {
+            // TODO: find a way to determing region above p_crit line
+            throw new Exception("Unable to determine region given p, v, and t");
+        }
     }
     /*
     public static int region_given_pvt(double p, double v, double t)
@@ -598,7 +605,7 @@ public static class ThermoMath
             int i = 0;
             for (i = 0; i < MAX_ITERS && (vdelta > MAX_DELTA || pdelta > MAX_DELTA); i++) {
                 //one iteration on v
-                if (region_given_pvt(p, v, guess) != region_twophase) {
+                if ((p < ThermoMath.psat_max) && region_given_pvt(p, v, guess) != region_twophase) {
                     vdelta = Math.Abs(v_given_pt(p, guess, fallback_region) - v);
                     double vdelta_a = Math.Abs(v_given_pt(p, guess + step, fallback_region) - v);
                     double vdelta_b = Math.Abs(v_given_pt(p, guess - (step / 2.0), fallback_region) - v);

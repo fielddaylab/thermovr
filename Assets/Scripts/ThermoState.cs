@@ -76,14 +76,13 @@ namespace ThermoVR.State
                                      //public double surfacearea = Math.Pow(3.141592*radius,2.0); //M^2 //hardcoded answer below
         public double surfacearea = 0.024674011; //M^2 //hardcoded answer to eqn above
         public double surfacearea_insqr = 38.2447935395871; //in^2 //hardcoded conversion from m^2 to in^2
-        const double p_crit = 22.064; // Pa
+        public const double p_crit = 22.064; // Pa
 
         public double v_stop1; // volume stop specified by tool_stop1
         public double v_stop2; // volume stop specified by tool_stop2
 
         List<VolumeStop> v_stops;
         private static float STOP_BUFFER = 0.00005f;
-        public double iterative_weight = 0;
 
         public void reset() {
             prev_region = region;
@@ -111,9 +110,9 @@ namespace ThermoVR.State
             prev_quality = -1;
             prev_region = region;
 
-            iterative_weight = 0;
-
             v_stops = new List<VolumeStop>();
+
+            GameMgr.Events.Dispatch(GameEvents.WarpPVT);
         }
 
         #region Stops (Clamps)
@@ -283,13 +282,13 @@ namespace ThermoVR.State
             debug_file.WriteLine("quality {0} changed to {1} (delta {2})", prev_quality, quality, quality - prev_quality);
         }
 
-        public void warp_pv(double p, double v, double t, double ambient_pressure) {
+        public void warp_pv(double p, double v, double t) {
             try {
                 pressure = p;
                 volume = v;
                 temperature = t;
 
-                iterative_weight = ambient_pressure;
+                // iterative_weight = ambient_pressure;
 
                 region = ThermoMath.region_given_pvt(pressure, volume, temperature);
                 entropy = ThermoMath.s_given_vt(volume, temperature, region);
@@ -319,6 +318,8 @@ namespace ThermoVR.State
                             break;
                         }
                 }
+
+                GameMgr.Events.Dispatch(GameEvents.WarpPVT);
             }
             catch (Exception e) {
                 revert_state();
@@ -437,12 +438,12 @@ namespace ThermoVR.State
 
                 if (region != ThermoMath.region_twophase) {
                     new_t = ThermoMath.iterate_t_given_v_verify_u(temperature, volume, new_u, region); //try to move t assuming we stay in starting region
-                    if (region == ThermoMath.region_liquid && pressure < p_crit && new_t > ThermoMath.tsat_given_p(pressure)) //overshot from liquid
+                    if (region == ThermoMath.region_liquid && pressure < ThermoMath.psat_max && new_t > ThermoMath.tsat_given_p(pressure)) //overshot from liquid
                     {
                         new_t = ThermoMath.tsat_given_p(pressure);
                         region = ThermoMath.region_twophase;
                     }
-                    else if (region == ThermoMath.region_vapor && pressure < p_crit && new_t < ThermoMath.tsat_given_p(pressure)) //overshot from vapor
+                    else if (region == ThermoMath.region_vapor && pressure < ThermoMath.psat_max && new_t < ThermoMath.tsat_given_p(pressure)) //overshot from vapor
                     {
                         new_t = ThermoMath.tsat_given_p(pressure);
                         region = ThermoMath.region_twophase;
@@ -482,9 +483,9 @@ namespace ThermoVR.State
             double new_p = pressure + added_p; // * delta_time;
 
             double p_dif = 0;
-            if (new_p < ThermoMath.p_min) {
-                p_dif = new_p - ThermoMath.p_min;
-                new_p = ThermoMath.p_min;
+            if (new_p < ThermoMath.psat_min) {
+                p_dif = new_p - ThermoMath.psat_min;
+                new_p = ThermoMath.psat_min;
             }
 
             double iterative_dif = (added_p - p_dif);
@@ -497,8 +498,10 @@ namespace ThermoVR.State
             if (treat_as_constant_v_add_p_uninsulated(new_p, added_p, iterative_dif, delta_time, insulation_coefficient)) {
                 return;
             }
-
-            iterative_weight += iterative_dif;
+            if (new_p < ThermoMath.psat_min) {
+                // lower bound
+                return;
+            }
 
             try {
                 //default guess
@@ -679,10 +682,12 @@ namespace ThermoVR.State
             if (treat_as_constant_v_add_p_insulated(p, delta_time)) {
                 return;
             }
+            if (new_p < ThermoMath.psat_min) {
+                // lower bound
+                return;
+            }
 
             double insulation_coefficient = 1; // 100%
-
-            iterative_weight += p;
 
             try {
                 double new_h = enthalpy;
@@ -716,7 +721,7 @@ namespace ThermoVR.State
                                 new_v = ThermoMath.v_given_pt(new_p, new_t, region);
                                 new_u = ThermoMath.u_given_pt(new_p, new_t, region);
 
-                                if (new_v > 0.002 || (ThermoMath.region_given_pvt(new_p, new_v, new_t) == ThermoMath.region_vapor && new_p < p_crit)) {
+                                if (new_v > 0.002 || (ThermoMath.region_given_pvt(new_p, new_v, new_t) == ThermoMath.region_vapor && new_p < ThermoMath.psat_max)) {
                                     region = ThermoMath.region_twophase;
                                     new_t = ThermoMath.tsat_given_p(new_p, region);
                                 }
@@ -898,7 +903,8 @@ namespace ThermoVR.State
                         }
 
                         double old_t = temperature;
-                        double new_t = ThermoMath.iterate_t_given_pv(temperature, new_p, new_v, region); // new_v is constant in liquid
+                        double new_t = 0;
+                        new_t = ThermoMath.iterate_t_given_pv(temperature, new_p, new_v, region); // new_v is constant in liquid
                         double delta_t = new_t - old_t;
                         new_t = old_t + delta_t * (1 - insulation_coefficient); // when insulation is 0%, T = T_old
                         

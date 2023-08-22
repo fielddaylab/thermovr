@@ -243,10 +243,6 @@ public class ThermoPresent : MonoBehaviour
         return state.region;
     }
 
-    public double get_iterative_weight() {
-        return state.iterative_weight;
-    }
-
     /// <summary>
     ///  Used for Reach State lab questions
     /// </summary>
@@ -723,8 +719,8 @@ public class ThermoPresent : MonoBehaviour
         return plot;
     }
 
-    public void warp_pv(double p, double v, double t, double ambient_pressure) {
-        state.warp_pv(p, v, t, ambient_pressure);
+    public void warp_pv(double p, double v, double t) {
+        state.warp_pv(p, v, t);
         visualize_state();
     }
 

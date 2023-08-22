@@ -160,6 +160,8 @@ public class World : MonoBehaviour
         GameMgr.Events?.Register<Pressable>(GameEvents.RegisterPressable, HandleRegisterPressable);
         GameMgr.Events?.Register<Touchable>(GameEvents.RegisterMovable, HandleRegisterMovable);
 
+        GameMgr.Events.Register(GameEvents.WarpPVT, HandleWarpPVT);
+
         movables = new List<Touchable>();
     }
 
@@ -201,7 +203,7 @@ public class World : MonoBehaviour
         tool_weight.Init(Units.Weight);
         tool_balloon.Init(Units.Weight);
         // TODO: establish logical bounds and units on the ambient pressure tool
-        tool_ambientPressure.Init(Units.AmbientPressure);
+        tool_ambientPressure.Init(Units.AmbientPressure, 0.001f); // display in kPa
         tool_roomTemp.Init(Units.TemperatureK);
         // tool_percentInsulation.Init(Units.Percent);
 
@@ -225,8 +227,7 @@ public class World : MonoBehaviour
         dial_coil.Init(0f, -1000f * 100f);
         dial_weight.Init(0f, (float)kg_corresponding_to_10mpa / 5.0f);
         dial_balloon.Init(0f, -(float)kg_corresponding_to_10mpa / 500.0f); // 500.0f
-        // TODO: establish logical bounds and units on the ambient pressure dial
-        dial_ambientPressure.Init(0f, 14.6959f * 2); // ~2 atm in psi
+        dial_ambientPressure.Init((float)ThermoMath.p_min, (float)ThermoMath.p_max);
         dial_roomTemp.Init(273, 366); // -100 to 200 fahrenheit // default val of 0.55 sets to 292 kelvin (72 degrees fahrenheit)
         dial_percentInsulation.Init(0f, 100);
 
@@ -703,7 +704,7 @@ public class World : MonoBehaviour
                                 DetachTool(toDetach, popVector());
                             }
                         }
-                        thermo_present.warp_pv(placement_thermo.y, placement_thermo.x, placement_thermo.z, ambient_pressure * PSI_TO_PASCAL);
+                        thermo_present.warp_pv(placement_thermo.y, placement_thermo.x, placement_thermo.z);
                     }
                     state_dot.GetComponent<Renderer>().enabled = true;
                 }
@@ -887,16 +888,16 @@ public class World : MonoBehaviour
 
         double delta_time = (double)Time.fixedDeltaTime;
 
-
         //apply thermo
         ambient_pressure = tool_ambientPressure.get_val();
         room_temp = tool_roomTemp.get_val();
         double weight_pressure = (applied_weight) / thermo_present.get_surfacearea_insqr(); //psi
-        weight_pressure += ambient_pressure;
         weight_pressure *= PSI_TO_PASCAL; //conversion from psi to pascal
+        weight_pressure += ambient_pressure; 
+        weight_pressure = Math.Clamp(weight_pressure, ThermoMath.p_min, ThermoMath.p_max);
 
         // get the amount of weight to apply, based on the difference between the total weight to be applied and how much is currently applied
-        double delta_weight = (weight_pressure - thermo_present.get_iterative_weight());
+        double delta_weight = (weight_pressure - thermo_present.get_pressure());
         if (System.Math.Abs(delta_weight * delta_time) < World.DELTA_PRESSURE_CUTOFF) {
             // small enough step; finish transition
         }
@@ -1094,6 +1095,13 @@ public class World : MonoBehaviour
 
     private void HandleHeatTransferToggle(object sender, System.EventArgs args) {
         // nothing yet; potentially dispatch an event
+    }
+
+    private void HandleWarpPVT() {
+        // set ambient pressure to the pressure picked
+        ambient_pressure = thermo_present.get_pressure();
+        Debug.Log("[Warp] pressure: " + thermo_present.get_pressure() + " || min " + ThermoMath.p_min);
+        dial_ambientPressure.set_val((float)((ambient_pressure - ThermoMath.p_min) / (ThermoMath.p_max - ThermoMath.p_min)));
     }
 
     #endregion // Handlers

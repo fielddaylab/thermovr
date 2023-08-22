@@ -146,6 +146,16 @@ namespace ThermoVR.Dials
             Update();
         }
 
+        public void set_val(float new_val) {
+            val = new_val;
+
+            forceMap();
+
+            apply_change(map, val, prev_val);
+
+            Update();
+        }
+
         /*
          * Standard way to map from 0-1 slder "val" range to min-max "tool" range.
          */
