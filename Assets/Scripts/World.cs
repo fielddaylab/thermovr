@@ -392,7 +392,9 @@ public class World : MonoBehaviour
         GameObject o = t.gameObject;
         o.transform.SetParent(t.touchable.og_parent);
         t.touchable.grabbed = false;
-        t.engaged = false;
+        if (!t.always_engaged) {
+            t.engaged = false;
+        }
         if (t == tool_stop1) {
             thermo_present.release_v_stop(t);
         }

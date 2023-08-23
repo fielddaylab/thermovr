@@ -117,16 +117,39 @@ namespace ThermoVR.Dials
 
         // Update is called once per frame, and after val updated
         void Update() {
-            Vector3 lp = meter.transform.localPosition;
-            lp.x = 0.05f - val * 0.1f;
-            meter.transform.localPosition = lp;
-            forceMap();
+            if (!AnyToolsActive()) {
+                return;
+            }
 
+            RecalibratePos();
             /*
             float magnitude = 0.05f - val * 0.1f;
             meter.transform.localPosition = Quaternion.Euler(0, 2.0f, 0) * meter.transform.forward * magnitude;
             forceMap();
             */
+        }
+
+        private void RecalibratePos() {
+            Vector3 lp = meter.transform.localPosition;
+            lp.x = 0.05f - val * 0.1f;
+            meter.transform.localPosition = lp;
+            forceMap();
+        }
+
+        private bool AnyToolsActive() {
+            if (relevant_tools == null) {
+                // vacuously true, I guess?
+                return true;
+            }
+
+            bool anyActive = false;
+            for (int i = 0; i < relevant_tools.Count; i++) {
+                if (relevant_tools[i].engaged) {
+                    anyActive = true;
+                }
+            }
+
+            return anyActive;
         }
 
         public void forceMap() {
@@ -143,7 +166,7 @@ namespace ThermoVR.Dials
 
             apply_change(map, val, prev_val);
 
-            Update();
+            RecalibratePos();
         }
 
         public void set_val(float new_val) {
@@ -153,7 +176,7 @@ namespace ThermoVR.Dials
 
             apply_change(map, val, prev_val);
 
-            Update();
+            RecalibratePos();
         }
 
         /*
@@ -170,6 +193,10 @@ namespace ThermoVR.Dials
         private float mapSharp() { return min_map + (max_map - min_map) * Mathf.Pow(val, response_power); }
 
         public void update_val(Vector3 hand_pos, Vector3 r_hand_pos) {
+            if (!AnyToolsActive()) {
+                return;
+            }
+
             float dx = r_hand_pos.x - hand_pos.x;
             float dy = r_hand_pos.y - hand_pos.y;
             float dz = r_hand_pos.z - hand_pos.z;

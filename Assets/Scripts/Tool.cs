@@ -99,11 +99,15 @@ namespace ThermoVR.Tools {
         [System.NonSerialized]
         public AudioSource audioS;
 
+        public bool always_engaged = false;
+
         private bool examined;
 
         public void Init(string unit, float mul = 1) {
             this.display_unit = unit;
             this.display_mul = mul;
+
+            engaged = always_engaged;
 
             Setup();
         }
