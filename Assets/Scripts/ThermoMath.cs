@@ -66,6 +66,8 @@ public static class ThermoMath
     public static double t_max;
     public static double[] t_neutral;
     public static double t_smallstep;
+    public static double t_crit;
+
     //J/kg
     public static double u_min;
     public static double u_max;
@@ -117,6 +119,7 @@ public static class ThermoMath
         t_max = IF97.get_Tmax(); // 1073.15
         t_neutral = new double[] { 293.0, 298.0, 400.0 };
         t_smallstep = 0.01;
+        t_crit = IF97.get_Tcrit();
 
         //J/kg
         u_min = 123.8;
@@ -302,28 +305,38 @@ public static class ThermoMath
             return p_neutral[fallback_region];
         }
     }
-    public static double v_given_pt(double p, double t, int fallback_region = 0) //DO NOT USE IN VAPOR DOME
+    public static double v_given_pt(double p, double t, int fallback_region = 0, bool projecting = false) //DO NOT USE IN VAPOR DOME
     {
         try {
             return 1.0 / IF97.rhomass_Tp(t, p / 1000000.0); //expects:K,MPa returns kg/M³
         }
         catch (Exception ex) {
-            Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, v_neutral[fallback_region]));
-            Debug.Log("[Error] " + ex.Message);
-            got_error = true;
-            return v_neutral[fallback_region];
+            if (projecting) {
+                throw ex;
+            }
+            else {
+                Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, v_neutral[fallback_region]));
+                Debug.Log("[Error] " + ex.Message);
+                got_error = true;
+                return v_neutral[fallback_region];
+            }
         }
     }
 
-    public static double v_given_ph(double p, double h, int fallback_region = 0) {
+    public static double v_given_ph(double p, double h, int fallback_region = 0, bool projecting = false) {
         try {
             return 1.0 / IF97.rhomass_phmass(p / 1000000.0, h / 1000.0);
         }
         catch (Exception ex) {
-            Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, v_neutral[fallback_region]));
-            Debug.Log("[Error] " + ex.Message);
-            got_error = true;
-            return v_neutral[fallback_region];
+            if (projecting) {
+                throw ex;
+            }
+            else {
+                Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, v_neutral[fallback_region]));
+                Debug.Log("[Error] " + ex.Message);
+                got_error = true;
+                return v_neutral[fallback_region];
+            }
         }
     }
 
@@ -593,7 +606,7 @@ public static class ThermoMath
             return t_neutral[fallback_region];
         }
     }
-    public static double iterate_t_given_pv(double t, double p, double v, int fallback_region = 0) //t = first guess
+    public static double iterate_t_given_pv(double t, double p, double v, int fallback_region = 0, bool projecting = false) //t = first guess
     {
         try {
             int MAX_ITERS = 100; //max # of iterations before giving up
@@ -606,9 +619,9 @@ public static class ThermoMath
             for (i = 0; i < MAX_ITERS && (vdelta > MAX_DELTA || pdelta > MAX_DELTA); i++) {
                 //one iteration on v
                 if ((p < ThermoMath.psat_max) && region_given_pvt(p, v, guess) != region_twophase) {
-                    vdelta = Math.Abs(v_given_pt(p, guess, fallback_region) - v);
-                    double vdelta_a = Math.Abs(v_given_pt(p, guess + step, fallback_region) - v);
-                    double vdelta_b = Math.Abs(v_given_pt(p, guess - (step / 2.0), fallback_region) - v);
+                    vdelta = Math.Abs(v_given_pt(p, guess, fallback_region, projecting) - v);
+                    double vdelta_a = Math.Abs(v_given_pt(p, guess + step, fallback_region, projecting) - v);
+                    double vdelta_b = Math.Abs(v_given_pt(p, guess - (step / 2.0), fallback_region, projecting) - v);
                     if (vdelta < vdelta_a && vdelta < vdelta_b) //unaltered guess is superior
                         step = step / 2.0;
                     else if (vdelta_a < vdelta_b) {
@@ -643,10 +656,16 @@ public static class ThermoMath
             return guess;
         }
         catch (Exception ex) {
-            Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, t_neutral[fallback_region]));
-            Debug.Log("[Error] " + ex.Message);
-            got_error = true;
-            return t_neutral[fallback_region];
+            if (projecting) {
+                // propogate error
+                throw ex;
+            }
+            else {
+                Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, t_neutral[fallback_region]));
+                Debug.Log("[Error] " + ex.Message);
+                got_error = true;
+                return t_neutral[fallback_region];
+            }
         }
     }
 
