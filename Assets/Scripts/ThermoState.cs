@@ -309,7 +309,7 @@ namespace ThermoVR.State
                             internalenergy = ThermoMath.u_given_px(pressure, quality, region);
                             */
                             // We've never quite gotten warp_pv to work in two-phase. So for now, disallow it.
-                            revert_state();
+                            reset();
                             break;
                         }
                     case ThermoMath.region_vapor: {
@@ -322,7 +322,7 @@ namespace ThermoVR.State
                 GameMgr.Events.Dispatch(GameEvents.WarpPVT);
             }
             catch (Exception e) {
-                revert_state();
+                reset();
             }
             clamp_state();
         }
