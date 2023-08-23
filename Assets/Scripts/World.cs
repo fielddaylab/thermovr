@@ -221,15 +221,15 @@ public class World : MonoBehaviour
         };
 
         // dial_insulator.Init(0f, 1f);
-        dial_stop1.Init((float)ThermoMath.v_min, (float)ThermoMath.v_max);
-        dial_stop2.Init((float)ThermoMath.v_min, (float)ThermoMath.v_max);
-        dial_burner.Init(0f, 1000f * 100f);
-        dial_coil.Init(0f, -1000f * 100f);
-        dial_weight.Init(0f, (float)kg_corresponding_to_10mpa / 5.0f);
-        dial_balloon.Init(0f, -(float)kg_corresponding_to_10mpa / 500.0f); // 500.0f
-        dial_ambientPressure.Init((float)ThermoMath.p_min, (float)ThermoMath.p_max);
-        dial_roomTemp.Init(273, 366); // -100 to 200 fahrenheit // default val of 0.55 sets to 292 kelvin (72 degrees fahrenheit)
-        dial_percentInsulation.Init(0f, 100);
+        dial_stop1.Init((float)ThermoMath.v_min, (float)ThermoMath.v_max, DigitFormat.Volume);
+        dial_stop2.Init((float)ThermoMath.v_min, (float)ThermoMath.v_max, DigitFormat.Volume);
+        dial_burner.Init(0f, 1000f * 100f, DigitFormat.Heat);
+        dial_coil.Init(0f, -1000f * 100f, DigitFormat.Heat);
+        dial_weight.Init(0f, (float)kg_corresponding_to_10mpa / 5.0f, DigitFormat.Weight);
+        dial_balloon.Init(0f, -(float)kg_corresponding_to_10mpa / 500.0f, DigitFormat.Weight); // 500.0f
+        dial_ambientPressure.Init((float)ThermoMath.p_min, (float)ThermoMath.p_max, DigitFormat.AmbientPressure);
+        dial_roomTemp.Init(273, 366, DigitFormat.TemperatureK); // -100 to 200 fahrenheit // default val of 0.55 sets to 292 kelvin (72 degrees fahrenheit)
+        dial_percentInsulation.Init(0f, 100, DigitFormat.Percent);
 
         room_temp = tool_roomTemp.get_val(); // in K
 

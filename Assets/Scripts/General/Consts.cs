@@ -47,3 +47,20 @@ static public class Units
     static public readonly string Enthalpy = "kJ/kg";
     static public readonly string Quality = "%";
 }
+
+// Used by graph elements, dial readouts, and sensor readouts
+static public class DigitFormat
+{
+    static public readonly string Weight = "{0:0.00}";
+    static public readonly string Heat = "{0:0.00}";
+    static public readonly string TemperatureK = "{0:#.00e+0}";
+    static public readonly string Percent = "{0:0.00}";
+
+    static public readonly string Pressure = "{0:#.00e+0}";
+    static public readonly string AmbientPressure = "{0:#.00e+0}";
+    static public readonly string Volume = "{0:#.00e+0}";
+    static public readonly string InternalEnergy = "{0:#.##e+0}";
+    static public readonly string Entropy = "{0:#.##e+0}";
+    static public readonly string Enthalpy = "{0:#.##e+0}";
+    static public readonly string Quality = "{0:0.00}";
+}

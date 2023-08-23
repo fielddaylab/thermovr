@@ -68,8 +68,8 @@ namespace ThermoVR.Dials
         public float max_map = 1.0f;
         [System.NonSerialized]
         public string unit = "";
-        [System.NonSerialized]
-        public string display_unit = "";
+        // [System.NonSerialized]
+        // public string display_unit = "";
         [System.NonSerialized]
         public float display_mul = 1.0f; //multiplied with map before displaying with display_unit
 
@@ -83,9 +83,12 @@ namespace ThermoVR.Dials
         [SerializeField] private GameObject meter; // (Knob)
         [HideInInspector] public Touchable touchable;
 
-        public void Init(float min_map, float max_map) {
+        private string valFormat;
+
+        public void Init(float min_map, float max_map, string valFormat) {
             this.min_map = min_map;
             this.max_map = max_map;
+            this.valFormat = valFormat;
             if (min_pos == null) {
                 orientation_dir = new Vector3(1, 0, 0);
             }
@@ -134,6 +137,11 @@ namespace ThermoVR.Dials
             lp.x = 0.05f - val * 0.1f;
             meter.transform.localPosition = lp;
             forceMap();
+        }
+
+        public void SetValText(string displayUnit, float value) {
+            string updateText = string.Format(this.valFormat + " " + displayUnit, value);
+            textv_tmpro.SetText(updateText);
         }
 
         private bool AnyToolsActive() {
