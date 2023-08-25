@@ -217,7 +217,6 @@ namespace ThermoVR.Tools {
             if (dial.textv_tmpro) dial.SetValText(display_unit, (float)(dial.map * display_mul));
             if (textd_tmpro) textd_tmpro.SetText("{0:3} " + display_unit, (float)(dial.map * display_mul));
         }
-
     }
 }
 

@@ -71,7 +71,7 @@ public class World : MonoBehaviour
     //[Header("Moveables")]
     List<Touchable> movables;
     GameObject workspace;
-    GameObject handle_workspace;
+    [SerializeField] private GameObject handle_workspace;
     Touchable handle_workspace_touchable;
     Touchable graph_touchable;
     GameObject lgrabbed = null;
@@ -113,7 +113,8 @@ public class World : MonoBehaviour
     [SerializeField] private Dial dial_roomTemp;
     [SerializeField] private Dial dial_percentInsulation;
 
-    [SerializeField] private ThermoToggle toggle_heatTransfer;
+    //[SerializeField] private ThermoToggle toggle_heatTransfer;
+    [SerializeField] private PhysicalToggle toggle_heatTransfer;
 
     public List<Dial> dials;
     ParticleSystem flame; //special case
@@ -161,6 +162,8 @@ public class World : MonoBehaviour
         GameMgr.Events?.Register<Touchable>(GameEvents.RegisterMovable, HandleRegisterMovable);
 
         GameMgr.Events.Register(GameEvents.WarpPVT, HandleWarpPVT);
+
+        GameMgr.Events.Register<Tool>(GameEvents.PressedToolToggle, HandleToolTogglePressed);
 
         movables = new List<Touchable>();
     }
@@ -241,8 +244,8 @@ public class World : MonoBehaviour
         reset_button.OnPress += HandleResetPressed;
         halfer_button.OnPress += HandleHalferPressed;
 
-        toggle_heatTransfer.Init();
-        toggle_heatTransfer.Pressable.PressCompleted += HandleHeatTransferToggle;
+        // toggle_heatTransfer.Init();
+        // toggle_heatTransfer.Pressable.PressCompleted += HandleHeatTransferToggle;
 
         // Initialize Tablet (and corresponding buttons)
         tablet.Init();
@@ -250,7 +253,6 @@ public class World : MonoBehaviour
         flame = GameObject.Find("Flame").GetComponent<ParticleSystem>();
 
         workspace = GameObject.Find("Workspace");
-        handle_workspace = GameObject.Find("Handle_Workspace");
         handle_workspace_touchable = handle_workspace.GetComponent<Touchable>();
 
         // set initial states of meshrenderers and transforms for our tools.
@@ -1095,15 +1097,26 @@ public class World : MonoBehaviour
         }
     }
 
-    private void HandleHeatTransferToggle(object sender, System.EventArgs args) {
-        // nothing yet; potentially dispatch an event
-    }
-
     private void HandleWarpPVT() {
         // set ambient pressure to the pressure picked
         ambient_pressure = thermo_present.get_pressure();
         Debug.Log("[Warp] pressure: " + thermo_present.get_pressure() + " || min " + ThermoMath.p_min);
         dial_ambientPressure.set_val((float)((ambient_pressure - ThermoMath.p_min) / (ThermoMath.p_max - ThermoMath.p_min)));
+    }
+
+
+    private void HandleToolTogglePressed(Tool t) {
+        for (int i = 0; i < tools.Count; i++) {
+            if (t == tools[i]) {
+                if (t.engaged) {
+                    DetachTool(t, Vector3.zero);
+                    StoreTool(t);
+                }
+                else {
+                    ActivateTool(t);
+                }
+            }
+        }
     }
 
     #endregion // Handlers
