@@ -60,6 +60,7 @@ public class World : MonoBehaviour
     [SerializeField] private GameObject ceye;
     [SerializeField] private ControllerAnchor lhand;
     [SerializeField] private ControllerAnchor rhand;
+    [SerializeField] private GameObject origin;
 
     /*
     GameObject vrcenter;
@@ -506,6 +507,7 @@ public class World : MonoBehaviour
         if (actable == handle_workspace) {
             float dy = (r_hand_pos.y - hand_pos.y);
             workspace.transform.position = new Vector3(workspace.transform.position.x, workspace.transform.position.y - dy, workspace.transform.position.z);
+            // origin.transform.Translate(new Vector3(0, dy, 0));
         }
         else if (actable == graph) {
             Vector3 localspace = graph.transform.InverseTransformPoint(hand_pos);
@@ -1110,10 +1112,12 @@ public class World : MonoBehaviour
             if (t == tools[i]) {
                 if (t.engaged) {
                     DetachTool(t, Vector3.zero);
-                    StoreTool(t);
+                    // StoreTool(t);
+                    break;
                 }
                 else {
                     ActivateTool(t);
+                    break;
                 }
             }
         }

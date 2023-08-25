@@ -93,7 +93,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 2147483647
+  m_StaticEditorFlags: 0
   m_IsActive: 1
 --- !u!4 &8909104615942786599
 Transform:
@@ -253,7 +253,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 2147483647
+  m_StaticEditorFlags: 0
   m_IsActive: 1
 --- !u!4 &9164721727033484656
 Transform:
@@ -648,8 +648,8 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 0.11, y: 0.04, z: 0.05}
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Size: {x: 0.11793994, y: 0.04, z: 0.02}
+  m_Center: {x: 0.003969978, y: 0.01, z: 0}
 --- !u!54 &6030497066997557905
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -700,7 +700,7 @@ MonoBehaviour:
   response_power: 1
   default_val: 0
   m_effect_map: []
-  meter: {fileID: 6030497067503597911}
+  meter: {fileID: 2136752545258839447}
   touchable: {fileID: 0}
 --- !u!1 &6030497067206319103
 GameObject:
