@@ -909,11 +909,6 @@ public class World : MonoBehaviour
         }
         else {
             delta_weight *= delta_time;
-            /*
-            if (thermo_present.get_iterative_weight() > weight_pressure) {
-                delta_weight *= 3; // reducing dial affects changes slower for some reason; this counteracts it
-            }
-            */
         }
 
         double insulation_coefficient;
@@ -1031,26 +1026,6 @@ public class World : MonoBehaviour
             */
         }
 
-        // Disable the warning on that the tools are not available in this region
-        /* 
-        switch (thermo.region)
-        {
-          case 0:
-          case 1:
-            tool_weight.textn.GetComponent<MeshRenderer>().enabled = true;
-            tool_weight.disabled = true;
-            tool_balloon.textn.GetComponent<MeshRenderer>().enabled = true;
-            tool_balloon.disabled = true;
-            break;
-          case 2:
-            tool_weight.textn.GetComponent<MeshRenderer>().enabled = false;
-            tool_weight.disabled = false;
-            tool_balloon.textn.GetComponent<MeshRenderer>().enabled = false;
-            tool_balloon.disabled = false;
-            break;
-        }
-        */
-
         Tool t;
         for (int i = 0; i < tools.Count; i++) {
             t = tools[i];
@@ -1059,14 +1034,11 @@ public class World : MonoBehaviour
             }
             if (!t.text_fadable.stale) {
                 if (t.text_fadable.alpha == 0f) {
-                    // t.textv_meshrenderer.enabled = false;
                     t.textl_meshrenderer.enabled = false;
                 }
                 else {
-                    // t.textv_meshrenderer.enabled = true;
                     t.textl_meshrenderer.enabled = true;
                     Color32 c = t.disabled ? new Color32(70, 70, 70, (byte)(t.text_fadable.alpha * 255)) : new Color32(0, 0, 0, (byte)(t.text_fadable.alpha * 255));
-                    // t.textv_tmpro.faceColor = c;
                     t.textl_tmpro.faceColor = c;
                 }
             }
