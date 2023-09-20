@@ -623,22 +623,22 @@ public static class ThermoMath
                     try {
                         vdelta = Math.Abs(v_given_pt(p, guess, fallback_region, projecting) - v);
                     }
-                    catch {
-
+                    catch (Exception ex) {
+                        handle_step_error(ex, projecting, fallback_region);
                     }
                     double vdelta_a = vdelta;
                     double vdelta_b = vdelta;
                     try {
                         vdelta_a = Math.Abs(v_given_pt(p, guess + step, fallback_region, projecting) - v);
                     }
-                    catch {
-
+                    catch (Exception ex) {
+                        handle_step_error(ex, projecting, fallback_region);
                     }
                     try {
                         vdelta_b = Math.Abs(v_given_pt(p, guess - step, fallback_region, projecting) - v);
                     }
-                    catch {
-
+                    catch (Exception ex) {
+                        handle_step_error(ex, projecting, fallback_region);
                     }
                     if (vdelta < vdelta_a && vdelta < vdelta_b) //unaltered guess is superior
                         step = step / 2.0;
@@ -657,22 +657,22 @@ public static class ThermoMath
                 try {
                     pdelta = Math.Abs(p_given_vt(v, guess, fallback_region) - p);
                 }
-                catch {
-
+                catch (Exception ex) {
+                    handle_step_error(ex, projecting, fallback_region);
                 }
                 double pdelta_a = pdelta;
                 double pdelta_b = pdelta;
                 try {
                     pdelta_a = Math.Abs(p_given_vt(v, guess + step, fallback_region) - p);
                 }
-                catch {
-
+                catch (Exception ex) {
+                    handle_step_error(ex, projecting, fallback_region);
                 }
                 try {
                     pdelta_b = Math.Abs(p_given_vt(v, guess - step, fallback_region) - p);
                 }
-                catch {
-
+                catch (Exception ex){
+                    handle_step_error(ex, projecting, fallback_region);
                 }
 
                 if (pdelta < pdelta_a && pdelta < pdelta_b) //unaltered guess is superior
@@ -687,19 +687,35 @@ public static class ThermoMath
                 }
             }
             //Debug.LogFormat("{0} iters, {1} vdelta, {2} pdelta, {3} guess", i, vdelta, pdelta, guess);
+            try {
+                v_given_pt(p, guess, fallback_region, projecting);
+                p_given_vt(v, guess, fallback_region);
+            }
+            catch (Exception ex) {
+                handle_step_error(ex, projecting, fallback_region, true);
+            }
+
             return guess;
         }
         catch (Exception ex) {
-            if (projecting) {
-                // propogate error
-                throw ex;
-            }
-            else {
-                Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, t_neutral[fallback_region]));
-                Debug.Log("[Error] " + ex.Message);
-                got_error = true;
-                return t_neutral[fallback_region];
-            }
+            return handle_step_error(ex, projecting, fallback_region);
+        }
+    }
+
+    static private double handle_step_error(Exception ex, bool projecting, int fallback_region, bool final = false) {
+        // only throw errors if the best guess has been finalized
+        if (!final && !projecting) { return 0.0; }
+
+        // TODO -- handle boundary check for applying pressure at min temp vs boundary check for max pressure
+        if (projecting) {
+            // propogate error
+            throw ex;
+        }
+        else {
+            Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, t_neutral[fallback_region]));
+            Debug.Log("[Error] " + ex.Message);
+            got_error = true;
+            return t_neutral[fallback_region];
         }
     }
 
