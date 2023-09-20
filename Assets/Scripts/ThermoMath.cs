@@ -537,6 +537,7 @@ public static class ThermoMath
 
     public static double iterate_t_given_p_verify_u(double t, double p, double u, int fallback_region = 0) //t = first guess
     {
+        // NOTE: Uses step
         try {
             int MAX_ITERS = 100; //max # of iterations before giving up
             double MAX_DELTA = 0.01; //acceptible solution error
@@ -547,7 +548,7 @@ public static class ThermoMath
             int i = 0;
             for (i = 0; i < MAX_ITERS && delta > MAX_DELTA; i++) {
                 double delta_a = Math.Abs(u_given_pt(p, guess + step) - mark);
-                double delta_b = Math.Abs(u_given_pt(p, guess - (step / 2.0)) - mark);
+                double delta_b = Math.Abs(u_given_pt(p, guess - step) - mark);
                 if (delta < delta_a && delta < delta_b) //original guess superior
                     step = step / 2.0;
                 else if (delta_a < delta_b) {
@@ -556,8 +557,7 @@ public static class ThermoMath
                 }
                 else {
                     delta = delta_b;
-                    step = step / -2.0;
-                    guess += step;
+                    guess -= step;
                 }
             }
             //Debug.LogFormat("{0} iters, {1} delta, {2} guess", i, delta, guess);
@@ -573,6 +573,7 @@ public static class ThermoMath
 
     public static double iterate_t_given_v_verify_u(double t, double v, double u, int fallback_region = 0) //t = first guess
     {
+        // NOTE: Uses step
         try {
             int MAX_ITERS = 200; //max # of iterations before giving up
             double MAX_DELTA = 0.0001; //acceptible solution error
@@ -583,7 +584,7 @@ public static class ThermoMath
             int i = 0;
             for (i = 0; i < MAX_ITERS && delta > MAX_DELTA; i++) {
                 double delta_a = Math.Abs(u_given_vt(v, guess + step, fallback_region) - mark);
-                double delta_b = Math.Abs(u_given_vt(v, guess - (step / 2.0), fallback_region) - mark);
+                double delta_b = Math.Abs(u_given_vt(v, guess - step, fallback_region) - mark);
                 if (delta < delta_a && delta < delta_b) //original guess superior
                     step = step / 2.0;
                 else if (delta_a < delta_b) {
@@ -592,8 +593,7 @@ public static class ThermoMath
                 }
                 else {
                     delta = delta_b;
-                    step = step / -2.0;
-                    guess += step;
+                    guess -= step;
                 }
             }
             //Debug.LogFormat("{0} iters, {1} delta, {2} guess", i, delta, guess);
@@ -608,13 +608,14 @@ public static class ThermoMath
     }
     public static double iterate_t_given_pv(double t, double p, double v, int fallback_region = 0, bool projecting = false) //t = first guess
     {
+        // NOTE: Uses step
         try {
             int MAX_ITERS = 100; //max # of iterations before giving up
             double MAX_DELTA = 0.01; //acceptible solution error
             double step = 10.0; //size of first step (shrinks every time it overshoots)
             double guess = t;
             double vdelta = MAX_DELTA + 1.0;
-            double pdelta = MAX_DELTA + 1.0; ;
+            double pdelta = MAX_DELTA + 1.0;
             int i = 0;
             for (i = 0; i < MAX_ITERS && (vdelta > MAX_DELTA || pdelta > MAX_DELTA); i++) {
                 //one iteration on v
@@ -634,7 +635,7 @@ public static class ThermoMath
 
                     }
                     try {
-                        vdelta_b = Math.Abs(v_given_pt(p, guess - (step / 2.0), fallback_region, projecting) - v);
+                        vdelta_b = Math.Abs(v_given_pt(p, guess - step, fallback_region, projecting) - v);
                     }
                     catch {
 
@@ -647,8 +648,7 @@ public static class ThermoMath
                     }
                     else {
                         vdelta = vdelta_b;
-                        step = step / -2.0;
-                        guess += step;
+                        guess -= step;
                     }
                     i++; //force "iteration counter", bc we do two iters per loop
                 }
@@ -669,7 +669,7 @@ public static class ThermoMath
 
                 }
                 try {
-                    pdelta_b = Math.Abs(p_given_vt(v, guess - (step / 2.0), fallback_region) - p);
+                    pdelta_b = Math.Abs(p_given_vt(v, guess - step, fallback_region) - p);
                 }
                 catch {
 
@@ -683,8 +683,7 @@ public static class ThermoMath
                 }
                 else {
                     pdelta = pdelta_b;
-                    step = step / -2.0;
-                    guess += step;
+                    guess -= step;
                 }
             }
             //Debug.LogFormat("{0} iters, {1} vdelta, {2} pdelta, {3} guess", i, vdelta, pdelta, guess);
@@ -706,6 +705,7 @@ public static class ThermoMath
 
     public static double iterate_p_given_vu(double p, double v, double u, int fallback_region = 0) //pq = first guess, step = first step
     {
+        // NOTE: Uses step
         try {
             int MAX_ITERS = 200; //max # of iterations before giving up
             double MAX_DELTA = 0.001; //acceptible solution error
@@ -715,7 +715,7 @@ public static class ThermoMath
             int i = 0;
             for (i = 0; i < MAX_ITERS && delta > MAX_DELTA; i++) {
                 double delta_a = Math.Abs(x_given_pu(guess + step, u, fallback_region) - x_given_pv(guess + step, v, fallback_region));
-                double delta_b = Math.Abs(x_given_pu(guess - (step / 2.0), u, fallback_region) - x_given_pv(guess - (step / 2.0), v, fallback_region));
+                double delta_b = Math.Abs(x_given_pu(guess - step, u, fallback_region) - x_given_pv(guess - step, v, fallback_region));
                 if (delta < delta_a && delta < delta_b) //original guess superior
                     step = step / 2.0;
                 else if (delta_a < delta_b) {
@@ -724,8 +724,7 @@ public static class ThermoMath
                 }
                 else {
                     delta = delta_b;
-                    step = step / -2.0;
-                    guess += step;
+                    guess -= step;
                 }
             }
             //Debug.LogFormat("{0} iters, {1} delta, {2} guess", i, delta, guess);
