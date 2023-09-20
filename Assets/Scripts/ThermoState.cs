@@ -352,10 +352,12 @@ namespace ThermoVR.State
 
         public void add_heat_per_delta_time(double applied_heat, double insulation_coefficient, double delta_time) {
 
+            // prevent errors from temperature reaching the boundaries of the simulation
             if (temperature_bounded(applied_heat, insulation_coefficient, delta_time)) {
                 return;
             }
 
+            // determine whether currently applied tools force a constant volume
             bool constant_v = treat_as_constant_v_add_heat(applied_heat, insulation_coefficient, delta_time);
 
             if (constant_v) {
