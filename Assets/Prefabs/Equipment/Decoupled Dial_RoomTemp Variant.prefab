@@ -281,6 +281,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_button: {fileID: 2623175902787157341}
+  m_defaultMat: {fileID: 2100000, guid: 9830506a137a929408750be33794ae2d, type: 2}
+  m_activeMat: {fileID: 2100000, guid: 2512827267cc0da4a90ecb92fd35043b, type: 2}
+  m_renderer: {fileID: 1744543733658024106}
+--- !u!23 &1744543733658024106 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 4608346534575548051, guid: 06b9e94301f4b664d8103168d4722295,
+    type: 3}
+  m_PrefabInstance: {fileID: 2864851804822625849}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &2623175902787157341 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 263068174627955556, guid: 06b9e94301f4b664d8103168d4722295,
