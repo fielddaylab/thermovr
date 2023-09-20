@@ -619,9 +619,26 @@ public static class ThermoMath
             for (i = 0; i < MAX_ITERS && (vdelta > MAX_DELTA || pdelta > MAX_DELTA); i++) {
                 //one iteration on v
                 if ((p < ThermoMath.psat_max) && region_given_pvt(p, v, guess) != region_twophase) {
-                    vdelta = Math.Abs(v_given_pt(p, guess, fallback_region, projecting) - v);
-                    double vdelta_a = Math.Abs(v_given_pt(p, guess + step, fallback_region, projecting) - v);
-                    double vdelta_b = Math.Abs(v_given_pt(p, guess - (step / 2.0), fallback_region, projecting) - v);
+                    try {
+                        vdelta = Math.Abs(v_given_pt(p, guess, fallback_region, projecting) - v);
+                    }
+                    catch {
+
+                    }
+                    double vdelta_a = vdelta;
+                    double vdelta_b = vdelta;
+                    try {
+                        vdelta_a = Math.Abs(v_given_pt(p, guess + step, fallback_region, projecting) - v);
+                    }
+                    catch {
+
+                    }
+                    try {
+                        vdelta_b = Math.Abs(v_given_pt(p, guess - (step / 2.0), fallback_region, projecting) - v);
+                    }
+                    catch {
+
+                    }
                     if (vdelta < vdelta_a && vdelta < vdelta_b) //unaltered guess is superior
                         step = step / 2.0;
                     else if (vdelta_a < vdelta_b) {
@@ -637,9 +654,27 @@ public static class ThermoMath
                 }
 
                 //another iteration on p
-                pdelta = Math.Abs(p_given_vt(v, guess, fallback_region) - p);
-                double pdelta_a = Math.Abs(p_given_vt(v, guess + step, fallback_region) - p);
-                double pdelta_b = Math.Abs(p_given_vt(v, guess - (step / 2.0), fallback_region) - p);
+                try {
+                    pdelta = Math.Abs(p_given_vt(v, guess, fallback_region) - p);
+                }
+                catch {
+
+                }
+                double pdelta_a = pdelta;
+                double pdelta_b = pdelta;
+                try {
+                    pdelta_a = Math.Abs(p_given_vt(v, guess + step, fallback_region) - p);
+                }
+                catch {
+
+                }
+                try {
+                    pdelta_b = Math.Abs(p_given_vt(v, guess - (step / 2.0), fallback_region) - p);
+                }
+                catch {
+
+                }
+
                 if (pdelta < pdelta_a && pdelta < pdelta_b) //unaltered guess is superior
                     step = step / 2.0;
                 else if (pdelta_a < pdelta_b) {

@@ -977,10 +977,12 @@ namespace ThermoVR.State
                         double old_t = temperature;
                         double new_t = 0;
                         try {
-                            new_t = ThermoMath.iterate_t_given_pv(temperature, new_p, new_v, region); // new_v is constant in liquid
+                            new_t = ThermoMath.iterate_t_given_pv(temperature, new_p, new_v, region, true); // new_v is constant in liquid
                         }
                         catch (ArgumentOutOfRangeException e) {
                             // temperature out of range
+                            ThermoMath.got_error = false;
+                            return true;
                         }
                         double delta_t = new_t - old_t;
                         new_t = old_t + delta_t * (1 - insulation_coefficient); // when insulation is 0%, T = T_old
