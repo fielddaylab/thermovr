@@ -350,7 +350,7 @@ namespace ThermoVR.State
 
         #region Apply Heat/Pressure
 
-        public void add_heat_per_delta_time(double applied_heat, double insulation_coefficient, double delta_time) {
+        public void add_heat_per_delta_time(double applied_heat, double insulation_coefficient, double delta_time, double p_outside) {
 
             // prevent errors from temperature reaching the boundaries of the simulation
             if (temperature_bounded(applied_heat, insulation_coefficient, delta_time)) {
@@ -358,14 +358,20 @@ namespace ThermoVR.State
             }
 
             // determine whether currently applied tools force a constant volume
-            bool constant_v = treat_as_constant_v_add_heat(applied_heat, insulation_coefficient, delta_time);
+            bool constant_v = treat_as_constant_v_add_heat(applied_heat, insulation_coefficient, delta_time, p_outside);
+
 
             if (constant_v) {
+                Debug.Log("Constant volume");
+
                 add_heat_constant_v_per_delta_time(applied_heat, insulation_coefficient, delta_time);
             }
             else {
+                Debug.Log("Constant pressure");
+
                 add_heat_constant_p_per_delta_time(applied_heat, insulation_coefficient, delta_time);
             }
+            // TODO: add a third case constant_t, using entropy instead of u or h
         }
 
         private void add_heat_constant_p_per_delta_time(double applied_heat, double insulation_coefficient, double delta_time) {  // Pressure Constrained -> Insulated && Uninsulated -> delta energy    // time eqtn 6b
@@ -486,8 +492,9 @@ namespace ThermoVR.State
                     pressure = new_p;
                     temperature = new_t;
                     quality = ThermoMath.x_given_pv(pressure, volume, region);
-                    // enthalpy = ThermoMath.h_given_vt(volume, temperature, region); // enthalpy way off
-                    // entropy = ThermoMath.s_given_vt(volume, temperature, region);
+                    // TODO: figure out why h_given_vt is so off
+                    enthalpy = ThermoMath.h_given_vt(volume, temperature, region);
+                    entropy = ThermoMath.s_given_vt(volume, temperature, region);
                 }
                 else {
                     enthalpy = ThermoMath.h_given_vt(volume, temperature, region);
@@ -499,7 +506,11 @@ namespace ThermoVR.State
             clamp_state();
         }
 
-        public void add_pressure_uninsulated_per_delta_time(double p, double delta_time, double insulation_coefficient) {
+        public void add_pressure_uninsulated_per_delta_time(double p, double delta_time, double insulation_coefficient, double p_outside, double temperature_gradient) {
+            if (blocked_by_stops(p_outside)) {
+                return;
+            }
+
             double added_p = p;
             double new_p = pressure + added_p; // * delta_time;
 
@@ -511,7 +522,7 @@ namespace ThermoVR.State
 
             double iterative_dif = (added_p - p_dif);
 
-            if (enthalpy_bounded(new_p, enthalpy) && region != ThermoMath.region_twophase) {
+            if (region != ThermoMath.region_twophase && enthalpy_bounded(new_p, enthalpy)) {
                 return;
             }
             if (region == ThermoMath.region_liquid /*AND temperature is near lower edge*/) {
@@ -660,8 +671,9 @@ namespace ThermoVR.State
                      */
 
                     double old_t = temperature;
+                    // inside - outside
                     double new_t = ThermoMath.tsat_given_p(new_p);
-                    double delta_t = new_t - old_t;
+                    double delta_t = temperature_gradient;
 
                     double delta_s = delta_time / mass * ((delta_t * insulation_coefficient) / temperature); // time eqtn 5
                     new_s = entropy + delta_s;
@@ -690,7 +702,7 @@ namespace ThermoVR.State
 
                     pressure = new_p;
                     enthalpy = new_h;
-                    // enthalpy = ThermoMath.h_given_vt(new_v, new_t, region);
+                    enthalpy = ThermoMath.h_given_vt(new_v, new_t, region);
                     entropy = new_s;
                     temperature = new_t;
                     internalenergy = new_u;
@@ -706,7 +718,35 @@ namespace ThermoVR.State
             clamp_state();
         }
 
-        public void add_pressure_insulated_per_delta_time(double p, double delta_time) {
+        private bool blocked_by_stops(double p_outside) {
+            double buffer = 0.01;
+            bool within_vstop_buffer = false;
+
+            for (int i = 0; i < v_stops.Count; i++) {
+                within_vstop_buffer = false;
+
+                VolumeStop curr_stop = v_stops[i];
+                double compare_v = curr_stop.Volume;
+
+                if (volume >= compare_v - buffer && volume <= compare_v + buffer) {
+                    within_vstop_buffer = true;
+                }
+
+                if (within_vstop_buffer) {
+                    if (pressure > p_outside) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        public void add_pressure_insulated_per_delta_time(double p, double delta_time, double p_outside, double temperature_gradient) {
+            if (blocked_by_stops(p_outside)) {
+                return;
+            }
+
             double new_p = pressure + p; // * delta_time;
                                          // if (Math.Abs(p * delta_time) < World.DELTA_PRESSURE_CUTOFF) { new_p = pressure + p; } // small enough step; finish transition
 
@@ -746,7 +786,7 @@ namespace ThermoVR.State
                     {
                             // Pressure Constrained -> Insulated -> delta pressure (liquid and two-phase)
                             //at this point, we have enough internal state to derive the rest
-                            
+
                             double old_t = temperature;
 
                             if (region == ThermoMath.region_twophase) {
@@ -866,7 +906,11 @@ namespace ThermoVR.State
         /// <param name="insulation_coefficient"></param>
         /// <param name="delta_time"></param>
         /// <returns></returns>
-        private bool treat_as_constant_v_add_heat(double applied_heat, double insulation_coefficient, double delta_time) {
+        private bool treat_as_constant_v_add_heat(double applied_heat, double insulation_coefficient, double delta_time, double p_outside) {
+            return blocked_by_stops(p_outside);
+
+            /*
+
             try {
                 // project where v will be; if it would overshoot a volume stop, treat it as constant volume
                 double delta_h = delta_time / mass * (applied_heat * insulation_coefficient);  // time eqtn 6a
@@ -909,6 +953,7 @@ namespace ThermoVR.State
             catch (Exception e) { }
 
             return true; // since an error was thrown when projecting volume, treating it as constant p will not work
+            */
         }
 
         /// <summary>

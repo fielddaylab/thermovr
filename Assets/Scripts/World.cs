@@ -923,15 +923,16 @@ public class World : MonoBehaviour
         insulation_coefficient = 1 - insulation_coefficient; // invert proportion
 
         // check if weight was applied
+        double temperature_gradient = room_temp - thermo_present.get_temperature();
 
         if (System.Math.Abs(delta_weight) > 0) {
             if (insulation_coefficient == 0) {
                 // perfect insulation
-                thermo_present.add_pressure_insulated_per_delta_time(delta_weight, delta_time); // Pressure Constrained -> Insulated ->  delta pressure
+                thermo_present.add_pressure_insulated_per_delta_time(delta_weight, delta_time, weight_pressure, temperature_gradient); // Pressure Constrained -> Insulated ->  delta pressure
             }
             else {
                 // insulation is inversely proportional to the rate of weight application
-                thermo_present.add_pressure_uninsulated_per_delta_time(delta_weight, delta_time, insulation_coefficient); // Pressure Constrained -> Uninsulated ->  delta pressure
+                thermo_present.add_pressure_uninsulated_per_delta_time(delta_weight, delta_time, insulation_coefficient, weight_pressure, temperature_gradient); // Pressure Constrained -> Uninsulated ->  delta pressure
             }
         }
 
@@ -941,19 +942,24 @@ public class World : MonoBehaviour
             double heat_transfer_delta =
                 (room_temp - thermo_present.get_temperature()) // total temperature difference
                 * insulation_coefficient // what percentage of that difference is shielded by insulation
+                /*
                 * SPECIFIC_HEAT_CAPACITY_LIQ // how much heat is required to raise 1 kg of water 1 Kelvin
-                / delta_time / 2; // halve the immediacy effect so that simulation can handle the change
+                // TODO: Replace this specific heat with a function calculating based on quality parameter
+                // for all processes not constant pressure, use c_v (vs c_p -- to be used in constant pressure)
+                */
+                / delta_time; // halve the immediacy effect so that simulation can handle the change
+            // if you have some state, and know r, can calculate heat exchange (based on eqtn 2), 
 
             if (heat_transfer_delta != 0) {
                 // insulation is inversely proportional to the rate of heat transfer (outside insulation)
-                thermo_present.add_heat_per_delta_time(heat_transfer_delta, insulation_coefficient, delta_time);
+                thermo_present.add_heat_per_delta_time(heat_transfer_delta, insulation_coefficient, delta_time, applied_weight);
             }
         }
 
         // tool heat
         if (applied_heat != 0) {
             // insulation is inversely proportional to the rate of heat transfer (within insulation)
-            thermo_present.add_heat_per_delta_time(applied_heat, (1 - insulation_coefficient), delta_time);
+            thermo_present.add_heat_per_delta_time(applied_heat, (1 - insulation_coefficient), delta_time, applied_weight);
         }
 
         //running blended average of hand velocity (transfers this velocity on "release object" for consistent "throwing")

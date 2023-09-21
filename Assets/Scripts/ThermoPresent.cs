@@ -724,19 +724,19 @@ public class ThermoPresent : MonoBehaviour
         visualize_state();
     }
 
-    public void add_heat_per_delta_time(double applied_heat, double insulation_coefficient, double delta_time) {
-        state.add_heat_per_delta_time(applied_heat, insulation_coefficient, delta_time);
+    public void add_heat_per_delta_time(double applied_heat, double insulation_coefficient, double delta_time, double p_outside) {
+        state.add_heat_per_delta_time(applied_heat, insulation_coefficient, delta_time, p_outside);
 
         visualize_state();
     }
 
-    public void add_pressure_uninsulated_per_delta_time(double p, double delta_time, double insulation_coefficient) {
-        state.add_pressure_uninsulated_per_delta_time(p, delta_time, insulation_coefficient);
+    public void add_pressure_uninsulated_per_delta_time(double p, double delta_time, double insulation_coefficient, double p_outside, double temperature_gradient) {
+        state.add_pressure_uninsulated_per_delta_time(p, delta_time, insulation_coefficient, p_outside, temperature_gradient);
         visualize_state();
     }
 
-    public void add_pressure_insulated_per_delta_time(double p, double delta_time) {
-        state.add_pressure_insulated_per_delta_time(p, delta_time);
+    public void add_pressure_insulated_per_delta_time(double p, double delta_time, double p_outside, double temperature_gradient) {
+        state.add_pressure_insulated_per_delta_time(p, delta_time, p_outside, temperature_gradient);
         visualize_state();
     }
 
