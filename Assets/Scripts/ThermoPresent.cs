@@ -239,6 +239,10 @@ public class ThermoPresent : MonoBehaviour
         return state.temperature;
     }
 
+    public double get_quality() {
+        return state.quality;
+    }
+
     public int get_region() {
         return state.region;
     }
@@ -724,8 +728,8 @@ public class ThermoPresent : MonoBehaviour
         visualize_state();
     }
 
-    public void add_heat_per_delta_time(double applied_heat, double insulation_coefficient, double delta_time, double p_outside) {
-        state.add_heat_per_delta_time(applied_heat, insulation_coefficient, delta_time, p_outside);
+    public void add_heat_per_delta_time(double applied_heat, double insulation_coefficient, double delta_time, double p_outside, bool is_internal, double temperature_gradient) {
+        state.add_heat_per_delta_time(applied_heat, insulation_coefficient, delta_time, p_outside, is_internal, temperature_gradient);
 
         visualize_state();
     }

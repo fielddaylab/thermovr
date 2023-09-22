@@ -361,7 +361,7 @@ namespace ThermoVR.State
 
         #region Apply Heat/Pressure
 
-        public void add_heat_per_delta_time(double applied_heat, double insulation_coefficient, double delta_time, double p_outside) {
+        public void add_heat_per_delta_time(double applied_heat, double insulation_coefficient, double delta_time, double p_outside, bool is_internal, double temperature_gradient) {
 
             // prevent errors from temperature reaching the boundaries of the simulation
             if (temperature_bounded(applied_heat, insulation_coefficient, delta_time)) {
@@ -371,18 +371,27 @@ namespace ThermoVR.State
             // determine whether currently applied tools force a constant volume
             bool constant_v = treat_as_constant_v_add_heat(applied_heat, insulation_coefficient, delta_time, p_outside);
 
-
             if (constant_v) {
-                Debug.Log("Constant volume");
-
                 add_heat_constant_v_per_delta_time(applied_heat, insulation_coefficient, delta_time);
             }
             else {
-                Debug.Log("Constant pressure");
-
                 add_heat_constant_p_per_delta_time(applied_heat, insulation_coefficient, delta_time);
+
+                /*
+                if (!is_internal && insulation_coefficient == 1) {
+                    // For now, only makes sense for external (internal would be multiplied by 0, rendering calculation pointless)
+                    Debug.Log("Constant temperature");
+
+                    // case constant_t, using entropy instead of u or h
+                    add_heat_constant_t_per_delta_time(applied_heat, insulation_coefficient, delta_time, temperature_gradient);
+                }
+                else {
+                    Debug.Log("Constant pressure");
+
+                    add_heat_constant_p_per_delta_time(applied_heat, insulation_coefficient, delta_time);
+                }
+                */
             }
-            // TODO: add a third case constant_t, using entropy instead of u or h
         }
 
         private void add_heat_constant_p_per_delta_time(double applied_heat, double insulation_coefficient, double delta_time) {  // Pressure Constrained -> Insulated && Uninsulated -> delta energy    // time eqtn 6b
@@ -514,6 +523,95 @@ namespace ThermoVR.State
                 else {
                     enthalpy = ThermoMath.h_given_vt(volume, temperature, region);
                     entropy = ThermoMath.s_given_vt(volume, temperature, region);
+                }
+            }
+            catch (Exception e) { }
+
+            clamp_state();
+        }
+
+        private void add_heat_constant_t_per_delta_time(double applied_heat, double insulation_coefficient, double delta_time, double temperature_gradient) {  // Temperature Constrained (0% insulation)   // time eqtn 5
+            try {
+                double new_s = entropy;
+                double new_h = enthalpy;
+
+                double delta_t = temperature_gradient * 1000;
+
+                double delta_s = delta_time / mass * ((delta_t * insulation_coefficient) / temperature); // time eqtn 5
+                new_s = entropy + delta_s;
+
+                // TODO: verify below
+                double delta_h = delta_time / mass * (delta_t * insulation_coefficient);  // time eqtn 6a
+                new_h = enthalpy + delta_h;
+
+                new_h = ClampEnthalpy(new_h, pressure);
+                double new_v = volume;
+
+                switch (region) {
+                    case ThermoMath.region_liquid:
+                    case ThermoMath.region_vapor:
+                        // check that h is within bounds
+                        new_h = ClampEnthalpy(new_h, pressure);
+                        clamp_state();
+                        //at this point, we have enough internal state to derive the rest
+                        try {
+                            new_v = ThermoMath.v_given_ph(pressure, enthalpy, region, true);
+                        }
+                        catch (Exception e) {
+                            new_v = ThermoMath.v_given_ph(pressure, new_h, region);
+                        }
+
+                        if (region == ThermoMath.region_liquid) {
+                            if (pressure < ThermoMath.psat_max) {
+                                if (new_v > LIQ_2_DIVISION) {
+                                    region = ThermoMath.region_twophase;
+                                    break;
+                                }
+                            }
+                            else {
+                                if (ThermoMath.t_given_ph(pressure, enthalpy, region) >= ThermoMath.t_crit) {
+                                    // Technically supercritical fluid. But we don't have that.
+                                    region = ThermoMath.region_vapor;
+                                }
+                            }
+                        }
+                        else if (region == ThermoMath.region_vapor) {
+                            if (pressure >= ThermoMath.psat_max) {
+                                if (ThermoMath.t_given_ph(pressure, enthalpy, region) < ThermoMath.t_crit) {
+                                    region = ThermoMath.region_liquid;
+                                }
+                            }
+
+                        }
+
+                        enthalpy = new_h;
+                        temperature = ThermoMath.t_given_ph(pressure, enthalpy, region);
+                        internalenergy = ThermoMath.u_given_vt(new_v, temperature, region);
+                        break;
+                }
+
+                if (region == ThermoMath.region_twophase) {
+                    double new_x = ThermoMath.x_given_ph(pressure, new_h, region);
+
+                    //at this point, we have enough internal state to derive the rest
+                    clamp_state();
+                    new_v = ThermoMath.v_given_px(pressure, new_x, region);
+                    //new_v = v_with_enforced_stops(new_v); // enforce volume stops
+                    temperature = ThermoMath.tsat_given_p(pressure, region);
+                    internalenergy = ThermoMath.u_given_px(pressure, new_x, region);
+                    enthalpy = new_h;
+                    quality = new_x;
+                }
+
+                volume = new_v;
+
+                int prev_region = region;
+                region = ThermoMath.region_given_pvt(pressure, volume, temperature);
+
+                switch (region) {
+                    case ThermoMath.region_liquid: quality = 0; break;
+                    case ThermoMath.region_twophase: quality = ThermoMath.x_given_pv(pressure, volume, region); break;
+                    case ThermoMath.region_vapor: quality = 1; break;
                 }
             }
             catch (Exception e) { }
@@ -734,6 +832,8 @@ namespace ThermoVR.State
         }
 
         private bool blocked_by_stops(double p_outside) {
+            if (region == 0) { return false; } // liquid volume doesn't change
+
             double buffer = 0.005;
             bool within_vstop_buffer = false;
 

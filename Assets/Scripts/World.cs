@@ -942,22 +942,23 @@ public class World : MonoBehaviour
             double heat_transfer_delta =
                 (room_temp - thermo_present.get_temperature()) // total temperature difference
                 * insulation_coefficient // what percentage of that difference is shielded by insulation
-                * SPECIFIC_HEAT_CAPACITY_LIQ // how much heat is required to raise 1 kg of water 1 Kelvin
-                // TODO: Replace this specific heat with a function calculating based on quality parameterW
+                * (SPECIFIC_HEAT_CAPACITY_LIQ) // how much heat is required to raise 1 kg of water 1 Kelvin
+                * (SPECIFIC_HEAT_CAPACITY_LIQ) // how much heat is required to raise 1 kg of water 1 Kelvin
+                // TODO: Replace this specific heat with a function calculating based on quality parameter
                 // for all processes not constant pressure, use c_v (vs c_p -- to be used in constant pressure)
-                / delta_time / 2; // halve the immediacy effect so that simulation can handle the change
+                / delta_time * 0.5; // halve the immediacy effect so that simulation can handle the change
             // if you have some state, and know r, can calculate heat exchange (based on eqtn 2), 
 
             if (heat_transfer_delta != 0) {
                 // insulation is inversely proportional to the rate of heat transfer (outside insulation)
-                thermo_present.add_heat_per_delta_time(heat_transfer_delta, insulation_coefficient, delta_time, weight_pressure);
+                thermo_present.add_heat_per_delta_time(heat_transfer_delta, insulation_coefficient, delta_time, weight_pressure, false, temperature_gradient);
             }
         }
 
         // tool heat
         if (applied_heat != 0) {
             // insulation is inversely proportional to the rate of heat transfer (within insulation)
-            thermo_present.add_heat_per_delta_time(applied_heat, (1 - insulation_coefficient), delta_time, weight_pressure);
+            thermo_present.add_heat_per_delta_time(applied_heat, (1 - insulation_coefficient), delta_time, weight_pressure, true, temperature_gradient);
         }
 
         //running blended average of hand velocity (transfers this velocity on "release object" for consistent "throwing")
