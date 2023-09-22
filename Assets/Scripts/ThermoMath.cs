@@ -480,7 +480,7 @@ public static class ThermoMath
         }
     }
 
-    public static double h_given_vt(double v, double t, int fallback_region = 0) {
+    public static double h_given_vt(double v, double t, int fallback_region = 0) { // DOES NOT APPEAR TO WORK IN VAPOR DOME
         try {
             return IAPWS95.IAPWS95_enthalpy(1f / v, t) * 1000f;
         }
@@ -489,6 +489,18 @@ public static class ThermoMath
             Debug.Log("[Error] " + ex.Message);
             got_error = true;
             return h_neutral[fallback_region];
+        }
+    }
+
+    public static double h_given_px(double p, double x, int fallback_region = 0) {
+        try {
+            return IF97.hmass_pQ(p / 1000000.0, x) * 1000f;
+        }
+        catch (Exception ex) {
+            Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, s_neutral[fallback_region]));
+            Debug.Log("[Error] " + ex.Message);
+            got_error = true;
+            return s_neutral[fallback_region];
         }
     }
 

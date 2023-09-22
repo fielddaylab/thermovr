@@ -92,13 +92,17 @@ namespace ThermoVR.State
             temperature = ThermoMath.t_neutral[region];
             //from this point, the rest should be derived!
             quality = ThermoMath.x_neutral[region];
-            if (region == ThermoMath.region_twophase)
+            if (region == ThermoMath.region_twophase) {
                 volume = ThermoMath.v_given_px(pressure, quality, region);
-            else
+                enthalpy = ThermoMath.h_given_px(pressure, quality, region);
+                entropy = ThermoMath.s_given_px(pressure, quality, region);
+            }
+            else {
                 volume = ThermoMath.v_given_pt(pressure, temperature, region);
+                enthalpy = ThermoMath.h_given_vt(volume, temperature, region);
+                entropy = ThermoMath.s_given_vt(volume, temperature, region);
+            }
             internalenergy = ThermoMath.u_given_pt(pressure, temperature, region);
-            enthalpy = ThermoMath.h_given_vt(volume, temperature, region);
-            entropy = ThermoMath.s_given_vt(volume, temperature, region);
             region = ThermoMath.region_given_pvt(pressure, volume, temperature); //should certainly stay the same, as bases were calculated from assumed region
 
             prev_pressure = -1;
@@ -291,8 +295,14 @@ namespace ThermoVR.State
                 // iterative_weight = ambient_pressure;
 
                 region = ThermoMath.region_given_pvt(pressure, volume, temperature);
-                entropy = ThermoMath.s_given_vt(volume, temperature, region);
-                enthalpy = ThermoMath.h_given_vt(volume, temperature, region);
+                if (region == ThermoMath.region_twophase) {
+                    entropy = ThermoMath.s_given_px(pressure, quality, region);
+                    enthalpy = ThermoMath.h_given_px(pressure, quality, region);
+                }
+                else {
+                    entropy = ThermoMath.s_given_vt(volume, temperature, region);
+                    enthalpy = ThermoMath.h_given_vt(volume, temperature, region);
+                }
 
                 // region = ThermoMath.region_given_ps(pressure, entropy);
 
@@ -309,6 +319,7 @@ namespace ThermoVR.State
                             internalenergy = ThermoMath.u_given_px(pressure, quality, region);
                             */
                             // We've never quite gotten warp_pv to work in two-phase. So for now, disallow it.
+                            // TODO: revisit this with new enthalpy calculation
                             reset();
                             break;
                         }
@@ -493,8 +504,12 @@ namespace ThermoVR.State
                     temperature = new_t;
                     quality = ThermoMath.x_given_pv(pressure, volume, region);
                     // TODO: figure out why h_given_vt is so off
+                    /*
                     enthalpy = ThermoMath.h_given_vt(volume, temperature, region);
                     entropy = ThermoMath.s_given_vt(volume, temperature, region);
+                    */
+                    enthalpy = ThermoMath.h_given_px(pressure, quality, region);
+                    entropy = ThermoMath.s_given_px(pressure, quality, region);
                 }
                 else {
                     enthalpy = ThermoMath.h_given_vt(volume, temperature, region);
@@ -702,7 +717,8 @@ namespace ThermoVR.State
 
                     pressure = new_p;
                     enthalpy = new_h;
-                    enthalpy = ThermoMath.h_given_vt(new_v, new_t, region);
+                    // enthalpy = ThermoMath.h_given_vt(new_v, new_t, region);
+                    enthalpy = ThermoMath.h_given_px(new_p, new_x, region);
                     entropy = new_s;
                     temperature = new_t;
                     internalenergy = new_u;
