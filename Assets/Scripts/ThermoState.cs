@@ -726,7 +726,6 @@ namespace ThermoVR.State
                     quality = new_x;
 
                     region = ThermoMath.region_given_pvt(pressure, volume, temperature);
-
                 }
             }
             catch (Exception e) { }
@@ -735,7 +734,7 @@ namespace ThermoVR.State
         }
 
         private bool blocked_by_stops(double p_outside) {
-            double buffer = 0.01;
+            double buffer = 0.005;
             bool within_vstop_buffer = false;
 
             for (int i = 0; i < v_stops.Count; i++) {
@@ -749,7 +748,10 @@ namespace ThermoVR.State
                 }
 
                 if (within_vstop_buffer) {
-                    if (pressure > p_outside) {
+                    if (volume < compare_v && pressure >= p_outside) {
+                        return true;
+                    }
+                    else if (volume > compare_v && pressure <= p_outside) {
                         return true;
                     }
                 }
