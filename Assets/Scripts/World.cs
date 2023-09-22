@@ -580,7 +580,7 @@ public class World : MonoBehaviour
         }
 
         //find new grabs
-        if (ref_grabbed == null && ref_htrigger_delta == 1) {
+        if (ref_grabbed == null && ((ref_htrigger_delta == 1 && ref_itrigger) || (ref_htrigger && ref_itrigger_delta == 1))) {
             //first try movables
             for (int i = 0; ref_grabbed == null && i < movables.Count; i++) {
                 if ( //object newly grabbed
@@ -672,7 +672,7 @@ public class World : MonoBehaviour
             }
         }
         //find new releases
-        else if (ref_grabbed && ref_htrigger_delta == -1) //something newly released
+        else if (ref_grabbed && (ref_htrigger_delta == -1 || ref_itrigger_delta == -1)) //something newly released
         {
             Tool t = ref_grabbed.GetComponent<Tool>();
             if (t) //tool newly released
@@ -942,7 +942,6 @@ public class World : MonoBehaviour
             double heat_transfer_delta =
                 (room_temp - thermo_present.get_temperature()) // total temperature difference
                 * insulation_coefficient // what percentage of that difference is shielded by insulation
-                * (SPECIFIC_HEAT_CAPACITY_LIQ) // how much heat is required to raise 1 kg of water 1 Kelvin
                 * (SPECIFIC_HEAT_CAPACITY_LIQ) // how much heat is required to raise 1 kg of water 1 Kelvin
                 // TODO: Replace this specific heat with a function calculating based on quality parameter
                 // for all processes not constant pressure, use c_v (vs c_p -- to be used in constant pressure)
