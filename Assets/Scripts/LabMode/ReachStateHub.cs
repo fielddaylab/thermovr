@@ -22,6 +22,7 @@ namespace ThermoVR.Lab
     }
 
 
+    [Serializable]
     public struct SimStateTarget {
         public VarID TargetID;
         public float TargetVal;

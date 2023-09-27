@@ -1,4 +1,5 @@
 using BeauUtil;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -7,11 +8,13 @@ using UnityEngine;
 
 namespace ThermoVR.Lab
 {
+    [Serializable]
     public struct LabInfo {
         public string Name;
         public List<TaskInfo> Tasks;
     }
 
+    [Serializable]
     public struct TaskInfo {
         // Common
         public TaskType TaskType;
@@ -70,44 +73,42 @@ namespace ThermoVR.Lab
             }
         }
 
-        private void LoadLab(TextAsset labInfoAsset) {
-            Debug.Log("[LabLoad] Attempting to load asset " + labInfoAsset.name + "...");
-
-            bool succeeded = true;
-            LabInfo newLabInfo = new LabInfo();
-            newLabInfo.Tasks = new List<TaskInfo>();
-
-            try {
-                List<string> groups = TextIO.TextAssetToList(labInfoAsset, GROUP_DELIM);
-
-                for (int i = 0; i < groups.Count; i++) {
-                    string currGroup = groups[i];
-
-                    if (currGroup.Contains("LAB-NAME")) {
-                        ParseLabName(currGroup, ref newLabInfo);
-                    }
-                    else if (currGroup.Contains("TASK")) {
-                        ParseTaskInfo(currGroup, ref newLabInfo);
-                    }
-                    else if (currGroup.Contains("END")) {
-                        // end of file
-                        break;
-                    }
-                    else {
-                        // unknown section
-                        continue;
-                    }
+        [ContextMenu("Convert Labs To JSON")]
+        /// <summary>
+        /// Takes Text Assets and converts them to JSON
+        /// </summary>
+        private void ConvertLabsToJSON() {
+            for (int i = 0; i < m_initialLabs.Length; i++) {
+                if (TryParseLab(m_initialLabs[i], out LabInfo info)) {
+                    string labJSON = JsonUtility.ToJson(info);
+                    TextIO.WriteString("Assets/Content/Labs/" + info.Name + ".json", labJSON);
+                    Debug.Log("[LabLoader] Converted lab " + info.Name);
                 }
-
-
+                else {
+                    Debug.Log("[LabLoad] Failed to convert asset " + m_initialLabs[i].name);
+                }
             }
-            catch (InvalidDataException e){
-                succeeded = false;
+        }
+
+
+        /// <summary>
+        /// Parses a Lab from JSON
+        /// </summary>
+        /// <param name="labInfoJSON"></param>
+        private bool TryLoadLabFromJSON(string labInfoJSON, out LabInfo info) {
+            try {
+                info = JsonUtility.FromJson<LabInfo>(labInfoJSON);
+                return true;
             }
+            catch (Exception){
+                // Invalid JSON
+                info = new LabInfo();
+                return false;
+            }
+        }
 
-            // Terminate
-
-            if (succeeded) {
+        private void LoadLab(TextAsset labInfoAsset) {
+            if (TryParseLab(labInfoAsset, out LabInfo newLabInfo)) {
                 Debug.Log("[LabLoad] Asset " + labInfoAsset.name + " loaded successfully.");
 
                 GameMgr.Events.Dispatch(GameEvents.LabLoaded, newLabInfo);
@@ -115,6 +116,53 @@ namespace ThermoVR.Lab
             else {
                 Debug.Log("[LabLoad] Failed to load asset " + labInfoAsset.name);
             }
+        }
+
+        /// <summary>
+        /// Parses a lab
+        /// </summary>
+        /// <param name="labInfoAsset"></param>
+        private bool TryParseLab(TextAsset labInfoAsset, out LabInfo newLabInfo) {
+            Debug.Log("[LabLoad] Attempting to parse asset " + labInfoAsset.name + "...");
+
+            bool succeeded = true;
+            newLabInfo = new LabInfo();
+            if (!TryLoadLabFromJSON(labInfoAsset.text, out newLabInfo)) {
+                succeeded = false;
+            }
+
+            if (!succeeded) {
+                succeeded = true;
+                newLabInfo.Tasks = new List<TaskInfo>();
+
+                try {
+                    List<string> groups = TextIO.TextAssetToList(labInfoAsset, GROUP_DELIM);
+
+                    for (int i = 0; i < groups.Count; i++) {
+                        string currGroup = groups[i];
+
+                        if (currGroup.Contains("LAB-NAME")) {
+                            ParseLabName(currGroup, ref newLabInfo);
+                        }
+                        else if (currGroup.Contains("TASK")) {
+                            ParseTaskInfo(currGroup, ref newLabInfo);
+                        }
+                        else if (currGroup.Contains("END")) {
+                            // end of file
+                            break;
+                        }
+                        else {
+                            // unknown section
+                            continue;
+                        }
+                    }
+                }
+                catch (InvalidDataException e) {
+                    succeeded = false;
+                }
+            }
+
+            return succeeded;
         }
 
         private void ParseLabName(string group, ref LabInfo labInfo) {
