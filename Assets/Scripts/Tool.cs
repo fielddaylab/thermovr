@@ -9,8 +9,22 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using ThermoVR.Dials;
+using System;
 
-namespace ThermoVR.Tools {
+namespace ThermoVR.Tools
+{
+    [Serializable]
+    public enum ToolType { 
+        Burner,
+        Coil,
+        Weight,
+        NegativeWeight,
+        Insulator,
+        SurroundingTemperature,
+        SurroundingPressure,
+        Stops
+    }
+
     public struct VolumeStop
     {
         public double Volume;

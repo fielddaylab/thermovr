@@ -3,7 +3,7 @@
 || TASK
 
 |Type: [multiple-choice, word-bank, reach-state, multi-select-choice]
-|ToolInfo: [insulator, burner, coil, ambient-pressure, room-temperature, balloon, weight, stops]
+|ToolInfo: [Burner, Coil, Weight, NegativeWeight, Insulator, SurroundingTemperature, SurroundingPressure, Stops]
 |SetInfo: [(p:5), (v:5), (t:5)]
 |LimitInfo: [(p:10:upper), (p:1:lower)]
 |TargetInfo (property, value, valid-range): [{(p:9:2)}, {(p:4:2)}, {(p:5:2), (v:4:2)}]
@@ -18,7 +18,7 @@
 
 
 |Type:  [multi-select-choice]
-|ToolInfo: 2
+|ToolInfo: [BurnerTest, Burner, All]
 |SetInfo: 2
 |LimitInfo: 2
 |TargetInfo (property, value, valid-range): 2
@@ -32,7 +32,7 @@
 || TASK
 
 |Type: [word-bank]
-|ToolInfo: 3
+|ToolInfo: [Burner]
 |SetInfo: 3
 |LimitInfo: 3
 |TargetInfo (property, value, valid-range): 3
