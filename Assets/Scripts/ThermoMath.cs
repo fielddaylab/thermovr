@@ -360,16 +360,21 @@ public static class ThermoMath
         }
     }
 
-    public static double v_given_px(double p, double x, int fallback_region = 0) //ONLY USE IN VAPOR DOME
+    public static double v_given_px(double p, double x, int fallback_region = 0, bool projecting = false) //ONLY USE IN VAPOR DOME
     {
         try {
             return 1.0 / IF97.rhomass_pQ(p / 1000000.0, x);
         }
         catch (Exception ex) {
-            Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, v_neutral[fallback_region]));
-            Debug.Log("[Error] " + ex.Message);
-            got_error = true;
-            return v_neutral[fallback_region];
+            if (projecting) {
+                throw ex;
+            }
+            else {
+                Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, v_neutral[fallback_region]));
+                Debug.Log("[Error] " + ex.Message);
+                got_error = true;
+                return v_neutral[fallback_region];
+            }
         }
     }
 

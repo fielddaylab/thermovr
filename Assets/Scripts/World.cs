@@ -31,6 +31,8 @@ public class World : MonoBehaviour
     const double PSI_TO_PASCAL = 6894.76;
     const double SPECIFIC_HEAT_CAPACITY_LIQ = 4184; // how many J it takes to heat 1 kg of water liquid 1 Kelvin
     const double SPECIFIC_HEAT_CAPACITY_VAP = 1.996; // how many J it takes to heat 1 kg of water vapor 1 Kelvin
+    public const float BURNER_MAX = 100000;
+    public const float COIL_MAX = -100000;
 
     public static World Instance;
 
@@ -227,8 +229,8 @@ public class World : MonoBehaviour
         // dial_insulator.Init(0f, 1f);
         dial_stop1.Init((float)ThermoMath.v_min, (float)ThermoMath.v_max, DigitFormat.Volume);
         dial_stop2.Init((float)ThermoMath.v_min, (float)ThermoMath.v_max, DigitFormat.Volume);
-        dial_burner.Init(0f, 1000f * 100f, DigitFormat.Heat);
-        dial_coil.Init(0f, -1000f * 100f, DigitFormat.Heat);
+        dial_burner.Init(0f, BURNER_MAX, DigitFormat.Heat);
+        dial_coil.Init(0f, COIL_MAX, DigitFormat.Heat);
         dial_weight.Init(0f, (float)kg_corresponding_to_10mpa / 5.0f, DigitFormat.Weight);
         dial_balloon.Init(0f, -(float)kg_corresponding_to_10mpa / 500.0f, DigitFormat.Weight); // 500.0f
         dial_ambientPressure.Init((float)ThermoMath.p_min, (float)ThermoMath.p_max, DigitFormat.AmbientPressure);

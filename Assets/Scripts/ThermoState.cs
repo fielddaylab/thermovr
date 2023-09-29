@@ -1067,10 +1067,15 @@ namespace ThermoVR.State
         /// <param name="delta_time"></param>
         /// <returns></returns>
         private bool treat_as_constant_v_add_heat(double applied_heat, double insulation_coefficient, double delta_time, double p_outside) {
-            return blocked_by_stops(p_outside);
+            bool blocked = blocked_by_stops(p_outside); // first pass
+            if (applied_heat <= World.BURNER_MAX && applied_heat >= World.COIL_MAX) {
+                // normal tool adjustments
+                return blocked;
+            }
 
+            return false;
             /*
-
+            // Second pass (projection) to check during major transfer
             try {
                 // project where v will be; if it would overshoot a volume stop, treat it as constant volume
                 double delta_h = delta_time / mass * (applied_heat * insulation_coefficient);  // time eqtn 6a
@@ -1085,12 +1090,17 @@ namespace ThermoVR.State
                         double new_x = ThermoMath.x_given_ph(pressure, new_h, region);
                         //at this point, we have enough internal state to derive the rest
                         clamp_state();
-                        raw_v = ThermoMath.v_given_px(pressure, new_x, region);
-                        new_v = v_with_enforced_stops(raw_v, out hit_stop); // enforce volume stops
-                        if (hit_stop) {
-                            // hit a stop (should actually be treating as constant v); roll back to previous volume
-                            // volume = new_v;
-                            // calculate new delta_h
+                        try {
+                            raw_v = ThermoMath.v_given_px(pressure, new_x, region, true);
+                            new_v = v_with_enforced_stops(raw_v, out hit_stop); // enforce volume stops
+                            if (hit_stop) {
+                                // hit a stop (should actually be treating as constant v); roll back to previous volume
+                                // volume = new_v;
+                                // calculate new delta_h
+                                return true;
+                            }
+                        }
+                        catch (Exception ex) {
                             return true;
                         }
                         break;
@@ -1113,6 +1123,7 @@ namespace ThermoVR.State
             catch (Exception e) { }
 
             return true; // since an error was thrown when projecting volume, treating it as constant p will not work
+
             */
         }
 
