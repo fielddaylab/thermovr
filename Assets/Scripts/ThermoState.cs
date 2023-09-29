@@ -517,16 +517,23 @@ namespace ThermoVR.State
                 if (region == ThermoMath.region_twophase) //either newly, or all along
                 {
                     double new_p = ThermoMath.iterate_p_given_vu(pressure, volume, new_u, region); // time eqtn 6
+                    // TODO: not pushing over the edge from two-phase into vapor like it should
+                    // This pushes it over the edge, but it jumps afterwards
+                    if (new_p == pressure) {
+                        if (new_u > internalenergy) {
+                            new_p += 1;
+                        }
+                        else if (new_u < internalenergy) {
+                            new_p -= 1;
+                        }
+                    }
+
                     new_t = ThermoMath.tsat_given_p(new_p);
+
                     internalenergy = new_u;
                     pressure = new_p;
                     temperature = new_t;
                     quality = ThermoMath.x_given_pv(pressure, volume, region);
-                    // TODO: figure out why h_given_vt is so off
-                    /*
-                    enthalpy = ThermoMath.h_given_vt(volume, temperature, region);
-                    entropy = ThermoMath.s_given_vt(volume, temperature, region);
-                    */
                     try {
                         enthalpy = ThermoMath.h_given_px(pressure, quality, region);
                         entropy = ThermoMath.s_given_px(pressure, quality, region);
@@ -538,7 +545,7 @@ namespace ThermoVR.State
                         if (quality < 0) {
                             region = ThermoMath.region_liquid;
                         }
-                        else {
+                        else if (quality > 1) {
                             region = ThermoMath.region_vapor;
                         }
                     }
