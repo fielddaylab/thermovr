@@ -528,7 +528,13 @@ namespace ThermoVR.State
                         }
                     }
 
-                    new_t = ThermoMath.tsat_given_p(new_p);
+                    try {
+                        new_t = ThermoMath.tsat_given_p(new_p, region, true);
+                    }
+                    catch { 
+                        // reached minimum pressure
+                        return;
+                    }
 
                     internalenergy = new_u;
                     pressure = new_p;

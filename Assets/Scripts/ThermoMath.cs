@@ -385,15 +385,22 @@ public static class ThermoMath
         }
     }
 
-    public static double tsat_given_p(double p, int fallback_region = 0) {
+    public static double tsat_given_p(double p, int fallback_region = 0, bool customHandle = false) {
         try {
             return IF97.Tsat97(p / 1000000.0);
         }
         catch (Exception ex) {
             Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, t_neutral[fallback_region]));
             Debug.Log("[Error] " + ex.Message);
-            got_error = true;
-            return t_neutral[fallback_region];
+            if (customHandle) {
+                throw ex;
+            }
+            else {
+                got_error = true;
+                return t_neutral[fallback_region];
+            }
+
+
         }
     }
 
@@ -744,7 +751,7 @@ public static class ThermoMath
         // NOTE: Uses step
         try {
             int MAX_ITERS = DEFAULT_ITERS; //max # of iterations before giving up
-            double MAX_DELTA = 0.001; //acceptible solution error
+            double MAX_DELTA = 0.0005; //acceptible solution error
             double step = DEFAULT_STEP; //size of first step (shrinks every time it overshoots)
             double guess = p;
             double delta = Math.Abs(x_given_pu(guess, u, fallback_region) - x_given_pv(guess, v, fallback_region));
