@@ -1073,8 +1073,6 @@ namespace ThermoVR.State
                 return blocked;
             }
 
-            return false;
-            /*
             // Second pass (projection) to check during major transfer
             try {
                 // project where v will be; if it would overshoot a volume stop, treat it as constant volume
@@ -1123,8 +1121,6 @@ namespace ThermoVR.State
             catch (Exception e) { }
 
             return true; // since an error was thrown when projecting volume, treating it as constant p will not work
-
-            */
         }
 
         /// <summary>
