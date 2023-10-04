@@ -81,7 +81,7 @@ namespace ThermoVR.State
         public double v_stop2; // volume stop specified by tool_stop2
 
         List<VolumeStop> v_stops;
-        private static float STOP_BUFFER = 0.00005f;
+        private static float STOP_BUFFER = 0.005f;
         private static double LIQ_2_DIVISION = 0.002;
 
         public void reset() {
@@ -94,8 +94,13 @@ namespace ThermoVR.State
             quality = ThermoMath.x_neutral[region];
             if (region == ThermoMath.region_twophase) {
                 volume = ThermoMath.v_given_px(pressure, quality, region);
-                enthalpy = ThermoMath.h_given_px(pressure, quality, region);
-                entropy = ThermoMath.s_given_px(pressure, quality, region);
+                try {
+                    enthalpy = ThermoMath.h_given_px(pressure, quality, region);
+                    entropy = ThermoMath.s_given_px(pressure, quality, region);
+                }
+                catch (Exception ex) {
+                    ThermoMath.got_error = true;
+                }
             }
             else {
                 volume = ThermoMath.v_given_pt(pressure, temperature, region);
@@ -296,8 +301,13 @@ namespace ThermoVR.State
 
                 region = ThermoMath.region_given_pvt(pressure, volume, temperature);
                 if (region == ThermoMath.region_twophase) {
-                    entropy = ThermoMath.s_given_px(pressure, quality, region);
-                    enthalpy = ThermoMath.h_given_px(pressure, quality, region);
+                    try {
+                        entropy = ThermoMath.s_given_px(pressure, quality, region);
+                        enthalpy = ThermoMath.h_given_px(pressure, quality, region);
+                    }
+                    catch (Exception ex) {
+                        ThermoMath.got_error = true;
+                    }
                 }
                 else {
                     entropy = ThermoMath.s_given_vt(volume, temperature, region);
@@ -507,18 +517,44 @@ namespace ThermoVR.State
                 if (region == ThermoMath.region_twophase) //either newly, or all along
                 {
                     double new_p = ThermoMath.iterate_p_given_vu(pressure, volume, new_u, region); // time eqtn 6
-                    new_t = ThermoMath.tsat_given_p(new_p);
+                    // TODO: not pushing over the edge from two-phase into vapor like it should
+                    // This pushes it over the edge, but it jumps afterwards
+                    if (new_p == pressure) {
+                        if (new_u > internalenergy) {
+                            new_p += 1;
+                        }
+                        else if (new_u < internalenergy) {
+                            new_p -= 1;
+                        }
+                    }
+
+                    try {
+                        new_t = ThermoMath.tsat_given_p(new_p, region, true);
+                    }
+                    catch { 
+                        // reached minimum pressure
+                        return;
+                    }
+
                     internalenergy = new_u;
                     pressure = new_p;
                     temperature = new_t;
                     quality = ThermoMath.x_given_pv(pressure, volume, region);
-                    // TODO: figure out why h_given_vt is so off
-                    /*
-                    enthalpy = ThermoMath.h_given_vt(volume, temperature, region);
-                    entropy = ThermoMath.s_given_vt(volume, temperature, region);
-                    */
-                    enthalpy = ThermoMath.h_given_px(pressure, quality, region);
-                    entropy = ThermoMath.s_given_px(pressure, quality, region);
+                    try {
+                        enthalpy = ThermoMath.h_given_px(pressure, quality, region);
+                        entropy = ThermoMath.s_given_px(pressure, quality, region);
+                    }
+                    catch (Exception e) {
+                        // quality out of range
+                        enthalpy = ThermoMath.h_given_vt(volume, temperature, region);
+                        entropy = ThermoMath.s_given_vt(volume, temperature, region);
+                        if (quality < 0) {
+                            region = ThermoMath.region_liquid;
+                        }
+                        else if (quality > 1) {
+                            region = ThermoMath.region_vapor;
+                        }
+                    }
                 }
                 else {
                     enthalpy = ThermoMath.h_given_vt(volume, temperature, region);
@@ -816,7 +852,14 @@ namespace ThermoVR.State
                     pressure = new_p;
                     enthalpy = new_h;
                     // enthalpy = ThermoMath.h_given_vt(new_v, new_t, region);
-                    enthalpy = ThermoMath.h_given_px(new_p, new_x, region);
+
+                    try {
+                        enthalpy = ThermoMath.h_given_px(new_p, new_x, region);
+                    }
+                    catch (Exception ex) {
+                        ThermoMath.got_error = true;
+                    }
+
                     entropy = new_s;
                     temperature = new_t;
                     internalenergy = new_u;
@@ -834,7 +877,6 @@ namespace ThermoVR.State
         private bool blocked_by_stops(double p_outside) {
             if (region == 0) { return false; } // liquid volume doesn't change
 
-            double buffer = 0.005;
             bool within_vstop_buffer = false;
 
             for (int i = 0; i < v_stops.Count; i++) {
@@ -843,7 +885,7 @@ namespace ThermoVR.State
                 VolumeStop curr_stop = v_stops[i];
                 double compare_v = curr_stop.Volume;
 
-                if (volume >= compare_v - buffer && volume <= compare_v + buffer) {
+                if (volume >= compare_v - STOP_BUFFER && volume <= compare_v + STOP_BUFFER) {
                     within_vstop_buffer = true;
                 }
 
@@ -1025,10 +1067,13 @@ namespace ThermoVR.State
         /// <param name="delta_time"></param>
         /// <returns></returns>
         private bool treat_as_constant_v_add_heat(double applied_heat, double insulation_coefficient, double delta_time, double p_outside) {
-            return blocked_by_stops(p_outside);
+            bool blocked = blocked_by_stops(p_outside); // first pass
+            if (applied_heat <= World.BURNER_MAX && applied_heat >= World.COIL_MAX) {
+                // normal tool adjustments
+                return blocked;
+            }
 
-            /*
-
+            // Second pass (projection) to check during major transfer
             try {
                 // project where v will be; if it would overshoot a volume stop, treat it as constant volume
                 double delta_h = delta_time / mass * (applied_heat * insulation_coefficient);  // time eqtn 6a
@@ -1043,12 +1088,17 @@ namespace ThermoVR.State
                         double new_x = ThermoMath.x_given_ph(pressure, new_h, region);
                         //at this point, we have enough internal state to derive the rest
                         clamp_state();
-                        raw_v = ThermoMath.v_given_px(pressure, new_x, region);
-                        new_v = v_with_enforced_stops(raw_v, out hit_stop); // enforce volume stops
-                        if (hit_stop) {
-                            // hit a stop (should actually be treating as constant v); roll back to previous volume
-                            // volume = new_v;
-                            // calculate new delta_h
+                        try {
+                            raw_v = ThermoMath.v_given_px(pressure, new_x, region, true);
+                            new_v = v_with_enforced_stops(raw_v, out hit_stop); // enforce volume stops
+                            if (hit_stop) {
+                                // hit a stop (should actually be treating as constant v); roll back to previous volume
+                                // volume = new_v;
+                                // calculate new delta_h
+                                return true;
+                            }
+                        }
+                        catch (Exception ex) {
                             return true;
                         }
                         break;
@@ -1071,7 +1121,6 @@ namespace ThermoVR.State
             catch (Exception e) { }
 
             return true; // since an error was thrown when projecting volume, treating it as constant p will not work
-            */
         }
 
         /// <summary>

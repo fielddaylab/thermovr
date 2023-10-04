@@ -27,6 +27,8 @@ using UnityEngine;
 public static class ThermoMath
 {
     private const int MAX_MILLISECOND = 50;
+    private const int DEFAULT_ITERS = 50; // The lower the number, the better the framerate (but speed at which an accurate answer is reached is slower)
+    private const double DEFAULT_STEP = 10.0;
     /*
     pressure = p
     specificvolume = v
@@ -358,16 +360,21 @@ public static class ThermoMath
         }
     }
 
-    public static double v_given_px(double p, double x, int fallback_region = 0) //ONLY USE IN VAPOR DOME
+    public static double v_given_px(double p, double x, int fallback_region = 0, bool projecting = false) //ONLY USE IN VAPOR DOME
     {
         try {
             return 1.0 / IF97.rhomass_pQ(p / 1000000.0, x);
         }
         catch (Exception ex) {
-            Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, v_neutral[fallback_region]));
-            Debug.Log("[Error] " + ex.Message);
-            got_error = true;
-            return v_neutral[fallback_region];
+            if (projecting) {
+                throw ex;
+            }
+            else {
+                Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, v_neutral[fallback_region]));
+                Debug.Log("[Error] " + ex.Message);
+                got_error = true;
+                return v_neutral[fallback_region];
+            }
         }
     }
 
@@ -383,15 +390,22 @@ public static class ThermoMath
         }
     }
 
-    public static double tsat_given_p(double p, int fallback_region = 0) {
+    public static double tsat_given_p(double p, int fallback_region = 0, bool customHandle = false) {
         try {
             return IF97.Tsat97(p / 1000000.0);
         }
         catch (Exception ex) {
             Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, t_neutral[fallback_region]));
             Debug.Log("[Error] " + ex.Message);
-            got_error = true;
-            return t_neutral[fallback_region];
+            if (customHandle) {
+                throw ex;
+            }
+            else {
+                got_error = true;
+                return t_neutral[fallback_region];
+            }
+
+
         }
     }
 
@@ -475,8 +489,9 @@ public static class ThermoMath
         catch (Exception ex) {
             Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, s_neutral[fallback_region]));
             Debug.Log("[Error] " + ex.Message);
-            got_error = true;
-            return s_neutral[fallback_region];
+            throw ex;
+            // got_error = true;
+            // return s_neutral[fallback_region];
         }
     }
 
@@ -499,8 +514,9 @@ public static class ThermoMath
         catch (Exception ex) {
             Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, s_neutral[fallback_region]));
             Debug.Log("[Error] " + ex.Message);
-            got_error = true;
-            return s_neutral[fallback_region];
+            throw ex;
+            // got_error = true;
+            // return s_neutral[fallback_region];
         }
     }
 
@@ -551,9 +567,9 @@ public static class ThermoMath
     {
         // NOTE: Uses step
         try {
-            int MAX_ITERS = 100; //max # of iterations before giving up
+            int MAX_ITERS = DEFAULT_ITERS; //max # of iterations before giving up
             double MAX_DELTA = 0.01; //acceptible solution error
-            double step = 10.0; //size of first step (shrinks every time it overshoots)
+            double step = DEFAULT_STEP; //size of first step (shrinks every time it overshoots)
             double guess = t;
             double mark = u;
             double delta = Math.Abs(u_given_pt(p, guess) - mark);
@@ -587,9 +603,9 @@ public static class ThermoMath
     {
         // NOTE: Uses step
         try {
-            int MAX_ITERS = 200; //max # of iterations before giving up
+            int MAX_ITERS = DEFAULT_ITERS; //max # of iterations before giving up
             double MAX_DELTA = 0.0001; //acceptible solution error
-            double step = 10.0; //size of first step (shrinks every time it overshoots)
+            double step = DEFAULT_STEP; //size of first step (shrinks every time it overshoots)
             double guess = t;
             double mark = u;
             double delta = Math.Abs(u_given_vt(v, guess, fallback_region) - mark);
@@ -622,9 +638,9 @@ public static class ThermoMath
     {
         // NOTE: Uses step
         try {
-            int MAX_ITERS = 100; //max # of iterations before giving up
+            int MAX_ITERS = DEFAULT_ITERS; //max # of iterations before giving up
             double MAX_DELTA = 0.01; //acceptible solution error
-            double step = 10.0; //size of first step (shrinks every time it overshoots)
+            double step = DEFAULT_STEP * (p / p_max); //size of first step (shrinks every time it overshoots)
             double guess = t;
             double vdelta = MAX_DELTA + 1.0;
             double pdelta = MAX_DELTA + 1.0;
@@ -653,14 +669,16 @@ public static class ThermoMath
                         handle_step_error(ex, projecting, fallback_region);
                     }
                     if (vdelta < vdelta_a && vdelta < vdelta_b) //unaltered guess is superior
-                        step = step / 2.0;
+                        step = step / 6.0 * (p / p_max);
                     else if (vdelta_a < vdelta_b) {
                         vdelta = vdelta_a;
                         guess += step;
+                        step *= 2;
                     }
                     else {
                         vdelta = vdelta_b;
                         guess -= step;
+                        step *= 2;
                     }
                     i++; //force "iteration counter", bc we do two iters per loop
                 }
@@ -688,7 +706,9 @@ public static class ThermoMath
                 }
 
                 if (pdelta < pdelta_a && pdelta < pdelta_b) //unaltered guess is superior
+                {
                     step = step / 2.0;
+                }
                 else if (pdelta_a < pdelta_b) {
                     pdelta = pdelta_a;
                     guess += step;
@@ -735,9 +755,9 @@ public static class ThermoMath
     {
         // NOTE: Uses step
         try {
-            int MAX_ITERS = 200; //max # of iterations before giving up
-            double MAX_DELTA = 0.001; //acceptible solution error
-            double step = 10.0; //size of first step (shrinks every time it overshoots)
+            int MAX_ITERS = DEFAULT_ITERS; //max # of iterations before giving up
+            double MAX_DELTA = 0.0005; //acceptible solution error
+            double step = DEFAULT_STEP; //size of first step (shrinks every time it overshoots)
             double guess = p;
             double delta = Math.Abs(x_given_pu(guess, u, fallback_region) - x_given_pv(guess, v, fallback_region));
             int i = 0;
