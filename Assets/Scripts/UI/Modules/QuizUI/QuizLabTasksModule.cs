@@ -55,6 +55,8 @@ namespace ThermoVR.Lab
 
                 LabTaskFrame newFrame = PopulateLabTaskFrame(m_tasks[tabIndex]);
 
+                ApplyWorldMods(m_tasks[tabIndex]);
+
                 float startingOffset = 0.1f;
                 RectTransform tabRect = newTabObj.GetComponent<RectTransform>();
                 float tabBuffer = m_xSpacing - tabRect.sizeDelta.x * tabRect.localScale.x;
@@ -73,6 +75,8 @@ namespace ThermoVR.Lab
 
         public override void Close() {
             base.Close();
+
+            ResetWorldMods();
 
             for (int i = 0; i < m_tabs.Count; i++) {
                 Destroy(m_tabs[i].gameObject);
@@ -171,12 +175,38 @@ namespace ThermoVR.Lab
                     break;
             }
 
+
+
             if (framePopulated) {
                 newFrameObj.SetActive(false);
                 m_frames.Add(newFrame);
             }
 
             return newFrame;
+        }
+
+        private void ApplyWorldMods(TaskInfo mods) {
+            // Tools
+            World.Instance.ModMgr.SetAllowedTools(mods.AllowedTools);
+
+            // Sets
+            if (!(mods.Sets.P == -1 || mods.Sets.V == -1 || mods.Sets.T == -1)) {
+                World.Instance.WarpPVT(mods.Sets.P, mods.Sets.V, mods.Sets.T);
+            }
+
+            // Limits
+            World.Instance.ModMgr.SetLimits(mods.Limits);
+        }
+
+        private void ResetWorldMods() {
+            // Tools
+            World.Instance.ModMgr.ResetToolRestrictions();
+
+            // Sets
+            // N/A
+
+            // Limits
+            World.Instance.ModMgr.ResetLimits();
         }
 
         #region Handlers

@@ -36,6 +36,8 @@ public class World : MonoBehaviour
 
     public static World Instance;
 
+    public WorldModMgr ModMgr;
+
     public Material hand_empty;
     Material[] hand_emptys;
     public Material hand_touching;
@@ -164,9 +166,12 @@ public class World : MonoBehaviour
         GameMgr.Events?.Register<Pressable>(GameEvents.RegisterPressable, HandleRegisterPressable);
         GameMgr.Events?.Register<Touchable>(GameEvents.RegisterMovable, HandleRegisterMovable);
 
-        GameMgr.Events.Register(GameEvents.WarpPVT, HandleWarpPVT);
+        GameMgr.Events?.Register(GameEvents.WarpPVT, HandleWarpPVT);
 
-        GameMgr.Events.Register<Tool>(GameEvents.PressedToolToggle, HandleToolTogglePressed);
+        GameMgr.Events?.Register<Tool>(GameEvents.PressedToolToggle, HandleToolTogglePressed);
+
+        GameMgr.Events?.Register<List<ToolType>>(GameEvents.UpdateAllowedTools, HandleAllowedToolsUpdated);
+        GameMgr.Events?.Register(GameEvents.ResetToolRestrictions, HandleResetToolRestrictions);
 
         movables = new List<Touchable>();
     }
@@ -208,7 +213,6 @@ public class World : MonoBehaviour
         tool_coil.Init(Units.Heat, 0.001f);
         tool_weight.Init(Units.Weight);
         tool_balloon.Init(Units.Weight);
-        // TODO: establish logical bounds and units on the ambient pressure tool
         tool_ambientPressure.Init(Units.AmbientPressure, 0.001f); // display in kPa
         tool_roomTemp.Init(Units.TemperatureK);
         // tool_percentInsulation.Init(Units.Percent);
@@ -414,6 +418,17 @@ public class World : MonoBehaviour
         GameMgr.Events?.Dispatch(GameEvents.DetachTool, t);
         GameMgr.Events?.Dispatch(GameEvents.UpdateToolText, t);
         UpdateApplyTool(t);
+    }
+
+    void AllowTool(Tool t) {
+        // TODO: this
+        t.gameObject.SetActive(true);
+    }
+
+    void DisallowTool(Tool t) {
+        // TODO: this
+        DetachTool(t, Vector3.zero);
+        t.gameObject.SetActive(false);
     }
 
     /*
@@ -712,7 +727,7 @@ public class World : MonoBehaviour
                                 DetachTool(toDetach, popVector());
                             }
                         }
-                        thermo_present.warp_pv(placement_thermo.y, placement_thermo.x, placement_thermo.z);
+                        WarpPVT(placement_thermo.y, placement_thermo.x, placement_thermo.z);
                     }
                     state_dot.GetComponent<Renderer>().enabled = true;
                 }
@@ -879,6 +894,10 @@ public class World : MonoBehaviour
         }
     }
 
+    public void WarpPVT(double p, double v, double t) {
+        thermo_present.warp_pv(p, v, t);
+    }
+
     /*
      * Another behemoth, does frame-by-frame updates to state, appearances, transforms, etc.
      * Includes calls to TryHand, UpdateGrabVis, etc. as well as calls to ThermoState functions.
@@ -961,6 +980,9 @@ public class World : MonoBehaviour
             // insulation is inversely proportional to the rate of heat transfer (within insulation)
             thermo_present.add_heat_per_delta_time(applied_heat, (1 - insulation_coefficient), delta_time, weight_pressure, true, temperature_gradient);
         }
+
+        // TODO: check if limits have been surpassed
+            // If so, trigger fail state protocol
 
         //running blended average of hand velocity (transfers this velocity on "release object" for consistent "throwing")
         lhand.vel += (lhand.transform.position - lhand.pos) / Time.fixedDeltaTime;
@@ -1098,6 +1120,20 @@ public class World : MonoBehaviour
                     break;
                 }
             }
+        }
+    }
+
+    private void HandleAllowedToolsUpdated(List<ToolType> allowed) {
+        for (int i = 0; i < tools.Count; i++) {
+            if (!allowed.Contains(tools[i].tool_type)) {
+                DisallowTool(tools[i]);
+            }
+        }
+    }
+
+    private void HandleResetToolRestrictions() {
+        for (int i = 0; i < tools.Count; i++) {
+            AllowTool(tools[i]);
         }
     }
 

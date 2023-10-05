@@ -115,6 +115,8 @@ namespace ThermoVR.Tools
 
         public bool always_engaged = false;
 
+        public ToolType tool_type;
+
         private bool examined;
 
         public void Init(string unit, float mul = 1) {

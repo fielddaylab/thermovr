@@ -20,6 +20,8 @@ static public class GameEvents
     static public readonly StringHash32 ActivateTool = "sim:activate-tool"; // Tool
     static public readonly StringHash32 DetachTool = "sim:detach-tool"; // Tool
     static public readonly StringHash32 StoreTool = "sim:store-tool"; // Tool
+    static public readonly StringHash32 UpdateAllowedTools = "sim:update-allowed-tools"; // List<ToolType>
+    static public readonly StringHash32 ResetToolRestrictions = "sim:update-allowed-tools";
     static public readonly StringHash32 UpdateToolText = "tool:update-text"; // Tool
     static public readonly StringHash32 UpdateVaporFlow = "sim:vapor-update-flow"; // double
     static public readonly StringHash32 UpdateVarText = "sim:update-var-text"; // VarUpdate
