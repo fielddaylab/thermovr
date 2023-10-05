@@ -4,8 +4,8 @@
 
 |Type: [multiple-choice, word-bank, reach-state, multi-select-choice]
 |ToolInfo: [Burner, Coil, Weight, NegativeWeight, Insulator, SurroundingTemperature, SurroundingPressure, Stops]
-|SetInfo: [(p:5), (v:5), (t:5)]
-|LimitInfo: [(p:10:upper), (p:1:lower)]
+|SetInfo: [(p:5), (v:200), (t:5)]
+|LimitInfo: [(pressure:10:ceiling), (pressure:1:floor)]
 |TargetInfo (property, value, valid-range): [{(p:9:2)}, {(p:4:2)}, {(p:5:2), (v:4:2)}]
 |QuizInfo: 
 	Question: "This is the question for the first task."

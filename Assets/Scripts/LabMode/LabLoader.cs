@@ -10,17 +10,79 @@ using UnityEngine;
 namespace ThermoVR.Lab
 {
     [Serializable]
-    public struct LabInfo {
+    public struct LabInfo
+    {
         public string Name;
         public List<TaskInfo> Tasks;
     }
 
+    /// <summary>
+    /// Defines a limit for a given 
+    /// </summary>
     [Serializable]
-    public struct TaskInfo {
+    public struct LimitPair
+    {
+        public double Limit;
+    }
+
+    [Serializable]
+    public struct SetGroup
+    {
+        public double P;
+        public double V;
+        public double T;
+
+        public SetGroup(double p, double v, double t) {
+            P = p;
+            V = v;
+            T = t;
+        }
+    }
+
+    [Serializable]
+    public struct LimitsGroup
+    {
+        // One for each limitable sim variable
+        public LimitBounds Pressure;
+        public LimitBounds Temperature;
+        public LimitBounds Volume;
+        public LimitBounds InternalEnergy;
+        public LimitBounds Entropy;
+        public LimitBounds Enthalpy;
+        public LimitBounds Quality;
+
+        public LimitsGroup(bool emptyInit) {
+            Pressure = new LimitBounds(emptyInit);
+            Temperature = new LimitBounds(emptyInit);
+            Volume = new LimitBounds(emptyInit);
+            InternalEnergy = new LimitBounds(emptyInit);
+            Entropy = new LimitBounds(emptyInit);
+            Enthalpy = new LimitBounds(emptyInit);
+            Quality = new LimitBounds(emptyInit);
+        }
+    }
+
+    [Serializable]
+    public struct LimitBounds
+    {
+        public double Ceiling;
+        public double Floor;
+
+        public LimitBounds(bool emptyInit) {
+            Ceiling = -1;
+            Floor = -1;
+        }
+    }
+
+    [Serializable]
+    public struct TaskInfo
+    {
         // Common
         public TaskType TaskType;
         public string TaskQuestion;
         public List<ToolType> AllowedTools;
+        public SetGroup Sets; // p, v, and t values to set
+        public LimitsGroup Limits; // stores limits for simulation variables
 
         // Multiple choice, word bank, multi-select
         public List<string> SecondaryTexts;
@@ -30,7 +92,8 @@ namespace ThermoVR.Lab
         public List<SimStateTarget> Targets;
     }
 
-    public enum TaskType {
+    public enum TaskType
+    {
         MultipleChoice, // single-select multiple choice
         WordBank,
         ReachState, // reach a given state in the sim
@@ -57,6 +120,11 @@ namespace ThermoVR.Lab
         private static string STATE_REQ_GROUP_DELIM = ",";
         private static string STATE_REQ_CHUNK_DELIM = ":";
         private static string CORRECT_MARKER = "(c)";
+        private static string TOOL_DELIM = ",";
+        private static string SET_GROUP_DELIM = ",";
+        private static string SET_CHUNK_DELIM = ":";
+        private static string LIMIT_GROUP_DELIM = ",";
+        private static string LIMIT_CHUNK_DELIM = ":";
 
 
         private static string MC_KEY = "multiple-choice";
@@ -283,7 +351,7 @@ namespace ThermoVR.Lab
             }
             int length = endIndex;
             iterateToolInfo = iterateToolInfo.Substring(0, length);
-            string[] tools = iterateToolInfo.Split(',');
+            string[] tools = iterateToolInfo.Split(TOOL_DELIM);
             bool allowAll = iterateToolInfo.ToLower().Contains("all");
             List<ToolType> allowedTools = new List<ToolType>();
 
@@ -309,11 +377,172 @@ namespace ThermoVR.Lab
         }
 
         private void ParseTaskSets(ref string setInfo, ref TaskInfo newTaskInfo) {
-            // if (m_verboseDebug) { Debug.Log("[LabLoad] Task Sets: " + newTaskInfo.Tools); }
+            // Example format is [(p:5), (v:5), (t:5)]
+            SetGroup newSets = new SetGroup(-1, -1, -1);
+            newTaskInfo.Sets = newSets;
+
+            int startIndex = setInfo.IndexOf('[') + 1;
+            if (startIndex == 0) {
+                Debug.Log("[LabLoad] SetInfo definition is invalid");
+                return;
+            }
+            string iterateSetInfo = setInfo.Substring(startIndex);
+            int endIndex = iterateSetInfo.IndexOf(']');
+            if (endIndex == -1) {
+                Debug.Log("[LabLoad] SetInfo definition is invalid");
+                return;
+            }
+            int length = endIndex;
+            iterateSetInfo = iterateSetInfo.Substring(0, length);
+            string[] setGroups = iterateSetInfo.Split(SET_GROUP_DELIM);
+            double p, v, t;
+            p = v = t = -1;
+
+            foreach (string group in setGroups) {
+                if (group.Contains('p')) {
+                    if (TryExtractSetVal(group, out double val)) {
+                        p = val;
+                    }
+                    else {
+                        Debug.Log("[LabLoad] SetInfo for p is invalid");
+                        continue;
+                    }
+                }
+                else if (group.Contains("v")) {
+                    if (TryExtractSetVal(group, out double val)) {
+                        v = val;
+                    }
+                    else {
+                        Debug.Log("[LabLoad] SetInfo for v is invalid");
+                        continue;
+                    }
+                }
+                else if (group.Contains("t")) {
+                    if (TryExtractSetVal(group, out double val)) {
+                        t = val;
+                    }
+                    else {
+                        Debug.Log("[LabLoad] SetInfo for t is invalid");
+                        continue;
+                    }
+                }
+            }
+
+            newSets.P = p;
+            newSets.V = v;
+            newSets.T = t;
+            newTaskInfo.Sets = newSets;
+            if (m_verboseDebug) { Debug.Log("[LabLoad] Task Sets: " + newTaskInfo.Sets); }
+        }
+
+        private bool TryExtractSetVal(string group, out double val) {
+            int startValIndex, endValIndex;
+            startValIndex = group.IndexOf(SET_CHUNK_DELIM) + 1;
+            endValIndex = group.IndexOf(')');
+            if (startValIndex == 0 || endValIndex == -1) {
+                val = -1;
+                return false;
+            }
+
+            string valStr = group.Substring(startValIndex, endValIndex - startValIndex);
+            double.TryParse(valStr, out val);
+            return true;
         }
 
         private void ParseTaskLimits(ref string limitInfo, ref TaskInfo newTaskInfo) {
-            // if (m_verboseDebug) { Debug.Log("[LabLoad] Task Limits: " + newTaskInfo.Tools); }
+            // Example format is [(pressure:10:ceiling), (pressure:1:floor), (enthalpy:10:floor)]
+            LimitsGroup newLimits = new LimitsGroup(true);
+            newTaskInfo.Limits = newLimits;
+
+            int startIndex = limitInfo.IndexOf('[') + 1;
+            if (startIndex == 0) {
+                Debug.Log("[LabLoad] LimitInfo definition is invalid");
+                return;
+            }
+            string iterateLimitInfo = limitInfo.Substring(startIndex);
+            int endIndex = iterateLimitInfo.IndexOf(']');
+            if (endIndex == -1) {
+                Debug.Log("[LabLoad] LimitInfo definition is invalid");
+                return;
+            }
+            int length = endIndex;
+            iterateLimitInfo = iterateLimitInfo.Substring(0, length);
+            string[] limitGroups = iterateLimitInfo.Split(LIMIT_GROUP_DELIM);
+
+            for (int i = 0; i < limitGroups.Length; i++) {
+                string group = limitGroups[i];
+
+                // remove parentheses from front and end
+                group = group.Trim();
+                group = group.Substring(1, group.Length - 2);
+
+                // parse the three components: varID, value, and floor/ceiling
+                string[] limitChunks = group.Split(LIMIT_CHUNK_DELIM);
+                VarID simVar;
+                double val = -1;
+                int boundaryType = 0; // floor = -1, ceiling = 1, default = 0
+                bool validInputs = true;
+
+                validInputs = Enum.TryParse(limitChunks[0], true, out simVar) ? validInputs : false;
+                validInputs = double.TryParse(limitChunks[1], out val) ? validInputs : false;
+                if (limitChunks[2].Contains('c')) {
+                    boundaryType = 1;
+                }
+                else if (limitChunks[2].Contains('f')) {
+                    boundaryType = -1;
+                }
+                validInputs = boundaryType != 0 ? validInputs : false;
+
+
+                if (validInputs) {
+                    RecordLimit(simVar, val, boundaryType, ref newLimits);
+                }
+            }
+
+            newTaskInfo.Limits = newLimits;
+            if (m_verboseDebug) { Debug.Log("[LabLoad] Task Limits: " + newTaskInfo.Limits); }
+        }
+
+        private void RecordLimit(VarID simVar, double val, int boundaryType, ref LimitsGroup limitGroup) {
+            switch (simVar) {
+                case VarID.Pressure:
+                    if (boundaryType == 1) { limitGroup.Pressure.Ceiling = val; }
+                    // else boundary type = -1
+                    else { limitGroup.Pressure.Floor = val; }
+                    break;
+                case VarID.Temperature:
+                    if (boundaryType == 1) { limitGroup.Temperature.Ceiling = val; }
+                    // else boundary type = -1
+                    else { limitGroup.Temperature.Floor = val; }
+                    break;
+                case VarID.Volume:
+                    if (boundaryType == 1) { limitGroup.Volume.Ceiling = val; }
+                    // else boundary type = -1
+                    else { limitGroup.Volume.Floor = val; }
+                    break;
+                case VarID.InternalEnergy:
+                    if (boundaryType == 1) { limitGroup.InternalEnergy.Ceiling = val; }
+                    // else boundary type = -1
+                    else { limitGroup.InternalEnergy.Floor = val; }
+                    break;
+                case VarID.Entropy:
+                    if (boundaryType == 1) { limitGroup.Entropy.Ceiling = val; }
+                    // else boundary type = -1
+                    else { limitGroup.Entropy.Floor = val; }
+                    break;
+                case VarID.Enthalpy:
+                    if (boundaryType == 1) { limitGroup.Enthalpy.Ceiling = val; }
+                    // else boundary type = -1
+                    else { limitGroup.Enthalpy.Floor = val; }
+                    break;
+                case VarID.Quality:
+                    if (boundaryType == 1) { limitGroup.Quality.Ceiling = val; }
+                    // else boundary type = -1
+                    else { limitGroup.Quality.Floor = val; }
+                    break;
+                default:
+                    break;
+            }
         }
 
         private void ParseTaskQuestion(ref string quizInfo, ref string iterateQuizInfo, ref TaskInfo newTaskInfo) {
