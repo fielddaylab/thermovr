@@ -598,11 +598,6 @@ public class World : MonoBehaviour
         }
     }
 
-    private void EnforceLimits() {
-        // TODO: check if limits have been surpassed
-        // If so, trigger fail state protocol
-    }
-
     private void ProcessInputs() {
         //running blended average of hand velocity (transfers this velocity on "release object" for consistent "throwing")
         lhand.vel += (lhand.transform.position - lhand.pos) / Time.fixedDeltaTime;
@@ -1066,7 +1061,7 @@ public class World : MonoBehaviour
     }
 
     /// <summary>
-    ///  Used for Reach State lab questions
+    ///  Used for Reach State lab questions and limits
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
@@ -1098,6 +1093,124 @@ public class World : MonoBehaviour
     }
 
     #endregion Helpers
+
+    #region Limits
+
+    private void EnforceLimits() {
+        if (!ModMgr.LimitsEnabled()) {
+            return;
+        }
+
+        // TODO: check if limits have been surpassed
+        // If so, trigger fail state protocol
+        bool crossedLimit = false;
+        bool crossedCeiling;
+
+        // Pressure
+        if (ModMgr.CrossedLimit(VarID.Pressure, get_state_var(VarID.Pressure), out crossedCeiling)) {
+            HandlePressureLimitCrossed(crossedCeiling);
+            crossedLimit = true;
+        }
+        // Temperature
+        else if (ModMgr.CrossedLimit(VarID.Temperature, get_state_var(VarID.Temperature), out crossedCeiling)) {
+            HandleTemperatureLimitCrossed(crossedCeiling);
+            crossedLimit = true;
+        }
+        // Volume
+        else if (ModMgr.CrossedLimit(VarID.Volume, get_state_var(VarID.Volume), out crossedCeiling)) {
+            HandleVolumeLimitCrossed(crossedCeiling);
+            crossedLimit = true;
+        }
+        // InternalEnergy
+        else if (ModMgr.CrossedLimit(VarID.InternalEnergy, get_state_var(VarID.InternalEnergy), out crossedCeiling)) {
+            HandleInternalEnergyLimitCrossed(crossedCeiling);
+            crossedLimit = true;
+        }
+        // Entropy
+        else if (ModMgr.CrossedLimit(VarID.Entropy, get_state_var(VarID.Entropy), out crossedCeiling)) {
+            HandleEntropyLimitCrossed(crossedCeiling);
+            crossedLimit = true;
+        }
+        // Enthalpy
+        else if (ModMgr.CrossedLimit(VarID.Enthalpy, get_state_var(VarID.Enthalpy), out crossedCeiling)) {
+            HandleEnthalpyLimitCrossed(crossedCeiling);
+            crossedLimit = true;
+        }
+        // Quality
+        else if (ModMgr.CrossedLimit(VarID.Quality, get_state_var(VarID.Quality), out crossedCeiling)) {
+            HandleQualityLimitCrossed(crossedCeiling);
+            crossedLimit = true;
+        }
+
+        if (crossedLimit) {
+            Debug.Log("[World] Crossed Limit!");
+        }
+    }
+
+    private void HandlePressureLimitCrossed(bool crossedCeiling) {
+        if (crossedCeiling) {
+            // TODO: handle pressure limit crossed
+        }
+        else {
+            // TODO: handle pressure limit crossed
+        }
+    }
+
+    private void HandleTemperatureLimitCrossed(bool crossedCeiling) {
+        if (crossedCeiling) {
+            // TODO: handle temperature limit crossed
+        }
+        else {
+            // TODO: handle temperature limit crossed
+        }
+    }
+
+    private void HandleVolumeLimitCrossed(bool crossedCeiling) {
+        if (crossedCeiling) {
+            // TODO: handle volume limit crossed
+        }
+        else {
+            // TODO: handle volume limit crossed
+        }
+    }
+
+    private void HandleInternalEnergyLimitCrossed(bool crossedCeiling) {
+        if (crossedCeiling) {
+            // TODO: handle internal energy limit crossed
+        }
+        else {
+            // TODO: handle internal energy limit crossed
+        }
+    }
+
+    private void HandleEntropyLimitCrossed(bool crossedCeiling) {
+        if (crossedCeiling) {
+            // TODO: handle entropy limit crossed
+        }
+        else {
+            // TODO: handle entropy limit crossed
+        }
+    }
+
+    private void HandleEnthalpyLimitCrossed(bool crossedCeiling) {
+        if (crossedCeiling) {
+            // TODO: handle enthalpy limit crossed
+        }
+        else {
+            // TODO: handle enthalpy limit crossed
+        }
+    }
+
+    private void HandleQualityLimitCrossed(bool crossedCeiling) {
+        if (crossedCeiling) {
+            // TODO: handle quality limit crossed
+        }
+        else {
+            // TODO: handle quality limit crossed
+        }
+    }
+
+    #endregion // Limits
 
     #region Handlers
 
