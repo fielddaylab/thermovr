@@ -26,6 +26,10 @@ using System;
 
 public class World : MonoBehaviour
 {
+    public static World Instance;
+
+    #region Consts
+
     const float CONTAINER_INSULATION_COEFFICIENT = 0.1f; // 0.1f; // Not really based on a physical material, just a way to roughly simulate imperfect insulation.
     public const double DELTA_PRESSURE_CUTOFF = 100.0;
     const double PSI_TO_PASCAL = 6894.76;
@@ -34,7 +38,9 @@ public class World : MonoBehaviour
     public const float BURNER_MAX = 100000;
     public const float COIL_MAX = -100000;
 
-    public static World Instance;
+    #endregion // Consts
+
+    #region Inspector
 
     public WorldModMgr ModMgr;
 
@@ -153,7 +159,10 @@ public class World : MonoBehaviour
 
     private List<Pressable> m_pressables; // pressables register themselves with this on event
 
+    #endregion // Inspector
+
     #region Initialization
+
     private void Awake() {
         if (Instance == null) {
             Instance = this;
@@ -308,37 +317,33 @@ public class World : MonoBehaviour
 
     #endregion // Initialization
 
-    /// <summary>
-    ///  Used for Reach State lab questions
-    /// </summary>
-    /// <param name="id"></param>
-    /// <returns></returns>
-    public double get_state_var(VarID id) {
-        switch (id) {
-            case VarID.VolumeStop:
-                return -1; // should be handled previously
-            default:
-                return thermo_present.get_state_var(id);
-        }
+    #region Callbacks
+
+    /*
+     * Another behemoth, does frame-by-frame updates to state, appearances, transforms, etc.
+     * Includes calls to TryHand, UpdateGrabVis, etc. as well as calls to ThermoState functions.
+     * Basically, wraps calls to a bunch of other functions, and a hodgepodge of other random tasks,
+     * as far as I can tell.
+     */
+    public void ManualFixedUpdate() {
+        arrows.ManualFixedUpdate(); // reset arrows for next instruction
+
+        StabilizeHands();
+
+        ApplyTools();
+
+        EnforceLimits();
+
+        ProcessInputs();
+
+        UpdateGrabVis();
+
+        UpdateToolTexts();
+
+        ProcessErrors();
     }
 
-    public Tuple<double, double> get_stop_vals() {
-        return new Tuple<double, double>(tool_stop1.get_val(), tool_stop2.get_val());
-    }
-
-
-    void SetAllHalfed(bool h) {
-        halfed = h;
-        for (int i = 0; i < halfables.Count; i++)
-            halfables[i].setHalf(halfed);
-        //special case, only halfed when engaged
-        if (!tool_coil.engaged) tool_coil.gameObject.GetComponent<Halfable>().setHalf(false);
-        if (!tool_insulator.engaged) tool_insulator.gameObject.GetComponent<Halfable>().setHalf(false);
-    }
-
-    Vector3 popVector() {
-        return new Vector3(UnityEngine.Random.Range(-1f, 1f), 1f, UnityEngine.Random.Range(-1f, 1f));
-    }
+    #endregion // Callbacks
 
     #region Tools
 
@@ -512,6 +517,168 @@ public class World : MonoBehaviour
     }
 
     #endregion // Tools
+
+    #region Helpers
+
+    private void StabilizeHands() {
+        //hands keep trying to run away- no idea why (this is a silly way to keep them still)
+        lhand.actualhand.transform.localPosition = new Vector3(0f, 0f, 0f);
+        lhand.actualhand.transform.localEulerAngles = new Vector3(0f, 0f, 90f);
+        rhand.actualhand.transform.localPosition = new Vector3(0f, 0f, 0f);
+        rhand.actualhand.transform.localEulerAngles = new Vector3(0f, 0f, -90f);
+    }
+
+    private void ApplyTools() {
+        double delta_time = (double)Time.fixedDeltaTime;
+
+        //apply thermo
+        ambient_pressure = tool_ambientPressure.get_val();
+        room_temp = tool_roomTemp.get_val();
+        double weight_pressure = (applied_weight) / thermo_present.get_surfacearea_insqr(); //psi
+        weight_pressure *= PSI_TO_PASCAL; //conversion from psi to pascal
+        weight_pressure += ambient_pressure;
+        weight_pressure = Math.Clamp(weight_pressure, ThermoMath.p_min, ThermoMath.p_max);
+
+        // get the amount of weight to apply, based on the difference between the total weight to be applied and how much is currently applied
+        double delta_weight = (weight_pressure - thermo_present.get_pressure());
+        if (System.Math.Abs(delta_weight * delta_time) < World.DELTA_PRESSURE_CUTOFF) {
+            // small enough step; finish transition
+        }
+        else {
+            delta_weight *= delta_time;
+        }
+
+        double insulation_coefficient;
+
+        if (tool_insulator.engaged) {
+            insulation_coefficient = dial_percentInsulation.val;
+        }
+        else {
+            insulation_coefficient = CONTAINER_INSULATION_COEFFICIENT;
+        }
+
+        insulation_coefficient = 1 - insulation_coefficient; // invert proportion
+
+        // check if weight was applied
+        double temperature_gradient = room_temp - thermo_present.get_temperature();
+
+        if (System.Math.Abs(delta_weight) > 0) {
+            if (insulation_coefficient == 0) {
+                // perfect insulation
+                thermo_present.add_pressure_insulated_per_delta_time(delta_weight, delta_time, weight_pressure, temperature_gradient); // Pressure Constrained -> Insulated ->  delta pressure
+            }
+            else {
+                // insulation is inversely proportional to the rate of weight application
+                thermo_present.add_pressure_uninsulated_per_delta_time(delta_weight, delta_time, insulation_coefficient, weight_pressure, temperature_gradient); // Pressure Constrained -> Uninsulated ->  delta pressure
+            }
+        }
+
+
+        // heat leak
+        if (toggle_heatTransfer.IsOn()) {
+            double heat_transfer_delta =
+                (room_temp - thermo_present.get_temperature()) // total temperature difference
+                * insulation_coefficient // what percentage of that difference is shielded by insulation
+                * (SPECIFIC_HEAT_CAPACITY_LIQ) // how much heat is required to raise 1 kg of water 1 Kelvin
+                                               // TODO: Replace this specific heat with a function calculating based on quality parameter
+                                               // for all processes not constant pressure, use c_v (vs c_p -- to be used in constant pressure)
+                / delta_time * 0.5; // halve the immediacy effect so that simulation can handle the change
+            // if you have some state, and know r, can calculate heat exchange (based on eqtn 2), 
+
+            if (heat_transfer_delta != 0) {
+                // insulation is inversely proportional to the rate of heat transfer (outside insulation)
+                thermo_present.add_heat_per_delta_time(heat_transfer_delta, insulation_coefficient, delta_time, weight_pressure, false, temperature_gradient);
+            }
+        }
+
+        // tool heat
+        if (applied_heat != 0) {
+            // insulation is inversely proportional to the rate of heat transfer (within insulation)
+            thermo_present.add_heat_per_delta_time(applied_heat, (1 - insulation_coefficient), delta_time, weight_pressure, true, temperature_gradient);
+        }
+    }
+
+    private void EnforceLimits() {
+        // TODO: check if limits have been surpassed
+        // If so, trigger fail state protocol
+    }
+
+    private void ProcessInputs() {
+        //running blended average of hand velocity (transfers this velocity on "release object" for consistent "throwing")
+        lhand.vel += (lhand.transform.position - lhand.pos) / Time.fixedDeltaTime;
+        lhand.vel *= 0.5f;
+        lhand.pos = lhand.transform.position;
+
+        rhand.vel += (rhand.transform.position - rhand.pos) / Time.fixedDeltaTime;
+        rhand.vel *= 0.5f;
+        rhand.pos = rhand.transform.position;
+
+        //input
+        //float lhandt  = OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger);
+        //float lindext = OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger);
+        //float rhandt  = OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger);
+        //float rindext = OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger);
+        float lhandt = OVRInput.Get(OVRInput.RawAxis1D.LHandTrigger);
+        float lindext = OVRInput.Get(OVRInput.RawAxis1D.LIndexTrigger);
+        float rhandt = OVRInput.Get(OVRInput.RawAxis1D.RHandTrigger);
+        float rindext = OVRInput.Get(OVRInput.RawAxis1D.RIndexTrigger);
+
+        bool rhandraytoggle = OVRInput.GetDown(OVRInput.Button.One);
+        bool lhandraytoggle = OVRInput.GetDown(OVRInput.Button.Three);
+
+        if (rhandraytoggle) {
+            rhand.ray.enabled = !rhand.ray.enabled;
+        }
+        if (lhandraytoggle) {
+            lhand.ray.enabled = !lhand.ray.enabled;
+        }
+
+        //test effect of hands one at a time ("true" == "left hand", "false" == "right hand")
+        TryHand(true, lhandt, lindext, lhand.transform.position, lhand.vel, ref lhtrigger, ref litrigger, ref lhtrigger_delta, ref litrigger_delta, ref lpos, ref lhand.obj, ref lgrabbed, ref rhand.obj, ref rgrabbed); //left hand
+        TryHand(false, rhandt, rindext, rhand.transform.position, rhand.vel, ref rhtrigger, ref ritrigger, ref rhtrigger_delta, ref ritrigger_delta, ref rpos, ref rhand.obj, ref rgrabbed, ref lhand.obj, ref lgrabbed); //right hand
+
+    }
+
+    private void UpdateToolTexts() {
+
+        //tooltext
+        Dial d;
+        for (int i = 0; i < dials.Count; i++) {
+            d = dials[i];
+            d.set_examined(false);
+            if (d.gameObject == lgrabbed || d.gameObject == rgrabbed) d.set_examined(true);
+            // TODO: update tool text
+            /*
+            if (t.get_val() != t.dial_dial.prev_val) {
+                UpdateToolText(t);
+                t.dial_dial.examined = true;
+            }
+            d.prev_val = t.get_val();
+            */
+        }
+
+        Tool t;
+        for (int i = 0; i < tools.Count; i++) {
+            t = tools[i];
+            if (t.text_fadable == null) {
+                continue;
+            }
+            if (!t.text_fadable.stale) {
+                if (t.text_fadable.alpha == 0f) {
+                    t.textl_meshrenderer.enabled = false;
+                }
+                else {
+                    t.textl_meshrenderer.enabled = true;
+                    Color32 c = t.disabled ? new Color32(70, 70, 70, (byte)(t.text_fadable.alpha * 255)) : new Color32(0, 0, 0, (byte)(t.text_fadable.alpha * 255));
+                    t.textl_tmpro.faceColor = c;
+                }
+            }
+        }
+    }
+
+    private void ProcessErrors() {
+        thermo_present.UpdateErrorState();
+    }
 
     //safe to call if not interactable, as it will just do nothing
     bool floatNumeric(float f) {
@@ -898,181 +1065,39 @@ public class World : MonoBehaviour
         thermo_present.warp_pv(p, v, t);
     }
 
-    /*
-     * Another behemoth, does frame-by-frame updates to state, appearances, transforms, etc.
-     * Includes calls to TryHand, UpdateGrabVis, etc. as well as calls to ThermoState functions.
-     * Basically, wraps calls to a bunch of other functions, and a hodgepodge of other random tasks,
-     * as far as I can tell.
-     */
-    public void ManualFixedUpdate() {
-        arrows.ManualFixedUpdate(); // reset arrows for next instruction
-
-        //hands keep trying to run away- no idea why (this is a silly way to keep them still)
-        lhand.actualhand.transform.localPosition = new Vector3(0f, 0f, 0f);
-        lhand.actualhand.transform.localEulerAngles = new Vector3(0f, 0f, 90f);
-        rhand.actualhand.transform.localPosition = new Vector3(0f, 0f, 0f);
-        rhand.actualhand.transform.localEulerAngles = new Vector3(0f, 0f, -90f);
-
-        double delta_time = (double)Time.fixedDeltaTime;
-
-        //apply thermo
-        ambient_pressure = tool_ambientPressure.get_val();
-        room_temp = tool_roomTemp.get_val();
-        double weight_pressure = (applied_weight) / thermo_present.get_surfacearea_insqr(); //psi
-        weight_pressure *= PSI_TO_PASCAL; //conversion from psi to pascal
-        weight_pressure += ambient_pressure; 
-        weight_pressure = Math.Clamp(weight_pressure, ThermoMath.p_min, ThermoMath.p_max);
-
-        // get the amount of weight to apply, based on the difference between the total weight to be applied and how much is currently applied
-        double delta_weight = (weight_pressure - thermo_present.get_pressure());
-        if (System.Math.Abs(delta_weight * delta_time) < World.DELTA_PRESSURE_CUTOFF) {
-            // small enough step; finish transition
+    /// <summary>
+    ///  Used for Reach State lab questions
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    public double get_state_var(VarID id) {
+        switch (id) {
+            case VarID.VolumeStop:
+                return -1; // should be handled previously
+            default:
+                return thermo_present.get_state_var(id);
         }
-        else {
-            delta_weight *= delta_time;
-        }
-
-        double insulation_coefficient;
-
-        if (tool_insulator.engaged) {
-            insulation_coefficient = dial_percentInsulation.val;
-        }
-        else {
-            insulation_coefficient = CONTAINER_INSULATION_COEFFICIENT;
-        }
-
-        insulation_coefficient = 1 - insulation_coefficient; // invert proportion
-
-        // check if weight was applied
-        double temperature_gradient = room_temp - thermo_present.get_temperature();
-
-        if (System.Math.Abs(delta_weight) > 0) {
-            if (insulation_coefficient == 0) {
-                // perfect insulation
-                thermo_present.add_pressure_insulated_per_delta_time(delta_weight, delta_time, weight_pressure, temperature_gradient); // Pressure Constrained -> Insulated ->  delta pressure
-            }
-            else {
-                // insulation is inversely proportional to the rate of weight application
-                thermo_present.add_pressure_uninsulated_per_delta_time(delta_weight, delta_time, insulation_coefficient, weight_pressure, temperature_gradient); // Pressure Constrained -> Uninsulated ->  delta pressure
-            }
-        }
-
-
-        // heat leak
-        if (toggle_heatTransfer.IsOn()) {
-            double heat_transfer_delta =
-                (room_temp - thermo_present.get_temperature()) // total temperature difference
-                * insulation_coefficient // what percentage of that difference is shielded by insulation
-                * (SPECIFIC_HEAT_CAPACITY_LIQ) // how much heat is required to raise 1 kg of water 1 Kelvin
-                // TODO: Replace this specific heat with a function calculating based on quality parameter
-                // for all processes not constant pressure, use c_v (vs c_p -- to be used in constant pressure)
-                / delta_time * 0.5; // halve the immediacy effect so that simulation can handle the change
-            // if you have some state, and know r, can calculate heat exchange (based on eqtn 2), 
-
-            if (heat_transfer_delta != 0) {
-                // insulation is inversely proportional to the rate of heat transfer (outside insulation)
-                thermo_present.add_heat_per_delta_time(heat_transfer_delta, insulation_coefficient, delta_time, weight_pressure, false, temperature_gradient);
-            }
-        }
-
-        // tool heat
-        if (applied_heat != 0) {
-            // insulation is inversely proportional to the rate of heat transfer (within insulation)
-            thermo_present.add_heat_per_delta_time(applied_heat, (1 - insulation_coefficient), delta_time, weight_pressure, true, temperature_gradient);
-        }
-
-        // TODO: check if limits have been surpassed
-            // If so, trigger fail state protocol
-
-        //running blended average of hand velocity (transfers this velocity on "release object" for consistent "throwing")
-        lhand.vel += (lhand.transform.position - lhand.pos) / Time.fixedDeltaTime;
-        lhand.vel *= 0.5f;
-        lhand.pos = lhand.transform.position;
-
-        rhand.vel += (rhand.transform.position - rhand.pos) / Time.fixedDeltaTime;
-        rhand.vel *= 0.5f;
-        rhand.pos = rhand.transform.position;
-
-        //input
-        //float lhandt  = OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger);
-        //float lindext = OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger);
-        //float rhandt  = OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger);
-        //float rindext = OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger);
-        float lhandt = OVRInput.Get(OVRInput.RawAxis1D.LHandTrigger);
-        float lindext = OVRInput.Get(OVRInput.RawAxis1D.LIndexTrigger);
-        float rhandt = OVRInput.Get(OVRInput.RawAxis1D.RHandTrigger);
-        float rindext = OVRInput.Get(OVRInput.RawAxis1D.RIndexTrigger);
-
-        bool rhandraytoggle = OVRInput.GetDown(OVRInput.Button.One);
-        bool lhandraytoggle = OVRInput.GetDown(OVRInput.Button.Three);
-
-        if (rhandraytoggle) {
-            rhand.ray.enabled = !rhand.ray.enabled;
-        }
-        if (lhandraytoggle) {
-            lhand.ray.enabled = !lhand.ray.enabled;
-
-        }
-
-        /*
-            //index compatibility
-            if (OVRInput.Get(OVRInput.Button.One, OVRInput.Controller.LTouch))
-            {
-              lhandt = 1.0f;
-            }
-            if(OVRInput.Get(OVRInput.Button.One,OVRInput.Controller.RTouch))
-            {
-              rhandt = 1.0f;
-            }
-            lhandt += lindext;
-            rhandt += rindext;
-            if (lindext > 0.0f || rindext > 0.0f)
-            {
-              ;
-            }
-        */
-
-        //test effect of hands one at a time ("true" == "left hand", "false" == "right hand")
-        TryHand(true, lhandt, lindext, lhand.transform.position, lhand.vel, ref lhtrigger, ref litrigger, ref lhtrigger_delta, ref litrigger_delta, ref lpos, ref lhand.obj, ref lgrabbed, ref rhand.obj, ref rgrabbed); //left hand
-        TryHand(false, rhandt, rindext, rhand.transform.position, rhand.vel, ref rhtrigger, ref ritrigger, ref rhtrigger_delta, ref ritrigger_delta, ref rpos, ref rhand.obj, ref rgrabbed, ref lhand.obj, ref lgrabbed); //right hand
-
-        UpdateGrabVis();
-
-        //tooltext
-        Dial d;
-        for (int i = 0; i < dials.Count; i++) {
-            d = dials[i];
-            d.set_examined(false);
-            if (d.gameObject == lgrabbed || d.gameObject == rgrabbed) d.set_examined(true);
-            // TODO: update tool text
-            /*
-            if (t.get_val() != t.dial_dial.prev_val) {
-                UpdateToolText(t);
-                t.dial_dial.examined = true;
-            }
-            d.prev_val = t.get_val();
-            */
-        }
-
-        Tool t;
-        for (int i = 0; i < tools.Count; i++) {
-            t = tools[i];
-            if (t.text_fadable == null) {
-                continue;
-            }
-            if (!t.text_fadable.stale) {
-                if (t.text_fadable.alpha == 0f) {
-                    t.textl_meshrenderer.enabled = false;
-                }
-                else {
-                    t.textl_meshrenderer.enabled = true;
-                    Color32 c = t.disabled ? new Color32(70, 70, 70, (byte)(t.text_fadable.alpha * 255)) : new Color32(0, 0, 0, (byte)(t.text_fadable.alpha * 255));
-                    t.textl_tmpro.faceColor = c;
-                }
-            }
-        }
-        thermo_present.UpdateErrorState();
     }
+
+    public Tuple<double, double> get_stop_vals() {
+        return new Tuple<double, double>(tool_stop1.get_val(), tool_stop2.get_val());
+    }
+
+
+    void SetAllHalfed(bool h) {
+        halfed = h;
+        for (int i = 0; i < halfables.Count; i++)
+            halfables[i].setHalf(halfed);
+        //special case, only halfed when engaged
+        if (!tool_coil.engaged) tool_coil.gameObject.GetComponent<Halfable>().setHalf(false);
+        if (!tool_insulator.engaged) tool_insulator.gameObject.GetComponent<Halfable>().setHalf(false);
+    }
+
+    Vector3 popVector() {
+        return new Vector3(UnityEngine.Random.Range(-1f, 1f), 1f, UnityEngine.Random.Range(-1f, 1f));
+    }
+
+    #endregion Helpers
 
     #region Handlers
 
