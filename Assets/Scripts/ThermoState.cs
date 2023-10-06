@@ -291,6 +291,32 @@ namespace ThermoVR.State
             debug_file.WriteLine("quality {0} changed to {1} (delta {2})", prev_quality, quality, quality - prev_quality);
         }
 
+        public void warp_pv_partial(double p, double v, double t) {
+            if (!(p == -1 || v == -1 || t == -1)) {
+                // all three given
+                warp_pv(p, v, t);
+            }
+            else {
+                // p and v, calc t
+                if (p != -1 && v != -1) {
+                    // TODO: improve this estimate
+                    t = ThermoMath.iterate_t_given_pv(p, v, t);
+                }
+
+                // p and t, calc v
+                else if (p != -1 && t != -1) {
+                    v = ThermoMath.v_given_pt(p, t);
+                }
+
+                // v and t, calc p
+                else if (v != -1 && t != -1) {
+                    p = ThermoMath.p_given_vt(v, t);
+                }
+
+                warp_pv(p, v, t);
+            }
+        }
+
         public void warp_pv(double p, double v, double t) {
             try {
                 pressure = p;

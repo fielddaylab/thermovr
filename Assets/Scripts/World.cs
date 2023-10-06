@@ -1056,6 +1056,16 @@ public class World : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Given 2 of 3 variables among p, v, t, calculate the third. Then warp.
+    /// </summary>
+    /// <param name="p"></param>
+    /// <param name="v"></param>
+    /// <param name="t"></param>
+    public void WarpPVTPartial(double p, double v, double t) {
+        thermo_present.warp_pv_partial(p, v, t);
+    }
+
     public void WarpPVT(double p, double v, double t) {
         thermo_present.warp_pv(p, v, t);
     }
@@ -1101,8 +1111,7 @@ public class World : MonoBehaviour
             return;
         }
 
-        // TODO: check if limits have been surpassed
-        // If so, trigger fail state protocol
+        // Check if limits have been surpassed
         bool crossedLimit = false;
         bool crossedCeiling;
 

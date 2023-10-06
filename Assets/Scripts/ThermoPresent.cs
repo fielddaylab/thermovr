@@ -723,6 +723,11 @@ public class ThermoPresent : MonoBehaviour
         return plot;
     }
 
+    public void warp_pv_partial(double p, double v, double t) {
+        state.warp_pv_partial(p, v, t);
+        visualize_state();
+    }
+
     public void warp_pv(double p, double v, double t) {
         state.warp_pv(p, v, t);
         visualize_state();

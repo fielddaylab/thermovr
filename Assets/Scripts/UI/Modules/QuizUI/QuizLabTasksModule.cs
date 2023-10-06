@@ -188,8 +188,12 @@ namespace ThermoVR.Lab
             World.Instance.ModMgr.SetAllowedTools(mods.AllowedTools);
 
             // Sets
-            if (!(mods.Sets.P == -1 || mods.Sets.V == -1 || mods.Sets.T == -1)) {
-                World.Instance.WarpPVT(mods.Sets.P, mods.Sets.V, mods.Sets.T);
+            int validCount = 0;
+            if (mods.Sets.P != -1) { validCount++; }
+            if (mods.Sets.V != -1) { validCount++; }
+            if (mods.Sets.T != -1) { validCount++; }
+            if (validCount >= 2) {
+                World.Instance.WarpPVTPartial(mods.Sets.P, mods.Sets.V, mods.Sets.T);
             }
 
             // Limits

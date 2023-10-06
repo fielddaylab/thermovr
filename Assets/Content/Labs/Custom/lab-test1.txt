@@ -4,7 +4,7 @@
 
 |Type: [multiple-choice, word-bank, reach-state, multi-select-choice]
 |ToolInfo: [Burner, Coil, Weight, NegativeWeight, Insulator, SurroundingTemperature, SurroundingPressure, Stops]
-|SetInfo: [(p:5), (v:200), (t:5)]
+|SetInfo: [(p:110000), (v:2.16), (t:515)]
 |LimitInfo: [(pressure:10:ceiling), (pressure:1:floor)]
 |TargetInfo (property, value, valid-range): [{(p:9:2)}, {(p:4:2)}, {(p:5:2), (v:4:2)}]
 |QuizInfo: 
@@ -19,7 +19,7 @@
 
 |Type:  [multi-select-choice]
 |ToolInfo: [BurnerTest, Burner, All]
-|SetInfo: 2
+|SetInfo: [(p:110000), (v:2.16)]
 |LimitInfo: 2
 |TargetInfo (property, value, valid-range): 2
 |QuizInfo: 
@@ -33,7 +33,7 @@
 
 |Type: [word-bank]
 |ToolInfo: [Burner]
-|SetInfo: 3
+|SetInfo: [(p:110000), (t:515)]
 |LimitInfo: 3
 |TargetInfo (property, value, valid-range): 3
 |QuizInfo:
@@ -46,7 +46,7 @@
 
 |Type: [reach-state]
 |ToolInfo:
-|SetInfo:
+|SetInfo: [(v:2.16), (t:515)]
 |LimitInfo:
 |TargetInfo:
 |QuizInfo:
