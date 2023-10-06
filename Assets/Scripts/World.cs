@@ -299,8 +299,8 @@ public class World : MonoBehaviour
 
         halfables = new List<Halfable> {
             GameObject.Find("Container").GetComponent<Halfable>(),
-            GameObject.Find("Tool_Insulator").GetComponent<Halfable>(),
-            GameObject.Find("Tool_Coil").GetComponent<Halfable>()
+            GameObject.Find("Tool_Insulator Variant").GetComponent<Halfable>(),
+            GameObject.Find("Tool_Coil Variant").GetComponent<Halfable>()
         };
 
         SetAllHalfed(true);
@@ -1125,7 +1125,13 @@ public class World : MonoBehaviour
 
     private void HandleAllowedToolsUpdated(List<ToolType> allowed) {
         for (int i = 0; i < tools.Count; i++) {
-            if (!allowed.Contains(tools[i].tool_type)) {
+            if (allowed.Contains(tools[i].tool_type)) {
+                AllowTool(tools[i]);
+            }
+            else if (tools[i].always_engaged) {
+                AllowTool(tools[i]);
+            }
+            else {
                 DisallowTool(tools[i]);
             }
         }

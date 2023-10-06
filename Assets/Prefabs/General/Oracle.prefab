@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 2423173608412668976}
   - component: {fileID: 2423173608412668977}
   - component: {fileID: 2423173608412668978}
+  - component: {fileID: 1924913066817648878}
   m_Layer: 0
   m_Name: Oracle
   m_TagString: Untagged
@@ -46,6 +47,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a677b9d22f9ef734c80ef3d3dc64283f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ModMgr: {fileID: 1924913066817648878}
   hand_empty: {fileID: 2100000, guid: a23630cc2689f7d428c589100157c502, type: 2}
   hand_touching: {fileID: 2100000, guid: f82e0f125f1c37847b1dcb9fd636af99, type: 2}
   hand_grabbing: {fileID: 2100000, guid: b619eec6ceb2d1e4097620d12ed5ac37, type: 2}
@@ -56,10 +58,13 @@ MonoBehaviour:
   arrows: {fileID: 0}
   thermo_present: {fileID: 2423173608412668977}
   tablet: {fileID: 0}
+  graph_elements: []
   cam_offset: {fileID: 0}
   ceye: {fileID: 0}
   lhand: {fileID: 0}
   rhand: {fileID: 0}
+  origin: {fileID: 0}
+  handle_workspace: {fileID: 0}
   tool_insulator: {fileID: 0}
   tool_stop1: {fileID: 0}
   tool_stop2: {fileID: 0}
@@ -78,6 +83,7 @@ MonoBehaviour:
   dial_ambientPressure: {fileID: 0}
   dial_roomTemp: {fileID: 0}
   dial_percentInsulation: {fileID: 0}
+  toggle_heatTransfer: {fileID: 0}
   dials: []
   reset_button: {fileID: 0}
   halfer_button: {fileID: 0}
@@ -94,12 +100,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   state: {fileID: 2423173608412668978}
+  dot_x_tracker: {fileID: 0}
+  dot_y_tracker: {fileID: 0}
+  dot_z_tracker: {fileID: 0}
   graph_material: {fileID: 2100000, guid: 0ddf9de8dbc3db34f94dce2e6e70f2ad, type: 2}
   graph_material_lit: {fileID: 2100000, guid: e7097598c35b1974abeb5028474d088c, type: 2}
   error_flasher: {fileID: 0}
   error_message: {fileID: 0}
   size_p: 0
-  converter: {fileID: 0}
   sample_lbase: 6
   plot_lbase: 10
 --- !u!114 &2423173608412668978
@@ -136,4 +144,15 @@ MonoBehaviour:
   surfacearea_insqr: 38.2447935395871
   v_stop1: 0
   v_stop2: 0
-  iterative_weight: 0
+--- !u!114 &1924913066817648878
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2423173608412668981}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3a168cabd71bc0b458d984d9137ad547, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

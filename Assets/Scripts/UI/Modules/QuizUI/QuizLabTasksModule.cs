@@ -55,8 +55,6 @@ namespace ThermoVR.Lab
 
                 LabTaskFrame newFrame = PopulateLabTaskFrame(m_tasks[tabIndex]);
 
-                ApplyWorldMods(m_tasks[tabIndex]);
-
                 float startingOffset = 0.1f;
                 RectTransform tabRect = newTabObj.GetComponent<RectTransform>();
                 float tabBuffer = m_xSpacing - tabRect.sizeDelta.x * tabRect.localScale.x;
@@ -200,13 +198,13 @@ namespace ThermoVR.Lab
 
         private void ResetWorldMods() {
             // Tools
-            World.Instance.ModMgr.ResetToolRestrictions();
+            World.Instance?.ModMgr.ResetToolRestrictions();
 
             // Sets
             // N/A
 
             // Limits
-            World.Instance.ModMgr.ResetLimits();
+            World.Instance?.ModMgr.ResetLimits();
         }
 
         #region Handlers
@@ -251,6 +249,7 @@ namespace ThermoVR.Lab
         private void ActivateTab(int index) {
             m_frames[index].gameObject.SetActive(true);
             m_tabs[index].Button.SetColor(GameDB.Instance.TabSelectedColor);
+            ApplyWorldMods(m_tasks[index]);
         }
 
         private void DeactivateTab(int index) {

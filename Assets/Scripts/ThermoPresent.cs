@@ -786,17 +786,16 @@ public class ThermoPresent : MonoBehaviour
     }
 
     private void update_tracker_pos() {
-        Vector3 state_pos = state_dot.transform.position;
+        Vector3 state_pos = state_dot.transform.localPosition;
 
-        Vector3 tracker_pos = dot_x_tracker.transform.position;
-        dot_x_tracker.transform.position = new Vector3(tracker_pos.x, tracker_pos.y, state_pos.z); // x_tracker and z_tracker are reversed in global calculations, somehow
+        Vector3 tracker_pos = dot_x_tracker.transform.localPosition;
+        dot_x_tracker.transform.localPosition = new Vector3(state_pos.x, tracker_pos.y, tracker_pos.z);
 
-        tracker_pos = dot_y_tracker.transform.position;
-        // dot_y_tracker.transform.SetPositionAndRotation(new Vector3(tracker_pos.x, state_pos.y, tracker_pos.z), Quaternion.identity);
-        dot_y_tracker.transform.position = new Vector3(tracker_pos.x, state_pos.y, tracker_pos.z);
+        tracker_pos = dot_y_tracker.transform.localPosition;
+        dot_y_tracker.transform.localPosition = new Vector3(tracker_pos.x, state_pos.y, tracker_pos.z);
 
-        tracker_pos = dot_z_tracker.transform.position;
-        dot_z_tracker.transform.position = new Vector3(state_pos.x, tracker_pos.y, tracker_pos.z); // x_tracker and z_tracker are reversed in global calculations, somehow
+        tracker_pos = dot_z_tracker.transform.localPosition;
+        dot_z_tracker.transform.localPosition = new Vector3(tracker_pos.x, tracker_pos.y, state_pos.z);
     }
 
     /// <summary>
