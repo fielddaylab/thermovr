@@ -1,0 +1,305 @@
+|| LAB-NAME: J Lab
+
+|| TASK // Q 1
+
+|Type: [reach-state]
+|ToolInfo: [Burner, Coil, Insulator]
+|SetInfo: [(p:150000), (v:0.0013), (t:515)] // TODO: set valid v and t
+|LimitInfo:
+|TargetInfo (property, value, valid-range):
+|QuizInfo: 
+	Question: "Determine the saturation temperature of H20: (constant pressure)
+	Initial pressure is 1.5e2 kPa. Apply the insulation layer and set the insulation slider to 100%. Add/remove heat until you are inside the vapor dome."
+	Requirements: [(Region:1:0)]
+|EfficiencyInfo:
+
+
+|| TASK
+
+
+|Type:  [multiple-choice]
+|ToolInfo: [Burner, Coil, Insulator]
+|SetInfo: 
+|LimitInfo:
+|TargetInfo (property, value, valid-range):
+|QuizInfo: 
+	Question: "Determine the saturation temperature of H20: (constant pressure)
+	What is the saturation temperature of H20 when P = 150 kPa?"
+	Answers: ["~ ?? K", "~ ?? K", "~ ?? K"(c)] // TODO: get correct answers
+|EfficiencyInfo:
+
+
+|| TASK
+
+|Type: [reach-state]
+|ToolInfo: [Burner, Coil, Insulator]
+|SetInfo:
+|LimitInfo:
+|TargetInfo (property, value, valid-range):
+|QuizInfo: 
+	Question: "Determine the saturation temperature of H20: (constant pressure)
+	Add/remove heat until T = 343 K (70 C)."
+	Requirements: [(Temperature:343:5)]
+|EfficiencyInfo:
+
+|| TASK
+
+|Type: [multiple-choice]
+|ToolInfo:
+|SetInfo: 
+|LimitInfo:
+|TargetInfo:
+|QuizInfo:
+	Question: "Determine the saturation temperature of H20: (constant pressure)
+	In which region are you?"
+	Answers: ["Subcooled Liquid", "Two-phase", "Superheated Vapor"] // TODO: mark correct answer
+|EfficiencyInfo: 
+
+
+|| TASK
+
+|Type: [reach-state]
+|ToolInfo: [Burner, Coil, Insulator]
+|SetInfo:
+|LimitInfo:
+|TargetInfo (property, value, valid-range):
+|QuizInfo: 
+	Question: "Determine the saturation temperature of H20: (constant pressure)
+	Add/remove heat until T = 423 K (150 C)."
+	Requirements: [(Temperature:423:5)]
+|EfficiencyInfo:
+
+|| TASK
+
+|Type: [multiple-choice]
+|ToolInfo:
+|SetInfo: 
+|LimitInfo:
+|TargetInfo:
+|QuizInfo:
+	Question: "Determine the saturation temperature of H20: (constant pressure)
+	In which region are you?"
+	Answers: ["Subcooled Liquid", "Two-phase", "Superheated Vapor"]  // TODO: mark correct answer
+|EfficiencyInfo: 
+
+
+|| TASK // Q 2
+
+|Type: [reach-state]
+|ToolInfo: [Weight, NegativeWeight]
+|SetInfo: [(p:150000), (v:0.0013), (t:343)] // TODO: set valid p and v
+|LimitInfo:
+|TargetInfo (property, value, valid-range):
+|QuizInfo: 
+	Question: "Determine the saturation pressure of H20: (constant temperature)
+	Initial temperature is 343 K. Add/remove pressure until you are inside the vapor dome."
+	Requirements: [(Region:1:0)] // TODO: mark correct region
+|EfficiencyInfo:
+
+|| TASK
+
+
+|Type:  [multiple-choice]
+|ToolInfo: [Weight, NegativeWeight]
+|SetInfo: 
+|LimitInfo:
+|TargetInfo (property, value, valid-range):
+|QuizInfo: 
+	Question: "Determine the saturation pressure of H20: (constant temperature)
+	What is the saturation pressure of H20 when T = 343 K (70 C)?"
+	Answers: ["~ ?? kPa", "~ ?? kPa", "~ ?? kPa"(c)] // TODO: get correct answers
+|EfficiencyInfo:
+
+
+|| TASK
+
+|Type: [reach-state]
+|ToolInfo: [Weight, NegativeWeight]
+|SetInfo:
+|LimitInfo:
+|TargetInfo (property, value, valid-range):
+|QuizInfo: 
+	Question: "Determine the saturation pressure of H20: (constant temperature)
+	Now add/remove pressure until P = 101 kPa."
+	Requirements: [(Region:1:0)] // TODO: mark correct region
+|EfficiencyInfo:
+
+|| TASK
+
+|Type: [multiple-choice]
+|ToolInfo:  [Weight, NegativeWeight]
+|SetInfo: 
+|LimitInfo:
+|TargetInfo:
+|QuizInfo:
+	Question: "Determine the saturation pressure of H20: (constant temperature)
+	In which region are you?"
+	Answers: ["Subcooled Liquid", "Two-phase", "Superheated Vapor"]  // TODO: mark correct answer
+|EfficiencyInfo: 
+
+|| TASK
+
+|Type: [reach-state]
+|ToolInfo: [Weight, NegativeWeight]
+|SetInfo:  [Weight, NegativeWeight]
+|LimitInfo:
+|TargetInfo (property, value, valid-range):
+|QuizInfo: 
+	Question: "Determine the saturation pressure of H20: (constant temperature)
+	Add/remove pressure until P = 10 kPa."
+	Requirements: [(Region:2:0)] // TODO: mark correct region
+|EfficiencyInfo:
+
+|| TASK
+
+|Type: [multiple-choice]
+|ToolInfo:  [Weight, NegativeWeight]
+|SetInfo: 
+|LimitInfo:
+|TargetInfo:
+|QuizInfo:
+	Question: "Determine the saturation pressure of H20: (constant temperature)
+	In which region are you?"
+	Answers: ["Subcooled Liquid", "Two-phase", "Superheated Vapor"]  // TODO: mark correct answer
+|EfficiencyInfo: 
+
+|| TASK // Q 3a
+
+|Type: [reach-state]
+|ToolInfo:  [Weight, NegativeWeight, Insulator]
+|SetInfo:  [(p:101000), (v:0.1), (t:343)] // TODO: set valid t
+|LimitInfo:
+|TargetInfo:
+|QuizInfo:
+	Question: "What kind of process is this? (What remains constant?)
+	Initial pressure is 101 kPa, and initial volume is 0.1 m^3/kg. Add insulation layer and set its value to 100%. Add mass until P = 8.8e2 kPa."
+	Requirements: [(Pressure:880000:1000)]
+|EfficiencyInfo: 
+
+
+|| TASK
+
+|Type: [multiple-choice]
+|ToolInfo:  [Weight, NegativeWeight, Insulator]
+|SetInfo: 
+|LimitInfo:
+|TargetInfo:
+|QuizInfo:
+	Question: "What kind of process is this? (What remains constant?)
+	In which region are you?"
+	Answers: ["Subcooled Liquid", "Two-phase", "Superheated Vapor"]  // TODO: mark correct answer
+|EfficiencyInfo: 
+
+|| TASK
+
+|Type: [word-bank]
+|ToolInfo:  [Weight, NegativeWeight, Insulator]
+|SetInfo: 
+|LimitInfo:
+|TargetInfo:
+|QuizInfo:
+	Question: "What kind of process is this? (What remains constant?)
+	What type of thermodynamic path did you use in this process?"
+	Answers: ["constant pressure", "constant volume", "constant temperature", "constant entropy"(c), "constant enthalpy"]   // TODO: mark correct answer
+|EfficiencyInfo: 
+
+
+|| TASK // Q 3b
+
+|Type: [reach-state]
+|ToolInfo:  [Weight, NegativeWeight, Insulator]
+|SetInfo:
+|LimitInfo:
+|TargetInfo:
+|QuizInfo:
+	Question: "What kind of process is this? (What remains constant?)
+	Bring the pressure to 101 kPa and temperature to 450 K."
+	Requirements: [(Pressure:101000:1000), (Temperature:450:2)]
+|EfficiencyInfo: 
+
+
+|| TASK
+
+|Type: [multiple-choice]
+|ToolInfo:  [Weight, NegativeWeight, Insulator]
+|SetInfo: 
+|LimitInfo:
+|TargetInfo:
+|QuizInfo:
+	Question: "What kind of process is this? (What remains constant?)
+	In which region are you?"
+	Answers: ["Subcooled Liquid", "Two-phase", "Superheated Vapor"]  // TODO: mark correct answer
+|EfficiencyInfo: 
+
+
+|| TASK
+
+|Type: [reach-state]
+|ToolInfo:  [Weight, NegativeWeight, Insulator]
+|SetInfo: 
+|LimitInfo:
+|TargetInfo:
+|QuizInfo:
+	Question: "What kind of process is this? (What remains constant?)
+	Add insulation layer, set insulation value at 100%. Add mass to top of piston and increase maass until pressure = 8.8e2 kPa."
+	Requirements: [(Pressure:880000:1000)]
+|EfficiencyInfo: 
+
+|| TASK
+
+|Type: [word-bank]
+|ToolInfo:  [Weight, NegativeWeight, Insulator]
+|SetInfo: 
+|LimitInfo:
+|TargetInfo:
+|QuizInfo:
+	Question: "What kind of process is this? (What remains constant?)
+	What type of thermodynamic path did you use in this process?"
+	Answers: ["constant pressure", "constant volume", "constant temperature", "constant entropy"(c), "constant enthalpy"]   // TODO: mark correct answer
+|EfficiencyInfo: 
+
+|| TASK // Q 4b
+
+|Type:  [reach-state]
+|ToolInfo:  [Burner, Coil, Insulator, Stops]
+|SetInfo:  [(p:101000), (v:0.1), (t:293)] // TODO: determine correct value for v
+|LimitInfo:
+|TargetInfo:
+|QuizInfo:
+	Question: "Combined processes: constant P, constant V
+	Initial pressure is 101 kPa, initial temperature is 293 K. Attach the insulation layeer and set insulation to 100%. Set a volume stop to 0.3 m^3/kg. Apply the Bunsen burner until the piston just hits the stop, v = 0.3 m^3/kg."
+	Requirements: [(Volume:0.3:0.05)]
+|EfficiencyInfo: 
+
+
+|| TASK
+
+|Type:  [reach-state]
+|ToolInfo:  [Burner, Coil, Insulator, Stops]
+|SetInfo:  
+|LimitInfo:
+|TargetInfo:
+|QuizInfo:
+	Question: "Combined processes: constant P, constant V
+	Continue to add heat until P = 200 kPa."
+	Requirements: [(Pressure:200000:1000)]
+|EfficiencyInfo: 
+
+|| TASK
+
+|Type:  [multiple-choice]
+|ToolInfo:  [Burner, Coil, Insulator, Stops]
+|SetInfo:  
+|LimitInfo:
+|TargetInfo:
+|QuizInfo:
+	Question: "Combined processes: constant P, constant V
+	What is the final temperature?"
+	Answers: ["~ ?? K", "~ ?? K", "~ ?? K", "~ ?? K"] // TODO: determine correct answers
+|EfficiencyInfo: 
+
+
+|| END
+
+
+

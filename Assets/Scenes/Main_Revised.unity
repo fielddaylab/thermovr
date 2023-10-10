@@ -41507,8 +41507,13 @@ PrefabInstance:
     - target: {fileID: 8994953295398689594, guid: 3421c47335e18734fb1505b67ab37930,
         type: 3}
       propertyPath: m_initialLabs.Array.size
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 8994953295398689594, guid: 3421c47335e18734fb1505b67ab37930,
+        type: 3}
+      propertyPath: m_initialLabs.Array.data[0]
+      value: 
+      objectReference: {fileID: 4900000, guid: d9ab28294fc896240b48e750cf4ee3a9, type: 3}
     - target: {fileID: 8994953295398689594, guid: 3421c47335e18734fb1505b67ab37930,
         type: 3}
       propertyPath: m_initialLabs.Array.data[1]
