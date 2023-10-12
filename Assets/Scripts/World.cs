@@ -597,7 +597,7 @@ public class World : MonoBehaviour
             thermo_present.add_heat_per_delta_time(applied_heat, (1 - insulation_coefficient), delta_time, weight_pressure, true, temperature_gradient);
         }
 
-        Debug.Log("[warp] current temp: " + thermo_present.get_temperature());
+        // Debug.Log("[warp] current temp: " + thermo_present.get_temperature()); // useful for determining exact temp needed for set values in labs
     }
 
     private void ProcessInputs() {
