@@ -401,7 +401,7 @@ namespace ThermoVR.Lab
             foreach (string group in setGroups) {
                 if (group.Contains('p')) {
                     if (TryExtractSetVal(group, out double val)) {
-                        p = val;
+                        p = val * 1000; // defined in kPa
                     }
                     else {
                         Debug.Log("[LabLoad] SetInfo for p is invalid");
