@@ -596,6 +596,8 @@ public class World : MonoBehaviour
             // insulation is inversely proportional to the rate of heat transfer (within insulation)
             thermo_present.add_heat_per_delta_time(applied_heat, (1 - insulation_coefficient), delta_time, weight_pressure, true, temperature_gradient);
         }
+
+        Debug.Log("[warp] current temp: " + thermo_present.get_temperature());
     }
 
     private void ProcessInputs() {
@@ -675,12 +677,6 @@ public class World : MonoBehaviour
         thermo_present.UpdateErrorState();
     }
 
-    //safe to call if not interactable, as it will just do nothing
-    bool floatNumeric(float f) {
-        if (double.IsNaN(f)) return false;
-        if (double.IsInfinity(f)) return false;
-        return true;
-    }
     void TryInteractable(GameObject actable, Vector3 hand_pos, ref Vector3 r_hand_pos) {
         //grabbing handle
         if (actable == handle_workspace) {
@@ -691,14 +687,13 @@ public class World : MonoBehaviour
         else if (actable == graph) {
             Vector3 localspace = graph.transform.InverseTransformPoint(hand_pos);
             Vector3 correctedspace = new Vector3(localspace.z, localspace.y, -localspace.x) * 4.0f; //rotate 90, mul by 4 (inverse transform of gmodel)
-
             //note: thermospace is v,p,t
 
             //Vector3 thermoguess = thermo.guessPlot(ThermoMath.t_neutral, correctedspace.y, correctedspace.x);
             Vector3 thermoguess = thermo_present.guessMeshPlot(correctedspace.x, correctedspace.y, correctedspace.z);
             Vector3 localguess = thermo_present.plot(thermoguess.y, thermoguess.x, thermoguess.z); //note swizzle!
 
-            if (floatNumeric(localguess.x) && floatNumeric(localguess.y) && floatNumeric(localguess.z)) {
+            if (MathUtility.floatNumeric(localguess.x) && MathUtility.floatNumeric(localguess.y) && MathUtility.floatNumeric(localguess.z)) {
                 placement_dot.transform.localPosition = localguess;
                 placement_thermo = thermoguess;
                 placement_thermo_reasonable = true;

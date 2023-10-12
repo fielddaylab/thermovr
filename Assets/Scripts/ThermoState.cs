@@ -8,13 +8,9 @@ It should be safe to assume that after any method call, the state remains consis
 
 using System;
 using System.IO;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System.Collections.Specialized;
-using Oculus.Platform;
 using ThermoVR.Tools;
-using ThermoVR;
 
 namespace ThermoVR.State
 {
@@ -291,16 +287,20 @@ namespace ThermoVR.State
             debug_file.WriteLine("quality {0} changed to {1} (delta {2})", prev_quality, quality, quality - prev_quality);
         }
 
-        public void warp_pv_partial(double p, double v, double t) {
+        public void warp_pv_partial(double p, double v, double t, ThermoPresent thermo_present) {
             if (!(p == -1 || v == -1 || t == -1)) {
                 // all three given
+
                 warp_pv(p, v, t);
+                // warp_refine_t_given_pvt(p, v, t, thermo_present);
             }
             else {
                 // p and v, calc t
                 if (p != -1 && v != -1) {
                     // TODO: improve this estimate
                     t = ThermoMath.iterate_t_given_pv(p, v, t);
+
+                    warp_refine_t_given_pvt(p, v, t, thermo_present);
                 }
 
                 // p and t, calc v
@@ -349,14 +349,14 @@ namespace ThermoVR.State
                             break;
                         }
                     case ThermoMath.region_twophase: {
-                            /*
+                            // temperature = prev_temperature;
+                            // pressure = prev_pressure;
+                            // volume = prev_volume;
+                            // region = prev_region;
                             quality = ThermoMath.x_given_pv(pressure, volume, region);
                             entropy = ThermoMath.s_given_px(pressure, quality, region);
-                            internalenergy = ThermoMath.u_given_px(pressure, quality, region);
-                            */
-                            // We've never quite gotten warp_pv to work in two-phase. So for now, disallow it.
-                            // TODO: revisit this with new enthalpy calculation
-                            reset();
+                            enthalpy = ThermoMath.h_given_px(pressure, quality, region);
+                            internalenergy = ThermoMath.u_given_px(pressure, quality);
                             break;
                         }
                     case ThermoMath.region_vapor: {
@@ -372,6 +372,24 @@ namespace ThermoVR.State
                 reset();
             }
             clamp_state();
+        }
+
+        private void warp_refine_t_given_pvt(double p, double v, double t, ThermoPresent thermo_present) {
+            Vector3 localspace = thermo_present.plot(p, v, t);
+            Vector3 correctedspace = localspace; // new Vector3(localspace.z, localspace.y, -localspace.x) * 4.0f; //rotate 90, mul by 4 (inverse transform of gmodel)
+
+            //note: thermospace is v,p,t
+
+            //Vector3 thermoguess = thermo.guessPlot(ThermoMath.t_neutral, correctedspace.y, correctedspace.x);
+            Vector3 thermoguess = thermo_present.guessMeshPlot(correctedspace.x, correctedspace.y, correctedspace.z);
+            Vector3 localguess = thermo_present.plot(thermoguess.y, thermoguess.x, thermoguess.z); //note swizzle!
+
+            if (MathUtility.floatNumeric(localguess.x) && MathUtility.floatNumeric(localguess.y) && MathUtility.floatNumeric(localguess.z)) {
+                warp_pv(thermoguess.y, thermoguess.x, thermoguess.z);
+            }
+            else {
+                reset();
+            }
         }
 
         private void revert_state() {

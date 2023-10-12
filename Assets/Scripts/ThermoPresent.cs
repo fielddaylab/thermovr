@@ -724,7 +724,7 @@ public class ThermoPresent : MonoBehaviour
     }
 
     public void warp_pv_partial(double p, double v, double t) {
-        state.warp_pv_partial(p, v, t);
+        state.warp_pv_partial(p, v, t, this);
         visualize_state();
     }
 
