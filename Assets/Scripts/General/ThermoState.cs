@@ -857,10 +857,10 @@ namespace ThermoVR.State
 
             bool within_vstop_buffer = false;
 
-            for (int i = 0; i < ToolMgr.I.VStops.Count; i++) {
+            for (int i = 0; i < ToolMgr.Instance.VStops.Count; i++) {
                 within_vstop_buffer = false;
 
-                VolumeStop curr_stop = ToolMgr.I.VStops[i];
+                VolumeStop curr_stop = ToolMgr.Instance.VStops[i];
                 double compare_v = curr_stop.Volume;
 
                 if (volume >= compare_v - STOP_BUFFER && volume <= compare_v + STOP_BUFFER) {
@@ -1396,8 +1396,8 @@ namespace ThermoVR.State
             bool volume_increasing = projected_v > curr_v;
             hit_stop = false;
 
-            for (int i = 0; i < ToolMgr.I.VStops.Count; i++) {
-                VolumeStop curr_stop = ToolMgr.I.VStops[i];
+            for (int i = 0; i < ToolMgr.Instance.VStops.Count; i++) {
+                VolumeStop curr_stop = ToolMgr.Instance.VStops[i];
                 double compare_v = curr_stop.Volume;
 
                 if (volume_increasing) {

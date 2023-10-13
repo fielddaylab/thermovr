@@ -7,8 +7,10 @@ using UnityEngine;
 
 namespace ThermoVR.Tools
 {
-    public class ToolMgr : Singleton<ToolMgr>
+    public class ToolMgr : MonoBehaviour
     {
+        public static ToolMgr Instance;
+
         public const float BURNER_MAX = 100000;
         public const float COIL_MAX = -100000;
 
@@ -42,6 +44,8 @@ namespace ThermoVR.Tools
         [SerializeField] private PhysicalToggle toggle_heatTransfer;
 
         [HideInInspector] public List<Dial> Dials;
+        public List<VolumeStop> VStops { get; private set; }
+
 
         [Space(5)]
         [Header("Halfables")]
@@ -50,7 +54,18 @@ namespace ThermoVR.Tools
         [SerializeField] Pressable reset_button;
         [SerializeField] Pressable halfer_button;
 
+        private void Awake() {
+            if (Instance == null) {
+                Instance = this;
+            }
+            else if (this != Instance) {
+                Destroy(this);
+            }
+        }
+
         public void Init() {
+            VStops = new List<VolumeStop>();
+
             // As we grab them, set ranges on tool dials (sliders).
             tools = new List<Tool> {
                 tool_insulator,
@@ -76,6 +91,11 @@ namespace ThermoVR.Tools
 
             // TODO: make explicit assignment
             flame = GameObject.Find("Flame").GetComponent<ParticleSystem>();
+
+            DeactivateAllTools(true);
+
+            // Insulator starts engaged
+            ActivateTool(tool_insulator);
 
             Dials = new List<Dial> {
                 dial_stop1,
@@ -106,13 +126,15 @@ namespace ThermoVR.Tools
             reset_button.OnPress += HandleResetPressed;
             halfer_button.OnPress += HandleHalferPressed;
 
+            /*
             halfables = new List<Halfable> {
-                GameObject.Find("Container").GetComponent<Halfable>(),
+                // GameObject.Find("Container").GetComponent<Halfable>(),
                 GameObject.Find("Tool_Insulator Variant").GetComponent<Halfable>(),
                 GameObject.Find("Tool_Coil Variant").GetComponent<Halfable>()
             };
 
             SetAllHalfed(true);
+            */
 
             GameMgr.Events?.Register<Tuple<double, double, double>>(GameEvents.WarpPVT, HandleWarpPVT);
 
@@ -123,8 +145,6 @@ namespace ThermoVR.Tools
         }
 
         #region Accessors
-
-        public List<VolumeStop> VStops { get; private set; }
 
         public double GetToolVal(ToolType type, int uniqueID = 0) {
             switch (type) {
@@ -240,6 +260,8 @@ namespace ThermoVR.Tools
         }
 
         private bool StopExists(Tool source) {
+            if (VStops == null) { return false; }
+
             for (int i = 0; i < VStops.Count; i++) {
                 if (VStops[i].Source == source) {
                     return true;
@@ -273,6 +295,8 @@ namespace ThermoVR.Tools
 
         public void ActivateTool(Tool t) {
             // TODO: trigger tool's entry animations
+            // tool.ActivateRoutine
+            t.gameObject.SetActive(true);
 
             GameObject o = t.gameObject;
             t.engaged = true;
@@ -284,16 +308,17 @@ namespace ThermoVR.Tools
             }
             GameMgr.Events?.Dispatch(GameEvents.ActivateTool, t);
             UpdateApplyTool(t);
+
             Halfable h = o.GetComponent<Halfable>();
             if (h != null) h.setHalf(halfed); //conform to half-ness while engaged
         }
 
-        public void DeactivateTool(Tool t, Vector3 vel) {
-            // TODO: trigger tool's entry animations
-
-            GameObject o = t.gameObject;
+        public void DeactivateTool(Tool t) {
             if (!t.always_engaged) {
                 t.engaged = false;
+                t.gameObject.SetActive(false);
+                // TODO: trigger tool's entry animations
+                // tool.DeactivateRoutine
             }
             if (t == tool_stop1) {
                 ReleaseVStop(t);
@@ -312,7 +337,7 @@ namespace ThermoVR.Tools
 
         public void DisallowTool(Tool t) {
             // TODO: disable buttons
-            DeactivateTool(t, Vector3.zero);
+            DeactivateTool(t);
             t.gameObject.SetActive(false);
         }
 
@@ -324,8 +349,8 @@ namespace ThermoVR.Tools
             }
             else if (t == tool_burner || t == tool_coil) {
                 if (tool_burner.engaged && tool_coil.engaged) {
-                    if (t == tool_burner) DeactivateTool(tool_coil, MathUtility.popVector());
-                    if (t == tool_coil) DeactivateTool(tool_burner, MathUtility.popVector());
+                    if (t == tool_burner) DeactivateTool(tool_coil);
+                    if (t == tool_coil) DeactivateTool(tool_burner);
                 }
 
                 if (t == tool_burner) {
@@ -354,8 +379,8 @@ namespace ThermoVR.Tools
             }
             else if (t == tool_weight || t == tool_negativeWeight) {
                 if (tool_weight.engaged && tool_negativeWeight.engaged) {
-                    if (t == tool_weight) DeactivateTool(tool_negativeWeight, MathUtility.popVector());
-                    else if (t == tool_negativeWeight) DeactivateTool(tool_weight, MathUtility.popVector());
+                    if (t == tool_weight) DeactivateTool(tool_negativeWeight);
+                    else if (t == tool_negativeWeight) DeactivateTool(tool_weight);
                 }
 
                 float v = 1f;
@@ -375,11 +400,15 @@ namespace ThermoVR.Tools
             if (!tool_insulator.engaged) tool_insulator.gameObject.GetComponent<Halfable>().setHalf(false);
         }
 
-        public void DeactivateAllTools() {
+        /// <summary>
+        /// Deactivates all tools that aren't omnipresent
+        /// </summary>
+        /// <param name="forceDetach">Force tools to detach on initial pass</param>
+        public void DeactivateAllTools(bool forceDetach = false) {
             for (int i = 0; i < tools.Count; i++) {
                 Tool toDetach = tools[i];
-                if (toDetach.engaged) {
-                    DeactivateTool(toDetach, MathUtility.popVector());
+                if (toDetach.engaged || forceDetach) {
+                    DeactivateTool(toDetach);
                 }
             }
         }
@@ -407,7 +436,7 @@ namespace ThermoVR.Tools
             GameMgr.Events.Dispatch(GameEvents.ResetPressed);
 
             for (int i = 0; i < tools.Count; i++) {
-                if (tools[i].engaged) DeactivateTool(tools[i], new Vector3(0.0f, 0.0f, 0.0f));
+                if (tools[i].engaged) DeactivateTool(tools[i]);
             }
 
             VStops.Clear();
@@ -426,7 +455,7 @@ namespace ThermoVR.Tools
             for (int i = 0; i < tools.Count; i++) {
                 if (t == tools[i]) {
                     if (t.engaged) {
-                        DeactivateTool(t, Vector3.zero);
+                        DeactivateTool(t);
                         break;
                     }
                     else {

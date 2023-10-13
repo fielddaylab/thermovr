@@ -7,19 +7,13 @@ It should be instantiated as a game object "Oracle" at the root of the scene hei
 There are unfortunately somewhat inconsistent patterns of what variables are defined publicly via the editor inspector, and which are set in code, though I tried to err toward the latter where possible.
 */
 
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using TMPro;
 using ThermoVR.Controls;
 using ThermoVR.Dials;
-using BeauUtil;
 using ThermoVR.Tools;
-using UnityEngine.UIElements;
 using ThermoVR;
-using static OVRInput;
 using ThermoVR.UI.GraphElements;
-using ThermoVR.UI;
 using ThermoVR.Lab;
 using ThermoVR.State;
 using System;
@@ -95,7 +89,6 @@ public class World : MonoBehaviour
 
     [Space(5)]
     [Header("Dot Placement")]
-    GameObject vessel;
     GameObject graph;
     GameObject state_dot;
     GameObject placement_dot;
@@ -165,7 +158,6 @@ public class World : MonoBehaviour
         workspace = GameObject.Find("Workspace");
         handle_workspace_touchable = handle_workspace.GetComponent<Touchable>();
 
-        vessel = GameObject.Find("Vessel");
         graph = GameObject.Find("Graph");
         graph_touchable = graph.GetComponent<Touchable>();
         state_dot = GameObject.Find("gstate");

@@ -49,6 +49,8 @@ namespace ThermoVR.Dials
         [SerializeField] private Transform max_pos;
         [SerializeField] private Transform min_pos;
         public TextMeshPro textv;
+        [SerializeField] private GameObject meter; // (Knob)
+
         [System.NonSerialized]
         public TextMeshPro textv_tmpro;
 
@@ -77,7 +79,7 @@ namespace ThermoVR.Dials
 
         private List<Tool> relevant_tools;
 
-        [SerializeField] private GameObject meter; // (Knob)
+        [SerializeField] private ToolActivator activator_button;
         [HideInInspector] public Touchable touchable;
 
         private string valFormat;
@@ -106,6 +108,11 @@ namespace ThermoVR.Dials
                     relevant_tools.Add(tool);
                 }
             }
+
+            if (activator_button != null) {
+                activator_button.SetTools(relevant_tools);
+            }
+
             total_dist = Vector3.Distance(max_pos.position, min_pos.position);
             initial_offset = meter.transform.localPosition;
 

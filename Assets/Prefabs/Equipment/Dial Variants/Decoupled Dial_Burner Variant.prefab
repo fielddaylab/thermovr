@@ -10,7 +10,7 @@ PrefabInstance:
     - target: {fileID: 2738182036806590396, guid: 3c6e7a3c269e2e946a211ad467331063,
         type: 3}
       propertyPath: m_RootOrder
-      value: 9
+      value: 8
       objectReference: {fileID: 0}
     - target: {fileID: 2738182036806590396, guid: 3c6e7a3c269e2e946a211ad467331063,
         type: 3}
@@ -125,6 +125,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 3c6e7a3c269e2e946a211ad467331063, type: 3}
+--- !u!114 &1700982347248533734 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5551163266199349380, guid: 3c6e7a3c269e2e946a211ad467331063,
+    type: 3}
+  m_PrefabInstance: {fileID: 6526467902608500834}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0a8067e71d32a3240b5cbb22d667d3f3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &6526467902776140442
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -132,6 +144,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1703253035018548620, guid: c88177c188275f044a1eb03b4f18b830,
+        type: 3}
+      propertyPath: activator_button
+      value: 
+      objectReference: {fileID: 1700982347248533734}
     - target: {fileID: 1703253035018548620, guid: c88177c188275f044a1eb03b4f18b830,
         type: 3}
       propertyPath: m_effect_map.Array.size
@@ -207,7 +224,7 @@ PrefabInstance:
     - target: {fileID: 6030497066997557908, guid: c88177c188275f044a1eb03b4f18b830,
         type: 3}
       propertyPath: m_Name
-      value: Decoupled Dial_Burner
+      value: Decoupled Dial_Burner Variant
       objectReference: {fileID: 0}
     - target: {fileID: 6030497066997557909, guid: c88177c188275f044a1eb03b4f18b830,
         type: 3}
