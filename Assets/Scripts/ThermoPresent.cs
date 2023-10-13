@@ -711,14 +711,14 @@ public class ThermoPresent : MonoBehaviour
 
         Vector3 plot;
         if (closest < position_dome_region) {
-            plot.x = state.Clampf(invplot_dimension(ThermoMath.v_min, ThermoMath.v_max, mesh_positions[closest].x), (float)ThermoMath.v_min, (float)ThermoMath.v_max);
-            plot.y = state.Clampf(invplot_dimension(ThermoMath.p_min, ThermoMath.p_max, mesh_positions[closest].y), (float)ThermoMath.p_min, (float)ThermoMath.p_max);
-            plot.z = state.Clampf(invplot_dimension(ThermoMath.t_min, ThermoMath.t_max, mesh_positions[closest].z), (float)ThermoMath.t_min, (float)ThermoMath.t_max);
+            plot.x = MathUtility.Clampf(invplot_dimension(ThermoMath.v_min, ThermoMath.v_max, mesh_positions[closest].x), (float)ThermoMath.v_min, (float)ThermoMath.v_max);
+            plot.y = MathUtility.Clampf(invplot_dimension(ThermoMath.p_min, ThermoMath.p_max, mesh_positions[closest].y), (float)ThermoMath.p_min, (float)ThermoMath.p_max);
+            plot.z = MathUtility.Clampf(invplot_dimension(ThermoMath.t_min, ThermoMath.t_max, mesh_positions[closest].z), (float)ThermoMath.t_min, (float)ThermoMath.t_max);
         }
         else {
-            plot.x = state.Clampf(invplot_dimension(ThermoMath.v_min, ThermoMath.v_max, vcube), (float)ThermoMath.v_min, (float)ThermoMath.v_max);
-            plot.y = state.Clampf(invplot_dimension(ThermoMath.p_min, ThermoMath.p_max, mesh_positions[closest].y), (float)ThermoMath.p_min, (float)ThermoMath.p_max);
-            plot.z = state.Clampf(invplot_dimension(ThermoMath.t_min, ThermoMath.t_max, mesh_positions[closest].z), (float)ThermoMath.t_min, (float)ThermoMath.t_max);
+            plot.x = MathUtility.Clampf(invplot_dimension(ThermoMath.v_min, ThermoMath.v_max, vcube), (float)ThermoMath.v_min, (float)ThermoMath.v_max);
+            plot.y = MathUtility.Clampf(invplot_dimension(ThermoMath.p_min, ThermoMath.p_max, mesh_positions[closest].y), (float)ThermoMath.p_min, (float)ThermoMath.p_max);
+            plot.z = MathUtility.Clampf(invplot_dimension(ThermoMath.t_min, ThermoMath.t_max, mesh_positions[closest].z), (float)ThermoMath.t_min, (float)ThermoMath.t_max);
         }
         return plot;
     }
@@ -802,32 +802,6 @@ public class ThermoPresent : MonoBehaviour
         tracker_pos = dot_z_tracker.transform.localPosition;
         dot_z_tracker.transform.localPosition = new Vector3(tracker_pos.x, tracker_pos.y, state_pos.z);
     }
-
-    /// <summary>
-    /// Remove clamp volume bounds
-    /// </summary>
-    public void release_v_stop(Tool source) {
-        state.release_v_stop(source);
-    }
-
-    /// <summary>
-    /// Set the clamp's min and max volume
-    /// </summary>
-    public void add_v_stop(double v_stop, Tool source) {
-        state.add_v_stop(v_stop, source);
-    }
-
-    public void update_v_stop(double v_stop, Tool source) {
-        state.update_v_stop(v_stop, source);
-    }
-    /*
-    /// <summary>
-    /// Set the clamp's min and max, preserving previous midpoint
-    /// </summary>
-    public void adjust_clamp(float range) {
-        state.adjust_clamp(range);
-    }
-    */
 
 
     string region_to_name(int region) //0 subcooled liquid, 1 two-phase, 2 superheated vapor

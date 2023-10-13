@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 2423173608412668977}
   - component: {fileID: 2423173608412668978}
   - component: {fileID: 1924913066817648878}
+  - component: {fileID: 5943454709359365371}
   m_Layer: 0
   m_Name: Oracle
   m_TagString: Untagged
@@ -48,6 +49,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ModMgr: {fileID: 1924913066817648878}
+  ToolMgr: {fileID: 5943454709359365371}
   hand_empty: {fileID: 2100000, guid: a23630cc2689f7d428c589100157c502, type: 2}
   hand_touching: {fileID: 2100000, guid: f82e0f125f1c37847b1dcb9fd636af99, type: 2}
   hand_grabbing: {fileID: 2100000, guid: b619eec6ceb2d1e4097620d12ed5ac37, type: 2}
@@ -157,3 +159,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_world: {fileID: 2423173608412668976}
+--- !u!114 &5943454709359365371
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2423173608412668981}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ceeee1747f28774393dfc4849831e75, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

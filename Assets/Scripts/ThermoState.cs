@@ -76,7 +76,6 @@ namespace ThermoVR.State
         public double v_stop1; // volume stop specified by tool_stop1
         public double v_stop2; // volume stop specified by tool_stop2
 
-        List<VolumeStop> v_stops;
         private static float STOP_BUFFER = 0.005f;
         private static double LIQ_2_DIVISION = 0.002;
 
@@ -115,76 +114,11 @@ namespace ThermoVR.State
             prev_quality = -1;
             prev_region = region;
 
-            v_stops = new List<VolumeStop>();
-
-            GameMgr.Events.Dispatch(GameEvents.WarpPVT);
+            GameMgr.Events.Dispatch(GameEvents.WarpPVT, new Tuple<double, double, double>(pressure, volume, temperature));
         }
-
-        #region Stops (Clamps)
-
-        /// <summary>
-        /// Remove clamp volume bounds
-        /// </summary>
-        public void release_v_stop(Tool source) {
-            if (!StopExists(source)) {
-                return;
-            }
-
-            RemoveStop(source);
-        }
-
-        /// <summary>
-        /// Set a new clamp stop
-        /// </summary>
-        public void add_v_stop(double v_stop, Tool source) {
-            if (StopExists(source)) {
-                return;
-            }
-
-            // constrain stop's values to global bounds
-            v_stop = Clampd(v_stop, ThermoMath.v_min, ThermoMath.v_max);
-
-            VolumeStop new_stop = new VolumeStop(v_stop, source);
-            v_stops.Add(new_stop);
-        }
-
-        private bool StopExists(Tool source) {
-            for (int i = 0; i < v_stops.Count; i++) {
-                if (v_stops[i].Source == source) {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        private void RemoveStop(Tool source) {
-
-            for (int i = 0; i < v_stops.Count; i++) {
-                if (v_stops[i].Source == source) {
-                    v_stops.RemoveAt(i);
-                    return;
-                }
-            }
-        }
-
-        public void update_v_stop(double v_stop_val, Tool source) {
-            for (int i = 0; i < v_stops.Count; i++) {
-                if (v_stops[i].Source == source) {
-                    VolumeStop temp_stop = v_stops[i];
-                    temp_stop.Volume = v_stop_val;
-                    v_stops[i] = temp_stop;
-                    return;
-                }
-            }
-        }
-
-
-        #endregion // Stops (Clamps)
 
         #region Enforce State
 
-        public double Clampd(double v, double min, double max) { if (v < min) return min; if (v > max) return max; return v; }
-        public float Clampf(float v, float min, float max) { if (v < min) return min; if (v > max) return max; return v; }
         void clamp_state() {
             if (Double.IsNaN(pressure)) pressure = prev_pressure;
             if (Double.IsNaN(temperature)) temperature = prev_temperature;
@@ -247,25 +181,25 @@ namespace ThermoVR.State
                 }
             */
 
-            pressure = Clampd(pressure, ThermoMath.p_min, ThermoMath.p_max);
-            volume = Clampd(volume, ThermoMath.v_min, ThermoMath.v_max);
-            temperature = Clampd(temperature, ThermoMath.t_min, ThermoMath.t_max);
-            internalenergy = Clampd(internalenergy, ThermoMath.u_min, ThermoMath.u_max);
-            entropy = Clampd(entropy, ThermoMath.s_min, ThermoMath.s_max);
+            pressure = MathUtility.Clampd(pressure, ThermoMath.p_min, ThermoMath.p_max);
+            volume = MathUtility.Clampd(volume, ThermoMath.v_min, ThermoMath.v_max);
+            temperature = MathUtility.Clampd(temperature, ThermoMath.t_min, ThermoMath.t_max);
+            internalenergy = MathUtility.Clampd(internalenergy, ThermoMath.u_min, ThermoMath.u_max);
+            entropy = MathUtility.Clampd(entropy, ThermoMath.s_min, ThermoMath.s_max);
 
             enthalpy = ClampEnthalpy(enthalpy, pressure);
 
-            quality = Clampd(quality, ThermoMath.x_min, ThermoMath.x_max);
+            quality = MathUtility.Clampd(quality, ThermoMath.x_min, ThermoMath.x_max);
         }
 
         private double ClampEnthalpy(double new_h, double p) {
-            enthalpy = Clampd(enthalpy, ThermoMath.h_min, ThermoMath.h_max);
+            enthalpy = MathUtility.Clampd(enthalpy, ThermoMath.h_min, ThermoMath.h_max);
 
             double h_min_given_p;
             double h_max_given_p;
             try {
                 IF97.h_bounds_given_p(p, out h_min_given_p, out h_max_given_p);
-                new_h = Clampd(new_h, h_min_given_p, h_max_given_p);
+                new_h = MathUtility.Clampd(new_h, h_min_given_p, h_max_given_p);
             }
             catch (Exception e) { }
 
@@ -366,7 +300,7 @@ namespace ThermoVR.State
                         }
                 }
 
-                GameMgr.Events.Dispatch(GameEvents.WarpPVT);
+                GameMgr.Events.Dispatch(GameEvents.WarpPVT, new Tuple<double, double, double>(pressure, volume, temperature));
             }
             catch (Exception e) {
                 reset();
@@ -923,10 +857,10 @@ namespace ThermoVR.State
 
             bool within_vstop_buffer = false;
 
-            for (int i = 0; i < v_stops.Count; i++) {
+            for (int i = 0; i < ToolMgr.I.VStops.Count; i++) {
                 within_vstop_buffer = false;
 
-                VolumeStop curr_stop = v_stops[i];
+                VolumeStop curr_stop = ToolMgr.I.VStops[i];
                 double compare_v = curr_stop.Volume;
 
                 if (volume >= compare_v - STOP_BUFFER && volume <= compare_v + STOP_BUFFER) {
@@ -1112,7 +1046,7 @@ namespace ThermoVR.State
         /// <returns></returns>
         private bool treat_as_constant_v_add_heat(double applied_heat, double insulation_coefficient, double delta_time, double p_outside) {
             bool blocked = blocked_by_stops(p_outside); // first pass
-            if (applied_heat <= World.BURNER_MAX && applied_heat >= World.COIL_MAX) {
+            if (applied_heat <= ToolMgr.BURNER_MAX && applied_heat >= ToolMgr.COIL_MAX) {
                 // normal tool adjustments
                 return blocked;
             }
@@ -1462,14 +1396,14 @@ namespace ThermoVR.State
             bool volume_increasing = projected_v > curr_v;
             hit_stop = false;
 
-            for (int i = 0; i < v_stops.Count; i++) {
-                VolumeStop curr_stop = v_stops[i];
+            for (int i = 0; i < ToolMgr.I.VStops.Count; i++) {
+                VolumeStop curr_stop = ToolMgr.I.VStops[i];
                 double compare_v = curr_stop.Volume;
 
                 if (volume_increasing) {
                     // when volume would increase, enforce stops above
                     if (curr_v <= compare_v && projected_v > compare_v) {
-                        projected_v = Clampd(projected_v, curr_v, compare_v - STOP_BUFFER);
+                        projected_v = MathUtility.Clampd(projected_v, curr_v, compare_v - STOP_BUFFER);
                         hit_stop = true;
                         Debug.Log("[Stops] enforced, preventing increase");
                     }
@@ -1477,7 +1411,7 @@ namespace ThermoVR.State
                 else {
                     // when volume would decrease, enforce stops below
                     if (curr_v >= compare_v && projected_v < compare_v) {
-                        projected_v = Clampd(projected_v, curr_v, compare_v + STOP_BUFFER);
+                        projected_v = MathUtility.Clampd(projected_v, curr_v, compare_v + STOP_BUFFER);
                         hit_stop = true;
                         Debug.Log("[Stops] enforced, preventing decrease");
                     }

@@ -40,51 +40,8 @@ namespace ThermoVR.Tools
     {
         [System.NonSerialized]
         public bool engaged = false;
-        [System.NonSerialized]
-        public bool stored = false;
-        [System.NonSerialized]
-        public Touchable touchable;
-        [System.NonSerialized]
-        public BoxCollider boxcollider;
-        [System.NonSerialized]
-        public Rigidbody rigidbody;
-        [System.NonSerialized]
-        public float t_free = 0.0f;
-
-        public GameObject mesh;
-
-        public GameObject storage;
-        [System.NonSerialized]
-        public float default_storage_scale;
-        [System.NonSerialized]
-        public Ghost storage_ghost;
-        [System.NonSerialized]
-        public Touchable storage_touchable;
-        [System.NonSerialized]
-        public GameObject storage_obj;
-        [System.NonSerialized]
-        public MeshRenderer storage_meshrenderer;
-        [System.NonSerialized]
-        public GameObject storage_snap;
-
-        public GameObject active;
-        [System.NonSerialized]
-        public Ghost active_ghost;
-        [System.NonSerialized]
-        public Touchable active_touchable;
-        [System.NonSerialized]
-        public GameObject active_available;
-        [System.NonSerialized]
-        public MeshRenderer active_available_meshrenderer;
-        [System.NonSerialized]
-        public GameObject active_snap;
 
         private float val = 0.0f; // value of the tool
-
-        public GameObject text;
-        //[HideInInspector]
-        //public GameObject textv;
-        
 
         public GameObject textl;
         [System.NonSerialized]
@@ -100,8 +57,6 @@ namespace ThermoVR.Tools
 
         public GameObject textn;
 
-        [System.NonSerialized]
-        public Fadable text_fadable;
         [System.NonSerialized]
         public bool disabled;
 
@@ -129,34 +84,12 @@ namespace ThermoVR.Tools
         }
 
         private void Setup() {
-            touchable = gameObject.GetComponent<Touchable>();
-            boxcollider = gameObject.GetComponent<BoxCollider>();
-            rigidbody = gameObject.GetComponent<Rigidbody>();
-
-            if (storage != null) {
-                default_storage_scale = storage.transform.localScale.x; //could grab any dimension
-                storage_ghost = storage.GetComponent<Ghost>();
-                storage_ghost.set_tool(this);
-                storage_touchable = storage.GetComponent<Touchable>();
-                storage_obj = storage_ghost.obj;
-                storage_meshrenderer = storage_obj.GetComponent<MeshRenderer>();
-            }
-
-            if (active != null) {
-                active_ghost = active.GetComponent<Ghost>();
-                active_ghost.set_tool(this);
-                active_touchable = active.GetComponent<Touchable>();
-                active_available = active_ghost.obj;
-                active_available_meshrenderer = active_available.GetComponent<MeshRenderer>();
-            }
-
             // TODO: separate textv from dial, move to tool
             // textv = dial_dial.textv.gameObject;
             //textv_tmpro = textv.GetComponent<TextMeshPro>();
             //textv_meshrenderer = textv.GetComponent<MeshRenderer>();
             textl_tmpro = textl.GetComponent<TextMeshPro>();
             textl_meshrenderer = textl.GetComponent<MeshRenderer>();
-            text_fadable = GetComponent<Fadable>();
             if (textd) {
                 textd_tmpro = textd.GetComponent<TextMeshPro>();
                 textd_meshrenderer = textd.GetComponent<MeshRenderer>();
@@ -166,33 +99,6 @@ namespace ThermoVR.Tools
 
             disabled = false;
             enabled = true;
-            examined = false;
-        }
-
-        // Update is called once per frame
-        void Update() {
-            t_free += Time.deltaTime;
-
-            if (text_fadable) text_fadable.set_factive(touchable.touch || examined);
-
-            // If tool has been sitting unused and unmoved for long enough, start it moving back to storage.
-            if (!engaged && !stored && !touchable.grabbed && t_free > 1.0f && storage != null) {
-                rigidbody.isKinematic = true;
-                gameObject.transform.position = Vector3.Lerp(gameObject.transform.position, storage.transform.position, 0.1f);
-                gameObject.transform.localRotation = Quaternion.Lerp(gameObject.transform.localRotation, storage.transform.localRotation, 0.1f);
-                if (Vector3.Distance(gameObject.transform.position, storage.transform.position) < 0.01f) {
-                    gameObject.transform.SetParent(storage.transform);
-                    stored = true;
-                    gameObject.transform.localPosition = new Vector3(0f, 0f, 0f);
-                    gameObject.transform.localScale = new Vector3(1f, 1f, 1f);
-                    gameObject.transform.localRotation = Quaternion.identity;
-                    float v = storage.transform.localScale.x; //can grab any dimension
-                    Vector3 invscale = new Vector3(1f / v, 1f / v, 1f / v);
-                    text.transform.localScale = invscale;
-                }
-            }
-            else if (engaged || stored || touchable.grabbed)
-                t_free = 0.0f;
         }
 
         public void update_val(float new_val, Dial dial) {
@@ -214,11 +120,7 @@ namespace ThermoVR.Tools
         /// </summary>
         /// <param name="dv">the dial's value difference</param>
         public void move(float dv) {
-            active.transform.position += new Vector3(0, dv, 0);
-        }
-
-        public void set_examined(bool examined) {
-            this.examined = true;
+            this.transform.position += new Vector3(0, dv, 0);
         }
 
         private void update_tool_text(Dial dial) {

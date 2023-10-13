@@ -75,9 +75,6 @@ namespace ThermoVR.Dials
 
         public List<EffectGroup> m_effect_map; // maps all effects to each tool affected by this dial's value
 
-        [System.NonSerialized]
-        public bool examined = false;
-
         private List<Tool> relevant_tools;
 
         [SerializeField] private GameObject meter; // (Knob)
@@ -116,9 +113,7 @@ namespace ThermoVR.Dials
             textv_tmpro = textv.GetComponent<TextMeshPro>();
 
             GameMgr.Events?.Register<Tool>(GameEvents.ActivateTool, HandleActivateTool, this)
-                .Register<Tool>(GameEvents.DetachTool, HandleDetachTool, this)
-                .Register<Tool>(GameEvents.StoreTool, HandleStoreTool, this)
-                .Register<Tool>(GameEvents.UpdateToolText, HandleUpdateToolText, this);
+                .Register<Tool>(GameEvents.DeactivateTool, HandleDeactivateTool, this);
 
             Reset();
         }
@@ -192,6 +187,10 @@ namespace ThermoVR.Dials
             RecalibratePos();
         }
 
+        public float get_val() {
+            return val;
+        }
+
         /*
          * Standard way to map from 0-1 slder "val" range to min-max "tool" range.
          */
@@ -248,15 +247,6 @@ namespace ThermoVR.Dials
             apply_change(map, new_val, prev_val);
         }
 
-        public void set_examined(bool examined) {
-            this.examined = examined;
-
-            for (int t = 0; t < relevant_tools.Count; t++) {
-                Tool tool = relevant_tools[t];
-                tool.set_examined(examined);
-            }
-        }
-
         public List<Tool> get_relevant_tools() {
             return relevant_tools;
         }
@@ -299,7 +289,7 @@ namespace ThermoVR.Dials
             }
         }
 
-        private void HandleDetachTool(Tool tool) {
+        private void HandleDeactivateTool(Tool tool) {
             if (relevant_tools.Contains(tool)) {
                 Reset();
             }

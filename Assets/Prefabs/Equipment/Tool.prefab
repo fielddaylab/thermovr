@@ -496,8 +496,6 @@ GameObject:
   - component: {fileID: 3880890576578896916}
   - component: {fileID: 3880890576578896919}
   - component: {fileID: 3880890576578896914}
-  - component: {fileID: 3880890576578896918}
-  - component: {fileID: 3880890576578896912}
   - component: {fileID: 3880890576578896917}
   - component: {fileID: 3880890576578896915}
   m_Layer: 0
@@ -553,37 +551,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &3880890576578896918
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3880890576578896923}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5ebcac9b616909a4380a72e50249cee2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ltouch: 0
-  rtouch: 0
-  touch: 0
---- !u!114 &3880890576578896912
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3880890576578896923}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d6d4d39a272fa404fa6960400639491e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  t_in: 0.2
-  t_start_out: 3
-  t_end_out: 3.5
-  t_stale: 0.5
 --- !u!114 &3880890576578896917
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -599,10 +566,11 @@ MonoBehaviour:
   mesh: {fileID: 3880890576985685194}
   storage: {fileID: 0}
   active: {fileID: 0}
-  text: {fileID: 3880890575333066398}
   textl: {fileID: 3880890575070334159}
   textd: {fileID: 3880890576963054495}
   textn: {fileID: 3880890576446558964}
+  always_engaged: 0
+  tool_type: 0
 --- !u!82 &3880890576578896915
 AudioSource:
   m_ObjectHideFlags: 0

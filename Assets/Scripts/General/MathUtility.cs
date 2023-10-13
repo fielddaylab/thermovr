@@ -12,5 +12,20 @@ namespace ThermoVR
             if (double.IsInfinity(f)) return false;
             return true;
         }
+
+        public static double Clampd(double v, double min, double max) {
+            if (v < min) return min;
+            if (v > max) return max;
+            return v; 
+        }
+        public static float Clampf(float v, float min, float max) { 
+            if (v < min) return min;
+            if (v > max) return max;
+            return v; 
+        }
+
+        public static Vector3 popVector() {
+            return new Vector3(UnityEngine.Random.Range(-1f, 1f), 1f, UnityEngine.Random.Range(-1f, 1f));
+        }
     }
 }

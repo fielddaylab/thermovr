@@ -29,6 +29,11 @@ public static class ThermoMath
     private const int MAX_MILLISECOND = 50;
     private const int DEFAULT_ITERS = 50; // The lower the number, the better the framerate (but speed at which an accurate answer is reached is slower)
     private const double DEFAULT_STEP = 10.0;
+
+    //public double surfacearea = Math.Pow(3.141592*radius,2.0); //M^2 //hardcoded answer below
+    public static double surfacearea = 0.024674011; //M^2 //hardcoded answer to eqn above
+    public static double surfacearea_insqr = 38.2447935395871; //in^2 //hardcoded conversion from m^2 to in^2
+
     /*
     pressure = p
     specificvolume = v

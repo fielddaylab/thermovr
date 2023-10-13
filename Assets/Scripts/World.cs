@@ -35,14 +35,13 @@ public class World : MonoBehaviour
     const double PSI_TO_PASCAL = 6894.76;
     const double SPECIFIC_HEAT_CAPACITY_LIQ = 4184; // how many J it takes to heat 1 kg of water liquid 1 Kelvin
     const double SPECIFIC_HEAT_CAPACITY_VAP = 1.996; // how many J it takes to heat 1 kg of water vapor 1 Kelvin
-    public const float BURNER_MAX = 100000;
-    public const float COIL_MAX = -100000;
 
     #endregion // Consts
 
     #region Inspector
 
     public WorldModMgr ModMgr;
+    [SerializeField] private ToolMgr ToolMgr;
 
     public Material hand_empty;
     Material[] hand_emptys;
@@ -95,49 +94,6 @@ public class World : MonoBehaviour
     Vector3 rpos = new Vector3(0f, 0f, 0f);
 
     [Space(5)]
-    [Header("Tools")]
-    [SerializeField] private Tool tool_insulator;
-    //[SerializeField] private Tool tool_clamp;
-    [SerializeField] private Tool tool_stop1;
-    [SerializeField] private Tool tool_stop2;
-    [SerializeField] private Tool tool_burner;
-    [SerializeField] private Tool tool_coil;
-    [SerializeField] private Tool tool_weight;
-    [SerializeField] private Tool tool_balloon;
-    [SerializeField] private Tool tool_ambientPressure;
-    [SerializeField] private Tool tool_roomTemp;
-    // [SerializeField] private Tool tool_percentInsulation;
-    // [SerializeField] private Tool tool_clampRange;
-
-    List<Tool> tools;
-
-    [Space(5)]
-    [Header("Dials")]
-    // [SerializeField] private Dial dial_insulator;
-    [SerializeField] private Dial dial_stop1;
-    [SerializeField] private Dial dial_stop2;
-    [SerializeField] private Dial dial_burner;
-    [SerializeField] private Dial dial_coil;
-    [SerializeField] private Dial dial_weight;
-    [SerializeField] private Dial dial_balloon;
-    [SerializeField] private Dial dial_ambientPressure;
-    [SerializeField] private Dial dial_roomTemp;
-    [SerializeField] private Dial dial_percentInsulation;
-
-    //[SerializeField] private ThermoToggle toggle_heatTransfer;
-    [SerializeField] private PhysicalToggle toggle_heatTransfer;
-
-    public List<Dial> dials;
-    ParticleSystem flame; //special case
-
-    [Space(5)]
-    [Header("Halfables")]
-    bool halfed = false;
-    List<Halfable> halfables;
-    [SerializeField] Pressable reset_button;
-    [SerializeField] Pressable halfer_button;
-
-    [Space(5)]
     [Header("Dot Placement")]
     GameObject vessel;
     GameObject graph;
@@ -153,8 +109,6 @@ public class World : MonoBehaviour
 
     // sim variables
     double room_temp = 292; // in K
-    double applied_heat = 0;
-    double applied_weight = 0;
     double ambient_pressure = 0;
 
     private List<Pressable> m_pressables; // pressables register themselves with this on event
@@ -175,12 +129,8 @@ public class World : MonoBehaviour
         GameMgr.Events?.Register<Pressable>(GameEvents.RegisterPressable, HandleRegisterPressable);
         GameMgr.Events?.Register<Touchable>(GameEvents.RegisterMovable, HandleRegisterMovable);
 
-        GameMgr.Events?.Register(GameEvents.WarpPVT, HandleWarpPVT);
+        GameMgr.Events?.Register(GameEvents.ResetPressed, HandleResetPressed);
 
-        GameMgr.Events?.Register<Tool>(GameEvents.PressedToolToggle, HandleToolTogglePressed);
-
-        GameMgr.Events?.Register<List<ToolType>>(GameEvents.UpdateAllowedTools, HandleAllowedToolsUpdated);
-        GameMgr.Events?.Register(GameEvents.ResetToolRestrictions, HandleResetToolRestrictions);
 
         movables = new List<Touchable>();
     }
@@ -198,67 +148,13 @@ public class World : MonoBehaviour
         lhand.Init(hand_emptys);
         rhand.Init(hand_emptys);
 
-        double kg_corresponding_to_10mpa = thermo_present.get_surfacearea_insqr() * (10 * 1453.8/*MPa->psi*/) * 0.453592/*lb->kg*/;
-        double kg_corresponding_to_2mpa = thermo_present.get_surfacearea_insqr() * (2 * 1453.8/*MPa->psi*/) * 0.453592/*lb->kg*/; // 10 MPa seems way too big, sooooo... we'll just do 2 MPa.
+        ToolMgr.Init();
 
-        // As we grab them, set ranges on tool dials (sliders).
-        tools = new List<Tool> {
-            tool_insulator,
-            tool_stop1,
-            tool_stop2,
-            tool_burner,
-            tool_coil,
-            tool_weight,
-            tool_balloon,
-            tool_ambientPressure,
-            tool_roomTemp,
-            // tool_percentInsulation
-        };
-
-        tool_insulator.Init(Units.Quality);
-        tool_stop1.Init(Units.Volume);
-        tool_stop2.Init(Units.Volume);
-        tool_burner.Init(Units.Heat, 0.001f);
-        tool_coil.Init(Units.Heat, 0.001f);
-        tool_weight.Init(Units.Weight);
-        tool_balloon.Init(Units.Weight);
-        tool_ambientPressure.Init(Units.AmbientPressure, 0.001f); // display in kPa
-        tool_roomTemp.Init(Units.TemperatureK);
-        // tool_percentInsulation.Init(Units.Percent);
-
-        dials = new List<Dial> {
-            // dial_insulator,
-            dial_stop1,
-            dial_stop2,
-            dial_burner,
-            dial_coil,
-            dial_weight,
-            dial_balloon,
-            dial_ambientPressure,
-            dial_roomTemp,
-            dial_percentInsulation
-        };
-
-        // dial_insulator.Init(0f, 1f);
-        dial_stop1.Init((float)ThermoMath.v_min, (float)ThermoMath.v_max, DigitFormat.Volume);
-        dial_stop2.Init((float)ThermoMath.v_min, (float)ThermoMath.v_max, DigitFormat.Volume);
-        dial_burner.Init(0f, BURNER_MAX, DigitFormat.Heat);
-        dial_coil.Init(0f, COIL_MAX, DigitFormat.Heat);
-        dial_weight.Init(0f, (float)kg_corresponding_to_10mpa / 5.0f, DigitFormat.Weight);
-        dial_balloon.Init(0f, -(float)kg_corresponding_to_10mpa / 5.0f, DigitFormat.Weight); // 500.0f
-        dial_ambientPressure.Init((float)ThermoMath.p_min, (float)ThermoMath.p_max, DigitFormat.AmbientPressure);
-        dial_roomTemp.Init(273, 366, DigitFormat.TemperatureK); // -100 to 200 fahrenheit // default val of 0.55 sets to 292 kelvin (72 degrees fahrenheit)
-        dial_percentInsulation.Init(0f, 100, DigitFormat.Percent);
-
-        room_temp = tool_roomTemp.get_val(); // in K
+        room_temp = ToolMgr.GetToolVal(ToolType.SurroundingTemperature); // in K
 
         // Gather pressables
         m_pressables = new List<Pressable>();
         GameMgr.Events.Dispatch(GameEvents.GatherPressables);
-
-        // Initialize Buttons
-        reset_button.OnPress += HandleResetPressed;
-        halfer_button.OnPress += HandleHalferPressed;
 
         // toggle_heatTransfer.Init();
         // toggle_heatTransfer.Pressable.PressCompleted += HandleHeatTransferToggle;
@@ -266,34 +162,8 @@ public class World : MonoBehaviour
         // Initialize Tablet (and corresponding buttons)
         tablet.Init();
 
-        flame = GameObject.Find("Flame").GetComponent<ParticleSystem>();
-
         workspace = GameObject.Find("Workspace");
         handle_workspace_touchable = handle_workspace.GetComponent<Touchable>();
-
-        // set initial states of meshrenderers and transforms for our tools.
-        for (int i = 0; i < tools.Count; i++) {
-            Tool t = tools[i];
-            if (t.active_available_meshrenderer != null) {
-                t.active_available_meshrenderer.enabled = false;
-            }
-            if (t.storage_meshrenderer != null) {
-                t.storage_meshrenderer.enabled = false;
-            }
-            if (t.storage != null) {
-                GameObject g = t.gameObject;
-                g.transform.SetParent(t.storage.gameObject.transform);
-                t.stored = true;
-                g.transform.localPosition = new Vector3(0f, 0f, 0f);
-                g.transform.localScale = new Vector3(1f, 1f, 1f);
-                g.transform.localRotation = Quaternion.identity;
-                float v = t.storage.transform.localScale.x; //can grab any dimension
-                Vector3 invscale = new Vector3(1f / v, 1f / v, 1f / v);
-                t.text.transform.localScale = invscale;
-            }
-
-            GameMgr.Events?.Dispatch(GameEvents.UpdateToolText, t);
-        }
 
         vessel = GameObject.Find("Vessel");
         graph = GameObject.Find("Graph");
@@ -303,16 +173,7 @@ public class World : MonoBehaviour
         placement_dot.GetComponent<Renderer>().enabled = false;
         placement_thermo_reasonable = false;
 
-        for (int i = 0; i < tools.Count; i++) movables.Add(tools[i].touchable); //important that tools take priority, so they can be grabbed and removed
         movables.Add(tablet.touchable);
-
-        halfables = new List<Halfable> {
-            GameObject.Find("Container").GetComponent<Halfable>(),
-            GameObject.Find("Tool_Insulator Variant").GetComponent<Halfable>(),
-            GameObject.Find("Tool_Coil Variant").GetComponent<Halfable>()
-        };
-
-        SetAllHalfed(true);
     }
 
     #endregion // Initialization
@@ -338,185 +199,10 @@ public class World : MonoBehaviour
 
         UpdateGrabVis();
 
-        UpdateToolTexts();
-
         ProcessErrors();
     }
 
     #endregion // Callbacks
-
-    #region Tools
-
-    // The three functions below are used to manage attach/detach and storage of tools.
-    // Generally, they have to set the transforms properly, update state variables,
-    // and update text.
-    void ActivateTool(Tool t) {
-        GameObject o = t.gameObject;
-        o.transform.SetParent(t.active.transform);
-        t.touchable.grabbed = false;
-        t.engaged = true;
-        if (t == tool_stop1) {
-            thermo_present.add_v_stop(tool_stop1.get_val(), t);
-        }
-        else if (t == tool_stop2) {
-            thermo_present.add_v_stop(tool_stop2.get_val(), t);
-        }
-        t.stored = false;
-        t.boxcollider.isTrigger = true;
-        // Not sure the two below are ever used? We don't have dials for these tools in use.
-        //     if(t == tool_insulator) t.dial_dial.val = (float)ThermoMath.percent_given_t(thermo.temperature);
-        //else if(t == tool_clamp)     t.dial_dial.val = (float)ThermoMath.percent_given_v(thermo.volume);
-        GameMgr.Events?.Dispatch(GameEvents.ActivateTool, t);
-        GameMgr.Events?.Dispatch(GameEvents.UpdateToolText, t);
-        UpdateApplyTool(t);
-        o.transform.localPosition = new Vector3(0f, 0f, 0f);
-        o.transform.localRotation = Quaternion.identity;
-        o.transform.localScale = new Vector3(1f, 1f, 1f);
-        float v = t.active.transform.localScale.x; //can grab any dimension
-        Vector3 invscale = new Vector3(1f / v, 1f / v, 1f / v);
-        t.text.transform.localScale = invscale;
-        Halfable h = o.GetComponent<Halfable>();
-        if (h != null) h.setHalf(halfed); //conform to half-ness while engaged
-    }
-    void StoreTool(Tool t) {
-        GameObject o = t.gameObject;
-        o.transform.SetParent(t.storage.transform);
-        t.touchable.grabbed = false;
-        t.engaged = false;
-        if (t == tool_stop1) {
-            thermo_present.release_v_stop(t);
-        }
-        else if (t == tool_stop2) {
-            thermo_present.release_v_stop(t);
-        }
-        t.stored = true;
-        o.transform.localPosition = new Vector3(0f, 0f, 0f);
-        o.transform.localRotation = Quaternion.identity;
-        o.transform.localScale = new Vector3(1f, 1f, 1f);
-        float v = t.storage.transform.localScale.x; //can grab any dimension
-        Vector3 invscale = new Vector3(1f / v, 1f / v, 1f / v);
-        t.text.transform.localScale = invscale;
-        Halfable h = o.GetComponent<Halfable>();
-        if (h != null) h.setHalf(false); //Un-half when we store a tool.
-        GameMgr.Events?.Dispatch(GameEvents.StoreTool, t);
-        GameMgr.Events?.Dispatch(GameEvents.UpdateToolText, t);
-        UpdateApplyTool(t);
-    }
-    void DetachTool(Tool t, Vector3 vel) {
-        GameObject o = t.gameObject;
-        o.transform.SetParent(t.touchable.og_parent);
-        t.touchable.grabbed = false;
-        if (!t.always_engaged) {
-            t.engaged = false;
-        }
-        if (t == tool_stop1) {
-            thermo_present.release_v_stop(t);
-        }
-        else if (t == tool_stop2) {
-            thermo_present.release_v_stop(t);
-        }
-        t.stored = false;
-        o.transform.localScale = new Vector3(1f, 1f, 1f);
-        t.text.transform.localScale = new Vector3(1f, 1f, 1f);
-        t.rigidbody.isKinematic = false;
-        t.rigidbody.velocity = vel;
-        GameMgr.Events?.Dispatch(GameEvents.DetachTool, t);
-        GameMgr.Events?.Dispatch(GameEvents.UpdateToolText, t);
-        UpdateApplyTool(t);
-    }
-
-    void AllowTool(Tool t) {
-        // TODO: this
-        t.gameObject.SetActive(true);
-    }
-
-    void DisallowTool(Tool t) {
-        // TODO: this
-        DetachTool(t, Vector3.zero);
-        t.gameObject.SetActive(false);
-    }
-
-    /*
-    tried during:
-    - newly grabbed
-    - newly snapped on
-    - dial altered
-    */
-    void UpdateApplyTool(Tool t) //alters "applied_x"
-    {
-        if (t == tool_insulator) {
-            //do nothing
-            return;
-        }
-        else if (t == tool_burner || t == tool_coil) {
-            if (tool_burner.engaged && tool_coil.engaged) {
-                if (t == tool_burner) DetachTool(tool_coil, popVector());
-                if (t == tool_coil) DetachTool(tool_burner, popVector());
-            }
-
-            if (t == tool_burner) {
-                if (tool_burner.get_val() == 0.0f) {
-                    var e = flame.emission;
-                    e.enabled = false;
-                }
-                else {
-                    var e = flame.emission;
-                    e.enabled = true;
-                }
-                var vel = flame.velocityOverLifetime;
-                vel.speedModifierMultiplier = Mathf.Lerp(0.1f, 0.5f, t.get_val());
-            }
-            else if (t == tool_coil) {
-                //TODO: coil visuals?
-            }
-
-            applied_heat = 0;
-            if (tool_burner.engaged) applied_heat += tool_burner.get_val();
-            if (tool_coil.engaged) applied_heat += tool_coil.get_val();
-        }
-        else if (t == tool_stop1 || t == tool_stop2) {
-            if (t == tool_stop1) {
-                thermo_present.update_v_stop(tool_stop1.get_val(), t);
-            }
-            if (t == tool_stop2) {
-                thermo_present.update_v_stop(tool_stop2.get_val(), t);
-            }
-            applied_weight = 0;
-            if (tool_weight.engaged) applied_weight += tool_weight.get_val();
-            if (tool_balloon.engaged) applied_weight += tool_balloon.get_val();
-        }
-        else if (t == tool_weight || t == tool_balloon) {
-            if (tool_weight.engaged && tool_balloon.engaged) {
-                if (t == tool_weight) DetachTool(tool_balloon, popVector());
-                else if (t == tool_balloon) DetachTool(tool_weight, popVector());
-            }
-
-            float v = 1f;
-            if (t == tool_weight) v += dial_weight.val;
-            else if (t == tool_balloon) v += dial_balloon.val;
-            Vector3 scale;
-            Vector3 invscale;
-
-            scale = new Vector3(v, v, v);
-            invscale = new Vector3(1f / v, 1f / v, 1f / v);
-            t.active.transform.localScale = scale;
-            if (t.engaged) t.text.transform.localScale = invscale;
-
-            v *= t.default_storage_scale;
-            scale = new Vector3(v, v, v);
-            invscale = new Vector3(1f / v, 1f / v, 1f / v);
-            t.storage.transform.localScale = scale;
-            if (t.stored) t.text.transform.localScale = invscale;
-
-            //math
-            applied_weight = 0;
-            if (tool_weight.engaged) applied_weight += tool_weight.get_val();
-            if (tool_balloon.engaged) applied_weight += tool_balloon.get_val();
-        }
-
-    }
-
-    #endregion // Tools
 
     #region Helpers
 
@@ -532,9 +218,9 @@ public class World : MonoBehaviour
         double delta_time = (double)Time.fixedDeltaTime;
 
         //apply thermo
-        ambient_pressure = tool_ambientPressure.get_val();
-        room_temp = tool_roomTemp.get_val();
-        double weight_pressure = (applied_weight) / thermo_present.get_surfacearea_insqr(); //psi
+        ambient_pressure = ToolMgr.GetToolVal(ToolType.SurroundingPressure);
+        room_temp = ToolMgr.GetToolVal(ToolType.SurroundingTemperature);
+        double weight_pressure = (ToolMgr.GetAppliedWeight()) / ThermoMath.surfacearea_insqr; //psi
         weight_pressure *= PSI_TO_PASCAL; //conversion from psi to pascal
         weight_pressure += ambient_pressure;
         weight_pressure = Math.Clamp(weight_pressure, ThermoMath.p_min, ThermoMath.p_max);
@@ -550,8 +236,8 @@ public class World : MonoBehaviour
 
         double insulation_coefficient;
 
-        if (tool_insulator.engaged) {
-            insulation_coefficient = dial_percentInsulation.val;
+        if (ToolMgr.IsToolEngaged(ToolType.Insulator)) {
+            insulation_coefficient = ToolMgr.GetDialVal(ToolType.Insulator);
         }
         else {
             insulation_coefficient = CONTAINER_INSULATION_COEFFICIENT;
@@ -575,7 +261,7 @@ public class World : MonoBehaviour
 
 
         // heat leak
-        if (toggle_heatTransfer.IsOn()) {
+        if (ToolMgr.IsHeatToggleOn()) {
             double heat_transfer_delta =
                 (room_temp - thermo_present.get_temperature()) // total temperature difference
                 * insulation_coefficient // what percentage of that difference is shielded by insulation
@@ -590,6 +276,8 @@ public class World : MonoBehaviour
                 thermo_present.add_heat_per_delta_time(heat_transfer_delta, insulation_coefficient, delta_time, weight_pressure, false, temperature_gradient);
             }
         }
+
+        double applied_heat = ToolMgr.GetAppliedHeat();
 
         // tool heat
         if (applied_heat != 0) {
@@ -636,43 +324,6 @@ public class World : MonoBehaviour
 
     }
 
-    private void UpdateToolTexts() {
-
-        //tooltext
-        Dial d;
-        for (int i = 0; i < dials.Count; i++) {
-            d = dials[i];
-            d.set_examined(false);
-            if (d.gameObject == lgrabbed || d.gameObject == rgrabbed) d.set_examined(true);
-            // TODO: update tool text
-            /*
-            if (t.get_val() != t.dial_dial.prev_val) {
-                UpdateToolText(t);
-                t.dial_dial.examined = true;
-            }
-            d.prev_val = t.get_val();
-            */
-        }
-
-        Tool t;
-        for (int i = 0; i < tools.Count; i++) {
-            t = tools[i];
-            if (t.text_fadable == null) {
-                continue;
-            }
-            if (!t.text_fadable.stale) {
-                if (t.text_fadable.alpha == 0f) {
-                    t.textl_meshrenderer.enabled = false;
-                }
-                else {
-                    t.textl_meshrenderer.enabled = true;
-                    Color32 c = t.disabled ? new Color32(70, 70, 70, (byte)(t.text_fadable.alpha * 255)) : new Color32(0, 0, 0, (byte)(t.text_fadable.alpha * 255));
-                    t.textl_tmpro.faceColor = c;
-                }
-            }
-        }
-    }
-
     private void ProcessErrors() {
         thermo_present.UpdateErrorState();
     }
@@ -710,7 +361,7 @@ public class World : MonoBehaviour
 
                 List<Tool> relevant_tools = dd.get_relevant_tools();
                 for (int t = 0; t < relevant_tools.Count; t++) {
-                    UpdateApplyTool(relevant_tools[t]);
+                    ToolMgr.UpdateApplyTool(relevant_tools[t]);
                 }
             }
         }
@@ -765,24 +416,6 @@ public class World : MonoBehaviour
                     ref_grabbed.transform.SetParent(ref_hand.transform);
                     if (ref_grabbed == ref_ograbbed) ref_ograbbed = null;
                     movables[i].grabbed = true;
-                    Tool t = ref_grabbed.GetComponent<Tool>();
-                    if (t) //newly grabbed object is a tool
-                    {
-                        t.audioS.Play();
-                        t.engaged = false;
-                        if (t == tool_stop1) {
-                            thermo_present.release_v_stop(t);
-                        }
-                        else if (t == tool_stop2) {
-                            thermo_present.release_v_stop(t);
-                        }
-                        t.stored = false;
-                        ref_grabbed.transform.localScale = new Vector3(1f, 1f, 1f);
-                        t.text.transform.localScale = new Vector3(1f, 1f, 1f);
-                        t.rigidbody.isKinematic = true;
-                        t.boxcollider.isTrigger = false;
-                        UpdateApplyTool(t);
-                    }
                     VisAid v = ref_grabbed.GetComponent<VisAid>();
                     if (v) //newly grabbed object is a visaid
                     {
@@ -798,13 +431,13 @@ public class World : MonoBehaviour
             }
             //then dials
             if (ref_grabbed == null) {
-                for (int i = 0; i < dials.Count; i++) {
+                for (int i = 0; i < ToolMgr.Dials.Count; i++) {
                     if ( //dial newly grabbed
-                           (left_hand && dials[i].touchable.ltouch) ||
-                           (!left_hand && dials[i].touchable.rtouch)
+                           (left_hand && ToolMgr.Dials[i].touchable.ltouch) ||
+                           (!left_hand && ToolMgr.Dials[i].touchable.rtouch)
                           ) {
-                        ref_grabbed = dials[i].gameObject;
-                        dials[i].touchable.grabbed = true;
+                        ref_grabbed = ToolMgr.Dials[i].gameObject;
+                        ToolMgr.Dials[i].touchable.grabbed = true;
                         if (ref_grabbed == ref_ograbbed) ref_ograbbed = null;
                     }
                 }
@@ -848,62 +481,37 @@ public class World : MonoBehaviour
         //find new releases
         else if (ref_grabbed && (ref_htrigger_delta == -1 || ref_itrigger_delta == -1)) //something newly released
         {
-            Tool t = ref_grabbed.GetComponent<Tool>();
-            if (t) //tool newly released
+            ref_grabbed.transform.SetParent(ref_grabbed.GetComponent<Touchable>().og_parent); //ok to do, even with a dial
+            VisAid v = ref_grabbed.GetComponent<VisAid>();
+            if (v) //visaid newly released
             {
-                t.audioS.Play();
-                if (t.active_ghost.tintersect) //tool released making it active
-                {
-                    ActivateTool(t);
-                }
-                else if (t.storage_ghost.tintersect) //tool released making it stored
-                {
-                    StoreTool(t);
-                }
-                else //tool released nowhere special
-                {
-                    DetachTool(t, hand_vel);
-                }
+                v.rigidbody.isKinematic = false;
+                v.rigidbody.velocity = hand_vel;
             }
-            else //newly released object is NOT a tool
-            {
-                ref_grabbed.transform.SetParent(ref_grabbed.GetComponent<Touchable>().og_parent); //ok to do, even with a dial
-                VisAid v = ref_grabbed.GetComponent<VisAid>();
-                if (v) //visaid newly released
-                {
-                    v.rigidbody.isKinematic = false;
-                    v.rigidbody.velocity = hand_vel;
-                }
-                if (ref_grabbed == graph) {
-                    placement_dot.GetComponent<Renderer>().enabled = false;
+            if (ref_grabbed == graph) {
+                placement_dot.GetComponent<Renderer>().enabled = false;
 
-                    if (placement_thermo_reasonable) {
-                        for (int i = 0; i < tools.Count; i++) {
-                            Tool toDetach = tools[i];
-                            if (toDetach.engaged) {
-                                DetachTool(toDetach, popVector());
-                            }
-                        }
-                        WarpPVT(placement_thermo.y, placement_thermo.x, placement_thermo.z);
-                    }
-                    state_dot.GetComponent<Renderer>().enabled = true;
+                if (placement_thermo_reasonable) {
+                    ToolMgr.DeactivateAllTools();
+                    WarpPVT(placement_thermo.y, placement_thermo.x, placement_thermo.z);
                 }
-
-                // newly released is a cartridge
-                Cartridge c = ref_grabbed.GetComponent<Cartridge>();
-
-                if (c != null) {
-                    GameMgr.Events.Dispatch(GameEvents.ColliderReleased, c.GetComponent<Collider>());
-                }
-
-                /* TODO: separate out returning functionality from tools, then add to cartridges
-                if (c != null) {
-                    c.GetComponent<Rigidbody>().isKinematic = false;
-                    c.GetComponent<Rigidbody>().velocity = hand_vel;
-                    c.GetComponent<Touchable>().grabbed = false;
-                }
-                */
+                state_dot.GetComponent<Renderer>().enabled = true;
             }
+
+            // newly released is a cartridge
+            Cartridge c = ref_grabbed.GetComponent<Cartridge>();
+
+            if (c != null) {
+                GameMgr.Events.Dispatch(GameEvents.ColliderReleased, c.GetComponent<Collider>());
+            }
+
+            /* TODO: separate out returning functionality from tools, then add to cartridges
+            if (c != null) {
+                c.GetComponent<Rigidbody>().isKinematic = false;
+                c.GetComponent<Rigidbody>().velocity = hand_vel;
+                c.GetComponent<Touchable>().grabbed = false;
+            }
+            */
 
             ref_grabbed.GetComponent<Touchable>().grabbed = false;
             ref_grabbed = null;
@@ -945,40 +553,6 @@ public class World : MonoBehaviour
      * Function to update object materials/appearance in response to a "grab" event.
      */
     void UpdateGrabVis() {
-        for (int i = 0; i < tools.Count; i++) {
-            Tool t = tools[i];
-            GameObject g = t.gameObject;
-
-            if (t.storage == null) {
-                continue; // tool that does not have a physical mesh
-            }
-
-            if (lgrabbed == g || rgrabbed == g) {
-                //active
-                if (t.active_ghost.tintersect) {
-                    t.active_available_meshrenderer.enabled = true;
-                    t.active_available_meshrenderer.material = GameDB.Instance.SnapMat;
-                }
-                else {
-                    t.active_available_meshrenderer.enabled = true;
-                    t.active_available_meshrenderer.material = GameDB.Instance.AvailableMat;
-                }
-                //storage
-                if (t.storage_ghost.tintersect) {
-                    t.storage_meshrenderer.enabled = true;
-                    t.storage_meshrenderer.material = GameDB.Instance.SnapMat;
-                }
-                else {
-                    t.storage_meshrenderer.enabled = true;
-                    t.storage_meshrenderer.material = GameDB.Instance.AvailableMat;
-                }
-            }
-            else {
-                t.active_available_meshrenderer.enabled = false;
-                t.storage_meshrenderer.enabled = false;
-            }
-        }
-
         bool ltouch = false;
         bool rtouch = false;
         update_touches(ref ltouch, ref rtouch);
@@ -1080,21 +654,7 @@ public class World : MonoBehaviour
     }
 
     public Tuple<double, double> get_stop_vals() {
-        return new Tuple<double, double>(tool_stop1.get_val(), tool_stop2.get_val());
-    }
-
-
-    void SetAllHalfed(bool h) {
-        halfed = h;
-        for (int i = 0; i < halfables.Count; i++)
-            halfables[i].setHalf(halfed);
-        //special case, only halfed when engaged
-        if (!tool_coil.engaged) tool_coil.gameObject.GetComponent<Halfable>().setHalf(false);
-        if (!tool_insulator.engaged) tool_insulator.gameObject.GetComponent<Halfable>().setHalf(false);
-    }
-
-    Vector3 popVector() {
-        return new Vector3(UnityEngine.Random.Range(-1f, 1f), 1f, UnityEngine.Random.Range(-1f, 1f));
+        return new Tuple<double, double>(ToolMgr.GetToolVal(ToolType.Stops, 1), ToolMgr.GetToolVal(ToolType.Stops, 2));
     }
 
     #endregion Helpers
@@ -1218,15 +778,8 @@ public class World : MonoBehaviour
 
     #region Handlers
 
-    private void HandleResetPressed(object sender, System.EventArgs args) {
-        for (int i = 0; i < tools.Count; i++) {
-            if (tools[i].engaged) DetachTool(tools[i], new Vector3(0.0f, 0.0f, 0.0f));
-        }
+    private void HandleResetPressed() {
         thermo_present.Reset();
-    }
-
-    private void HandleHalferPressed(object sender, System.EventArgs args) {
-        SetAllHalfed(!halfed);
     }
 
     private void HandleRegisterPressable(Pressable pressable) {
@@ -1238,50 +791,6 @@ public class World : MonoBehaviour
     private void HandleRegisterMovable(Touchable touchable) {
         if (!movables.Contains(touchable)) {
             movables.Add(touchable);
-        }
-    }
-
-    private void HandleWarpPVT() {
-        // set ambient pressure to the pressure picked
-        ambient_pressure = thermo_present.get_pressure();
-        Debug.Log("[Warp] pressure: " + thermo_present.get_pressure() + " || min " + ThermoMath.p_min);
-        dial_ambientPressure.set_val((float)((ambient_pressure - ThermoMath.p_min) / (ThermoMath.p_max - ThermoMath.p_min)));
-    }
-
-
-    private void HandleToolTogglePressed(Tool t) {
-        for (int i = 0; i < tools.Count; i++) {
-            if (t == tools[i]) {
-                if (t.engaged) {
-                    DetachTool(t, Vector3.zero);
-                    // StoreTool(t);
-                    break;
-                }
-                else {
-                    ActivateTool(t);
-                    break;
-                }
-            }
-        }
-    }
-
-    private void HandleAllowedToolsUpdated(List<ToolType> allowed) {
-        for (int i = 0; i < tools.Count; i++) {
-            if (allowed.Contains(tools[i].tool_type)) {
-                AllowTool(tools[i]);
-            }
-            else if (tools[i].always_engaged) {
-                AllowTool(tools[i]);
-            }
-            else {
-                DisallowTool(tools[i]);
-            }
-        }
-    }
-
-    private void HandleResetToolRestrictions() {
-        for (int i = 0; i < tools.Count; i++) {
-            AllowTool(tools[i]);
         }
     }
 
