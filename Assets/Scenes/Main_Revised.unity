@@ -26582,7 +26582,7 @@ PrefabInstance:
         type: 3}
       propertyPath: dial_coil
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 8646620364713073625}
     - target: {fileID: 2423173608412668976, guid: fd9e7f31046f39c46a3fb1d9fd9683d9,
         type: 3}
       propertyPath: tool_coil
@@ -26652,7 +26652,7 @@ PrefabInstance:
         type: 3}
       propertyPath: dial_roomTemp
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 8646620364713073627}
     - target: {fileID: 2423173608412668976, guid: fd9e7f31046f39c46a3fb1d9fd9683d9,
         type: 3}
       propertyPath: halfer_button
@@ -26677,7 +26677,7 @@ PrefabInstance:
         type: 3}
       propertyPath: toggle_heatTransfer
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 8646620364713073626}
     - target: {fileID: 2423173608412668976, guid: fd9e7f31046f39c46a3fb1d9fd9683d9,
         type: 3}
       propertyPath: dial_ambientPressure
@@ -36112,17 +36112,17 @@ PrefabInstance:
     - target: {fileID: 8596095803994565699, guid: 82a063789f5492a4881e22d450e47a1b,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.393
+      value: -0.836
       objectReference: {fileID: 0}
     - target: {fileID: 8596095803994565699, guid: 82a063789f5492a4881e22d450e47a1b,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.033
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 8596095803994565699, guid: 82a063789f5492a4881e22d450e47a1b,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0.0070004463
+      value: -0.517
       objectReference: {fileID: 0}
     - target: {fileID: 8596095803994565699, guid: 82a063789f5492a4881e22d450e47a1b,
         type: 3}
@@ -36197,6 +36197,16 @@ PrefabInstance:
       propertyPath: m_tool
       value: 
       objectReference: {fileID: 1862234073}
+    - target: {fileID: 2143282454750515190, guid: 29c93134005f4e146888613d124d2592,
+        type: 3}
+      propertyPath: m_Name
+      value: Decoupled Dial_Coil
+      objectReference: {fileID: 0}
+    - target: {fileID: 3859045859753793845, guid: 29c93134005f4e146888613d124d2592,
+        type: 3}
+      propertyPath: m_Name
+      value: Decoupled Dial_Coil OLD
+      objectReference: {fileID: 0}
     - target: {fileID: 4248942824328243682, guid: 29c93134005f4e146888613d124d2592,
         type: 3}
       propertyPath: m_tool
@@ -36227,6 +36237,56 @@ PrefabInstance:
       propertyPath: m_tool
       value: 
       objectReference: {fileID: 755198150}
+    - target: {fileID: 5909018921737607197, guid: 29c93134005f4e146888613d124d2592,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0.004408178
+      objectReference: {fileID: 0}
+    - target: {fileID: 5909018921737607197, guid: 29c93134005f4e146888613d124d2592,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0.09166777
+      objectReference: {fileID: 0}
+    - target: {fileID: 5909018921737607197, guid: 29c93134005f4e146888613d124d2592,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0.12680009
+      objectReference: {fileID: 0}
+    - target: {fileID: 5909018921737607197, guid: 29c93134005f4e146888613d124d2592,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.999744
+      objectReference: {fileID: 0}
+    - target: {fileID: 5909018921737607197, guid: 29c93134005f4e146888613d124d2592,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.000020204352
+      objectReference: {fileID: 0}
+    - target: {fileID: 5909018921737607197, guid: 29c93134005f4e146888613d124d2592,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.0000033203612
+      objectReference: {fileID: 0}
+    - target: {fileID: 5909018921737607197, guid: 29c93134005f4e146888613d124d2592,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.0226291
+      objectReference: {fileID: 0}
+    - target: {fileID: 5909018921737607197, guid: 29c93134005f4e146888613d124d2592,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: -0.002
+      objectReference: {fileID: 0}
+    - target: {fileID: 5909018921737607197, guid: 29c93134005f4e146888613d124d2592,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0.001
+      objectReference: {fileID: 0}
+    - target: {fileID: 5909018921737607197, guid: 29c93134005f4e146888613d124d2592,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: -7.107
+      objectReference: {fileID: 0}
     - target: {fileID: 6943949143618453025, guid: 29c93134005f4e146888613d124d2592,
         type: 3}
       propertyPath: m_effect_map.Array.data[0].ToAffect.Array.data[0]
@@ -36354,6 +36414,42 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 29c93134005f4e146888613d124d2592, type: 3}
+--- !u!114 &8646620364713073625 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6462087897992728814, guid: 29c93134005f4e146888613d124d2592,
+    type: 3}
+  m_PrefabInstance: {fileID: 8646620364713073624}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e51bfea116f32e48b1f8cef1806f825, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &8646620364713073626 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 84230639495462404, guid: 29c93134005f4e146888613d124d2592,
+    type: 3}
+  m_PrefabInstance: {fileID: 8646620364713073624}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ecdb526cc77062248a4ef31a5dc2b28f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &8646620364713073627 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7957744705016039887, guid: 29c93134005f4e146888613d124d2592,
+    type: 3}
+  m_PrefabInstance: {fileID: 8646620364713073624}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e51bfea116f32e48b1f8cef1806f825, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!23 &8668581854155840848
 MeshRenderer:
   m_ObjectHideFlags: 0

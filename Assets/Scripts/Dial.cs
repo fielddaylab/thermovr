@@ -85,6 +85,9 @@ namespace ThermoVR.Dials
 
         private string valFormat;
 
+        private float total_dist;
+        private Vector3 initial_offset;
+
         public void Init(float min_map, float max_map, string valFormat) {
             this.min_map = min_map;
             this.max_map = max_map;
@@ -106,6 +109,8 @@ namespace ThermoVR.Dials
                     relevant_tools.Add(tool);
                 }
             }
+            total_dist = Vector3.Distance(max_pos.position, min_pos.position);
+            initial_offset = meter.transform.localPosition;
 
             touchable = this.GetComponent<Touchable>();
             textv_tmpro = textv.GetComponent<TextMeshPro>();
@@ -134,7 +139,7 @@ namespace ThermoVR.Dials
 
         private void RecalibratePos() {
             Vector3 lp = meter.transform.localPosition;
-            lp.x = 0.05f - val * 0.1f;
+            lp.x = total_dist / 2 - val * total_dist - initial_offset.x * 2;
             meter.transform.localPosition = lp;
             forceMap();
         }

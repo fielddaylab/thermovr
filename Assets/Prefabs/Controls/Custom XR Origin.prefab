@@ -75,6 +75,7 @@ GameObject:
   - component: {fileID: 8596095803994565699}
   - component: {fileID: 8596095803994565700}
   - component: {fileID: 8596095803994565701}
+  - component: {fileID: 7054154938042844197}
   m_Layer: 0
   m_Name: Custom XR Origin
   m_TagString: Untagged
@@ -129,6 +130,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_ActionAssets:
   - {fileID: -944628639613478452, guid: c348712bda248c246b8c49b3db54643f, type: 3}
+--- !u!114 &7054154938042844197
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8596095803994565698}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 348a7fb6c0dfeb447bddc3b69c56e9d1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_InitialHeight: 0.325
+  m_CenterEye: {fileID: 8596095802523667356}
+  m_Origin: {fileID: 8596095803994565700}
 --- !u!1001 &7202434019138529601
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -217,6 +233,12 @@ Transform:
 --- !u!1 &8596095802523375546 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1495010367197232891, guid: 9964d0d35be7efa46a1c3c15f551192f,
+    type: 3}
+  m_PrefabInstance: {fileID: 7202434019138529601}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &8596095802523667356 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1495010367197586141, guid: 9964d0d35be7efa46a1c3c15f551192f,
     type: 3}
   m_PrefabInstance: {fileID: 7202434019138529601}
   m_PrefabAsset: {fileID: 0}
