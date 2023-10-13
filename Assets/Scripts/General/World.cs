@@ -577,54 +577,6 @@ public class World : MonoBehaviour
         else rhand.meshrenderer.materials = hand_emptys;
     }
 
-    //give it a list of fingertoggleables, and it manipulates them to act as a singularly-selectable list
-    int reconcileDependentSelectables(int known, List<Tab> list) {
-        int n_toggled = 0;
-        Tab t;
-        for (int i = 0; i < list.Count; i++) {
-            t = list[i];
-            if (t.fingertoggleable.on) n_toggled++;
-        }
-
-        if (n_toggled <= 1) {
-            known = -1;
-            for (int i = 0; i < list.Count; i++) {
-                t = list[i];
-                if (t.fingertoggleable.on) known = i;
-            }
-        }
-        else //need conflict resolution!
-        {
-            known = -1;
-            for (int i = 0; i < list.Count; i++) {
-                t = list[i];
-                if (t.fingertoggleable.on) {
-                    if (known == -1) known = i;
-                    else {
-                        //if only t is intersecting, prefer t
-                        if (t.fingertoggleable.finger && !list[known].fingertoggleable.finger) {
-                            list[known].fingertoggleable.on = false;
-                            known = i;
-                        }
-                        else //prefer previous (ignore t)
-                            t.fingertoggleable.on = false;
-                    }
-                }
-            }
-        }
-
-        return known;
-    }
-
-    void updateSelectableVis(int known, List<Tab> list) {
-        Tab t;
-        for (int i = 0; i < list.Count; i++) {
-            t = list[i];
-            if (known == i) t.backing_meshrenderer.material = tab_sel;
-            else t.backing_meshrenderer.material = tab_default;
-        }
-    }
-
     /// <summary>
     /// Given 2 of 3 variables among p, v, t, calculate the third. Then warp.
     /// </summary>
