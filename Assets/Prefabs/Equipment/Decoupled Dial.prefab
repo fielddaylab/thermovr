@@ -648,8 +648,8 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 0.11793994, y: 0.04, z: 0.02}
-  m_Center: {x: 0.003969978, y: 0.01, z: 0}
+  m_Size: {x: 0.21957998, y: 0.04, z: 0.01000009}
+  m_Center: {x: -0.046850048, y: 0.009999976, z: -5.1616805e-12}
 --- !u!54 &6030497066997557905
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -697,10 +697,11 @@ MonoBehaviour:
   max_pos: {fileID: 2591799295768889723}
   min_pos: {fileID: 7546416110445245067}
   textv: {fileID: 6030497067206319096}
+  meter: {fileID: 2136752545258839447}
   response_power: 1
   default_val: 0
   m_effect_map: []
-  meter: {fileID: 2136752545258839447}
+  activator_button: {fileID: 0}
   touchable: {fileID: 0}
 --- !u!1 &6030497067206319103
 GameObject:
