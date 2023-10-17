@@ -182,6 +182,11 @@ namespace ThermoVR.Dials
             apply_change(map, val, prev_val);
 
             RecalibratePos();
+
+            // reset active button materials
+            if (activator_button != null) {
+                activator_button.UpdateActiveMaterial();
+            }
         }
 
         public void set_val(float new_val) {

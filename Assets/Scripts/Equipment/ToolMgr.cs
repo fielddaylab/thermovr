@@ -442,6 +442,8 @@ namespace ThermoVR.Tools
 
             // Insulator starts engaged
             ActivateTool(tool_insulator);
+
+            toggle_heatTransfer.ResetToggle();
         }
 
         private void HandleHalferPressed(object sender, System.EventArgs args) {

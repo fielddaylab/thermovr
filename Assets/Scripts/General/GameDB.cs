@@ -9,6 +9,9 @@ public class GameDB : MonoBehaviour
     public Material AvailableMat;
     public Material SnapMat;
 
+    public Material InactiveButtonMaterial;
+    public Material ActiveButtonMaterial;
+
     public Sprite MCFill;
     public Sprite SocketEmpty;
     public Sprite Correct, Incorrect, Missed;
