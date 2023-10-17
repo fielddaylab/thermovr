@@ -450,10 +450,15 @@ namespace ThermoVR.Tools
 
         private void HandleWarpPVT(Tuple<double, double, double> pvt) {
             // Pop off applied tools after warp
-            ResetDefaults();
+            DeactivateAllTools(true);
 
             // set ambient pressure to the pressure picked
-            // dial_surroundingPressure.set_val((float)((pvt.Item1 - ThermoMath.p_min) / (ThermoMath.p_max - ThermoMath.p_min)));
+            dial_surroundingPressure.set_val((float)((pvt.Item1 - ThermoMath.p_min) / (ThermoMath.p_max - ThermoMath.p_min)));
+
+            // Insulator starts engaged
+            ActivateTool(tool_insulator);
+
+            toggle_heatTransfer.ResetToggle();
         }
 
         private void HandleToolTogglePressed(Tool t) {
