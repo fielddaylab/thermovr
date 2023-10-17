@@ -10,6 +10,7 @@ using UnityEngine;
 using TMPro;
 using ThermoVR.Dials;
 using System;
+using BeauRoutine;
 
 namespace ThermoVR.Tools
 {
@@ -36,7 +37,7 @@ namespace ThermoVR.Tools
         }
     }
 
-    public class Tool : MonoBehaviour
+    public abstract class Tool : MonoBehaviour, ITool
     {
         [System.NonSerialized]
         public bool engaged = false;
@@ -56,6 +57,23 @@ namespace ThermoVR.Tools
 
         #endregion // Inspector
 
+        #region ITool
+
+        protected Routine m_TransitionRoutine;
+
+        protected abstract IEnumerator ActivationRoutine();
+        protected abstract IEnumerator DeactivationRoutine();
+
+        public void TriggerActivation() {
+            m_TransitionRoutine.Replace(this, ActivationRoutine()).ExecuteWhileDisabled();
+        }
+
+        public void TriggerDeactivation() {
+            m_TransitionRoutine.Replace(this, DeactivationRoutine()).ExecuteWhileDisabled();
+        }
+
+        #endregion // ITool
+
         public void Init(string unit, float mul = 1) {
             this.display_unit = unit;
             this.display_mul = mul;
@@ -63,17 +81,17 @@ namespace ThermoVR.Tools
             engaged = always_engaged;
         }
 
-        public void update_val(float new_val, Dial dial) {
+        public void UpdateVal(float new_val, Dial dial) {
             val = new_val;
 
-            update_tool_text(dial);
+            UpdateToolText(dial);
         }
 
-        public void update_text(Dial dial) {
-            update_tool_text(dial);
+        public void UpdateText(Dial dial) {
+            UpdateToolText(dial);
         }
 
-        public float get_val() {
+        public float GetVal() {
             return val;
         }
 
@@ -81,11 +99,12 @@ namespace ThermoVR.Tools
         /// Moves the engaged tool position
         /// </summary>
         /// <param name="dv">the dial's value difference</param>
-        public void move(float dv) {
+        public void Move(float dv) {
             this.transform.position += new Vector3(0, dv, 0);
         }
 
-        private void update_tool_text(Dial dial) {
+
+        private void UpdateToolText(Dial dial) {
             if (dial.textv_tmpro) dial.SetValText(display_unit, (float)(dial.map * display_mul));
         }
     }

@@ -774,8 +774,8 @@ GameObject:
   - component: {fileID: 403562375778999768}
   - component: {fileID: 2479692992649688194}
   - component: {fileID: 4780455615310965058}
-  - component: {fileID: 1272362679841757905}
   - component: {fileID: 6498444934716518741}
+  - component: {fileID: 7253573963648887459}
   m_Layer: 0
   m_Name: Cartridge_Ghost
   m_TagString: Untagged
@@ -862,22 +862,6 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &1272362679841757905
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5215565046713486384}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 76eee94994f4d034dad8cdc8103ba6bd, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_ghostType: 1
-  triggerTag: Cartridge
-  tool: {fileID: 0}
-  obj: {fileID: 0}
 --- !u!54 &6498444934716518741
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -894,6 +878,22 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &7253573963648887459
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5215565046713486384}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1ac208ff3e9dbc74087d6842fdd48d69, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_ghostType: 1
+  triggerTag: 
+  tool: {fileID: 0}
+  obj: {fileID: 0}
 --- !u!1 &6701198451115315520
 GameObject:
   m_ObjectHideFlags: 0

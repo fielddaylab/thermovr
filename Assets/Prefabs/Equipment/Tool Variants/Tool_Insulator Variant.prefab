@@ -70,13 +70,40 @@ PrefabInstance:
     - target: {fileID: 1469844742514000811, guid: 65b0020cd06dbeb4d8b64470f234f970,
         type: 3}
       propertyPath: m_Name
-      value: Tool_Insulator
+      value: Tool_Insulator Variant
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 65b0020cd06dbeb4d8b64470f234f970, type: 3}
+--- !u!1 &4234803274903849856 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1469844742514000811, guid: 65b0020cd06dbeb4d8b64470f234f970,
+    type: 3}
+  m_PrefabInstance: {fileID: 3359961459538511915}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &331724071344363254
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4234803274903849856}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d91e7483a14a10844864b3ba33a5c149, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  always_engaged: 0
+  tool_type: 4
+  ModelContainer: {fileID: 4234803275758838863}
 --- !u!4 &4234803275758838860 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1469844741424147559, guid: 65b0020cd06dbeb4d8b64470f234f970,
+    type: 3}
+  m_PrefabInstance: {fileID: 3359961459538511915}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &4234803275758838863 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1469844741424147556, guid: 65b0020cd06dbeb4d8b64470f234f970,
     type: 3}
   m_PrefabInstance: {fileID: 3359961459538511915}
   m_PrefabAsset: {fileID: 0}

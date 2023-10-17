@@ -273,10 +273,10 @@ namespace ThermoVR.Dials
 
                         switch (effectResponse.Effect) {
                             case Effect.Value:
-                                tool.update_val(map, this);
+                                tool.UpdateVal(map, this);
                                 break;
                             case Effect.Movement:
-                                tool.move((new_val - prev_val) * effectResponse.Modifier);
+                                tool.Move((new_val - prev_val) * effectResponse.Modifier);
                                 break;
                             default:
                                 break;
@@ -299,20 +299,6 @@ namespace ThermoVR.Dials
         private void HandleDeactivateTool(Tool tool) {
             if (relevant_tools.Contains(tool)) {
                 Reset();
-            }
-        }
-
-        private void HandleStoreTool(Tool tool) {
-            if (relevant_tools.Contains(tool)) {
-                Reset();
-            }
-        }
-
-        private void HandleUpdateToolText(Tool tool) {
-            for (int t = 0; t < relevant_tools.Count; t++) {
-                if (relevant_tools[t] == tool) {
-                    tool.update_text(this);
-                }
             }
         }
 

@@ -13,6 +13,7 @@ namespace ThermoVR.Tools
 
         public const float BURNER_MAX = 100000;
         public const float COIL_MAX = -100000;
+        private const float DEFAULT_CHAMBER_PRESSURE = 101325;
 
         [Space(5)]
         [Header("Tools")]
@@ -92,11 +93,6 @@ namespace ThermoVR.Tools
             // TODO: make explicit assignment
             flame = GameObject.Find("Flame").GetComponent<ParticleSystem>();
 
-            DeactivateAllTools(true);
-
-            // Insulator starts engaged
-            ActivateTool(tool_insulator);
-
             Dials = new List<Dial> {
                 dial_stop1,
                 dial_stop2,
@@ -121,6 +117,8 @@ namespace ThermoVR.Tools
             dial_surroundingPressure.Init((float)ThermoMath.p_min, (float)ThermoMath.p_max, DigitFormat.AmbientPressure);
             dial_surroundingTemp.Init(273, 366, DigitFormat.TemperatureK); // -100 to 200 fahrenheit // default val of 0.55 sets to 292 kelvin (72 degrees fahrenheit)
             dial_percentInsulation.Init(0f, 100, DigitFormat.Percent);
+
+            ResetDefaults();
 
             // Initialize Buttons
             reset_button.OnPress += HandleResetPressed;
@@ -149,22 +147,22 @@ namespace ThermoVR.Tools
         public double GetToolVal(ToolType type, int uniqueID = 0) {
             switch (type) {
                 case ToolType.Burner:
-                    return tool_burner.get_val();
+                    return tool_burner.GetVal();
                 case ToolType.Coil:
-                    return tool_coil.get_val();
+                    return tool_coil.GetVal();
                 case ToolType.Weight:
-                    return tool_weight.get_val();
+                    return tool_weight.GetVal();
                 case ToolType.NegativeWeight:
-                    return tool_negativeWeight.get_val();
+                    return tool_negativeWeight.GetVal();
                 case ToolType.Insulator:
-                    return tool_insulator.get_val();
+                    return tool_insulator.GetVal();
                 case ToolType.SurroundingTemperature:
-                    return tool_surroundingTemp.get_val();
+                    return tool_surroundingTemp.GetVal();
                 case ToolType.SurroundingPressure:
-                    return tool_surroundingPressure.get_val();
+                    return tool_surroundingPressure.GetVal();
                 case ToolType.Stops:
-                    if (uniqueID == 1) { return tool_stop1.get_val(); }
-                    else if (uniqueID == 2) { return tool_stop2.get_val(); }
+                    if (uniqueID == 1) { return tool_stop1.GetVal(); }
+                    else if (uniqueID == 2) { return tool_stop2.GetVal(); }
                     else { break; }
                 default:
                     break;
@@ -294,17 +292,16 @@ namespace ThermoVR.Tools
         #endregion // Volume Stops
 
         public void ActivateTool(Tool t) {
-            // TODO: trigger tool's entry animations
-            // tool.ActivateRoutine
-            t.gameObject.SetActive(true);
+            // trigger tool's entry animations
+            t.TriggerActivation();
 
             GameObject o = t.gameObject;
             t.engaged = true;
             if (t == tool_stop1) {
-                AddVStop(tool_stop1.get_val(), t);
+                AddVStop(tool_stop1.GetVal(), t);
             }
             else if (t == tool_stop2) {
-                AddVStop(tool_stop2.get_val(), t);
+                AddVStop(tool_stop2.GetVal(), t);
             }
             GameMgr.Events?.Dispatch(GameEvents.ActivateTool, t);
             UpdateApplyTool(t);
@@ -315,10 +312,10 @@ namespace ThermoVR.Tools
 
         public void DeactivateTool(Tool t) {
             if (!t.always_engaged) {
+                // Trigger tool's deactivation animations
+                t.TriggerDeactivation();
+
                 t.engaged = false;
-                t.gameObject.SetActive(false);
-                // TODO: trigger tool's entry animations
-                // tool.DeactivateRoutine
             }
             if (t == tool_stop1) {
                 ReleaseVStop(t);
@@ -354,7 +351,7 @@ namespace ThermoVR.Tools
                 }
 
                 if (t == tool_burner) {
-                    if (tool_burner.get_val() == 0.0f) {
+                    if (tool_burner.GetVal() == 0.0f) {
                         var e = flame.emission;
                         e.enabled = false;
                     }
@@ -363,7 +360,7 @@ namespace ThermoVR.Tools
                         e.enabled = true;
                     }
                     var vel = flame.velocityOverLifetime;
-                    vel.speedModifierMultiplier = Mathf.Lerp(0.1f, 0.5f, t.get_val());
+                    vel.speedModifierMultiplier = Mathf.Lerp(0.1f, 0.5f, t.GetVal());
                 }
                 else if (t == tool_coil) {
                     //TODO: coil visuals?
@@ -371,10 +368,10 @@ namespace ThermoVR.Tools
             }
             else if (t == tool_stop1 || t == tool_stop2) {
                 if (t == tool_stop1) {
-                    UpdateVStop(tool_stop1.get_val(), t);
+                    UpdateVStop(tool_stop1.GetVal(), t);
                 }
                 if (t == tool_stop2) {
-                    UpdateVStop(tool_stop2.get_val(), t);
+                    UpdateVStop(tool_stop2.GetVal(), t);
                 }
             }
             else if (t == tool_weight || t == tool_negativeWeight) {
@@ -415,16 +412,16 @@ namespace ThermoVR.Tools
 
         public double GetAppliedHeat() {
             double applied_heat = 0;
-            if (tool_burner.engaged) applied_heat += tool_burner.get_val();
-            if (tool_coil.engaged) applied_heat += tool_coil.get_val();
+            if (tool_burner.engaged) applied_heat += tool_burner.GetVal();
+            if (tool_coil.engaged) applied_heat += tool_coil.GetVal();
 
             return applied_heat;
         }
 
         public double GetAppliedWeight() {
             double applied_weight = 0;
-            if (tool_weight.engaged) applied_weight += tool_weight.get_val();
-            if (tool_negativeWeight.engaged) applied_weight += tool_negativeWeight.get_val();
+            if (tool_weight.engaged) applied_weight += tool_weight.GetVal();
+            if (tool_negativeWeight.engaged) applied_weight += tool_negativeWeight.GetVal();
 
             return applied_weight;
         }
@@ -435,11 +432,17 @@ namespace ThermoVR.Tools
         private void HandleResetPressed(object sender, System.EventArgs args) {
             GameMgr.Events.Dispatch(GameEvents.ResetPressed);
 
-            for (int i = 0; i < tools.Count; i++) {
-                if (tools[i].engaged) DeactivateTool(tools[i]);
-            }
+            ResetDefaults();
+        }
 
-            VStops.Clear();
+        private void ResetDefaults() {
+            DeactivateAllTools(true);
+
+            dial_surroundingPressure.set_val((float)((DEFAULT_CHAMBER_PRESSURE - ThermoMath.p_min) / (ThermoMath.p_max - ThermoMath.p_min)));
+
+            // Insulator starts engaged
+            ActivateTool(tool_insulator);
+
         }
 
         private void HandleHalferPressed(object sender, System.EventArgs args) {
