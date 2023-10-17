@@ -281,9 +281,7 @@ namespace ThermoVR.Dials
                             default:
                                 break;
                         }
-
                     }
-
                 }
             }
         }
