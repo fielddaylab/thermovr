@@ -328,14 +328,12 @@ namespace ThermoVR.Tools
         }
 
         public void AllowTool(Tool t) {
-            // TODO: show buttons
-            t.gameObject.SetActive(true);
+            // TODO: show on buttons
         }
 
         public void DisallowTool(Tool t) {
-            // TODO: disable buttons
+            // TODO: show on buttons 
             DeactivateTool(t);
-            t.gameObject.SetActive(false);
         }
 
         public void UpdateApplyTool(Tool t) //alters "applied_x"
@@ -472,6 +470,8 @@ namespace ThermoVR.Tools
 
 
         private void HandleAllowedToolsUpdated(List<ToolType> allowed) {
+            ResetDefaults();
+
             for (int i = 0; i < tools.Count; i++) {
                 if (allowed.Contains(tools[i].tool_type)) {
                     AllowTool(tools[i]);
@@ -486,6 +486,8 @@ namespace ThermoVR.Tools
         }
 
         private void HandleResetToolRestrictions() {
+            ResetDefaults();
+
             for (int i = 0; i < tools.Count; i++) {
                 AllowTool(tools[i]);
             }
