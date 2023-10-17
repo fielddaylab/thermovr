@@ -449,8 +449,11 @@ namespace ThermoVR.Tools
         }
 
         private void HandleWarpPVT(Tuple<double, double, double> pvt) {
+            // Pop off applied tools after warp
+            ResetDefaults();
+
             // set ambient pressure to the pressure picked
-            dial_surroundingPressure.set_val((float)((pvt.Item1 - ThermoMath.p_min) / (ThermoMath.p_max - ThermoMath.p_min)));
+            // dial_surroundingPressure.set_val((float)((pvt.Item1 - ThermoMath.p_min) / (ThermoMath.p_max - ThermoMath.p_min)));
         }
 
         private void HandleToolTogglePressed(Tool t) {
@@ -470,7 +473,7 @@ namespace ThermoVR.Tools
 
 
         private void HandleAllowedToolsUpdated(List<ToolType> allowed) {
-            ResetDefaults();
+            // Between lab tasks
 
             for (int i = 0; i < tools.Count; i++) {
                 if (allowed.Contains(tools[i].tool_type)) {
@@ -486,6 +489,7 @@ namespace ThermoVR.Tools
         }
 
         private void HandleResetToolRestrictions() {
+            // When lab is removed
             ResetDefaults();
 
             for (int i = 0; i < tools.Count; i++) {
