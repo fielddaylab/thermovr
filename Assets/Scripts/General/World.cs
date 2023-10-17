@@ -138,8 +138,12 @@ public class World : MonoBehaviour
         hand_touchings = new Material[] { hand_touching };
         hand_grabbings = new Material[] { hand_grabbing };
 
-        lhand.Init(hand_emptys);
-        rhand.Init(hand_emptys);
+        if (lhand != null) {
+            lhand.Init(hand_emptys);
+        }
+        if (rhand != null) {
+            rhand.Init(hand_emptys);
+        }
 
         ToolMgr.Init();
 
@@ -181,15 +185,20 @@ public class World : MonoBehaviour
     public void ManualFixedUpdate() {
         arrows.ManualFixedUpdate(); // reset arrows for next instruction
 
-        StabilizeHands();
+        if (lhand != null && rhand != null) {
+            StabilizeHands();
+        }
 
         ApplyTools();
 
         EnforceLimits();
 
-        ProcessInputs();
+        if (lhand != null && rhand != null) {
+            ProcessInputs();
 
-        UpdateGrabVis();
+            UpdateGrabVis();
+        }
+
 
         ProcessErrors();
     }

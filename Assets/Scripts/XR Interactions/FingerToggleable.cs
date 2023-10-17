@@ -20,9 +20,13 @@ public class FingerToggleable : MonoBehaviour
   {
     l_finger = GameObject.Find("LFinger");
     r_finger = GameObject.Find("RFinger");
-    lfinger_c = l_finger.GetComponent<Collider>();
-    rfinger_c = r_finger.GetComponent<Collider>();
-  }
+        if (l_finger != null) {
+            lfinger_c = l_finger.GetComponent<Collider>();
+        }
+        if (r_finger != null) {
+            rfinger_c = r_finger.GetComponent<Collider>();
+        }
+    }
 
   [System.NonSerialized]
   public bool lfinger = false;

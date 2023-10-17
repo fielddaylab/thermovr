@@ -26,8 +26,12 @@ public class Touchable : MonoBehaviour
         rhand = GameObject.Find("RightControllerAnchor");
         //lhand_c = lhand.GetComponentsInChildren<Collider>();
         //rhand_c = rhand.GetComponentsInChildren<Collider>();
-        lhand_c = GameObject.Find("LeftControllerAnchor").GetComponent<SphereCollider>();
-        rhand_c = GameObject.Find("RightControllerAnchor").GetComponent<SphereCollider>();
+        if (lhand != null ) {
+            lhand_c = lhand.GetComponent<SphereCollider>();
+        }
+        if (rhand != null) {
+            rhand_c = rhand.GetComponent<SphereCollider>();
+        }
         og_parent = gameObject.transform.parent;
 
         if (has_lightables) {
