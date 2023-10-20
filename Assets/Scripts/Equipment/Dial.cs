@@ -146,8 +146,8 @@ namespace ThermoVR.Dials
             forceMap();
         }
 
-        public void SetValText(string displayUnit, float value) {
-            string updateText = string.Format(this.valFormat + " " + displayUnit, value);
+        public void SetValText(float value) {
+            string updateText = string.Format(this.valFormat, value);
             textv_tmpro.SetText(updateText);
         }
 

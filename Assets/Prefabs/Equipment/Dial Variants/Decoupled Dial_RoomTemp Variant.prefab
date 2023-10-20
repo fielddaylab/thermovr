@@ -346,8 +346,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_button: {fileID: 4014051421869753412}
-  m_defaultMat: {fileID: 2100000, guid: 9830506a137a929408750be33794ae2d, type: 2}
-  m_activeMat: {fileID: 2100000, guid: 2512827267cc0da4a90ecb92fd35043b, type: 2}
   m_renderer: {fileID: 857512818778112435}
 --- !u!114 &4014051421869753412 stripped
 MonoBehaviour:
@@ -428,6 +426,11 @@ PrefabInstance:
       propertyPath: m_effect_map.Array.data[0].Effects.Array.data[2].ResponsePower
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 1052825991280628676, guid: c88177c188275f044a1eb03b4f18b830,
+        type: 3}
+      propertyPath: m_ToolType
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 1703253035018548620, guid: c88177c188275f044a1eb03b4f18b830,
         type: 3}
       propertyPath: m_effect_map.Array.size
@@ -476,7 +479,7 @@ PrefabInstance:
     - target: {fileID: 4782439999084141159, guid: c88177c188275f044a1eb03b4f18b830,
         type: 3}
       propertyPath: m_RootOrder
-      value: 9
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 6030497066976596720, guid: c88177c188275f044a1eb03b4f18b830,
         type: 3}

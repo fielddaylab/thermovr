@@ -105,7 +105,7 @@ namespace ThermoVR.Tools
 
 
         private void UpdateToolText(Dial dial) {
-            if (dial.textv_tmpro) dial.SetValText(display_unit, (float)(dial.map * display_mul));
+            if (dial.textv_tmpro) dial.SetValText((float)(dial.map * display_mul));
         }
     }
 }
