@@ -44,16 +44,16 @@ public class ThermoPresent : MonoBehaviour
     [SerializeField] ThermoState state;
 
     //vessel
-    GameObject vessel;
-    GameObject container;
-    GameObject piston;
+    // GameObject vessel;
+    // GameObject container;
+    [SerializeField] private GameObject piston;
     float piston_min_y;
     float piston_max_y;
-    GameObject contents;
+    [SerializeField] private GameObject contents;
     float contents_min_h; //h = "height", not "enthalpy"
     float contents_max_h; //h = "height", not "enthalpy"
-    GameObject water;
-    GameObject steam;
+    [SerializeField] private GameObject water;
+    // GameObject steam;
 
     //mesh
     GameObject graph;
@@ -653,16 +653,11 @@ public class ThermoPresent : MonoBehaviour
     }
 
     void findObjects() {
-        vessel = GameObject.Find("Vessel");
-        container = GameObject.Find("Container");
-        piston = GameObject.Find("Piston");
+        // TODO: do actual math
         piston_min_y = piston.transform.localPosition.y;
-        piston_max_y = piston_min_y + 0.17f; //experimentally derived...
-        contents = GameObject.Find("Contents");
+        piston_max_y = piston_min_y + 0.453f; //experimentally derived...
         contents_min_h = contents.transform.localScale.y;
-        contents_max_h = contents_min_h + 0.17f; //experimentally derived...
-        water = GameObject.Find("Water");
-        steam = GameObject.Find("Steam");
+        contents_max_h = contents_min_h + 0.453f; //experimentally derived...
 
         graph = GameObject.Find("gmodel");
         state_dot = GameObject.Find("gstate");
@@ -754,6 +749,8 @@ public class ThermoPresent : MonoBehaviour
 
         update_tracker_pos();
 
+        // TODO: do actual math
+
         float height = (float)(state.volume / state.surfacearea); //M
         float reductionFactor = 0.02f; //hack to reduce overall volume; do all calculations assuming 1.0kg of water, do all visualizations assuming reductionFactor*1.0kg of water. Assuming volume is linearly proportional to molarity (I _think_ it is?), we should be good. If not, we're still better than altering the behavior of vapor at an arbitrary threshhold
         height *= reductionFactor;
@@ -831,16 +828,16 @@ public class ThermoPresent : MonoBehaviour
         if (modified) genMesh();
 
         string update_text = "";
-        if (Math.Abs(state.pressure - state.prev_pressure) > ThermoMath.p_smallstep) { update_text = string.Format("P: " + DigitFormat.Pressure + " " + Units.Pressure, (float)state.pressure / 1000f); GameMgr.Events.Dispatch(GameEvents.UpdateVarText, new VarUpdate(VarID.Pressure, update_text)); }
-        if (Math.Abs(state.temperature - state.prev_temperature) > ThermoMath.t_smallstep) { update_text = string.Format("T: " + DigitFormat.TemperatureK + " " + Units.TemperatureK + " ({1:0.00}" + Units.TemperatureC + ")", (float)state.temperature, (float)state.temperature - 273.15f); DispatchText(update_text, VarID.Temperature); }
-        if (Math.Abs(state.volume - state.prev_volume) > ThermoMath.v_smallstep) { update_text = string.Format("v: " + DigitFormat.Volume + " " + Units.Volume, (float)state.volume); DispatchText(update_text, VarID.Volume); }
-        if (Math.Abs(state.internalenergy - state.prev_internalenergy) > ThermoMath.u_smallstep) { update_text = string.Format("u: " + DigitFormat.InternalEnergy + " "+ Units.InternalEnergy, (float)state.internalenergy / 1000f); DispatchText(update_text, VarID.InternalEnergy); }
-        if (Math.Abs(state.entropy - state.prev_entropy) > ThermoMath.s_smallstep) { update_text = string.Format("s: " + DigitFormat.Entropy + " " + Units.Entropy, (float)state.entropy / 1000f); DispatchText(update_text, VarID.Entropy); }
-        if (Math.Abs(state.enthalpy - state.prev_enthalpy) > ThermoMath.h_smallstep) { update_text = string.Format("h: " + DigitFormat.Enthalpy + " " + Units.Enthalpy, (float)state.enthalpy / 1000f); DispatchText(update_text, VarID.Enthalpy); }
-        if (state.region == 1 && Math.Abs(state.quality - state.prev_quality) > ThermoMath.x_smallstep) { update_text = string.Format("x: " + DigitFormat.Quality + " " + Units.Quality, (float)(state.quality * 100f)); DispatchText(update_text, VarID.Quality); }
+        if (Math.Abs(state.pressure - state.prev_pressure) > ThermoMath.p_smallstep) { update_text = string.Format("P: " + DigitFormat.Pressure /*+ " " + Units.Pressure*/, (float)state.pressure / 1000f); GameMgr.Events.Dispatch(GameEvents.UpdateVarText, new VarUpdate(VarID.Pressure, update_text)); }
+        if (Math.Abs(state.temperature - state.prev_temperature) > ThermoMath.t_smallstep) { update_text = string.Format("T: " + DigitFormat.TemperatureK /*+ " " + Units.TemperatureK + " ({1:0.00}" + Units.TemperatureC + ")"*/, (float)state.temperature, (float)state.temperature - 273.15f); DispatchText(update_text, VarID.Temperature); }
+        if (Math.Abs(state.volume - state.prev_volume) > ThermoMath.v_smallstep) { update_text = string.Format("v: " + DigitFormat.Volume /*+ " " + Units.Volume*/, (float)state.volume); DispatchText(update_text, VarID.Volume); }
+        if (Math.Abs(state.internalenergy - state.prev_internalenergy) > ThermoMath.u_smallstep) { update_text = string.Format("u: " + DigitFormat.InternalEnergy /*+ " "+ Units.InternalEnergy*/, (float)state.internalenergy / 1000f); DispatchText(update_text, VarID.InternalEnergy); }
+        if (Math.Abs(state.entropy - state.prev_entropy) > ThermoMath.s_smallstep) { update_text = string.Format("s: " + DigitFormat.Entropy /*+ " " + Units.Entropy*/, (float)state.entropy / 1000f); DispatchText(update_text, VarID.Entropy); }
+        if (Math.Abs(state.enthalpy - state.prev_enthalpy) > ThermoMath.h_smallstep) { update_text = string.Format("h: " + DigitFormat.Enthalpy /*+ " " + Units.Enthalpy*/, (float)state.enthalpy / 1000f); DispatchText(update_text, VarID.Enthalpy); }
+        if (state.region == 1 && Math.Abs(state.quality - state.prev_quality) > ThermoMath.x_smallstep) { update_text = string.Format("x: " + DigitFormat.Quality /*+ " " + Units.Quality*/, (float)(state.quality * 100f)); DispatchText(update_text, VarID.Quality); }
         if (true /*state.region != state.prev_region*/) {
             update_text = "Region: " + region_to_name(state.region); DispatchText(update_text, VarID.Region);
-            if (state.region == 1) { update_text = string.Format("x: " + DigitFormat.Quality + " " + Units.Quality, (float)(state.quality * 100f)); DispatchText(update_text, VarID.Quality); }
+            if (state.region == 1) { update_text = string.Format("x: " + DigitFormat.Quality /*+ " " + Units.Quality*/, (float)(state.quality * 100f)); DispatchText(update_text, VarID.Quality); }
             else { update_text = "x: Undefined"; DispatchText(update_text, VarID.Quality); }
         }
 

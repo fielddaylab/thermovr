@@ -328,14 +328,12 @@ namespace ThermoVR.Tools
         }
 
         public void AllowTool(Tool t) {
-            // TODO: show buttons
-            t.gameObject.SetActive(true);
+            // TODO: show on buttons
         }
 
         public void DisallowTool(Tool t) {
-            // TODO: disable buttons
+            // TODO: show on buttons 
             DeactivateTool(t);
-            t.gameObject.SetActive(false);
         }
 
         public void UpdateApplyTool(Tool t) //alters "applied_x"
@@ -451,8 +449,16 @@ namespace ThermoVR.Tools
         }
 
         private void HandleWarpPVT(Tuple<double, double, double> pvt) {
+            // Pop off applied tools after warp
+            DeactivateAllTools(true);
+
             // set ambient pressure to the pressure picked
             dial_surroundingPressure.set_val((float)((pvt.Item1 - ThermoMath.p_min) / (ThermoMath.p_max - ThermoMath.p_min)));
+
+            // Insulator starts engaged
+            ActivateTool(tool_insulator);
+
+            toggle_heatTransfer.ResetToggle();
         }
 
         private void HandleToolTogglePressed(Tool t) {
@@ -472,6 +478,8 @@ namespace ThermoVR.Tools
 
 
         private void HandleAllowedToolsUpdated(List<ToolType> allowed) {
+            // Between lab tasks
+
             for (int i = 0; i < tools.Count; i++) {
                 if (allowed.Contains(tools[i].tool_type)) {
                     AllowTool(tools[i]);
@@ -486,6 +494,9 @@ namespace ThermoVR.Tools
         }
 
         private void HandleResetToolRestrictions() {
+            // When lab is removed
+            ResetDefaults();
+
             for (int i = 0; i < tools.Count; i++) {
                 AllowTool(tools[i]);
             }
