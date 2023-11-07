@@ -24,7 +24,7 @@ public class World : MonoBehaviour
 
     #region Consts
 
-    const float CONTAINER_INSULATION_COEFFICIENT = 0.1f; // 0.1f; // Not really based on a physical material, just a way to roughly simulate imperfect insulation.
+    const float CONTAINER_INSULATION_COEFFICIENT = 0f;
     public const double DELTA_PRESSURE_CUTOFF = 100.0;
     const double PSI_TO_PASCAL = 6894.76;
     const double SPECIFIC_HEAT_CAPACITY_LIQ = 4184; // how many J it takes to heat 1 kg of water liquid 1 Kelvin
