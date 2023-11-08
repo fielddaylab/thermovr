@@ -4,23 +4,27 @@ using System.Collections.Generic;
 using ThermoVR.Tools;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace ThermoVR.Dials
 {
-    public enum Effect {
+    public enum Effect
+    {
         None,
         Value,      // change the value of a sim value (e.g. burner heat, or stop volume)
         Movement    // move the tool in world space
     }
 
     // TODO: incorporate these triggers (stops should only get enacted on release, for example)
-    public enum EffectTrigger {
+    public enum EffectTrigger
+    {
         OnMove,     // takes effect immediately
         OnRelease   // takes effect once dial is released
     }
 
     [Serializable]
-    public struct EffectResponse {
+    public struct EffectResponse
+    {
         public Effect Effect;
         public float Modifier;
         public EffectTrigger Trigger;
@@ -33,7 +37,8 @@ namespace ThermoVR.Dials
     }
 
     [Serializable]
-    public struct EffectGroup {
+    public struct EffectGroup
+    {
         public List<Tool> ToAffect;
         public List<EffectResponse> Effects;
 
@@ -41,6 +46,11 @@ namespace ThermoVR.Dials
             ToAffect = toAffect;
             Effects = effects;
         }
+    }
+
+    public enum ConstrainType {
+        Min,
+        Max
     }
 
     [RequireComponent(typeof(Touchable))]
@@ -87,6 +97,11 @@ namespace ThermoVR.Dials
         private float total_dist;
         private Vector3 initial_offset;
 
+        private float min_constraint;
+        private float max_constraint;
+
+        public UnityEvent DialMoved;
+
         public void Init(float min_map, float max_map, string valFormat) {
             this.min_map = min_map;
             this.max_map = max_map;
@@ -97,6 +112,9 @@ namespace ThermoVR.Dials
             else {
                 orientation_dir = (max_pos.position - min_pos.position).normalized;
             }
+
+            min_constraint = 0f;
+            max_constraint = 1f;
 
             relevant_tools = new List<Tool>();
             for (int g = 0; g < m_effect_map.Count; g++) {
@@ -203,6 +221,18 @@ namespace ThermoVR.Dials
             return val;
         }
 
+        public void SetConstraint(float constraint, ConstrainType constrainType) {
+            if (constrainType == ConstrainType.Min) {
+                min_constraint = constraint;
+            }
+            else {
+                // max
+                max_constraint = constraint;
+            }
+
+            // Clamp necessary?
+        }
+
         /*
          * Standard way to map from 0-1 slder "val" range to min-max "tool" range.
          */
@@ -247,10 +277,10 @@ namespace ThermoVR.Dials
             float prev_val = val;
             // float prev_map = map;
 
-            float new_val = Mathf.Clamp(prev_val - magnitude, 0f, 1f);
+            float new_val = Mathf.Clamp(prev_val - magnitude, min_constraint, max_constraint);
             //if this close to either end, assume user wants min/max
-            if (new_val < 0.005) new_val = 0f;
-            if (new_val > 0.995) new_val = 1f;
+            if (new_val < min_constraint + 0.005) new_val = min_constraint;
+            if (new_val > max_constraint - 0.005) new_val = max_constraint;
 
             // TODO: need a check here for if tool is enabled?
             val = new_val;

@@ -512,6 +512,11 @@ PrefabInstance:
       propertyPath: m_effect_map.Array.data[0].ToAffect.Array.data[0]
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 6108157273832587095, guid: 4ff5544de7eaa814f80d3185a5731319,
+        type: 3}
+      propertyPath: m_ConstrainingDial
+      value: 
+      objectReference: {fileID: 6943949144886270042}
     - target: {fileID: 7566547350388355766, guid: 4ff5544de7eaa814f80d3185a5731319,
         type: 3}
       propertyPath: m_tool
@@ -575,7 +580,7 @@ PrefabInstance:
     - target: {fileID: 8626880435129451511, guid: 4ff5544de7eaa814f80d3185a5731319,
         type: 3}
       propertyPath: m_Name
-      value: Decoupled Dial_Stop2
+      value: Decoupled Dial_Stop2 (Lower)
       objectReference: {fileID: 0}
     - target: {fileID: 9108265673600250866, guid: 4ff5544de7eaa814f80d3185a5731319,
         type: 3}
@@ -610,6 +615,18 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 6050164183667086649}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &6943949143897426390 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3723171435253259503, guid: 4ff5544de7eaa814f80d3185a5731319,
+    type: 3}
+  m_PrefabInstance: {fileID: 6050164183667086649}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e51bfea116f32e48b1f8cef1806f825, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &7232746613266230921
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -855,7 +872,7 @@ PrefabInstance:
     - target: {fileID: 6536949306411365424, guid: 3e714643dc00bf247ad852ea6690ec47,
         type: 3}
       propertyPath: m_Name
-      value: Decoupled Dial_Stop1
+      value: Decoupled Dial_Stop1 (Upper)
       objectReference: {fileID: 0}
     - target: {fileID: 6536949306411365425, guid: 3e714643dc00bf247ad852ea6690ec47,
         type: 3}
@@ -912,6 +929,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: -9.7
       objectReference: {fileID: 0}
+    - target: {fileID: 8625513991731246942, guid: 3e714643dc00bf247ad852ea6690ec47,
+        type: 3}
+      propertyPath: m_ConstrainingDial
+      value: 
+      objectReference: {fileID: 6943949143897426390}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 3e714643dc00bf247ad852ea6690ec47, type: 3}
 --- !u!4 &2616123306102523715 stripped
@@ -920,3 +942,15 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 9149553625272300402}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &6943949144886270042 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2207998016276458280, guid: 3e714643dc00bf247ad852ea6690ec47,
+    type: 3}
+  m_PrefabInstance: {fileID: 9149553625272300402}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e51bfea116f32e48b1f8cef1806f825, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
