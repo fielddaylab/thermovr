@@ -46,9 +46,9 @@ public class ThermoPresent : MonoBehaviour
     //vessel
     // GameObject vessel;
     // GameObject container;
-    [SerializeField] private GameObject piston;
-    float piston_min_y;
-    float piston_max_y;
+    [SerializeField] private PistonController piston;
+    // float piston_min_y;
+    // float piston_max_y;
     [SerializeField] private GameObject contents;
     float contents_min_h; //h = "height", not "enthalpy"
     float contents_max_h; //h = "height", not "enthalpy"
@@ -654,10 +654,12 @@ public class ThermoPresent : MonoBehaviour
 
     void findObjects() {
         // TODO: do actual math
-        piston_min_y = piston.transform.localPosition.y;
+        /*
+        piston_min_y = piston.transform.localPosition.y; // scale by y?
         piston_max_y = piston_min_y + 0.453f; //experimentally derived...
         contents_min_h = contents.transform.localScale.y;
         contents_max_h = contents_min_h + 0.453f; //experimentally derived...
+        */
 
         graph = GameObject.Find("gmodel");
         state_dot = GameObject.Find("gstate");
@@ -752,12 +754,12 @@ public class ThermoPresent : MonoBehaviour
         // TODO: do actual math
 
         float height = (float)(state.volume / state.surfacearea); //M
-        float reductionFactor = 0.02f; //hack to reduce overall volume; do all calculations assuming 1.0kg of water, do all visualizations assuming reductionFactor*1.0kg of water. Assuming volume is linearly proportional to molarity (I _think_ it is?), we should be good. If not, we're still better than altering the behavior of vapor at an arbitrary threshhold
-        height *= reductionFactor;
+        // float reductionFactor = 0.02f; //hack to reduce overall volume; do all calculations assuming 1.0kg of water, do all visualizations assuming reductionFactor*1.0kg of water. Assuming volume is linearly proportional to molarity (I _think_ it is?), we should be good. If not, we're still better than altering the behavior of vapor at an arbitrary threshhold
+        // height *= reductionFactor;
         float size_p = height / ((float)state.radius * 2f); //"max height" is approx 2x diameter, so this sets size_p to essentially "%_contents_size"
         if (size_p > 1) size_p = 1; //hard stop on visualization
         Vector3 piston_lt = piston.transform.localPosition;
-        piston_lt.y = piston_min_y + size_p * (piston_max_y - piston_min_y);
+        piston_lt.y = piston.GetMinPos().y + size_p * (piston.GetMaxPos().y - piston.GetMinPos().y);
         piston.transform.localPosition = piston_lt;
 
         Vector3 contents_lt = contents.transform.localScale;

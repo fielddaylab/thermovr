@@ -100,7 +100,7 @@ namespace ThermoVR.Dials
         private float min_constraint;
         private float max_constraint;
 
-        public UnityEvent DialMoved;
+        [HideInInspector] public UnityEvent DialMoved;
 
         public void Init(float min_map, float max_map, string valFormat) {
             this.min_map = min_map;
@@ -162,6 +162,8 @@ namespace ThermoVR.Dials
             lp.x = total_dist / 2 - val * total_dist - initial_offset.x * 2;
             meter.transform.localPosition = lp;
             forceMap();
+
+            DialMoved?.Invoke();
         }
 
         public void SetValText(float value) {

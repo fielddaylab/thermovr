@@ -13,6 +13,8 @@ namespace ThermoVR.Dials
         private Dial m_Dial; // The dial being constrained
 
         private void OnEnable() {
+            m_Dial = this.GetComponent<Dial>();
+
             if (m_ConstrainingDial) {
                 m_ConstrainingDial.DialMoved.AddListener(HandleDialMoved);
             }
@@ -27,7 +29,9 @@ namespace ThermoVR.Dials
         #region Handlers
 
         private void HandleDialMoved() {
-            m_Dial.SetConstraint(m_ConstrainingDial.get_val(), m_ConstrainType);
+            if (m_Dial) {
+                m_Dial.SetConstraint(m_ConstrainingDial.get_val(), m_ConstrainType);
+            }
         }
 
         #endregion // Handlers

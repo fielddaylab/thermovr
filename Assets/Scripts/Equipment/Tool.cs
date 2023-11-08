@@ -11,6 +11,7 @@ using TMPro;
 using ThermoVR.Dials;
 using System;
 using BeauRoutine;
+using UnityEngine.Events;
 
 namespace ThermoVR.Tools
 {
@@ -55,6 +56,8 @@ namespace ThermoVR.Tools
         public ToolType tool_type;
         [SerializeField] private GameObject ModelContainer;
 
+        [HideInInspector] public UnityEvent ValUpdated;
+
         #endregion // Inspector
 
         #region ITool
@@ -83,6 +86,8 @@ namespace ThermoVR.Tools
 
         public void UpdateVal(float new_val, Dial dial) {
             val = new_val;
+
+            ValUpdated?.Invoke();
 
             UpdateToolText(dial);
         }

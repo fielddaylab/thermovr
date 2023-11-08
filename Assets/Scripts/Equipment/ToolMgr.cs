@@ -53,7 +53,7 @@ namespace ThermoVR.Tools
         bool halfed = false;
         List<Halfable> halfables;
         [SerializeField] Pressable reset_button;
-        [SerializeField] Pressable halfer_button;
+        // [SerializeField] Pressable halfer_button;
 
         private void Awake() {
             if (Instance == null) {
@@ -122,7 +122,7 @@ namespace ThermoVR.Tools
 
             // Initialize Buttons
             reset_button.OnPress += HandleResetPressed;
-            halfer_button.OnPress += HandleHalferPressed;
+            // halfer_button.OnPress += HandleHalferPressed;
 
             /*
             halfables = new List<Halfable> {
@@ -418,8 +418,12 @@ namespace ThermoVR.Tools
 
         public double GetAppliedWeight() {
             double applied_weight = 0;
-            if (tool_weight.engaged) applied_weight += tool_weight.GetVal();
-            if (tool_negativeWeight.engaged) applied_weight += tool_negativeWeight.GetVal();
+            if (tool_weight.engaged) {
+                applied_weight += tool_weight.GetVal();
+            }
+            if (tool_negativeWeight.engaged) {
+                applied_weight += tool_negativeWeight.GetVal();
+            }
 
             return applied_weight;
         }
