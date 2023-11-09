@@ -1,10 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
+using ThermoVR.Dials;
 using UnityEngine;
 
 namespace ThermoVR.Tools
 {
-    [RequireComponent(typeof(Tool))]
+    [RequireComponent(typeof(Dial))]
     public class ToolAnimateFrameController : MonoBehaviour
     {
         #region Inspector
@@ -15,19 +16,18 @@ namespace ThermoVR.Tools
         [SerializeField] private float test_val;
 
         private AnimationClip m_Clip;
-        private int m_ClipFrames;
 
         #endregion // Inspector
 
-        private Tool m_Tool;
+        private Dial m_ToolDial;
 
         #region Unity Callbacks
 
         private void OnEnable() {
-            m_Tool = this.GetComponent<Tool>();
+            m_ToolDial = this.GetComponent<Dial>();
 
-            if (m_Tool) {
-                m_Tool.ValUpdated.AddListener(HandleToolValUpdated);
+            if (m_ToolDial) {
+                m_ToolDial.DialMoved.AddListener(HandleToolValUpdated);
             }
             if (m_Animator) {
                 m_Clip = m_Animator.runtimeAnimatorController.animationClips[m_AnimationIndex];
@@ -36,8 +36,8 @@ namespace ThermoVR.Tools
         }
 
         private void OnDisable() {
-            if (m_Tool) {
-                m_Tool.ValUpdated.RemoveListener(HandleToolValUpdated);
+            if (m_ToolDial) {
+                m_ToolDial.DialMoved.RemoveListener(HandleToolValUpdated);
             }
         }
 
@@ -46,11 +46,11 @@ namespace ThermoVR.Tools
         #region Handlers
 
         private void HandleToolValUpdated() {
-            if (!m_Animator || !m_Tool) {
+            if (!m_Animator || !m_ToolDial) {
                 return;
             }
 
-            float newVal = m_Tool.GetVal();
+            float newVal = m_ToolDial.get_val();
 
             m_Animator.speed = 0;
             m_Animator.Play(m_Clip.name, 0, newVal);

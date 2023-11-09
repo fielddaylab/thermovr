@@ -47,13 +47,7 @@ public class ThermoPresent : MonoBehaviour
     // GameObject vessel;
     // GameObject container;
     [SerializeField] private PistonController piston;
-    // float piston_min_y;
-    // float piston_max_y;
-    [SerializeField] private GameObject contents;
-    float contents_min_h; //h = "height", not "enthalpy"
-    float contents_max_h; //h = "height", not "enthalpy"
-    [SerializeField] private GameObject water;
-    // GameObject steam;
+    [SerializeField] private ContentsController contents;
 
     //mesh
     GameObject graph;
@@ -69,10 +63,16 @@ public class ThermoPresent : MonoBehaviour
 
     public float size_p;
 
+    public double visual_v_max; // the volume at which the visualization stops increasing volume
+
+
     void Awake() {
         ThermoMath.Init();
         state = this.GetComponent<ThermoState>();
         state.reset();
+
+        float reduction_factor = 0.02f;
+        visual_v_max = ThermoMath.v_max * reduction_factor;
     }
 
     // Start is called before the first frame update
@@ -252,7 +252,7 @@ public class ThermoPresent : MonoBehaviour
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
-   public double get_state_var(VarID id) {
+    public double get_state_var(VarID id) {
         switch (id) {
             case VarID.Region:
                 return state.region;
@@ -751,42 +751,60 @@ public class ThermoPresent : MonoBehaviour
 
         update_tracker_pos();
 
-        // TODO: do actual math
+        // PISTON HEIGHT
 
-        float height = (float)(state.volume / state.surfacearea); //M
-        // float reductionFactor = 0.02f; //hack to reduce overall volume; do all calculations assuming 1.0kg of water, do all visualizations assuming reductionFactor*1.0kg of water. Assuming volume is linearly proportional to molarity (I _think_ it is?), we should be good. If not, we're still better than altering the behavior of vapor at an arbitrary threshhold
+        // float height = (float)(state.volume / state.surfacearea); //M
+
+        //hack to reduce overall volume; do all calculations assuming 1.0kg of water, do all visualizations assuming reductionFactor*1.0kg of water.
+        // Assuming volume is linearly proportional to molarity (I _think_ it is?), we should be good.
+        // If not, we're still better than altering the behavior of vapor at an arbitrary threshhold
+
+        // float reductionFactor = 0.02f;
         // height *= reductionFactor;
-        float size_p = height / ((float)state.radius * 2f); //"max height" is approx 2x diameter, so this sets size_p to essentially "%_contents_size"
-        if (size_p > 1) size_p = 1; //hard stop on visualization
+        //float size_p = height / ((float)state.radius * 2f); //"max height" is approx 2x diameter, so this sets size_p to essentially "%_contents_size"
+        //if (size_p > 1) size_p = 1; //hard stop on visualization
+
+        // TODO: find an acceptable balance between visualizations at low volumes and high volumes
         Vector3 piston_lt = piston.transform.localPosition;
-        piston_lt.y = piston.GetMinPos().y + size_p * (piston.GetMaxPos().y - piston.GetMinPos().y);
+        float adjusted_height = (float)(state.volume / ThermoMath.v_max); // (float)(state.volume / visual_v_max);
+        /*
+        if (adjusted_height > 1) {
+            adjusted_height = 1;
+        }
+        */
+        piston_lt.y = piston.GetMinPos().y + adjusted_height * (piston.GetMaxPos().y - piston.GetMinPos().y);
         piston.transform.localPosition = piston_lt;
 
+        // WATER/VAPOR RATIO
+
         Vector3 contents_lt = contents.transform.localScale;
-        contents_lt.y = contents_min_h + size_p * (contents_max_h - contents_min_h);
+        contents_lt.y = contents.GetMinScale().y + size_p * (contents.GetMaxScale().y - contents.GetMinScale().y);
         contents.transform.localScale = contents_lt;
 
-        Vector3 water_lt = water.transform.localScale;
+        Vector3 water_lt = contents.Water.transform.localScale;
+        Vector3 vapor_lt = contents.Steam.transform.localScale;
+        float water_ratio = 0;
         float q = (float)state.quality;
         switch (state.region) {
             case ThermoMath.region_liquid:
             case ThermoMath.region_vapor:
-                water_lt.y = 1f - q;
+                water_ratio = 1f - q;
                 break;
             case ThermoMath.region_twophase:
-                /*      
-                        //This eqn would derive "quality as percentage of volume" from "quality as a percentage of mass"
-                        //apparently "quality" is already "percentage of volume" (which seems strange to me but ok)
-                        float vliq = (float)ThermoMath.vliq_given_p(state.pressure, state.region);
-                        float vvap = (float)ThermoMath.vvap_given_p(state.pressure, state.region);
-                        q = (vliq * q) / ((vliq * q) + (vvap * (1 - q)));
-                */
-                //so just do the same thing regardless of region
-                water_lt.y = 1f - q;
+                //This eqn would derive "quality as percentage of volume" from "quality as a percentage of mass"
+                // OLD: apparently "quality" is already "percentage of volume" (which seems strange to me but ok) -- UPDATE: we do actually need the full equation.
+                float vliq = (float)ThermoMath.vliq_given_p(state.pressure, state.region);
+                float vvap = (float)ThermoMath.vvap_given_p(state.pressure, state.region);
+                // TODO: derive ratio of water to vapor given current state
+                // q = (vliq * q) / ((vliq * q) + (vvap * (1 - q)));
+                water_ratio = 1f - q;
                 break;
         }
-        water.transform.localScale = water_lt;
-        //steam.transform.localScale = -1f*steam_lt;
+        water_lt.y = water_ratio;
+        vapor_lt.y = -(1 - water_lt.y);
+
+        contents.Water.transform.localScale = water_lt;
+        contents.Steam.transform.localScale = vapor_lt;
     }
 
     private void update_tracker_pos() {

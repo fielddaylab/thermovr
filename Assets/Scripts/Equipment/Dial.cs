@@ -149,7 +149,6 @@ namespace ThermoVR.Dials
                 return;
             }
 
-            RecalibratePos();
             /*
             float magnitude = 0.05f - val * 0.1f;
             meter.transform.localPosition = Quaternion.Euler(0, 2.0f, 0) * meter.transform.forward * magnitude;
@@ -201,8 +200,6 @@ namespace ThermoVR.Dials
 
             apply_change(map, val, prev_val);
 
-            RecalibratePos();
-
             // reset active button materials
             if (activator_button != null) {
                 activator_button.UpdateActiveMaterial();
@@ -215,8 +212,6 @@ namespace ThermoVR.Dials
             forceMap();
 
             apply_change(map, val, prev_val);
-
-            RecalibratePos();
         }
 
         public float get_val() {
@@ -321,6 +316,8 @@ namespace ThermoVR.Dials
                     }
                 }
             }
+
+            RecalibratePos();
         }
 
         #region Handlers

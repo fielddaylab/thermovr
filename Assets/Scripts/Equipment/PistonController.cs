@@ -23,6 +23,22 @@ namespace ThermoVR {
             m_MaxPos = this.transform.localPosition;
         }
 
+        /// <summary>
+        /// Shortcut to preview max position
+        /// </summary>
+        [ContextMenu("Preview Max Position")]
+        private void PreviewMaxPos() {
+            this.transform.localPosition = m_MaxPos;
+        }
+
+        /// <summary>
+        /// Shortcut to preview min position
+        /// </summary>
+        [ContextMenu("Preview Min Position")]
+        private void PreviewMinPos() {
+            this.transform.localPosition = m_MinPos;
+        }
+
         #endregion // Editor
 
         #region Inspector
