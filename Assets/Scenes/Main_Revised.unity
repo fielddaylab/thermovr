@@ -4564,6 +4564,12 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!1 &343089302 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 658143357692841119, guid: fe74fea8cc8f19143ab68c413aee5331,
+    type: 3}
+  m_PrefabInstance: {fileID: 658143357327172437}
+  m_PrefabAsset: {fileID: 0}
 --- !u!43 &351815422
 Mesh:
   m_ObjectHideFlags: 0
@@ -28755,6 +28761,31 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 611816777470426839, guid: 6bf08338a80970c4591f98f1ec31bdf2,
+        type: 3}
+      propertyPath: m_toRotate
+      value: 
+      objectReference: {fileID: 343089302}
+    - target: {fileID: 1563467875338796475, guid: 6bf08338a80970c4591f98f1ec31bdf2,
+        type: 3}
+      propertyPath: m_SharedTarget
+      value: 
+      objectReference: {fileID: 343089302}
+    - target: {fileID: 2348519819687537230, guid: 6bf08338a80970c4591f98f1ec31bdf2,
+        type: 3}
+      propertyPath: m_toRotate
+      value: 
+      objectReference: {fileID: 343089302}
+    - target: {fileID: 5636327171093291441, guid: 6bf08338a80970c4591f98f1ec31bdf2,
+        type: 3}
+      propertyPath: m_toRotate
+      value: 
+      objectReference: {fileID: 343089302}
+    - target: {fileID: 7950259397289290675, guid: 6bf08338a80970c4591f98f1ec31bdf2,
+        type: 3}
+      propertyPath: m_toRotate
+      value: 
+      objectReference: {fileID: 343089302}
     - target: {fileID: 8645931554229369263, guid: 6bf08338a80970c4591f98f1ec31bdf2,
         type: 3}
       propertyPath: m_RootOrder
@@ -28815,7 +28846,8 @@ PrefabInstance:
       propertyPath: m_Name
       value: Desk00
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 2745453107814621725, guid: 6bf08338a80970c4591f98f1ec31bdf2, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 6bf08338a80970c4591f98f1ec31bdf2, type: 3}
 --- !u!23 &8145365923474717143
 MeshRenderer:
