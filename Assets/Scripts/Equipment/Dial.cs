@@ -113,8 +113,8 @@ namespace ThermoVR.Dials
                 orientation_dir = (max_pos.position - min_pos.position).normalized;
             }
 
-            min_constraint = 0f;
-            max_constraint = 1f;
+            SetConstraint(0f, ConstrainType.Min);
+            SetConstraint(1f, ConstrainType.Max);
 
             relevant_tools = new List<Tool>();
             for (int g = 0; g < m_effect_map.Count; g++) {
