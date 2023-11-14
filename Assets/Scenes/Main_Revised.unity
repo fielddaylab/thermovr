@@ -6244,6 +6244,36 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 168326270}
     m_Modifications:
+    - target: {fileID: 5708367520199940217, guid: 3388d94625410f94995dff8c357f4b53,
+        type: 3}
+      propertyPath: EmissionModule.enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5708367520199940217, guid: 3388d94625410f94995dff8c357f4b53,
+        type: 3}
+      propertyPath: ShapeModule.radius.value
+      value: 0.16
+      objectReference: {fileID: 0}
+    - target: {fileID: 5708367520199940217, guid: 3388d94625410f94995dff8c357f4b53,
+        type: 3}
+      propertyPath: InitialModule.startSpeed.scalar
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5708367520199940217, guid: 3388d94625410f94995dff8c357f4b53,
+        type: 3}
+      propertyPath: EmissionModule.rateOverTime.scalar
+      value: 10000
+      objectReference: {fileID: 0}
+    - target: {fileID: 5708367520199940217, guid: 3388d94625410f94995dff8c357f4b53,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.scalar
+      value: 0.01
+      objectReference: {fileID: 0}
+    - target: {fileID: 5708367520199940217, guid: 3388d94625410f94995dff8c357f4b53,
+        type: 3}
+      propertyPath: VelocityModule.speedModifier.scalar
+      value: 0.5
+      objectReference: {fileID: 0}
     - target: {fileID: 7698499541522794548, guid: 3388d94625410f94995dff8c357f4b53,
         type: 3}
       propertyPath: m_RootOrder
@@ -17373,6 +17403,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Piston
       objectReference: {fileID: 0}
+    - target: {fileID: 5916710298008257957, guid: c3c39ed4992637b43ae8c3fc2ce6cd0d,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5916710298008257958, guid: c3c39ed4992637b43ae8c3fc2ce6cd0d,
         type: 3}
       propertyPath: m_RootOrder
@@ -22293,11 +22328,6 @@ PrefabInstance:
       propertyPath: m_InteractionManager
       value: 
       objectReference: {fileID: 1020262038}
-    - target: {fileID: 7054154938042844197, guid: 82a063789f5492a4881e22d450e47a1b,
-        type: 3}
-      propertyPath: m_InitialHeight
-      value: 0.425
-      objectReference: {fileID: 0}
     - target: {fileID: 8596095803994565698, guid: 82a063789f5492a4881e22d450e47a1b,
         type: 3}
       propertyPath: m_Name
