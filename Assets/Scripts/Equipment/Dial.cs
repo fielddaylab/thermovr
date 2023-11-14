@@ -218,6 +218,12 @@ namespace ThermoVR.Dials
             return val;
         }
 
+        public void set_mapped_val(float target_map) {
+            float newVal = Mathf.Pow(target_map, 1 / (float)response_power);
+
+            set_val(newVal);
+        }
+
         public void SetConstraint(float constraint, ConstrainType constrainType) {
             if (constrainType == ConstrainType.Min) {
                 min_constraint = constraint;

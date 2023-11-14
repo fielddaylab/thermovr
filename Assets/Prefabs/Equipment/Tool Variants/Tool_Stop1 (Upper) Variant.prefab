@@ -89,7 +89,7 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 5e2d451027d3de44d95734879db49e92,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.32690024
+      value: 0.325
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 5e2d451027d3de44d95734879db49e92,
         type: 3}
@@ -208,7 +208,7 @@ PrefabInstance:
     - target: {fileID: 1469844742514000811, guid: 65b0020cd06dbeb4d8b64470f234f970,
         type: 3}
       propertyPath: m_Name
-      value: Tool_Stop1 (Top) Variant
+      value: Tool_Stop1 (Upper) Variant
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 65b0020cd06dbeb4d8b64470f234f970, type: 3}
@@ -245,6 +245,9 @@ MonoBehaviour:
   always_engaged: 0
   tool_type: 7
   ModelContainer: {fileID: 6752387475534277636}
+  ValUpdated:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1001 &8735177538599298440
 PrefabInstance:
   m_ObjectHideFlags: 0

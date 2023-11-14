@@ -440,7 +440,8 @@ namespace ThermoVR.Tools
         private void ResetDefaults() {
             DeactivateAllTools(true);
 
-            dial_surroundingPressure.set_val((float)((DEFAULT_CHAMBER_PRESSURE - ThermoMath.p_min) / (ThermoMath.p_max - ThermoMath.p_min)));
+            float targetMap = (float)((DEFAULT_CHAMBER_PRESSURE - ThermoMath.p_min) / (ThermoMath.p_max - ThermoMath.p_min));
+            dial_surroundingPressure.set_mapped_val(targetMap);
 
             // Insulator starts engaged
             ActivateTool(tool_insulator);
@@ -457,7 +458,8 @@ namespace ThermoVR.Tools
             DeactivateAllTools(true);
 
             // set ambient pressure to the pressure picked
-            dial_surroundingPressure.set_val((float)((pvt.Item1 - ThermoMath.p_min) / (ThermoMath.p_max - ThermoMath.p_min)));
+            float targetMap = (float)((pvt.Item1 - ThermoMath.p_min) / (ThermoMath.p_max - ThermoMath.p_min));
+            dial_surroundingPressure.set_mapped_val(targetMap);
 
             // Insulator starts engaged
             ActivateTool(tool_insulator);
