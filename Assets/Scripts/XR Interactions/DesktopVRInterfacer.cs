@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using ThermoVR.Dials;
 using UnityEngine;
 
 namespace ThermoVR.Controls {
@@ -8,22 +10,26 @@ namespace ThermoVR.Controls {
     /// </summary>
     public class DesktopVRInterfacer : MonoBehaviour
     {
+        private string CLICKABLE_LAYER = "Clickable";
+
         private GameObject m_Dragging; // the object being grabbed
         private Vector3 m_PrevWorldPos; // previous mouse position
 
         private void Update() {
             if (Input.GetMouseButtonDown(0)) {
                 // left button clicked
-                if (RaycastFromMouse(out GameObject objHit)) {
+                if (RaycastFromMouse(CLICKABLE_LAYER, out GameObject objHit)) {
                     // handle dial knobs
-                    // start dragging
-                    m_Dragging = objHit;
-                    m_PrevWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                    if (objHit.GetComponent<Dial>()) {
+                        // start dragging
+                        m_Dragging = objHit;
+                        m_PrevWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition + new Vector3(0, 0, Vector3.Distance(Camera.main.transform.position, objHit.transform.position)));
+                    }
                 }
             }
             else if (Input.GetMouseButtonUp(0)) {
                 // left button released
-                if (RaycastFromMouse(out GameObject objHit)) {
+                if (RaycastFromMouse(CLICKABLE_LAYER, out GameObject objHit)) {
                     // handle buttons
                     Pressable btnPressable = objHit.GetComponent<Pressable>();
                     if (btnPressable) {
@@ -32,15 +38,16 @@ namespace ThermoVR.Controls {
                     }
 
                     // handle dial knobs
-                    // end dragging
-                    m_Dragging = null;
+
                 }
+
+                // end dragging
+                m_Dragging = null;
             }
 
             if (m_Dragging) {
-                Debug.Log("Dragging");
-                Vector3 currPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-                World.Instance.TryInteractable(m_Dragging, currPos, ref m_PrevWorldPos);
+                Vector3 currPos = Camera.main.ScreenToWorldPoint(Input.mousePosition + new Vector3(0, 0, Vector3.Distance(Camera.main.transform.position, m_Dragging.transform.position)));
+                World.Instance.TryInteractable(m_Dragging, m_PrevWorldPos, ref currPos);
 
                 m_PrevWorldPos = currPos;
             }
@@ -48,10 +55,10 @@ namespace ThermoVR.Controls {
 
         #region Helpers
 
-        private bool RaycastFromMouse(out GameObject hitObj) {
+        private bool RaycastFromMouse(string layer, out GameObject hitObj) {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
-            if (UnityEngine.Physics.Raycast(ray, out hit)) {
+            if (UnityEngine.Physics.Raycast(ray, out hit, Mathf.Infinity, 1 << LayerMask.NameToLayer(layer))) {
                 hitObj = hit.collider.gameObject;
                 return true;
             }
