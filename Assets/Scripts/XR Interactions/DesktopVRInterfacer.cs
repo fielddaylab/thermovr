@@ -51,7 +51,7 @@ namespace ThermoVR.Controls {
         private bool RaycastFromMouse(out GameObject hitObj) {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
-            if (Physics.Raycast(ray, out hit)) {
+            if (UnityEngine.Physics.Raycast(ray, out hit)) {
                 hitObj = hit.collider.gameObject;
                 return true;
             }
