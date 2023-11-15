@@ -18,6 +18,27 @@ namespace ThermoVR.Tools
             yield return null;
         }
 
+        protected override IEnumerator BeginAdjustRoutine() {
+            Debug.Log("[Triggers] Burner begin adjust!");
+            yield return null;
+        }
+
+        protected override IEnumerator EndAdjustRoutine() {
+            Debug.Log("[Triggers] Burner end adjust!");
+            yield return null;
+        }
+
+        protected override IEnumerator EngageRoutine() {
+            Debug.Log("[Triggers] Burner engaged!");
+            yield return null;
+        }
+
+        protected override IEnumerator DisengageRoutine() {
+            Debug.Log("[Triggers] Burner disengaged!");
+            yield return null;
+        }
+
+
         #endregion // Tool
     }
 }

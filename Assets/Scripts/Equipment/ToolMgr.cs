@@ -122,17 +122,6 @@ namespace ThermoVR.Tools
 
             // Initialize Buttons
             reset_button.OnPress += HandleResetPressed;
-            // halfer_button.OnPress += HandleHalferPressed;
-
-            /*
-            halfables = new List<Halfable> {
-                // GameObject.Find("Container").GetComponent<Halfable>(),
-                GameObject.Find("Tool_Insulator Variant").GetComponent<Halfable>(),
-                GameObject.Find("Tool_Coil Variant").GetComponent<Halfable>()
-            };
-
-            SetAllHalfed(true);
-            */
 
             GameMgr.Events?.Register<Tuple<double, double, double>>(GameEvents.WarpPVT, HandleWarpPVT);
 
@@ -140,6 +129,9 @@ namespace ThermoVR.Tools
 
             GameMgr.Events?.Register<List<ToolType>>(GameEvents.UpdateAllowedTools, HandleAllowedToolsUpdated);
             GameMgr.Events?.Register(GameEvents.ResetToolRestrictions, HandleResetToolRestrictions);
+
+            GameMgr.Events?.Register<GameObject>(GameEvents.ObjectGrabbed, HandleObjectGrabbed);
+            GameMgr.Events?.Register<GameObject>(GameEvents.ObjectReleased, HandleObjectReleased);
         }
 
         #region Accessors
@@ -327,6 +319,23 @@ namespace ThermoVR.Tools
             UpdateApplyTool(t);
         }
 
+        public void EngageTool(Tool t) {
+            t.TriggerEngage();
+        }
+
+        public void DisengageTool(Tool t) {
+            t.TriggerDisengage();
+        }
+
+        public void BeginAdjustTool(Tool t) {
+            t.TriggerBeginAdjust();
+        }
+
+        public void EndAdjustTool(Tool t) {
+            t.TriggerEndAdjust();
+        }
+
+
         public void AllowTool(Tool t) {
             // TODO: show on buttons
         }
@@ -505,6 +514,44 @@ namespace ThermoVR.Tools
 
             for (int i = 0; i < tools.Count; i++) {
                 AllowTool(tools[i]);
+            }
+        }
+
+
+        private void HandleObjectGrabbed(GameObject obj) {
+            // Check if it was a tool dial knob
+            List<Tool> relevantTools = null;
+
+            // Check if it was a tool dial knob
+            foreach (var dial in Dials) {
+                if (dial.IsKnob(obj)) {
+                    relevantTools = dial.get_relevant_tools();
+                    break;
+                }
+            }
+
+            if (relevantTools != null) {
+                foreach (var tool in relevantTools) {
+                    tool.TriggerBeginAdjust();
+                }
+            }
+        }
+
+        private void HandleObjectReleased(GameObject obj) {
+            List<Tool> relevantTools = null;
+
+            // Check if it was a tool dial knob
+            foreach(var dial in Dials) {
+                if (dial.IsKnob(obj)) {
+                    relevantTools = dial.get_relevant_tools();
+                    break;
+                }
+            }
+
+            if (relevantTools != null) {
+                foreach(var tool in relevantTools) {
+                    tool.TriggerEndAdjust();
+                }
             }
         }
 

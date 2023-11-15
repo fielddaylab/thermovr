@@ -193,12 +193,7 @@ namespace ThermoVR.Dials
 
         public void Reset() {
             float prev_val = val;
-
-            val = default_val;
-
-            forceMap();
-
-            apply_change(map, val, prev_val);
+            set_val(default_val);
 
             // reset active button materials
             if (activator_button != null) {
@@ -249,7 +244,12 @@ namespace ThermoVR.Dials
          */
         private float mapSharp() { return min_map + (max_map - min_map) * Mathf.Pow(val, response_power); }
 
-        public void update_val(Vector3 hand_pos, Vector3 r_hand_pos) {
+        /// <summary>
+        /// Updates val via grab position
+        /// </summary>
+        /// <param name="hand_pos"></param>
+        /// <param name="r_hand_pos"></param>
+        public void update_val_grab(Vector3 hand_pos, Vector3 r_hand_pos) {
             if (!AnyToolsActive()) {
                 return;
             }
@@ -277,7 +277,7 @@ namespace ThermoVR.Dials
                 magnitude *= -1;
             }
 
-            float prev_val = val;
+            prev_val = val;
             // float prev_map = map;
 
             float new_val = Mathf.Clamp(prev_val - magnitude, min_constraint, max_constraint);
@@ -285,18 +285,27 @@ namespace ThermoVR.Dials
             if (new_val < min_constraint + 0.005) new_val = min_constraint;
             if (new_val > max_constraint - 0.005) new_val = max_constraint;
 
-            // TODO: need a check here for if tool is enabled?
-            val = new_val;
-            forceMap();
-
-            apply_change(map, new_val, prev_val);
+            set_val(new_val);
         }
 
         public List<Tool> get_relevant_tools() {
             return relevant_tools;
         }
 
+        /// <summary>
+        /// Checks if the given object is the dial's knob
+        /// </summary>
+        /// <param name="compare"></param>
+        /// <returns></returns>
+        public bool IsKnob(GameObject compare) {
+            return compare == meter;
+        }
+
         private void apply_change(float map, float new_val, float prev_val) {
+            if (new_val == prev_val) {
+                return;
+            }
+
             // for each group
             for (int g = 0; g < m_effect_map.Count; g++) {
                 EffectGroup group = m_effect_map[g];
@@ -319,6 +328,16 @@ namespace ThermoVR.Dials
                             default:
                                 break;
                         }
+                    }
+
+                    // set engaged state
+                    if (new_val == 0) {
+                        // newly entered zero value
+                        ToolMgr.Instance.EngageTool(tool);
+                    }
+                    else if (prev_val == 0) {
+                        // newly left zero value
+                        ToolMgr.Instance.DisengageTool(tool);
                     }
                 }
             }

@@ -64,8 +64,14 @@ namespace ThermoVR.Tools
 
         protected Routine m_TransitionRoutine;
 
-        protected abstract IEnumerator ActivationRoutine();
-        protected abstract IEnumerator DeactivationRoutine();
+        protected abstract IEnumerator ActivationRoutine(); // when tool is activated
+        protected abstract IEnumerator DeactivationRoutine(); // when tool is deactivated
+
+        protected abstract IEnumerator EngageRoutine(); // when tool dial is set to a non-zero number
+        protected abstract IEnumerator DisengageRoutine(); // when tool dial is set to 0
+
+        protected abstract IEnumerator BeginAdjustRoutine(); // when player has grabbed the dial
+        protected abstract IEnumerator EndAdjustRoutine(); // when player has released the dial
 
         public void TriggerActivation() {
             m_TransitionRoutine.Replace(this, ActivationRoutine()).ExecuteWhileDisabled();
@@ -75,6 +81,22 @@ namespace ThermoVR.Tools
             m_TransitionRoutine.Replace(this, DeactivationRoutine()).ExecuteWhileDisabled();
         }
 
+        public void TriggerEngage() {
+            m_TransitionRoutine.Replace(this, EngageRoutine()).ExecuteWhileDisabled();
+        }
+
+        public void TriggerDisengage() {
+            m_TransitionRoutine.Replace(this, DisengageRoutine()).ExecuteWhileDisabled();
+        }
+
+        public void TriggerBeginAdjust() {
+            m_TransitionRoutine.Replace(this, BeginAdjustRoutine()).ExecuteWhileDisabled();
+        }
+
+        public void TriggerEndAdjust() {
+            m_TransitionRoutine.Replace(this, EndAdjustRoutine()).ExecuteWhileDisabled();
+        }
+
         #endregion // ITool
 
         public void Init(string unit, float mul = 1) {
@@ -82,6 +104,9 @@ namespace ThermoVR.Tools
             this.display_mul = mul;
 
             engaged = always_engaged;
+
+            GameMgr.Events?.Register<Collider>(GameEvents.ColliderReleased, HandleColliderReleased);
+            GameMgr.Events?.Register<Collider>(GameEvents.ColliderGrabbed, HandleColliderGrabbed);
         }
 
         public void UpdateVal(float new_val, Dial dial) {
@@ -112,6 +137,18 @@ namespace ThermoVR.Tools
         private void UpdateToolText(Dial dial) {
             if (dial.textv_tmpro) dial.SetValText((float)(dial.map * display_mul));
         }
+
+        #region Handlers
+
+        private void HandleColliderGrabbed(Collider col) {
+
+        }
+
+        private void HandleColliderReleased(Collider col) {
+
+        }
+
+        #endregion // Handlers
     }
 }
 

@@ -25,6 +25,10 @@ namespace ThermoVR.Tools
             yield return null;
         }
 
+        protected override IEnumerator BeginAdjustRoutine() {
+            yield return null;
+        }
+
         protected override IEnumerator DeactivationRoutine() {
             // disable anchor until deactivation completed
             m_HydraulicPressAnchor.enabled = false;
@@ -32,6 +36,18 @@ namespace ThermoVR.Tools
             gameObject.SetActive(false);
 
             m_HydraulicPressAnchor.enabled = true;
+            yield return null;
+        }
+
+        protected override IEnumerator DisengageRoutine() {
+            yield return null;
+        }
+
+        protected override IEnumerator EndAdjustRoutine() {
+            yield return null;
+        }
+
+        protected override IEnumerator EngageRoutine() {
             yield return null;
         }
 

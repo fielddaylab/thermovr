@@ -34,6 +34,22 @@ namespace ThermoVR.Tools
             yield return null;
         }
 
+        protected override IEnumerator BeginAdjustRoutine() {
+            yield return null;
+        }
+
+        protected override IEnumerator EndAdjustRoutine() {
+            yield return null;
+        }
+
+        protected override IEnumerator EngageRoutine() {
+            yield return null;
+        }
+
+        protected override IEnumerator DisengageRoutine() {
+            yield return null;
+        }
+
         #endregion // Tool
     }
 }
