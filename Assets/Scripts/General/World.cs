@@ -333,8 +333,8 @@ public class World : MonoBehaviour
     /// Tries to grab things
     /// </summary>
     /// <param name="actable"></param>
-    /// <param name="hand_pos">curr hand position</param>
-    /// <param name="r_hand_pos">ref to prev hand position</param>
+    /// <param name="hand_pos">prev hand position</param>
+    /// <param name="r_hand_pos">ref to curr hand position</param>
     public void TryInteractable(GameObject actable, Vector3 hand_pos, ref Vector3 r_hand_pos) {
         //grabbing handle
         if (actable == handle_workspace) {
