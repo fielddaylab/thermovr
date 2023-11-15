@@ -55,11 +55,17 @@ namespace ThermoVR
             PressCompleted += HandlePressCompleted;
         }
 
-        private void Press() {
+        /// <summary>
+        /// Triggers the button press
+        /// </summary>
+        /// <param name="cooldown">Cooldown if in VR, none if in desktop</param>
+        public void Press(bool cooldown) {
             if (m_touchTimer <= 0) {
                 OnPress?.Invoke(this, EventArgs.Empty);
                 PressCompleted?.Invoke(this, EventArgs.Empty);
-                m_touchTimer = m_touchTime;
+                if (cooldown) {
+                    m_touchTimer = m_touchTime;
+                }
             }
         }
 
@@ -104,7 +110,7 @@ namespace ThermoVR
                     || (!left_hand && m_fingerToggleable.rfinger)) {
                     // trigger button effect
                     if (m_fingerToggleable.on) {
-                        Press();
+                        Press(true);
                     }
                 }
             }
