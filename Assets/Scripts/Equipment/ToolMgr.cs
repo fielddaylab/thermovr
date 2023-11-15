@@ -524,7 +524,7 @@ namespace ThermoVR.Tools
 
             // Check if it was a tool dial knob
             foreach (var dial in Dials) {
-                if (dial.IsKnob(obj)) {
+                if (dial.gameObject == obj) {
                     relevantTools = dial.get_relevant_tools();
                     break;
                 }
@@ -532,7 +532,7 @@ namespace ThermoVR.Tools
 
             if (relevantTools != null) {
                 foreach (var tool in relevantTools) {
-                    tool.TriggerBeginAdjust();
+                    BeginAdjustTool(tool);
                 }
             }
         }
@@ -542,7 +542,7 @@ namespace ThermoVR.Tools
 
             // Check if it was a tool dial knob
             foreach(var dial in Dials) {
-                if (dial.IsKnob(obj)) {
+                if (dial.gameObject == obj) {
                     relevantTools = dial.get_relevant_tools();
                     break;
                 }
@@ -550,7 +550,7 @@ namespace ThermoVR.Tools
 
             if (relevantTools != null) {
                 foreach(var tool in relevantTools) {
-                    tool.TriggerEndAdjust();
+                    EndAdjustTool(tool);
                 }
             }
         }

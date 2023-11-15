@@ -24,7 +24,10 @@ namespace ThermoVR.Controls {
                         // start dragging
                         m_Dragging = objHit;
                         m_PrevWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition + new Vector3(0, 0, Vector3.Distance(Camera.main.transform.position, objHit.transform.position)));
+
+                        GameMgr.Events.Dispatch(GameEvents.ObjectGrabbed, m_Dragging);
                     }
+
                 }
             }
             else if (Input.GetMouseButtonUp(0)) {
@@ -41,8 +44,11 @@ namespace ThermoVR.Controls {
 
                 }
 
-                // end dragging
-                m_Dragging = null;
+                if (m_Dragging) {
+                    // end dragging
+                    GameMgr.Events.Dispatch(GameEvents.ObjectReleased, m_Dragging);
+                    m_Dragging = null;
+                }
             }
 
             if (m_Dragging) {

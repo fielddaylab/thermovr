@@ -333,11 +333,11 @@ namespace ThermoVR.Dials
                     // set engaged state
                     if (new_val == 0) {
                         // newly entered zero value
-                        ToolMgr.Instance.EngageTool(tool);
+                        ToolMgr.Instance.DisengageTool(tool);
                     }
                     else if (prev_val == 0) {
                         // newly left zero value
-                        ToolMgr.Instance.DisengageTool(tool);
+                        ToolMgr.Instance.EngageTool(tool);
                     }
                 }
             }

@@ -9,11 +9,15 @@ namespace ThermoVR.Tools
         #region Tool
 
         protected override IEnumerator ActivationRoutine() {
+            Debug.Log("[Triggers] Burner activated!");
+
             gameObject.SetActive(true);
             yield return null;
         }
 
         protected override IEnumerator DeactivationRoutine() {
+            Debug.Log("[Triggers] Burner deactivated!");
+
             gameObject.SetActive(false);
             yield return null;
         }
