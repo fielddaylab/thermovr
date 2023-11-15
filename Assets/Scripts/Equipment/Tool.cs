@@ -60,10 +60,15 @@ namespace ThermoVR.Tools
 
         #endregion // Inspector
 
+        [SerializeField] protected float m_RoutineSpeed = 1; // one control for overall routine speeds
+        protected Vector3 m_ActivatedBasePos; // base position tool moves to upon activation
+        protected Vector3 m_DeactivatedBasePos; // base position tool moves to upon deactivation
+
         #region ITool
 
         protected Routine m_TransitionRoutine;
 
+        protected abstract void InitializeRoutines_Impl();
         protected abstract IEnumerator ActivationRoutine(); // when tool is activated
         protected abstract IEnumerator DeactivationRoutine(); // when tool is deactivated
 
@@ -72,6 +77,10 @@ namespace ThermoVR.Tools
 
         protected abstract IEnumerator BeginAdjustRoutine(); // when player has grabbed the dial
         protected abstract IEnumerator EndAdjustRoutine(); // when player has released the dial
+
+        public void InitializeRoutines() {
+            InitializeRoutines_Impl();
+        }
 
         public void TriggerActivation() {
             m_TransitionRoutine.Replace(this, ActivationRoutine()).ExecuteWhileDisabled();
@@ -107,6 +116,8 @@ namespace ThermoVR.Tools
 
             GameMgr.Events?.Register<Collider>(GameEvents.ColliderReleased, HandleColliderReleased);
             GameMgr.Events?.Register<Collider>(GameEvents.ColliderGrabbed, HandleColliderGrabbed);
+
+            InitializeRoutines();
         }
 
         public void UpdateVal(float new_val, Dial dial) {

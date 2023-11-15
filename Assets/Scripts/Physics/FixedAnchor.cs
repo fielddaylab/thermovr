@@ -11,7 +11,17 @@ namespace ThermoVR.Physics
         [Required] [SerializeField] private GameObject m_AnchorTo;
         [SerializeField] private Axis m_Axes;
 
+        public Vector3 GetAnchorPoint() {
+            return AdjustPos();
+        }
+
         private void Update() {
+            this.transform.position = AdjustPos();
+        }
+
+        #region Helpers
+
+        private Vector3 AdjustPos() {
             Vector3 currPos = this.transform.position;
             Vector3 anchorPos = m_AnchorTo.transform.position;
             Vector3 newPos = currPos;
@@ -26,7 +36,9 @@ namespace ThermoVR.Physics
                 newPos.z = anchorPos.z;
             }
 
-            this.transform.position = newPos;
+            return newPos;
         }
+
+        #endregion // Helpers
     }
 }

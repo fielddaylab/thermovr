@@ -80,7 +80,7 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 3359961459538511915}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &331724071344363254
+--- !u!114 &1381572976971963075
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -95,6 +95,10 @@ MonoBehaviour:
   always_engaged: 0
   tool_type: 4
   ModelContainer: {fileID: 4234803275758838863}
+  ValUpdated:
+    m_PersistentCalls:
+      m_Calls: []
+  m_RoutineSpeed: 1
 --- !u!4 &4234803275758838860 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1469844741424147559, guid: 65b0020cd06dbeb4d8b64470f234f970,

@@ -8,6 +8,9 @@ namespace ThermoVR.Tools
     {
         #region Tool
 
+        protected override void InitializeRoutines_Impl() {
+
+        }
         protected override IEnumerator ActivationRoutine() {
             gameObject.SetActive(true);
             yield return null;

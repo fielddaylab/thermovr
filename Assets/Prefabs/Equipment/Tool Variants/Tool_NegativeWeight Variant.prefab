@@ -110,7 +110,8 @@ MonoBehaviour:
   ValUpdated:
     m_PersistentCalls:
       m_Calls: []
-  m_ElasticAnchor: {fileID: 2864342201347712138}
+  m_RoutineSpeed: 1
+  m_ElasticAnchor: {fileID: 0}
 --- !u!1001 &9001386288146954782
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -227,23 +228,3 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!1 &1795528771675944322 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 7206224242276224924, guid: 301af2931e918f043b4f4d86b69286e7,
-    type: 3}
-  m_PrefabInstance: {fileID: 9001386288146954782}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &2864342201347712138
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1795528771675944322}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5b39e11662257d84c8efc723fb8d0c91, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_AnchorTo: {fileID: 0}
-  m_Axes: 2

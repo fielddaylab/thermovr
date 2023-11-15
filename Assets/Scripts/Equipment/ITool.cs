@@ -5,6 +5,9 @@ using UnityEngine;
 
 public interface ITool
 {
+
+    public abstract void InitializeRoutines();
+
     public abstract void TriggerActivation();
 
     public abstract void TriggerDeactivation();

@@ -8,6 +8,11 @@ namespace ThermoVR.Tools
     {
         #region Tool
 
+
+        protected override void InitializeRoutines_Impl() {
+
+        }
+
         protected override IEnumerator ActivationRoutine() {
             Debug.Log("[Triggers] Burner activated!");
 
