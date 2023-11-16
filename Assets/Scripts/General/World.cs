@@ -263,6 +263,7 @@ public class World : MonoBehaviour
 
         // heat leak
         if (ToolMgr.IsHeatToggleOn()) {
+            // material thermal conductivity
             double heat_transfer_delta =
                 (room_temp - thermo_present.get_temperature()) // total temperature difference
                 * insulation_coefficient // what percentage of that difference is shielded by insulation

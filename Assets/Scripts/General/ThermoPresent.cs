@@ -765,6 +765,7 @@ public class ThermoPresent : MonoBehaviour
         //if (size_p > 1) size_p = 1; //hard stop on visualization
 
         // TODO: find an acceptable balance between visualizations at low volumes and high volumes
+        /*
         Vector3 piston_lt = piston.transform.localPosition;
         float adjusted_height = (float)(state.volume / ThermoMath.v_max); // (float)(state.volume / visual_v_max);
         /*
@@ -772,19 +773,86 @@ public class ThermoPresent : MonoBehaviour
             adjusted_height = 1;
         }
         */
-        piston_lt.y = piston.GetMinPos().y + adjusted_height * (piston.GetMaxPos().y - piston.GetMinPos().y);
-        piston.transform.localPosition = piston_lt;
+        /*piston_lt.y = piston.GetMinPos().y + adjusted_height * (piston.GetMaxPos().y - piston.GetMinPos().y);
+        piston.transform.localPosition = piston_lt;*/
+
+
+        float vliq = (float)ThermoMath.vliq_given_p(state.pressure, state.region);
+        float vvap = (float)ThermoMath.vvap_given_p(state.pressure, state.region);
+
+        float q = (float)state.quality;
+
+
+        // NEW HEIGHT IMPLEMENTATION
+        float log_offset = 5.4f; // Math.Log of ThermoMath.min
+
+        float v_height = 0;
+        float l_height = 0;
+
+        float area = (float)Math.PI * (float)ThermoState.radius * (float)ThermoState.radius; //  0.071f;
+        float min_height = (float)ThermoMath.v_min / area;
+        float max_height = (float)ThermoMath.v_max / area;
+
+        float total_height = 0;
+
+        // inside vapor dome
+        switch (state.region) {
+            case ThermoMath.region_liquid:
+                l_height = (float)Math.Log(state.volume / area) + log_offset;
+                v_height = 0;
+                break;
+            case ThermoMath.region_twophase:
+                v_height = (float)Math.Log(q * vvap / area) + log_offset;
+                l_height = (float)Math.Log((1 - q) * vliq / area) + log_offset;
+                break;
+            case ThermoMath.region_vapor:
+                l_height = 0;
+                v_height = (float)Math.Log(vvap / area) + log_offset;
+                break;
+            default:
+                break;
+        }
+
+        total_height = v_height + l_height;
+
+
+        //
 
         // WATER/VAPOR RATIO
 
+        // max
+        // 15
+
+        // min
+        // 0
+
+        float max_raw_height = 15;
+        float min_raw_height = 0;
+        float raw_dif = max_raw_height - min_raw_height;
+
+        float piston_dif = (piston.GetMaxPos().y - piston.GetMinPos().y);
+
+        float ratio = (total_height / max_raw_height);
+
+        Vector3 piston_lt = piston.transform.localPosition;
+        // float adjusted_height = (float)(state.volume / ThermoMath.v_max); // (float)(state.volume / visual_v_max);
+
+        piston_lt.y = piston.GetMinPos().y + ratio * piston_dif; //  * (piston.GetMaxPos().y - piston.GetMinPos().y);
+        piston.transform.localPosition = piston_lt;
+
+        // when piston at min position, scale is
+        // when piston at max position, scale is 
+
+        float contents_dif = (contents.GetMaxScale().y - contents.GetMinScale().y);
+
         Vector3 contents_lt = contents.transform.localScale;
-        contents_lt.y = contents.GetMinScale().y + size_p * (contents.GetMaxScale().y - contents.GetMinScale().y);
+        contents_lt.y = contents.GetMinScale().y + ratio * contents_dif; // contents.GetMinScale().y + size_p * (contents.GetMaxScale().y - contents.GetMinScale().y);
         contents.transform.localScale = contents_lt;
 
         Vector3 water_lt = contents.Water.transform.localScale;
         Vector3 vapor_lt = contents.Steam.transform.localScale;
-        float water_ratio = 0;
-        float q = (float)state.quality;
+        
+        /*float water_ratio = 0;
         switch (state.region) {
             case ThermoMath.region_liquid:
             case ThermoMath.region_vapor:
@@ -793,14 +861,21 @@ public class ThermoPresent : MonoBehaviour
             case ThermoMath.region_twophase:
                 //This eqn would derive "quality as percentage of volume" from "quality as a percentage of mass"
                 // OLD: apparently "quality" is already "percentage of volume" (which seems strange to me but ok) -- UPDATE: we do actually need the full equation.
-                float vliq = (float)ThermoMath.vliq_given_p(state.pressure, state.region);
-                float vvap = (float)ThermoMath.vvap_given_p(state.pressure, state.region);
+                vliq = (float)ThermoMath.vliq_given_p(state.pressure, state.region);
+                vvap = (float)ThermoMath.vvap_given_p(state.pressure, state.region);
                 // TODO: derive ratio of water to vapor given current state
                 // q = (vliq * q) / ((vliq * q) + (vvap * (1 - q)));
-                water_ratio = 1f - q;
+                float vapor_ratio = q * vvap / (float)state.volume;
+
+                water_ratio = 1 - vapor_ratio;
+                // water_ratio = 1f - q;
                 break;
-        }
-        water_lt.y = water_ratio;
+        }*/
+
+        //water_lt.y = water_ratio;
+        //vapor_lt.y = -(1 - water_lt.y);
+
+        water_lt.y = l_height / total_height;
         vapor_lt.y = -(1 - water_lt.y);
 
         contents.Water.transform.localScale = water_lt;

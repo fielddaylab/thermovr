@@ -22,7 +22,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using ThermoVR.State;
+using BeauUtil;
 using UnityEngine;
+using Unity.IL2CPP.CompilerServices;
 
 public static class ThermoMath
 {

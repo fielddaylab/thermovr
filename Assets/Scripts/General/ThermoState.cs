@@ -68,9 +68,16 @@ namespace ThermoVR.State
 
         //static properties of system
         public double mass = 1; //kg
-        public double radius = 0.05; //M
+        /*
+        public double radius = 0.05; //M // TODO: Set to .15 M
                                      //public double surfacearea = Math.Pow(3.141592*radius,2.0); //M^2 //hardcoded answer below
         public double surfacearea = 0.024674011; //M^2 //hardcoded answer to eqn above
+        public double surfacearea_insqr = 38.2447935395871; //in^2 //hardcoded conversion from m^2 to in^2
+        */
+
+        public static double radius = 0.15; //M // TODO: Set to .15 M
+                                     //public double surfacearea = Math.Pow(3.141592*radius,2.0); //M^2 //hardcoded answer below
+        public double surfacearea = 0.071f; //M^2 //hardcoded answer to eqn above
         public double surfacearea_insqr = 38.2447935395871; //in^2 //hardcoded conversion from m^2 to in^2
 
         public double v_stop1; // volume stop specified by tool_stop1
@@ -652,7 +659,7 @@ namespace ThermoVR.State
             if (region != ThermoMath.region_twophase && enthalpy_bounded(new_p, enthalpy)) {
                 return;
             }
-            if (region == ThermoMath.region_liquid /*AND temperature is near lower edge*/) {
+            if (region == ThermoMath.region_liquid) {
                 try {
                     double new_t = ThermoMath.iterate_t_given_pv(temperature, new_p, volume, region, true); // new_v is constant in liquid
                 }
