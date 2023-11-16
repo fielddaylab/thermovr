@@ -4363,6 +4363,12 @@ Mesh:
     offset: 0
     size: 0
     path: 
+--- !u!23 &1102967504 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 177650748604696431, guid: a7ba15d208570c444b8b77b073a99b57,
+    type: 3}
+  m_PrefabInstance: {fileID: 1216849943}
+  m_PrefabAsset: {fileID: 0}
 --- !u!43 &1161715995
 Mesh:
   m_ObjectHideFlags: 0
@@ -4691,6 +4697,12 @@ Mesh:
     offset: 0
     size: 0
     path: 
+--- !u!23 &1210543714 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 7313494235279020243, guid: a7ba15d208570c444b8b77b073a99b57,
+    type: 3}
+  m_PrefabInstance: {fileID: 1216849943}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1213183947
 GameObject:
   m_ObjectHideFlags: 0
@@ -5574,6 +5586,12 @@ Mesh:
     offset: 0
     size: 0
     path: 
+--- !u!23 &1301208562 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 4417966976067181494, guid: a7ba15d208570c444b8b77b073a99b57,
+    type: 3}
+  m_PrefabInstance: {fileID: 1216849943}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &1415769779 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 6943949144576852197, guid: 29c93134005f4e146888613d124d2592,
@@ -5693,6 +5711,12 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1439410704}
   m_Mesh: {fileID: -818845697879174583, guid: d9c112031cf006449bec07d3134ed39a, type: 3}
+--- !u!23 &1492256562 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 4354129251524012084, guid: a7ba15d208570c444b8b77b073a99b57,
+    type: 3}
+  m_PrefabInstance: {fileID: 1216849943}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1497916164
 GameObject:
   m_ObjectHideFlags: 0
@@ -6658,6 +6682,12 @@ Mesh:
     offset: 0
     size: 0
     path: 
+--- !u!23 &1661696223 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 5492280924406414864, guid: a7ba15d208570c444b8b77b073a99b57,
+    type: 3}
+  m_PrefabInstance: {fileID: 1216849943}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1667001468
 GameObject:
   m_ObjectHideFlags: 0
@@ -21195,6 +21225,36 @@ PrefabInstance:
       propertyPath: m_Name
       value: Decoupled Dial_Stop2 (Lower)
       objectReference: {fileID: 0}
+    - target: {fileID: 3101307485985759467, guid: 29c93134005f4e146888613d124d2592,
+        type: 3}
+      propertyPath: m_Renderers.Array.size
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3101307485985759467, guid: 29c93134005f4e146888613d124d2592,
+        type: 3}
+      propertyPath: m_Renderers.Array.data[0]
+      value: 
+      objectReference: {fileID: 1102967504}
+    - target: {fileID: 3101307485985759467, guid: 29c93134005f4e146888613d124d2592,
+        type: 3}
+      propertyPath: m_Renderers.Array.data[1]
+      value: 
+      objectReference: {fileID: 1210543714}
+    - target: {fileID: 3101307485985759467, guid: 29c93134005f4e146888613d124d2592,
+        type: 3}
+      propertyPath: m_Renderers.Array.data[2]
+      value: 
+      objectReference: {fileID: 1492256562}
+    - target: {fileID: 3101307485985759467, guid: 29c93134005f4e146888613d124d2592,
+        type: 3}
+      propertyPath: m_Renderers.Array.data[3]
+      value: 
+      objectReference: {fileID: 1661696223}
+    - target: {fileID: 3101307485985759467, guid: 29c93134005f4e146888613d124d2592,
+        type: 3}
+      propertyPath: m_Renderers.Array.data[4]
+      value: 
+      objectReference: {fileID: 1301208562}
     - target: {fileID: 3283562945714010780, guid: 29c93134005f4e146888613d124d2592,
         type: 3}
       propertyPath: m_LocalRotation.w
@@ -21562,9 +21622,24 @@ PrefabInstance:
       objectReference: {fileID: 1216849952}
     - target: {fileID: 6943949144757892004, guid: 29c93134005f4e146888613d124d2592,
         type: 3}
+      propertyPath: m_effect_map.Array.data[0].Effects.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6943949144757892004, guid: 29c93134005f4e146888613d124d2592,
+        type: 3}
       propertyPath: m_effect_map.Array.data[0].ToAffect.Array.data[0]
       value: 
       objectReference: {fileID: 1216849953}
+    - target: {fileID: 6943949144757892004, guid: 29c93134005f4e146888613d124d2592,
+        type: 3}
+      propertyPath: m_effect_map.Array.data[0].Effects.Array.data[1].Effect
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6943949144757892004, guid: 29c93134005f4e146888613d124d2592,
+        type: 3}
+      propertyPath: m_effect_map.Array.data[0].Effects.Array.data[1].Modifier
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6943949144886270042, guid: 29c93134005f4e146888613d124d2592,
         type: 3}
       propertyPath: m_effect_map.Array.data[0].ToAffect.Array.data[0]

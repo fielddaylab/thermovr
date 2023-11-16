@@ -30,22 +30,22 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: c584fd3a5f46772438e90a1a066e71d2,
         type: 3}
       propertyPath: m_LocalRotation.w
-      value: -3.7493994e-33
-      objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: c584fd3a5f46772438e90a1a066e71d2,
-        type: 3}
-      propertyPath: m_LocalRotation.x
-      value: -6.123234e-17
-      objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: c584fd3a5f46772438e90a1a066e71d2,
-        type: 3}
-      propertyPath: m_LocalRotation.y
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: c584fd3a5f46772438e90a1a066e71d2,
         type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: c584fd3a5f46772438e90a1a066e71d2,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: c584fd3a5f46772438e90a1a066e71d2,
+        type: 3}
       propertyPath: m_LocalRotation.z
-      value: 6.123234e-17
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: c584fd3a5f46772438e90a1a066e71d2,
         type: 3}
@@ -89,6 +89,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_AnchorTo: {fileID: 0}
   m_Axes: 2
+--- !u!23 &3868932570474941242 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 2637903897542523366, guid: c584fd3a5f46772438e90a1a066e71d2,
+    type: 3}
+  m_PrefabInstance: {fileID: 1236944203217040092}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &2226226603657281195
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -194,4 +200,9 @@ MonoBehaviour:
   ValUpdated:
     m_PersistentCalls:
       m_Calls: []
+  m_RoutineSpeed: 1
   m_HydraulicPressAnchor: {fileID: 6131305594146145073}
+  m_ArrowRenderer: {fileID: 3868932570474941242}
+  m_LitMat: {fileID: 2100000, guid: 93d4857dc8cbca24db058fc1c2af558d, type: 2}
+  m_UnlitMat: {fileID: -2015665169355206672, guid: c584fd3a5f46772438e90a1a066e71d2,
+    type: 3}

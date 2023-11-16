@@ -13,6 +13,9 @@ namespace ThermoVR.Tools
         #region Inspector
 
         [SerializeField] private FixedAnchor m_HydraulicPressAnchor;
+        [SerializeField] private MeshRenderer m_ArrowRenderer;
+        [SerializeField] private Material m_LitMat;
+        [SerializeField] private Material m_UnlitMat;
 
         #endregion // Inspector
 
@@ -51,20 +54,27 @@ namespace ThermoVR.Tools
             yield return null;
         }
 
+        protected override IEnumerator EngageRoutine() {
+            Material[] materials = m_ArrowRenderer.materials;
+            materials[0] = m_LitMat;
+            m_ArrowRenderer.materials = materials;
+
+            yield return null;
+        }
+
+        protected override IEnumerator DisengageRoutine() {
+            Material[] materials = m_ArrowRenderer.materials;
+            materials[0] = m_UnlitMat;
+            m_ArrowRenderer.materials = materials;
+
+            yield return null;
+        }
 
         protected override IEnumerator BeginAdjustRoutine() {
             yield return null;
         }
 
-        protected override IEnumerator DisengageRoutine() {
-            yield return null;
-        }
-
         protected override IEnumerator EndAdjustRoutine() {
-            yield return null;
-        }
-
-        protected override IEnumerator EngageRoutine() {
             yield return null;
         }
 

@@ -23,6 +23,9 @@ namespace ThermoVR.Tools
             m_RightStartAngle = m_Right.transform.eulerAngles.y;
 
             m_StartY = m_Left.transform.position.y;
+
+            m_Elements.Add(m_Left);
+            m_Elements.Add(m_Right);
         }
 
         protected override IEnumerator ActivationRoutine() {

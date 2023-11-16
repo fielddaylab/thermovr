@@ -64,6 +64,8 @@ namespace ThermoVR.Tools
         protected Vector3 m_ActivatedBasePos; // base position tool moves to upon activation
         protected Vector3 m_DeactivatedBasePos; // base position tool moves to upon deactivation
 
+        protected List<GameObject> m_Elements; // individual pieces that move on dial move
+
         #region ITool
 
         protected Routine m_ActivationRoutineControl;
@@ -119,6 +121,8 @@ namespace ThermoVR.Tools
             GameMgr.Events?.Register<Collider>(GameEvents.ColliderReleased, HandleColliderReleased);
             GameMgr.Events?.Register<Collider>(GameEvents.ColliderGrabbed, HandleColliderGrabbed);
 
+            m_Elements = new List<GameObject>();
+
             InitializeRoutines();
         }
 
@@ -138,17 +142,18 @@ namespace ThermoVR.Tools
             return val;
         }
 
+        private void UpdateToolText(Dial dial) {
+            if (dial.textv_tmpro) dial.SetValText((float)(dial.map * display_mul));
+        }
+
         /// <summary>
         /// Moves the engaged tool position
         /// </summary>
         /// <param name="dv">the dial's value difference</param>
         public void Move(float dv) {
-            this.transform.position += new Vector3(0, dv, 0);
-        }
-
-
-        private void UpdateToolText(Dial dial) {
-            if (dial.textv_tmpro) dial.SetValText((float)(dial.map * display_mul));
+            foreach(var obj in m_Elements) {
+                obj.transform.position += new Vector3(0, dv, 0);
+            }
         }
 
         #region Handlers
