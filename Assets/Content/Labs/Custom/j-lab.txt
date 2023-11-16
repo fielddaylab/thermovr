@@ -267,7 +267,7 @@
 |TargetInfo:
 |QuizInfo:
 	Question: "Combined processes: constant P, constant V
-	Initial pressure is 1.01e2 kPa, initial temperature is 2.93e2 K. Attach the insulation layer and set insulation to 100%. Set a volume stop to 3.0e-1 m^3/kg. Apply the Bunsen burner until the piston just hits the stop, v = 3.0e-1 m^3/kg."
+	Initial pressure is 1.01e2 kPa, initial temperature is 2.93e2 K. Attach the insulation layer and set insulation to 100%. Set the upper volume stop to 3.0e-1 m^3/kg. Apply the Bunsen burner until the piston just hits the stop, v = 3.0e-1 m^3/kg."
 	Requirements: [(Volume:0.3:0.05)]
 |EfficiencyInfo: 
 
@@ -296,6 +296,46 @@
 	Question: "Combined processes: constant P, constant V
 	What is the final temperature?"
 	Answers: ["~ 3.53e2 K", "~ 3.73e2 K", "~ 3.93e2 K"(c)]
+|EfficiencyInfo: 
+
+
+|| TASK
+
+|Type:  [reach-state]
+|ToolInfo:  [Burner, Coil, Insulator, Stops]
+|SetInfo:  
+|LimitInfo:
+|TargetInfo:
+|QuizInfo:
+	Question: "Combined processes: constant P, constant V
+	Set the lower volume stop to 1.0e-1 m^3/kg. Apply the cooling coil until the piston just hits the stop, v = 2.0e-1 m^3/kg."
+	Requirements: [(Volume:0.1:0.05)]
+|EfficiencyInfo: 
+
+|| TASK
+
+|Type:  [reach-state]
+|ToolInfo:  [Burner, Coil, Insulator, Stops]
+|SetInfo:  
+|LimitInfo:
+|TargetInfo:
+|QuizInfo:
+	Question: "Combined processes: constant P, constant V
+	Continue to add cooling until P = 4.0e1 kPa."
+	Requirements: [(Pressure:40:0.1)]
+|EfficiencyInfo: 
+
+|| TASK
+
+|Type:  [multiple-choice]
+|ToolInfo:  [Burner, Coil, Insulator, Stops]
+|SetInfo:  
+|LimitInfo:
+|TargetInfo:
+|QuizInfo:
+	Question: "Combined processes: constant P, constant V
+	What is the final temperature?"
+	Answers: ["~ 3.49e2 K"(c), "~ 3.69e2 K", "~ 3.89e2 K"]
 |EfficiencyInfo: 
 
 || END

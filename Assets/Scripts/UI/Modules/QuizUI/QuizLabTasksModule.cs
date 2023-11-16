@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using ThermoVR.UI;
 using UnityEngine;
@@ -29,6 +30,9 @@ namespace ThermoVR.Lab
 
             GameMgr.Events?.Register<Cartridge>(GameEvents.ActivateCartridge, HandleActivateCartridge);
             GameMgr.Events?.Register<Cartridge>(GameEvents.DeactivateCartridge, HandleDeactivateCartridge);
+
+            GameMgr.Events?.Register(GameEvents.TaskResetPressed, HandleTaskResetPressed);
+
 
             m_tabs = new List<LabTab>();
             m_frames = new List<LabTaskFrame>();
@@ -246,6 +250,10 @@ namespace ThermoVR.Lab
             }
 
             m_activeTabIndex = newTabIndex;
+        }
+
+        private void HandleTaskResetPressed() {
+            ApplyWorldMods(m_tasks[m_activeTabIndex]);
         }
 
         #endregion // Handlers

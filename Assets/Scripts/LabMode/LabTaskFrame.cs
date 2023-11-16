@@ -29,6 +29,8 @@ namespace ThermoVR.Lab
             for (int i = 0; i < m_evaluables.Length; i++) {
                 m_evaluables[i].ResetState();
             }
+
+            GameMgr.Events.Dispatch(GameEvents.TaskResetPressed);
         }
     }
 }

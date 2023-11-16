@@ -24,7 +24,7 @@ public class World : MonoBehaviour
 
     #region Consts
 
-    const float CONTAINER_INSULATION_COEFFICIENT = 0.1f; // 0.1f; // Not really based on a physical material, just a way to roughly simulate imperfect insulation.
+    const float CONTAINER_INSULATION_COEFFICIENT = 0f;
     public const double DELTA_PRESSURE_CUTOFF = 100.0;
     const double PSI_TO_PASCAL = 6894.76;
     const double SPECIFIC_HEAT_CAPACITY_LIQ = 4184; // how many J it takes to heat 1 kg of water liquid 1 Kelvin
@@ -364,7 +364,7 @@ public class World : MonoBehaviour
             Dial dd = actable.GetComponent<Dial>();
 
             if (dd != null) {
-                dd.update_val(hand_pos, r_hand_pos);
+                dd.update_val_grab(hand_pos, r_hand_pos);
 
                 List<Tool> relevant_tools = dd.get_relevant_tools();
                 for (int t = 0; t < relevant_tools.Count; t++) {
@@ -484,6 +484,8 @@ public class World : MonoBehaviour
                 Halfable h = ref_grabbed.GetComponent<Halfable>();
                 if (h != null) h.setHalf(false); //nothing should be halfed while being grabbed
             }
+
+            GameMgr.Events.Dispatch(GameEvents.ObjectGrabbed, ref_grabbed);
         }
         //find new releases
         else if (ref_grabbed && (ref_htrigger_delta == -1 || ref_itrigger_delta == -1)) //something newly released
@@ -512,13 +514,7 @@ public class World : MonoBehaviour
                 GameMgr.Events.Dispatch(GameEvents.ColliderReleased, c.GetComponent<Collider>());
             }
 
-            /* TODO: separate out returning functionality from tools, then add to cartridges
-            if (c != null) {
-                c.GetComponent<Rigidbody>().isKinematic = false;
-                c.GetComponent<Rigidbody>().velocity = hand_vel;
-                c.GetComponent<Touchable>().grabbed = false;
-            }
-            */
+            GameMgr.Events.Dispatch(GameEvents.ObjectReleased, ref_grabbed);
 
             ref_grabbed.GetComponent<Touchable>().grabbed = false;
             ref_grabbed = null;

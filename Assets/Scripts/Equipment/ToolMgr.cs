@@ -53,7 +53,7 @@ namespace ThermoVR.Tools
         bool halfed = false;
         List<Halfable> halfables;
         [SerializeField] Pressable reset_button;
-        [SerializeField] Pressable halfer_button;
+        // [SerializeField] Pressable halfer_button;
 
         private void Awake() {
             if (Instance == null) {
@@ -122,17 +122,6 @@ namespace ThermoVR.Tools
 
             // Initialize Buttons
             reset_button.OnPress += HandleResetPressed;
-            halfer_button.OnPress += HandleHalferPressed;
-
-            /*
-            halfables = new List<Halfable> {
-                // GameObject.Find("Container").GetComponent<Halfable>(),
-                GameObject.Find("Tool_Insulator Variant").GetComponent<Halfable>(),
-                GameObject.Find("Tool_Coil Variant").GetComponent<Halfable>()
-            };
-
-            SetAllHalfed(true);
-            */
 
             GameMgr.Events?.Register<Tuple<double, double, double>>(GameEvents.WarpPVT, HandleWarpPVT);
 
@@ -140,6 +129,9 @@ namespace ThermoVR.Tools
 
             GameMgr.Events?.Register<List<ToolType>>(GameEvents.UpdateAllowedTools, HandleAllowedToolsUpdated);
             GameMgr.Events?.Register(GameEvents.ResetToolRestrictions, HandleResetToolRestrictions);
+
+            GameMgr.Events?.Register<GameObject>(GameEvents.ObjectGrabbed, HandleObjectGrabbed);
+            GameMgr.Events?.Register<GameObject>(GameEvents.ObjectReleased, HandleObjectReleased);
         }
 
         #region Accessors
@@ -327,6 +319,23 @@ namespace ThermoVR.Tools
             UpdateApplyTool(t);
         }
 
+        public void EngageTool(Tool t) {
+            t.TriggerEngage();
+        }
+
+        public void DisengageTool(Tool t) {
+            t.TriggerDisengage();
+        }
+
+        public void BeginAdjustTool(Tool t) {
+            t.TriggerBeginAdjust();
+        }
+
+        public void EndAdjustTool(Tool t) {
+            t.TriggerEndAdjust();
+        }
+
+
         public void AllowTool(Tool t) {
             // TODO: show on buttons
         }
@@ -408,6 +417,15 @@ namespace ThermoVR.Tools
             }
         }
 
+        public void ActivateConstantTools() {
+            for (int i = 0; i < tools.Count; i++) {
+                Tool toActivate = tools[i];
+                if (toActivate.always_engaged) {
+                    ActivateTool(toActivate);
+                }
+            }
+        }
+
         public double GetAppliedHeat() {
             double applied_heat = 0;
             if (tool_burner.engaged) applied_heat += tool_burner.GetVal();
@@ -418,8 +436,12 @@ namespace ThermoVR.Tools
 
         public double GetAppliedWeight() {
             double applied_weight = 0;
-            if (tool_weight.engaged) applied_weight += tool_weight.GetVal();
-            if (tool_negativeWeight.engaged) applied_weight += tool_negativeWeight.GetVal();
+            if (tool_weight.engaged) {
+                applied_weight += tool_weight.GetVal();
+            }
+            if (tool_negativeWeight.engaged) {
+                applied_weight += tool_negativeWeight.GetVal();
+            }
 
             return applied_weight;
         }
@@ -435,8 +457,10 @@ namespace ThermoVR.Tools
 
         private void ResetDefaults() {
             DeactivateAllTools(true);
+            ActivateConstantTools();
 
-            dial_surroundingPressure.set_val((float)((DEFAULT_CHAMBER_PRESSURE - ThermoMath.p_min) / (ThermoMath.p_max - ThermoMath.p_min)));
+            float targetMap = (float)((DEFAULT_CHAMBER_PRESSURE - ThermoMath.p_min) / (ThermoMath.p_max - ThermoMath.p_min));
+            dial_surroundingPressure.set_mapped_val(targetMap);
 
             // Insulator starts engaged
             ActivateTool(tool_insulator);
@@ -453,7 +477,8 @@ namespace ThermoVR.Tools
             DeactivateAllTools(true);
 
             // set ambient pressure to the pressure picked
-            dial_surroundingPressure.set_val((float)((pvt.Item1 - ThermoMath.p_min) / (ThermoMath.p_max - ThermoMath.p_min)));
+            float targetMap = (float)((pvt.Item1 - ThermoMath.p_min) / (ThermoMath.p_max - ThermoMath.p_min));
+            dial_surroundingPressure.set_mapped_val(targetMap);
 
             // Insulator starts engaged
             ActivateTool(tool_insulator);
@@ -499,6 +524,44 @@ namespace ThermoVR.Tools
 
             for (int i = 0; i < tools.Count; i++) {
                 AllowTool(tools[i]);
+            }
+        }
+
+
+        private void HandleObjectGrabbed(GameObject obj) {
+            // Check if it was a tool dial knob
+            List<Tool> relevantTools = null;
+
+            // Check if it was a tool dial knob
+            foreach (var dial in Dials) {
+                if (dial.gameObject == obj) {
+                    relevantTools = dial.get_relevant_tools();
+                    break;
+                }
+            }
+
+            if (relevantTools != null) {
+                foreach (var tool in relevantTools) {
+                    BeginAdjustTool(tool);
+                }
+            }
+        }
+
+        private void HandleObjectReleased(GameObject obj) {
+            List<Tool> relevantTools = null;
+
+            // Check if it was a tool dial knob
+            foreach(var dial in Dials) {
+                if (dial.gameObject == obj) {
+                    relevantTools = dial.get_relevant_tools();
+                    break;
+                }
+            }
+
+            if (relevantTools != null) {
+                foreach(var tool in relevantTools) {
+                    EndAdjustTool(tool);
+                }
             }
         }
 

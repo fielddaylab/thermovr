@@ -4,23 +4,27 @@ using System.Collections.Generic;
 using ThermoVR.Tools;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace ThermoVR.Dials
 {
-    public enum Effect {
+    public enum Effect
+    {
         None,
         Value,      // change the value of a sim value (e.g. burner heat, or stop volume)
         Movement    // move the tool in world space
     }
 
     // TODO: incorporate these triggers (stops should only get enacted on release, for example)
-    public enum EffectTrigger {
+    public enum EffectTrigger
+    {
         OnMove,     // takes effect immediately
         OnRelease   // takes effect once dial is released
     }
 
     [Serializable]
-    public struct EffectResponse {
+    public struct EffectResponse
+    {
         public Effect Effect;
         public float Modifier;
         public EffectTrigger Trigger;
@@ -33,7 +37,8 @@ namespace ThermoVR.Dials
     }
 
     [Serializable]
-    public struct EffectGroup {
+    public struct EffectGroup
+    {
         public List<Tool> ToAffect;
         public List<EffectResponse> Effects;
 
@@ -41,6 +46,12 @@ namespace ThermoVR.Dials
             ToAffect = toAffect;
             Effects = effects;
         }
+    }
+
+    public enum ConstrainType
+    {
+        Min,
+        Max
     }
 
     [RequireComponent(typeof(Touchable))]
@@ -87,6 +98,11 @@ namespace ThermoVR.Dials
         private float total_dist;
         private Vector3 initial_offset;
 
+        private float min_constraint;
+        private float max_constraint;
+
+        [HideInInspector] public UnityEvent DialMoved;
+
         public void Init(float min_map, float max_map, string valFormat) {
             this.min_map = min_map;
             this.max_map = max_map;
@@ -97,6 +113,9 @@ namespace ThermoVR.Dials
             else {
                 orientation_dir = (max_pos.position - min_pos.position).normalized;
             }
+
+            SetConstraint(0f, ConstrainType.Min);
+            SetConstraint(1f, ConstrainType.Max);
 
             relevant_tools = new List<Tool>();
             for (int g = 0; g < m_effect_map.Count; g++) {
@@ -122,7 +141,7 @@ namespace ThermoVR.Dials
             GameMgr.Events?.Register<Tool>(GameEvents.ActivateTool, HandleActivateTool, this)
                 .Register<Tool>(GameEvents.DeactivateTool, HandleDeactivateTool, this);
 
-            Reset();
+            Reset(true);
         }
 
         // Update is called once per frame, and after val updated
@@ -131,7 +150,6 @@ namespace ThermoVR.Dials
                 return;
             }
 
-            RecalibratePos();
             /*
             float magnitude = 0.05f - val * 0.1f;
             meter.transform.localPosition = Quaternion.Euler(0, 2.0f, 0) * meter.transform.forward * magnitude;
@@ -144,6 +162,8 @@ namespace ThermoVR.Dials
             lp.x = total_dist / 2 - val * total_dist - initial_offset.x * 2;
             meter.transform.localPosition = lp;
             forceMap();
+
+            DialMoved?.Invoke();
         }
 
         public void SetValText(float value) {
@@ -172,21 +192,22 @@ namespace ThermoVR.Dials
             map = response_power > 1 ? mapSharp() : mapLinear();
         }
 
-        public void Reset() {
+        public void Reset(bool isActive) {
             float prev_val = val;
 
-            val = default_val;
-
-            forceMap();
-
-            apply_change(map, val, prev_val);
-
-            RecalibratePos();
+            if (isActive) {
+                set_val(default_val);
+            }
+            else {
+                set_val(0);
+            }
 
             // reset active button materials
             if (activator_button != null) {
                 activator_button.UpdateActiveMaterial();
             }
+
+            RecalibratePos();
         }
 
         public void set_val(float new_val) {
@@ -195,12 +216,28 @@ namespace ThermoVR.Dials
             forceMap();
 
             apply_change(map, val, prev_val);
-
-            RecalibratePos();
         }
 
         public float get_val() {
             return val;
+        }
+
+        public void set_mapped_val(float target_map) {
+            float newVal = Mathf.Pow(target_map, 1 / (float)response_power);
+
+            set_val(newVal);
+        }
+
+        public void SetConstraint(float constraint, ConstrainType constrainType) {
+            if (constrainType == ConstrainType.Min) {
+                min_constraint = constraint;
+            }
+            else {
+                // max
+                max_constraint = constraint;
+            }
+
+            // Clamp necessary?
         }
 
         /*
@@ -216,7 +253,12 @@ namespace ThermoVR.Dials
          */
         private float mapSharp() { return min_map + (max_map - min_map) * Mathf.Pow(val, response_power); }
 
-        public void update_val(Vector3 hand_pos, Vector3 r_hand_pos) {
+        /// <summary>
+        /// Updates val via grab position
+        /// </summary>
+        /// <param name="hand_pos"></param>
+        /// <param name="r_hand_pos"></param>
+        public void update_val_grab(Vector3 hand_pos, Vector3 r_hand_pos) {
             if (!AnyToolsActive()) {
                 return;
             }
@@ -244,23 +286,28 @@ namespace ThermoVR.Dials
                 magnitude *= -1;
             }
 
-            float prev_val = val;
+            prev_val = val;
             // float prev_map = map;
 
-            float new_val = Mathf.Clamp(prev_val - magnitude, 0f, 1f);
+            float new_val = Mathf.Clamp(prev_val - magnitude, min_constraint, max_constraint);
             //if this close to either end, assume user wants min/max
-            if (new_val < 0.005) new_val = 0f;
-            if (new_val > 0.995) new_val = 1f;
+            if (new_val < min_constraint + 0.005) new_val = min_constraint;
+            if (new_val > max_constraint - 0.005) new_val = max_constraint;
 
-            // TODO: need a check here for if tool is enabled?
-            val = new_val;
-            forceMap();
-
-            apply_change(map, new_val, prev_val);
+            set_val(new_val);
         }
 
         public List<Tool> get_relevant_tools() {
             return relevant_tools;
+        }
+
+        /// <summary>
+        /// Checks if the given object is the dial's knob
+        /// </summary>
+        /// <param name="compare"></param>
+        /// <returns></returns>
+        public bool IsKnob(GameObject compare) {
+            return compare == meter;
         }
 
         private void apply_change(float map, float new_val, float prev_val) {
@@ -287,21 +334,33 @@ namespace ThermoVR.Dials
                                 break;
                         }
                     }
+
+                    // set engaged state of dial (note: different from if tool is active)
+                    if (new_val == 0) {
+                        // newly entered zero value
+                        ToolMgr.Instance.DisengageTool(tool);
+                    }
+                    else if (prev_val == 0) {
+                        // newly left zero value
+                        ToolMgr.Instance.EngageTool(tool);
+                    }
                 }
             }
+
+            RecalibratePos();
         }
 
         #region Handlers
 
         private void HandleActivateTool(Tool tool) {
             if (relevant_tools.Contains(tool)) {
-                Reset();
+                Reset(true);
             }
         }
 
         private void HandleDeactivateTool(Tool tool) {
             if (relevant_tools.Contains(tool)) {
-                Reset();
+                Reset(false);
             }
         }
 

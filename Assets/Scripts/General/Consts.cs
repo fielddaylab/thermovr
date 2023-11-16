@@ -12,8 +12,11 @@ static public class GameEvents
     static public readonly StringHash32 LabLoaded = "world:lab-loaded"; // LabInfo
     static public readonly StringHash32 ColliderReleased = "world:collider-released"; // Collider
     static public readonly StringHash32 ColliderGrabbed = "world:collider-grabbed"; // Collider
+    static public readonly StringHash32 ObjectReleased = "world:object-released"; // GameObject
+    static public readonly StringHash32 ObjectGrabbed = "world:object-grabbed"; // GameObject
     static public readonly StringHash32 ActivateCartridge = "world:activate-cartridge"; // Cartridge
     static public readonly StringHash32 DeactivateCartridge = "world:deactivate-cartridge"; // Cartridge
+    static public readonly StringHash32 TaskResetPressed = "world:task-reset-pressed";
     static public readonly StringHash32 BeginLab = "world:begin-lab";
     static public readonly StringHash32 PressedToolToggle = "world:pressed-tool-toggle";
     static public readonly StringHash32 WarpPVT = "sim:warp-pvt";

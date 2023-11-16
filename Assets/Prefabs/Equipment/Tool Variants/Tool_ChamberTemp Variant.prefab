@@ -169,6 +169,15 @@ MonoBehaviour:
   always_engaged: 1
   tool_type: 5
   ModelContainer: {fileID: 8257855382351835781}
+  ValUpdated:
+    m_PersistentCalls:
+      m_Calls: []
+  m_RoutineSpeed: 1
+  m_Mesh: {fileID: 8769726703146137898}
+  m_ActiveGlassMat: {fileID: 1775407545186772815, guid: 6856b8e261155f54b8da9aa4f336180e,
+    type: 3}
+  m_InactiveGlassMat: {fileID: -2924492723981160421, guid: 7df9d313a3024d949b274ca49c7ab073,
+    type: 3}
 --- !u!1 &8257855382351835781 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1469844741424147556, guid: 65b0020cd06dbeb4d8b64470f234f970,
@@ -255,3 +264,9 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6856b8e261155f54b8da9aa4f336180e, type: 3}
+--- !u!23 &8769726703146137898 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: -7511558181221131132, guid: 6856b8e261155f54b8da9aa4f336180e,
+    type: 3}
+  m_PrefabInstance: {fileID: 7959486002620982702}
+  m_PrefabAsset: {fileID: 0}

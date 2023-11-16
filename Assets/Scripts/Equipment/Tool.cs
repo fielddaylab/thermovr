@@ -11,6 +11,7 @@ using TMPro;
 using ThermoVR.Dials;
 using System;
 using BeauRoutine;
+using UnityEngine.Events;
 
 namespace ThermoVR.Tools
 {
@@ -55,21 +56,58 @@ namespace ThermoVR.Tools
         public ToolType tool_type;
         [SerializeField] private GameObject ModelContainer;
 
+        [HideInInspector] public UnityEvent ValUpdated;
+
         #endregion // Inspector
+
+        [SerializeField] protected float m_RoutineSpeed = 1; // one control for overall routine speeds
+        protected Vector3 m_ActivatedBasePos; // base position tool moves to upon activation
+        protected Vector3 m_DeactivatedBasePos; // base position tool moves to upon deactivation
+
+        protected List<GameObject> m_Elements; // individual pieces that move on dial move
 
         #region ITool
 
-        protected Routine m_TransitionRoutine;
+        protected Routine m_ActivationRoutineControl;
+        protected Routine m_EngagementRoutineControl;
+        protected Routine m_AdjustRoutineControl;
 
-        protected abstract IEnumerator ActivationRoutine();
-        protected abstract IEnumerator DeactivationRoutine();
+        protected abstract void InitializeRoutines_Impl();
+        protected abstract IEnumerator ActivationRoutine(); // when tool is activated
+        protected abstract IEnumerator DeactivationRoutine(); // when tool is deactivated
+
+        protected abstract IEnumerator EngageRoutine(); // when tool dial is set to a non-zero number
+        protected abstract IEnumerator DisengageRoutine(); // when tool dial is set to 0
+
+        protected abstract IEnumerator BeginAdjustRoutine(); // when player has grabbed the dial
+        protected abstract IEnumerator EndAdjustRoutine(); // when player has released the dial
+
+        public void InitializeRoutines() {
+            InitializeRoutines_Impl();
+        }
 
         public void TriggerActivation() {
-            m_TransitionRoutine.Replace(this, ActivationRoutine()).ExecuteWhileDisabled();
+            m_ActivationRoutineControl.Replace(this, ActivationRoutine()).ExecuteWhileDisabled();
         }
 
         public void TriggerDeactivation() {
-            m_TransitionRoutine.Replace(this, DeactivationRoutine()).ExecuteWhileDisabled();
+            m_ActivationRoutineControl.Replace(this, DeactivationRoutine()).ExecuteWhileDisabled();
+        }
+
+        public void TriggerEngage() {
+            m_EngagementRoutineControl.Replace(this, EngageRoutine()).ExecuteWhileDisabled();
+        }
+
+        public void TriggerDisengage() {
+            m_EngagementRoutineControl.Replace(this, DisengageRoutine()).ExecuteWhileDisabled();
+        }
+
+        public void TriggerBeginAdjust() {
+            m_AdjustRoutineControl.Replace(this, BeginAdjustRoutine()).ExecuteWhileDisabled();
+        }
+
+        public void TriggerEndAdjust() {
+            m_AdjustRoutineControl.Replace(this, EndAdjustRoutine()).ExecuteWhileDisabled();
         }
 
         #endregion // ITool
@@ -79,10 +117,19 @@ namespace ThermoVR.Tools
             this.display_mul = mul;
 
             engaged = always_engaged;
+
+            GameMgr.Events?.Register<Collider>(GameEvents.ColliderReleased, HandleColliderReleased);
+            GameMgr.Events?.Register<Collider>(GameEvents.ColliderGrabbed, HandleColliderGrabbed);
+
+            m_Elements = new List<GameObject>();
+
+            InitializeRoutines();
         }
 
         public void UpdateVal(float new_val, Dial dial) {
             val = new_val;
+
+            ValUpdated?.Invoke();
 
             UpdateToolText(dial);
         }
@@ -95,18 +142,31 @@ namespace ThermoVR.Tools
             return val;
         }
 
+        private void UpdateToolText(Dial dial) {
+            if (dial.textv_tmpro) dial.SetValText((float)(dial.map * display_mul));
+        }
+
         /// <summary>
         /// Moves the engaged tool position
         /// </summary>
         /// <param name="dv">the dial's value difference</param>
         public void Move(float dv) {
-            this.transform.position += new Vector3(0, dv, 0);
+            foreach(var obj in m_Elements) {
+                obj.transform.position += new Vector3(0, dv, 0);
+            }
         }
 
+        #region Handlers
 
-        private void UpdateToolText(Dial dial) {
-            if (dial.textv_tmpro) dial.SetValText((float)(dial.map * display_mul));
+        private void HandleColliderGrabbed(Collider col) {
+
         }
+
+        private void HandleColliderReleased(Collider col) {
+
+        }
+
+        #endregion // Handlers
     }
 }
 
