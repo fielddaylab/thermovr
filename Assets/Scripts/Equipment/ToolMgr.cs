@@ -417,6 +417,15 @@ namespace ThermoVR.Tools
             }
         }
 
+        public void ActivateConstantTools() {
+            for (int i = 0; i < tools.Count; i++) {
+                Tool toActivate = tools[i];
+                if (toActivate.always_engaged) {
+                    ActivateTool(toActivate);
+                }
+            }
+        }
+
         public double GetAppliedHeat() {
             double applied_heat = 0;
             if (tool_burner.engaged) applied_heat += tool_burner.GetVal();
@@ -448,6 +457,7 @@ namespace ThermoVR.Tools
 
         private void ResetDefaults() {
             DeactivateAllTools(true);
+            ActivateConstantTools();
 
             float targetMap = (float)((DEFAULT_CHAMBER_PRESSURE - ThermoMath.p_min) / (ThermoMath.p_max - ThermoMath.p_min));
             dial_surroundingPressure.set_mapped_val(targetMap);

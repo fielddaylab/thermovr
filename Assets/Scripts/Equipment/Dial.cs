@@ -48,7 +48,8 @@ namespace ThermoVR.Dials
         }
     }
 
-    public enum ConstrainType {
+    public enum ConstrainType
+    {
         Min,
         Max
     }
@@ -140,7 +141,7 @@ namespace ThermoVR.Dials
             GameMgr.Events?.Register<Tool>(GameEvents.ActivateTool, HandleActivateTool, this)
                 .Register<Tool>(GameEvents.DeactivateTool, HandleDeactivateTool, this);
 
-            Reset();
+            Reset(true);
         }
 
         // Update is called once per frame, and after val updated
@@ -191,14 +192,22 @@ namespace ThermoVR.Dials
             map = response_power > 1 ? mapSharp() : mapLinear();
         }
 
-        public void Reset() {
+        public void Reset(bool isActive) {
             float prev_val = val;
-            set_val(default_val);
+
+            if (isActive) {
+                set_val(default_val);
+            }
+            else {
+                set_val(0);
+            }
 
             // reset active button materials
             if (activator_button != null) {
                 activator_button.UpdateActiveMaterial();
             }
+
+            RecalibratePos();
         }
 
         public void set_val(float new_val) {
@@ -302,10 +311,6 @@ namespace ThermoVR.Dials
         }
 
         private void apply_change(float map, float new_val, float prev_val) {
-            if (new_val == prev_val) {
-                return;
-            }
-
             // for each group
             for (int g = 0; g < m_effect_map.Count; g++) {
                 EffectGroup group = m_effect_map[g];
@@ -330,7 +335,7 @@ namespace ThermoVR.Dials
                         }
                     }
 
-                    // set engaged state
+                    // set engaged state of dial (note: different from if tool is active)
                     if (new_val == 0) {
                         // newly entered zero value
                         ToolMgr.Instance.DisengageTool(tool);
@@ -349,13 +354,13 @@ namespace ThermoVR.Dials
 
         private void HandleActivateTool(Tool tool) {
             if (relevant_tools.Contains(tool)) {
-                Reset();
+                Reset(true);
             }
         }
 
         private void HandleDeactivateTool(Tool tool) {
             if (relevant_tools.Contains(tool)) {
-                Reset();
+                Reset(false);
             }
         }
 

@@ -1,3 +1,4 @@
+using BeauUtil;
 using System.Collections;
 using System.Collections.Generic;
 using ThermoVR.Dials;
@@ -10,10 +11,8 @@ namespace ThermoVR.Tools
     {
         #region Inspector
 
-        [SerializeField] private Animator m_Animator; // the animator with the animation we're modifying
+        [Required] [SerializeField] private Animator m_Animator; // the animator with the animation we're modifying
         [SerializeField] private int m_AnimationIndex; // the index of the specific animation clip we're working with
-
-        [SerializeField] private float test_val;
 
         private AnimationClip m_Clip;
 

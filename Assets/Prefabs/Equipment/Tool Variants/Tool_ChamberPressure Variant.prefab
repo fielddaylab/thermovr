@@ -74,6 +74,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7df9d313a3024d949b274ca49c7ab073, type: 3}
+--- !u!23 &3715577274515359266 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: -7511558181221131132, guid: 7df9d313a3024d949b274ca49c7ab073,
+    type: 3}
+  m_PrefabInstance: {fileID: 2617141661383400102}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &6342440882807034903
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -186,6 +192,15 @@ MonoBehaviour:
   always_engaged: 1
   tool_type: 6
   ModelContainer: {fileID: 5503698224716658803}
+  ValUpdated:
+    m_PersistentCalls:
+      m_Calls: []
+  m_RoutineSpeed: 1
+  m_Mesh: {fileID: 3715577274515359266}
+  m_ActiveGlassMat: {fileID: 1775407545186772815, guid: 7df9d313a3024d949b274ca49c7ab073,
+    type: 3}
+  m_InactiveGlassMat: {fileID: -2924492723981160421, guid: 6856b8e261155f54b8da9aa4f336180e,
+    type: 3}
 --- !u!1001 &8991069136767059721
 PrefabInstance:
   m_ObjectHideFlags: 0

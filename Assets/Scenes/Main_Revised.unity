@@ -2927,6 +2927,12 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 1742087595086344827}
   m_PrefabAsset: {fileID: 0}
+--- !u!95 &667033889 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 5369382654648585120, guid: a7ba15d208570c444b8b77b073a99b57,
+    type: 3}
+  m_PrefabInstance: {fileID: 1216849943}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &682379367
 GameObject:
   m_ObjectHideFlags: 0
@@ -4801,6 +4807,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Diorama
+      objectReference: {fileID: 0}
+    - target: {fileID: 7514909427655331812, guid: a7ba15d208570c444b8b77b073a99b57,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a7ba15d208570c444b8b77b073a99b57, type: 3}
@@ -21088,7 +21099,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Animator
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 667033889}
     - target: {fileID: 968756469204753056, guid: 29c93134005f4e146888613d124d2592,
         type: 3}
       propertyPath: m_Materials.Array.data[0]

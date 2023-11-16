@@ -10,16 +10,27 @@ namespace ThermoVR.Tools
         [SerializeField] private GameObject m_Left;
         [SerializeField] private GameObject m_Right;
 
+        private float m_LeftStartAngle, m_RightStartAngle;
+        private float m_StartY;
+
         private static float ADJUST_ANGLE = 90f;
         private static float ROTATE_SPEED = 0.075f;
 
         #region Tool
 
         protected override void InitializeRoutines_Impl() {
+            m_LeftStartAngle = m_Left.transform.eulerAngles.y;
+            m_RightStartAngle = m_Right.transform.eulerAngles.y;
 
+            m_StartY = m_Left.transform.position.y;
         }
 
         protected override IEnumerator ActivationRoutine() {
+            Vector3 currLeft = m_Left.transform.position;
+            m_Left.transform.position = new Vector3(currLeft.x, m_StartY, currLeft.z);
+            Vector3 currRight = m_Right.transform.position;
+            m_Right.transform.position = new Vector3(currRight.x, m_StartY, currRight.z);
+
             gameObject.SetActive(true);
             yield return null;
         }
@@ -50,26 +61,16 @@ namespace ThermoVR.Tools
         #region Helpers
 
         private IEnumerator SnapOn() {
-            Vector3 targetLeftRotation = m_Left.transform.localEulerAngles;
-            targetLeftRotation.y = targetLeftRotation.y - ADJUST_ANGLE;
-            Vector3 targetRightRotation = m_Right.transform.localEulerAngles;
-            targetRightRotation.y = targetRightRotation.y + ADJUST_ANGLE;
-
             yield return Routine.Combine(
-                m_Left.transform.RotateTo(targetLeftRotation, ROTATE_SPEED / m_RoutineSpeed, Axis.Y, Space.Self),
-                m_Right.transform.RotateTo(targetRightRotation, ROTATE_SPEED / m_RoutineSpeed, Axis.Y, Space.Self)
+                m_Left.transform.RotateTo(m_LeftStartAngle, ROTATE_SPEED / m_RoutineSpeed, Axis.Y, Space.World),
+                m_Right.transform.RotateTo(m_RightStartAngle, ROTATE_SPEED / m_RoutineSpeed, Axis.Y, Space.World)
                 );
         }
 
         private IEnumerator SnapOff() {
-            Vector3 targetLeftRotation = m_Left.transform.localEulerAngles;
-            targetLeftRotation.y = targetLeftRotation.y + ADJUST_ANGLE;
-            Vector3 targetRightRotation = m_Right.transform.localEulerAngles;
-            targetRightRotation.y = targetRightRotation.y - ADJUST_ANGLE;
-
             yield return Routine.Combine(
-                m_Left.transform.RotateTo(targetLeftRotation, ROTATE_SPEED / m_RoutineSpeed, Axis.Y, Space.Self),
-                m_Right.transform.RotateTo(targetRightRotation, ROTATE_SPEED / m_RoutineSpeed, Axis.Y, Space.Self)
+                m_Left.transform.RotateTo(m_LeftStartAngle + ADJUST_ANGLE, ROTATE_SPEED / m_RoutineSpeed, Axis.Y, Space.World),
+                m_Right.transform.RotateTo(m_RightStartAngle - ADJUST_ANGLE, ROTATE_SPEED / m_RoutineSpeed, Axis.Y, Space.World)
                 );
         }
 

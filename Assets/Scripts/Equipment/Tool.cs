@@ -66,7 +66,9 @@ namespace ThermoVR.Tools
 
         #region ITool
 
-        protected Routine m_TransitionRoutine;
+        protected Routine m_ActivationRoutineControl;
+        protected Routine m_EngagementRoutineControl;
+        protected Routine m_AdjustRoutineControl;
 
         protected abstract void InitializeRoutines_Impl();
         protected abstract IEnumerator ActivationRoutine(); // when tool is activated
@@ -83,27 +85,27 @@ namespace ThermoVR.Tools
         }
 
         public void TriggerActivation() {
-            m_TransitionRoutine.Replace(this, ActivationRoutine()).ExecuteWhileDisabled();
+            m_ActivationRoutineControl.Replace(this, ActivationRoutine()).ExecuteWhileDisabled();
         }
 
         public void TriggerDeactivation() {
-            m_TransitionRoutine.Replace(this, DeactivationRoutine()).ExecuteWhileDisabled();
+            m_ActivationRoutineControl.Replace(this, DeactivationRoutine()).ExecuteWhileDisabled();
         }
 
         public void TriggerEngage() {
-            m_TransitionRoutine.Replace(this, EngageRoutine()).ExecuteWhileDisabled();
+            m_EngagementRoutineControl.Replace(this, EngageRoutine()).ExecuteWhileDisabled();
         }
 
         public void TriggerDisengage() {
-            m_TransitionRoutine.Replace(this, DisengageRoutine()).ExecuteWhileDisabled();
+            m_EngagementRoutineControl.Replace(this, DisengageRoutine()).ExecuteWhileDisabled();
         }
 
         public void TriggerBeginAdjust() {
-            m_TransitionRoutine.Replace(this, BeginAdjustRoutine()).ExecuteWhileDisabled();
+            m_AdjustRoutineControl.Replace(this, BeginAdjustRoutine()).ExecuteWhileDisabled();
         }
 
         public void TriggerEndAdjust() {
-            m_TransitionRoutine.Replace(this, EndAdjustRoutine()).ExecuteWhileDisabled();
+            m_AdjustRoutineControl.Replace(this, EndAdjustRoutine()).ExecuteWhileDisabled();
         }
 
         #endregion // ITool
