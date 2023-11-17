@@ -338,11 +338,14 @@ namespace ThermoVR.Tools
 
 
         public void AllowTool(Tool t) {
-            // TODO: show on buttons
+            // TODO: show on buttons (dispatch event)
+            t.allowed = true;
         }
 
         public void DisallowTool(Tool t) {
-            // TODO: show on buttons 
+            // TODO: show on buttons (dispatch event)
+            t.allowed = false;
+
             DeactivateTool(t);
         }
 
@@ -451,6 +454,8 @@ namespace ThermoVR.Tools
 
 
         private void HandleResetPressed(object sender, System.EventArgs args) {
+            reset_button.ClickAudio.Play();
+
             GameMgr.Events.Dispatch(GameEvents.ResetPressed);
 
             ResetDefaults();

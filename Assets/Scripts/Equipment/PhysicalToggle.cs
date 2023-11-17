@@ -48,6 +48,7 @@ public class PhysicalToggle : MonoBehaviour
     private void HandleTogglePressed(object sender, EventArgs args) {
         m_isOn = !m_isOn;
         UpdateActiveMaterial();
+        m_button.ClickAudio.Play();
     }
 
     #endregion // Handlers

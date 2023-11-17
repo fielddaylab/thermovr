@@ -43,6 +43,8 @@ namespace ThermoVR.Tools
         [System.NonSerialized]
         public bool engaged = false;
 
+        [HideInInspector] public bool allowed; // whether the player can use this tool
+
         private float val = 0.0f; // value of the tool
 
         [System.NonSerialized]
@@ -122,6 +124,8 @@ namespace ThermoVR.Tools
             GameMgr.Events?.Register<Collider>(GameEvents.ColliderGrabbed, HandleColliderGrabbed);
 
             m_Elements = new List<GameObject>();
+
+            allowed = true;
 
             InitializeRoutines();
         }

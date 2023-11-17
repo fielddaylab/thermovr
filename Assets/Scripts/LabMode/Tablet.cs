@@ -8,6 +8,7 @@ using ThermoVR.UI;
 using TMPro;
 using UnityEngine;
 using static OVRInput;
+using static UnityEngine.InputSystem.HID.HID;
 
 namespace ThermoVR
 {
@@ -84,27 +85,41 @@ namespace ThermoVR
         #region Handlers
 
         private void HandleReadoutTabPress(object sender, EventArgs args) {
+            PlayClick(m_readoutTabButton);
+
             // Open Readout UI
             m_hub.OpenUI(UIID.Readout);
         }
 
         private void HandleSandboxTabPress(object sender, EventArgs args) {
+            PlayClick(m_sandboxTabButton);
+
             // Open Sandbox UI
             m_hub.OpenUI(UIID.Sandbox);
         }
 
         private void HandleQuizTabPress(object sender, EventArgs args) {
+            PlayClick(m_quizTabButton);
+
             // Open Quiz UI
             m_hub.OpenUI(UIID.Quiz);
         }
 
         private void HandleGraphTabPress(object sender, EventArgs args) {
+            PlayClick(m_graphTabButton);
+
             // Open Graph UI
             m_hub.OpenUI(UIID.Graph);
         }
 
         private void HandleExpandToggleButtonPress(object sender, EventArgs args) {
+            PlayClick(m_expandToggleButton);
+
             ToggleExpandedModel();
+        }
+
+        private void PlayClick(Pressable pressable) {
+            pressable.ClickAudio.Play();
         }
 
         #endregion // Handlers
