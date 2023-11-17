@@ -37,10 +37,12 @@ namespace ThermoVR.State
     {
         public VarID ID;
         public string NewText;
+        public string Units;
 
-        public VarUpdate(VarID id, string newText) {
+        public VarUpdate(VarID id, string newText, string units) {
             ID = id;
             NewText = newText;
+            Units = units;
         }
     }
 

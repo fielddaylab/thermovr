@@ -13,7 +13,8 @@ namespace ThermoVR.Lab
 
         #region Inspector
 
-        public TMP_Text TMP;
+        public TMP_Text ValueText;
+        public TMP_Text UnitText;
 
         [SerializeField] private Slider m_slider;
 
