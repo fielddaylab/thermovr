@@ -844,7 +844,7 @@ public class ThermoPresent : MonoBehaviour
 
         string update_text = "";
         if (Math.Abs(state.pressure - state.prev_pressure) > ThermoMath.p_smallstep) { update_text = string.Format("P: " + DigitFormat.Pressure, (float)state.pressure / 1000f); DispatchText(update_text, Units.Pressure, VarID.Pressure); }
-        if (Math.Abs(state.temperature - state.prev_temperature) > ThermoMath.t_smallstep) { update_text = string.Format("T: " + DigitFormat.TemperatureK + " " + Units.TemperatureK + " ({1:0.00}" + Units.TemperatureC + ")", (float)state.temperature, (float)state.temperature - 273.15f); DispatchText(update_text, "", VarID.Temperature); }
+        if (Math.Abs(state.temperature - state.prev_temperature) > ThermoMath.t_smallstep) { update_text = string.Format("T: " + DigitFormat.TemperatureK + "    " + Units.TemperatureK + "  ({1:0.00} " + Units.TemperatureC + ")", (float)state.temperature, (float)state.temperature - 273.15f); DispatchText(update_text, "", VarID.Temperature); }
         if (Math.Abs(state.volume - state.prev_volume) > ThermoMath.v_smallstep) { update_text = string.Format("v: " + DigitFormat.Volume, (float)state.volume); DispatchText(update_text, Units.Volume, VarID.Volume); }
         if (Math.Abs(state.internalenergy - state.prev_internalenergy) > ThermoMath.u_smallstep) { update_text = string.Format("u: " + DigitFormat.InternalEnergy, (float)state.internalenergy / 1000f); DispatchText(update_text, Units.InternalEnergy, VarID.InternalEnergy); }
         if (Math.Abs(state.entropy - state.prev_entropy) > ThermoMath.s_smallstep) { update_text = string.Format("s: " + DigitFormat.Entropy, (float)state.entropy / 1000f); DispatchText(update_text, Units.Entropy, VarID.Entropy); }
