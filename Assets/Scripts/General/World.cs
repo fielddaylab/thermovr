@@ -221,7 +221,7 @@ public class World : MonoBehaviour
         //apply thermo
         ambient_pressure = ToolMgr.GetToolVal(ToolType.SurroundingPressure);
         room_temp = ToolMgr.GetToolVal(ToolType.SurroundingTemperature);
-        double weight_pressure = (ToolMgr.GetAppliedWeight()) / ThermoMath.surfacearea_insqr; //psi
+        double weight_pressure = (ToolMgr.GetAppliedWeight()) / ThermoState.surfacearea_insqr; //psi
         weight_pressure *= PSI_TO_PASCAL; //conversion from psi to pascal
         weight_pressure += ambient_pressure;
         weight_pressure = Math.Clamp(weight_pressure, ThermoMath.p_min, ThermoMath.p_max);

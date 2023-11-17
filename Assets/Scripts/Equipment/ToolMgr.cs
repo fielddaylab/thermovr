@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using ThermoVR.Dials;
+using ThermoVR.State;
 using UnityEngine;
 
 namespace ThermoVR.Tools
@@ -105,7 +106,7 @@ namespace ThermoVR.Tools
                 dial_percentInsulation
             };
 
-            double kg_corresponding_to_10mpa = ThermoMath.surfacearea_insqr * (10 * 1453.8/*MPa->psi*/) * 0.453592/*lb->kg*/;
+            double kg_corresponding_to_10mpa = ThermoState.surfacearea_insqr * (10 * 1453.8/*MPa->psi*/) * 0.453592/*lb->kg*/;
             // double kg_corresponding_to_2mpa = ThermoMath.surfacearea_insqr * (2 * 1453.8/*MPa->psi*/) * 0.453592/*lb->kg*/; // 10 MPa seems way too big, sooooo... we'll just do 2 MPa.
 
             dial_stop1.Init((float)ThermoMath.v_min, (float)ThermoMath.v_max, DigitFormat.Volume);

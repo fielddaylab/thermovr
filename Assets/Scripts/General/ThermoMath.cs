@@ -32,9 +32,6 @@ public static class ThermoMath
     private const int DEFAULT_ITERS = 50; // The lower the number, the better the framerate (but speed at which an accurate answer is reached is slower)
     private const double DEFAULT_STEP = 10.0;
 
-    //public double surfacearea = Math.Pow(3.141592*radius,2.0); //M^2 //hardcoded answer below
-    public static double surfacearea = 0.024674011; //M^2 //hardcoded answer to eqn above
-    public static double surfacearea_insqr = 38.2447935395871; //in^2 //hardcoded conversion from m^2 to in^2
 
     /*
     pressure = p
@@ -300,6 +297,10 @@ public static class ThermoMath
     public static double percent_given_h(double h) { return (h - h_min) / (h_max - h_min); }
     public static double percent_given_x(double x) { return x; } //x already is a percent
 
+    private static void display_error() {
+        got_error = true;
+    }
+
     //rule of naming for consistency: prefer lexical ordering "p < v < t < u < s < h < q", ie "p_given_vt" rather than "p_given_tv"
 
     public static double p_given_vt(double v, double t, int fallback_region = 0) //experimentally only valid in the superheated vapor region
@@ -310,7 +311,7 @@ public static class ThermoMath
         catch (Exception ex) {
             Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, p_neutral[fallback_region]));
             Debug.Log("[Error] " + ex.Message);
-            got_error = true;
+            display_error();
             return p_neutral[fallback_region];
         }
     }
@@ -326,7 +327,7 @@ public static class ThermoMath
             else {
                 Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, v_neutral[fallback_region]));
                 Debug.Log("[Error] " + ex.Message);
-                got_error = true;
+                display_error();
                 return v_neutral[fallback_region];
             }
         }
@@ -343,7 +344,7 @@ public static class ThermoMath
             else {
                 Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, v_neutral[fallback_region]));
                 Debug.Log("[Error] " + ex.Message);
-                got_error = true;
+                display_error();
                 return v_neutral[fallback_region];
             }
         }
@@ -379,7 +380,7 @@ public static class ThermoMath
             else {
                 Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, v_neutral[fallback_region]));
                 Debug.Log("[Error] " + ex.Message);
-                got_error = true;
+                display_error();
                 return v_neutral[fallback_region];
             }
         }
@@ -392,7 +393,7 @@ public static class ThermoMath
         catch (Exception ex) {
             Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, t_neutral[fallback_region]));
             Debug.Log("[Error] " + ex.Message);
-            got_error = true;
+            display_error();
             return t_neutral[fallback_region];
         }
     }
@@ -408,7 +409,7 @@ public static class ThermoMath
                 throw ex;
             }
             else {
-                got_error = true;
+                display_error();
                 return t_neutral[fallback_region];
             }
 
@@ -423,7 +424,7 @@ public static class ThermoMath
         catch (Exception ex) {
             Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, v_neutral[fallback_region]));
             Debug.Log("[Error] " + ex.Message);
-            got_error = true;
+            display_error();
             return v_neutral[fallback_region];
         }
     }
@@ -435,7 +436,7 @@ public static class ThermoMath
         catch (Exception ex) {
             Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, v_neutral[fallback_region]));
             Debug.Log("[Error] " + ex.Message);
-            got_error = true;
+            display_error();
             return v_neutral[fallback_region];
         }
     }
@@ -448,7 +449,7 @@ public static class ThermoMath
         catch (Exception ex) {
             Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, u_neutral[fallback_region]));
             Debug.Log("[Error] " + ex.Message);
-            got_error = true;
+            display_error();
             return u_neutral[fallback_region];
         }
     }
@@ -460,7 +461,7 @@ public static class ThermoMath
         catch (Exception ex) {
             Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, u_neutral[fallback_region]));
             Debug.Log("[Error] " + ex.Message);
-            got_error = true;
+            display_error();
             return u_neutral[fallback_region];
         }
     }
@@ -472,7 +473,7 @@ public static class ThermoMath
         catch (Exception ex) {
             Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, u_neutral[fallback_region]));
             Debug.Log("[Error] " + ex.Message);
-            got_error = true;
+            display_error();
             return u_neutral[fallback_region];
         }
     }
@@ -484,7 +485,7 @@ public static class ThermoMath
         catch (Exception ex) {
             Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, s_neutral[fallback_region]));
             Debug.Log("[Error] " + ex.Message);
-            got_error = true;
+            display_error();
             return s_neutral[fallback_region];
         }
     }
@@ -509,7 +510,7 @@ public static class ThermoMath
         catch (Exception ex) {
             Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, h_neutral[fallback_region]));
             Debug.Log("[Error] " + ex.Message);
-            got_error = true;
+            display_error();
             return h_neutral[fallback_region];
         }
     }
@@ -539,7 +540,7 @@ public static class ThermoMath
         catch (Exception ex) {
             Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, x_neutral[fallback_region]));
             Debug.Log("[Error] " + ex.Message);
-            got_error = true;
+            display_error();
             return x_neutral[fallback_region];
         }
     }
@@ -552,7 +553,7 @@ public static class ThermoMath
         catch (Exception ex) {
             Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, x_neutral[fallback_region]));
             Debug.Log("[Error] " + ex.Message);
-            got_error = true;
+            display_error();
             return x_neutral[fallback_region];
         }
     }
@@ -565,7 +566,7 @@ public static class ThermoMath
         catch (Exception ex) {
             Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, x_neutral[fallback_region]));
             Debug.Log("[Error] " + ex.Message);
-            got_error = true;
+            display_error();
             return x_neutral[fallback_region];
         }
     }
@@ -601,7 +602,7 @@ public static class ThermoMath
         catch (Exception ex) {
             Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, t_neutral[fallback_region]));
             Debug.Log("[Error] " + ex.Message);
-            got_error = true;
+            display_error();
             return t_neutral[fallback_region];
         }
     }
@@ -637,7 +638,7 @@ public static class ThermoMath
         catch (Exception ex) {
             Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, t_neutral[fallback_region]));
             Debug.Log("[Error] " + ex.Message);
-            got_error = true;
+            display_error();
             return t_neutral[fallback_region];
         }
     }
@@ -753,7 +754,7 @@ public static class ThermoMath
         else {
             Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, t_neutral[fallback_region]));
             Debug.Log("[Error] " + ex.Message);
-            got_error = true;
+            display_error();
             return t_neutral[fallback_region];
         }
     }
@@ -788,7 +789,7 @@ public static class ThermoMath
         catch (Exception ex) {
             Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, t_neutral[fallback_region]));
             Debug.Log("[Error] " + ex.Message);
-            got_error = true;
+            display_error();
             return t_neutral[fallback_region];
         }
     }

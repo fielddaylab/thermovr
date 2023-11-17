@@ -19,7 +19,7 @@ namespace ThermoVR {
         /// Position the piston in the scene at the desired min position, then run this function.
         /// </summary>
         [ContextMenu("Set Max Scale")]
-        private void SetMaxSa() {
+        private void SetMaxScale() {
             m_MaxScale = this.transform.localScale;
         }
 
@@ -50,7 +50,17 @@ namespace ThermoVR {
         [SerializeField] private Vector3 m_MaxScale;
         [SerializeField] private Vector3 m_MinScale;
 
+        private float m_Span; // difference between min and max positions
+
         #endregion // Inspector
+
+        #region Unity Callbacks
+
+        private void Awake() {
+            m_Span = m_MaxScale.y - m_MinScale.y;
+        }
+
+        #endregion // Unity Callbacks
 
         #region Accessors
 
@@ -60,6 +70,10 @@ namespace ThermoVR {
 
         public Vector3 GetMaxScale() {
             return m_MaxScale;
+        }
+
+        public float GetSpan() {
+            return m_Span;
         }
 
         #endregion // Accessors

@@ -46,7 +46,17 @@ namespace ThermoVR {
         [SerializeField] private Vector3 m_MaxPos;
         [SerializeField] private Vector3 m_MinPos;
 
+        private float m_Span; // difference between min and max positions
+
         #endregion // Inspector
+
+        #region Unity Callbacks
+
+        private void Awake() {
+            m_Span = m_MaxPos.y - m_MinPos.y;
+        }
+
+        #endregion // Unity Callbacks
 
         #region Accessors
 
@@ -56,6 +66,10 @@ namespace ThermoVR {
 
         public Vector3 GetMaxPos() {
             return m_MaxPos;
+        }
+
+        public float GetSpan() {
+            return m_Span;
         }
 
         #endregion // Accessors
