@@ -232,7 +232,7 @@ public class World : MonoBehaviour
             // small enough step; finish transition
         }
         else {
-            delta_weight *= delta_time;
+            // delta_weight *= delta_time;
         }
 
         double insulation_coefficient;

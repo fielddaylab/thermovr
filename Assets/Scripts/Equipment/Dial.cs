@@ -250,6 +250,11 @@ namespace ThermoVR.Dials
 
         public bool IsObjWithinBounds(GameObject obj)
         {
+            if (obj == null)
+            {
+                return true;
+            }
+
             float dist = Vector3.Distance(obj.transform.position, meter.transform.position);
             return dist <= .1f;
         }

@@ -122,7 +122,6 @@ namespace ThermoVR.Tools {
                 new_tool_pos.y = GetMinPos().y + log_map * toolSpan;
 
                 // if above sim volume (and thus above piston), add piston height
-                // TODO: Inconsistent depending on vapor ratio
                 if (newToolVal > ThermoState.Instance.volume)
                 {
                     new_tool_pos.y += m_PistonCapHeight;
