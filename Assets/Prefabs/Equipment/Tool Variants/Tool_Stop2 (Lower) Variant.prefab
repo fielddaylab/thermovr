@@ -164,7 +164,7 @@ PrefabInstance:
     - target: {fileID: 1469844742514000810, guid: 65b0020cd06dbeb4d8b64470f234f970,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: -0.197
       objectReference: {fileID: 0}
     - target: {fileID: 1469844742514000810, guid: 65b0020cd06dbeb4d8b64470f234f970,
         type: 3}
@@ -231,6 +231,22 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 4978218055838084424}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &5408492604602403805
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5869279875863408355}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aacb888d85a9b0942911e934272b8fda, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_MaxPos: {x: 0, y: 0.4398, z: 0}
+  m_MinPos: {x: 0, y: -0.187, z: 0}
+  m_PistonCapHeight: 0.11
+  m_MappingType: 1
 --- !u!114 &6574051720708683532
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -243,6 +259,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 081dcfca00b592c4f99bf617b5ee5e04, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  allowed: 0
   always_engaged: 0
   tool_type: 7
   ModelContainer: {fileID: 5869279874772222252}

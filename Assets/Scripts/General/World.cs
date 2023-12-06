@@ -336,7 +336,7 @@ public class World : MonoBehaviour
     /// <param name="actable"></param>
     /// <param name="hand_pos">prev hand position</param>
     /// <param name="r_hand_pos">ref to curr hand position</param>
-    public void TryInteractable(GameObject actable, Vector3 hand_pos, ref Vector3 r_hand_pos) {
+    public void TryInteractable(ref GameObject actable, Vector3 hand_pos, ref Vector3 r_hand_pos, GameObject hand_obj) {
         //grabbing handle
         if (actable == handle_workspace) {
             float dy = (r_hand_pos.y - hand_pos.y);
@@ -365,11 +365,21 @@ public class World : MonoBehaviour
             Dial dd = actable.GetComponent<Dial>();
 
             if (dd != null) {
-                dd.update_val_grab(hand_pos, r_hand_pos);
+                // ensure hand is within range of dial
+                if (dd.IsObjWithinBounds(hand_obj))
+                {
+                    dd.update_val_grab(hand_pos, r_hand_pos);
 
-                List<Tool> relevant_tools = dd.get_relevant_tools();
-                for (int t = 0; t < relevant_tools.Count; t++) {
-                    ToolMgr.UpdateApplyTool(relevant_tools[t]);
+                    List<Tool> relevant_tools = dd.get_relevant_tools();
+                    for (int t = 0; t < relevant_tools.Count; t++)
+                    {
+                        ToolMgr.UpdateApplyTool(relevant_tools[t]);
+                    }
+                }
+                else
+                {
+                    // stop grabbing
+                    actable = null;
                 }
             }
         }
@@ -521,7 +531,7 @@ public class World : MonoBehaviour
             ref_grabbed = null;
         }
 
-        if (ref_grabbed) TryInteractable(ref_grabbed, hand_pos, ref ref_hand_pos);
+        if (ref_grabbed) TryInteractable(ref ref_grabbed, hand_pos, ref ref_hand_pos, ref_hand);
 
         ref_hand_pos = hand_pos;
 

@@ -48,6 +48,8 @@ namespace ThermoVR.State
 
     public class ThermoState : MonoBehaviour
     {
+        public static ThermoState Instance;
+
         //state
         //xyz corresponds to vpt (Y = "up")
         public double pressure;       //p //pascals
@@ -84,11 +86,26 @@ namespace ThermoVR.State
         // public static double piston_area = 0.0078539816; //  pi * radius^2. Hardcoded based on a radius of 0.05 m;
         public static double piston_area = 0.0706858347; //  pi * radius^2. Hardcoded based on a radius of 0.15 m;
 
+        public static double log_offset_volume = 5.4f;
+
         public double v_stop1; // volume stop specified by tool_stop1
         public double v_stop2; // volume stop specified by tool_stop2
 
         private static float STOP_BUFFER = 0.005f;
         private static double LIQ_2_DIVISION = 0.002;
+
+        private void OnEnable()
+        {
+            if (Instance == null)
+            {
+                Instance = this;
+            }
+            else if (this != Instance)
+            {
+                Debug.LogWarning("[ThermoState] Multiple instances of ThermoState appeared in the same scene.");
+                Destroy(this.gameObject);
+            }
+        }
 
         public void reset() {
             prev_region = region;

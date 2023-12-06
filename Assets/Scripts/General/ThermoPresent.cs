@@ -36,8 +36,7 @@ class GRAPHPTCMP : IComparer<int>
 [RequireComponent(typeof(ThermoState))]
 public class ThermoPresent : MonoBehaviour
 {
-    private static float max_height_log = 15; // log of max real-world height given 1 kg water and radius 0.15 m or 0.05 m
-    private static float min_height_log = 0; // log of min real-world height given 1 kg of water and radious 0.15 m or 0.05 m
+    public static float max_height_log = 15; // log of max real-world height given 1 kg water and radius 0.15 m or 0.05 m
 
     bool debug_write = false;
     StreamWriter debug_file;
@@ -744,32 +743,34 @@ public class ThermoPresent : MonoBehaviour
         // Instead, use a log scale.
         // log_offset is the exponent value that produces ThermoMath.v_min * -1 given the piston radius.
         // Applying the offset ensures we never have a volume scale < 0
-        double log_offset = 5.4f;
-
         double vheight = 0; // vapor height
         double lheight = 0; // liquid height
         double total_height = 0; // combined height
 
         switch (state.region) {
             case ThermoMath.region_liquid:
-                lheight = Math.Log(state.volume / ThermoState.piston_area) + log_offset;
+                lheight = Math.Log(state.volume / ThermoState.piston_area) + ThermoState.log_offset_volume;
                 vheight = 0;
                 break;
             case ThermoMath.region_twophase:
+                // TODO: under constant volume, applying heat/cooling results in changing overall volume presentation
                 double vliq = ThermoMath.vliq_given_p(state.pressure, state.region);
                 double vvap = ThermoMath.vvap_given_p(state.pressure, state.region);
-                vheight = Math.Log(q * vvap / ThermoState.piston_area) + log_offset;
-                lheight = Math.Log((1 - q) * vliq / ThermoState.piston_area) + log_offset;
+                vheight = Math.Log(q * vvap / ThermoState.piston_area) + ThermoState.log_offset_volume;
+                lheight = Math.Log((1 - q) * vliq / ThermoState.piston_area) + ThermoState.log_offset_volume;
                 if (lheight < 0) {
                     // turns out log offset works for overall volume... but individual pieces like liquid height
                     // can still be much smaller than the minimum overall state volume. But at these values,
                     // we're talking about slivers smaller than the player can even see. So we can ignore them.
                     lheight = 0;
                 }
+                // round out to current overall volume (take out from vapor)
+                double dif = (vheight + lheight) - (Math.Log(state.volume / ThermoState.piston_area) + ThermoState.log_offset_volume);
+                vheight -= dif;
                 break;
             case ThermoMath.region_vapor:
                 lheight = 0;
-                vheight = Math.Log(state.volume / ThermoState.piston_area) + log_offset;
+                vheight = Math.Log(state.volume / ThermoState.piston_area) + ThermoState.log_offset_volume;
                 break;
             default:
                 break;

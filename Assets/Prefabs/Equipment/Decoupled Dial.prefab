@@ -885,11 +885,15 @@ MonoBehaviour:
   min_pos: {fileID: 7546416110445245067}
   textv: {fileID: 6030497067206319096}
   meter: {fileID: 2136752545258839447}
+  interactableRange: {fileID: 0}
   response_power: 1
   default_val: 0
   m_effect_map: []
   activator_button: {fileID: 0}
   touchable: {fileID: 0}
+  DialMoved:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &6030497067206319103
 GameObject:
   m_ObjectHideFlags: 0

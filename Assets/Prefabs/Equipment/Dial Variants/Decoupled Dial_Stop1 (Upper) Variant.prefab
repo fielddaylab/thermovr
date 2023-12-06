@@ -173,7 +173,7 @@ PrefabInstance:
     - target: {fileID: 1703253035018548620, guid: c88177c188275f044a1eb03b4f18b830,
         type: 3}
       propertyPath: m_effect_map.Array.data[0].Effects.Array.size
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1703253035018548620, guid: c88177c188275f044a1eb03b4f18b830,
         type: 3}
@@ -214,6 +214,21 @@ PrefabInstance:
         type: 3}
       propertyPath: m_effect_map.Array.data[0].Effects.Array.data[1].ResponsePower
       value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6030497066976596720, guid: c88177c188275f044a1eb03b4f18b830,
+        type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 6030497066976596720, guid: c88177c188275f044a1eb03b4f18b830,
+        type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 6030497066976596720, guid: c88177c188275f044a1eb03b4f18b830,
+        type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.9
       objectReference: {fileID: 0}
     - target: {fileID: 6030497066976596720, guid: c88177c188275f044a1eb03b4f18b830,
         type: 3}
@@ -343,6 +358,22 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 650569911056080548}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &2363699737701989116
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6536949306411365424}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aacb888d85a9b0942911e934272b8fda, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_MaxPos: {x: 0, y: 0, z: 0}
+  m_MinPos: {x: 0, y: 0, z: 0}
+  m_PistonCapHeight: 0
+  m_MappingType: 0
 --- !u!114 &8625513991731246942
 MonoBehaviour:
   m_ObjectHideFlags: 0
