@@ -37,15 +37,19 @@ namespace ThermoVR.State
     {
         public VarID ID;
         public string NewText;
+        public string Units;
 
-        public VarUpdate(VarID id, string newText) {
+        public VarUpdate(VarID id, string newText, string units) {
             ID = id;
             NewText = newText;
+            Units = units;
         }
     }
 
     public class ThermoState : MonoBehaviour
     {
+        public static ThermoState Instance;
+
         //state
         //xyz corresponds to vpt (Y = "up")
         public double pressure;       //p //pascals
@@ -68,16 +72,40 @@ namespace ThermoVR.State
 
         //static properties of system
         public double mass = 1; //kg
-        public double radius = 0.05; //M
+        /*
+        public static double radius = 0.05; //M
                                      //public double surfacearea = Math.Pow(3.141592*radius,2.0); //M^2 //hardcoded answer below
-        public double surfacearea = 0.024674011; //M^2 //hardcoded answer to eqn above
-        public double surfacearea_insqr = 38.2447935395871; //in^2 //hardcoded conversion from m^2 to in^2
+        public static double surfacearea = 0.024674011; //M^2 //hardcoded answer to eqn above
+        public static double surfacearea_insqr = 38.2447935395871; //in^2 //hardcoded conversion from m^2 to in^2
+        */
+        public static double radius = 0.15; //M
+                                     //public double surfacearea = Math.Pow(3.141592*radius,2.0); //M^2 //hardcoded answer below
+        public static double surfacearea = 0.222066099f; //M^2 //hardcoded answer to eqn above
+        public static double surfacearea_insqr = 344.2031418563; //in^2 //hardcoded conversion from m^2 to in^2
+
+        // public static double piston_area = 0.0078539816; //  pi * radius^2. Hardcoded based on a radius of 0.05 m;
+        public static double piston_area = 0.0706858347; //  pi * radius^2. Hardcoded based on a radius of 0.15 m;
+
+        public static double log_offset_volume = 5.4f;
 
         public double v_stop1; // volume stop specified by tool_stop1
         public double v_stop2; // volume stop specified by tool_stop2
 
         private static float STOP_BUFFER = 0.005f;
         private static double LIQ_2_DIVISION = 0.002;
+
+        private void OnEnable()
+        {
+            if (Instance == null)
+            {
+                Instance = this;
+            }
+            else if (this != Instance)
+            {
+                Debug.LogWarning("[ThermoState] Multiple instances of ThermoState appeared in the same scene.");
+                Destroy(this.gameObject);
+            }
+        }
 
         public void reset() {
             prev_region = region;
@@ -652,7 +680,7 @@ namespace ThermoVR.State
             if (region != ThermoMath.region_twophase && enthalpy_bounded(new_p, enthalpy)) {
                 return;
             }
-            if (region == ThermoMath.region_liquid /*AND temperature is near lower edge*/) {
+            if (region == ThermoMath.region_liquid) {
                 try {
                     double new_t = ThermoMath.iterate_t_given_pv(temperature, new_p, volume, region, true); // new_v is constant in liquid
                 }

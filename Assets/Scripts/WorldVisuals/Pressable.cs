@@ -12,7 +12,7 @@ namespace ThermoVR
     {
         private Touchable m_touchable;
         private FingerToggleable m_fingerToggleable;
-        private AudioSource m_audioSrc;
+        public AudioSource ClickAudio;
 
         [SerializeField] private double m_touchTime = 0.1; // min time before new press is registered
         private double m_touchTimer; // time remaining before new press may be registered
@@ -26,7 +26,7 @@ namespace ThermoVR
         private void Awake() {
             m_touchable = GetComponent<Touchable>();
             m_fingerToggleable = GetComponent<FingerToggleable>();
-            m_audioSrc = GetComponent<AudioSource>();
+            ClickAudio = GetComponent<AudioSource>();
 
             m_touchTimer = 0;
         }
@@ -91,7 +91,7 @@ namespace ThermoVR
         #region Handlers
 
         private void HandlePress(object sender, EventArgs args) {
-            m_audioSrc.Play();
+            // m_audioSrc.Play();
             m_fingerToggleable.on = false;
         }
 

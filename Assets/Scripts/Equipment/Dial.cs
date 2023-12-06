@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using ThermoVR.Controls;
 using ThermoVR.Tools;
 using TMPro;
 using UnityEngine;
@@ -61,6 +62,8 @@ namespace ThermoVR.Dials
         [SerializeField] private Transform min_pos;
         public TextMeshPro textv;
         [SerializeField] private GameObject meter; // (Knob)
+
+        // [SerializeField] private CollisionRange interactableRange;
 
         [System.NonSerialized]
         public TextMeshPro textv_tmpro;
@@ -171,6 +174,11 @@ namespace ThermoVR.Dials
             textv_tmpro.SetText(updateText);
         }
 
+        public List<Tool> GetRelevantTools()
+        {
+            return relevant_tools;
+        }
+
         private bool AnyToolsActive() {
             if (relevant_tools == null) {
                 // vacuously true, I guess?
@@ -240,6 +248,17 @@ namespace ThermoVR.Dials
             // Clamp necessary?
         }
 
+        public bool IsObjWithinBounds(GameObject obj)
+        {
+            if (obj == null)
+            {
+                return true;
+            }
+
+            float dist = Vector3.Distance(obj.transform.position, meter.transform.position);
+            return dist <= .1f;
+        }
+
         /*
          * Standard way to map from 0-1 slder "val" range to min-max "tool" range.
          */
@@ -258,14 +277,16 @@ namespace ThermoVR.Dials
         /// </summary>
         /// <param name="hand_pos"></param>
         /// <param name="r_hand_pos"></param>
-        public void update_val_grab(Vector3 hand_pos, Vector3 r_hand_pos) {
+        public void update_val_grab(Vector3 prev_hand_pos, Vector3 r_hand_pos) {
             if (!AnyToolsActive()) {
                 return;
             }
 
-            float dx = r_hand_pos.x - hand_pos.x;
-            float dy = r_hand_pos.y - hand_pos.y;
-            float dz = r_hand_pos.z - hand_pos.z;
+            // TODO: check hand pos relative to max/min
+
+            float dx = r_hand_pos.x - prev_hand_pos.x;
+            float dy = r_hand_pos.y - prev_hand_pos.y;
+            float dz = r_hand_pos.z - prev_hand_pos.z;
 
             Vector3 movement_vector = new Vector3(
                 (dx) * orientation_dir.x,

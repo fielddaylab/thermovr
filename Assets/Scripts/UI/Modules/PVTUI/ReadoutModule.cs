@@ -76,7 +76,8 @@ public class ReadoutModule : UIModule
         }
 
         if (toUpdate!= null) {
-            toUpdate.TMP.SetText(update.NewText);
+            toUpdate.ValueText.SetText(update.NewText);
+            toUpdate.UnitText.SetText(update.Units);
 
             // TextMeshPro thing;
             // thing.SetText(update.NewText);

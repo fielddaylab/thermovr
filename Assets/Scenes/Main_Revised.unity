@@ -4768,7 +4768,7 @@ PrefabInstance:
     - target: {fileID: 3829620117184144896, guid: a7ba15d208570c444b8b77b073a99b57,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1.484
+      value: 1.478
       objectReference: {fileID: 0}
     - target: {fileID: 3829620117184144896, guid: a7ba15d208570c444b8b77b073a99b57,
         type: 3}
@@ -4821,6 +4821,11 @@ PrefabInstance:
       value: Diorama
       objectReference: {fileID: 0}
     - target: {fileID: 7514909427655331812, guid: a7ba15d208570c444b8b77b073a99b57,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8914099393769055595, guid: a7ba15d208570c444b8b77b073a99b57,
         type: 3}
       propertyPath: m_IsActive
       value: 1
@@ -13338,22 +13343,22 @@ PrefabInstance:
     - target: {fileID: 8096817359677954218, guid: 276bbdcb8ff79af45aec063946bb5829,
         type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.85427743
+      value: 0.809017
       objectReference: {fileID: 0}
     - target: {fileID: 8096817359677954218, guid: 276bbdcb8ff79af45aec063946bb5829,
         type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8096817359677954218, guid: 276bbdcb8ff79af45aec063946bb5829,
         type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0.51981735
+      value: 0.58778524
       objectReference: {fileID: 0}
     - target: {fileID: 8096817359677954218, guid: 276bbdcb8ff79af45aec063946bb5829,
         type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8096817359677954218, guid: 276bbdcb8ff79af45aec063946bb5829,
         type: 3}
@@ -13363,7 +13368,7 @@ PrefabInstance:
     - target: {fileID: 8096817359677954218, guid: 276bbdcb8ff79af45aec063946bb5829,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
+      value: 72
       objectReference: {fileID: 0}
     - target: {fileID: 8096817359677954218, guid: 276bbdcb8ff79af45aec063946bb5829,
         type: 3}
@@ -17610,7 +17615,7 @@ PrefabInstance:
     - target: {fileID: 282395287385211754, guid: 9077b291381065a4789a5b6eaee38839,
         type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 282395287385211755, guid: 9077b291381065a4789a5b6eaee38839,
         type: 3}
@@ -17855,6 +17860,16 @@ PrefabInstance:
     - target: {fileID: 2032468231526245578, guid: 9077b291381065a4789a5b6eaee38839,
         type: 3}
       propertyPath: m_AnchorMin.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2168693476904812196, guid: 9077b291381065a4789a5b6eaee38839,
+        type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2168693476904812196, guid: 9077b291381065a4789a5b6eaee38839,
+        type: 3}
+      propertyPath: m_AnchorMax.y
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2176036216068677378, guid: 9077b291381065a4789a5b6eaee38839,
@@ -18140,7 +18155,7 @@ PrefabInstance:
     - target: {fileID: 4665943292973688086, guid: 9077b291381065a4789a5b6eaee38839,
         type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4665943292973688087, guid: 9077b291381065a4789a5b6eaee38839,
         type: 3}
@@ -20975,7 +20990,7 @@ PrefabInstance:
     - target: {fileID: 8596095803994565699, guid: 82a063789f5492a4881e22d450e47a1b,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.55
+      value: -0.35
       objectReference: {fileID: 0}
     - target: {fileID: 8596095803994565699, guid: 82a063789f5492a4881e22d450e47a1b,
         type: 3}
@@ -21219,6 +21234,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Decoupled Dial_Stop1 (Upper)
+      objectReference: {fileID: 0}
+    - target: {fileID: 2616123306115137319, guid: 29c93134005f4e146888613d124d2592,
+        type: 3}
+      propertyPath: m_text
+      value: Upper Stop
+      objectReference: {fileID: 0}
+    - target: {fileID: 2616123307072450219, guid: 29c93134005f4e146888613d124d2592,
+        type: 3}
+      propertyPath: m_text
+      value: Lower Stop
       objectReference: {fileID: 0}
     - target: {fileID: 2616123307093399246, guid: 29c93134005f4e146888613d124d2592,
         type: 3}

@@ -36,6 +36,8 @@ class GRAPHPTCMP : IComparer<int>
 [RequireComponent(typeof(ThermoState))]
 public class ThermoPresent : MonoBehaviour
 {
+    public static float max_height_log = 15; // log of max real-world height given 1 kg water and radius 0.15 m or 0.05 m
+
     bool debug_write = false;
     StreamWriter debug_file;
 
@@ -63,16 +65,10 @@ public class ThermoPresent : MonoBehaviour
 
     public float size_p;
 
-    public double visual_v_max; // the volume at which the visualization stops increasing volume
-
-
     void Awake() {
         ThermoMath.Init();
         state = this.GetComponent<ThermoState>();
         state.reset();
-
-        float reduction_factor = 0.02f;
-        visual_v_max = ThermoMath.v_max * reduction_factor;
     }
 
     // Start is called before the first frame update
@@ -225,10 +221,6 @@ public class ThermoPresent : MonoBehaviour
         graphObject.GetComponent<MeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
 
         return graphObject;
-    }
-
-    public double get_surfacearea_insqr() {
-        return state.surfacearea_insqr;
     }
 
     public double get_pressure() {
@@ -653,14 +645,6 @@ public class ThermoPresent : MonoBehaviour
     }
 
     void findObjects() {
-        // TODO: do actual math
-        /*
-        piston_min_y = piston.transform.localPosition.y; // scale by y?
-        piston_max_y = piston_min_y + 0.453f; //experimentally derived...
-        contents_min_h = contents.transform.localScale.y;
-        contents_max_h = contents_min_h + 0.453f; //experimentally derived...
-        */
-
         graph = GameObject.Find("gmodel");
         state_dot = GameObject.Find("gstate");
     }
@@ -753,58 +737,70 @@ public class ThermoPresent : MonoBehaviour
 
         // PISTON HEIGHT
 
-        // float height = (float)(state.volume / state.surfacearea); //M
+        double q = state.quality;
 
-        //hack to reduce overall volume; do all calculations assuming 1.0kg of water, do all visualizations assuming reductionFactor*1.0kg of water.
-        // Assuming volume is linearly proportional to molarity (I _think_ it is?), we should be good.
-        // If not, we're still better than altering the behavior of vapor at an arbitrary threshhold
+        // Since the difference between min and max volume is a magnitude of 10^7, linear scaling won't work.
+        // Instead, use a log scale.
+        // log_offset is the exponent value that produces ThermoMath.v_min * -1 given the piston radius.
+        // Applying the offset ensures we never have a volume scale < 0
+        double vheight = 0; // vapor height
+        double lheight = 0; // liquid height
+        double total_height = 0; // combined height
 
-        // float reductionFactor = 0.02f;
-        // height *= reductionFactor;
-        //float size_p = height / ((float)state.radius * 2f); //"max height" is approx 2x diameter, so this sets size_p to essentially "%_contents_size"
-        //if (size_p > 1) size_p = 1; //hard stop on visualization
-
-        // TODO: find an acceptable balance between visualizations at low volumes and high volumes
-        Vector3 piston_lt = piston.transform.localPosition;
-        float adjusted_height = (float)(state.volume / ThermoMath.v_max); // (float)(state.volume / visual_v_max);
-        /*
-        if (adjusted_height > 1) {
-            adjusted_height = 1;
+        switch (state.region) {
+            case ThermoMath.region_liquid:
+                lheight = Math.Log(state.volume / ThermoState.piston_area) + ThermoState.log_offset_volume;
+                vheight = 0;
+                break;
+            case ThermoMath.region_twophase:
+                // TODO: under constant volume, applying heat/cooling results in changing overall volume presentation
+                double vliq = ThermoMath.vliq_given_p(state.pressure, state.region);
+                double vvap = ThermoMath.vvap_given_p(state.pressure, state.region);
+                vheight = Math.Log(q * vvap / ThermoState.piston_area) + ThermoState.log_offset_volume;
+                lheight = Math.Log((1 - q) * vliq / ThermoState.piston_area) + ThermoState.log_offset_volume;
+                if (lheight < 0) {
+                    // turns out log offset works for overall volume... but individual pieces like liquid height
+                    // can still be much smaller than the minimum overall state volume. But at these values,
+                    // we're talking about slivers smaller than the player can even see. So we can ignore them.
+                    lheight = 0;
+                }
+                // round out to current overall volume (take out from vapor)
+                double dif = (vheight + lheight) - (Math.Log(state.volume / ThermoState.piston_area) + ThermoState.log_offset_volume);
+                vheight -= dif;
+                break;
+            case ThermoMath.region_vapor:
+                lheight = 0;
+                vheight = Math.Log(state.volume / ThermoState.piston_area) + ThermoState.log_offset_volume;
+                break;
+            default:
+                break;
         }
-        */
-        piston_lt.y = piston.GetMinPos().y + adjusted_height * (piston.GetMaxPos().y - piston.GetMinPos().y);
-        piston.transform.localPosition = piston_lt;
+
+        total_height = vheight + lheight;
 
         // WATER/VAPOR RATIO
 
-        Vector3 contents_lt = contents.transform.localScale;
-        contents_lt.y = contents.GetMinScale().y + size_p * (contents.GetMaxScale().y - contents.GetMinScale().y);
-        contents.transform.localScale = contents_lt;
+        float log_map = (float)(total_height / max_height_log); // map log height to range from 0 to 1
 
-        Vector3 water_lt = contents.Water.transform.localScale;
-        Vector3 vapor_lt = contents.Steam.transform.localScale;
-        float water_ratio = 0;
-        float q = (float)state.quality;
-        switch (state.region) {
-            case ThermoMath.region_liquid:
-            case ThermoMath.region_vapor:
-                water_ratio = 1f - q;
-                break;
-            case ThermoMath.region_twophase:
-                //This eqn would derive "quality as percentage of volume" from "quality as a percentage of mass"
-                // OLD: apparently "quality" is already "percentage of volume" (which seems strange to me but ok) -- UPDATE: we do actually need the full equation.
-                float vliq = (float)ThermoMath.vliq_given_p(state.pressure, state.region);
-                float vvap = (float)ThermoMath.vvap_given_p(state.pressure, state.region);
-                // TODO: derive ratio of water to vapor given current state
-                // q = (vliq * q) / ((vliq * q) + (vvap * (1 - q)));
-                water_ratio = 1f - q;
-                break;
-        }
-        water_lt.y = water_ratio;
-        vapor_lt.y = -(1 - water_lt.y);
+        float piston_span = piston.GetSpan(); // distance between min and max piston positions
+        Vector3 new_piston_pos = piston.transform.localPosition;
+        new_piston_pos.y = piston.GetMinPos().y + log_map * piston_span;
+        piston.transform.localPosition = new_piston_pos;
 
-        contents.Water.transform.localScale = water_lt;
-        contents.Steam.transform.localScale = vapor_lt;
+
+        float contents_span = contents.GetSpan();
+        Vector3 new_contents_scale = contents.transform.localScale;
+        new_contents_scale.y = contents.GetMinScale().y + log_map * contents_span;
+        contents.transform.localScale = new_contents_scale;
+
+        Vector3 new_liquid_scale = contents.Water.transform.localScale;
+        Vector3 new_vapor_scale = contents.Steam.transform.localScale;
+
+        new_liquid_scale.y = (float)(lheight / total_height);
+        new_vapor_scale.y = -(1 - new_liquid_scale.y);
+
+        contents.Water.transform.localScale = new_liquid_scale;
+        contents.Steam.transform.localScale = new_vapor_scale;
     }
 
     private void update_tracker_pos() {
@@ -833,9 +829,9 @@ public class ThermoPresent : MonoBehaviour
 
     private void Start() {
         string update_text = "";
-        update_text = "region: " + region_to_name(state.region); DispatchText(update_text, VarID.Region);
-        if (state.region == 1) { update_text = string.Format("x: {0:0.000}" + Units.Quality, (float)(state.quality * 100f)); DispatchText(update_text, VarID.Quality); }
-        else { update_text = "x: Undefined"; DispatchText(update_text, VarID.Quality); }
+        update_text = "region: " + region_to_name(state.region); DispatchText(update_text, "", VarID.Region);
+        if (state.region == 1) { update_text = string.Format("x: {0:0.000}", (float)(state.quality * 100f)); DispatchText(update_text, Units.Quality, VarID.Quality); }
+        else { update_text = "x: Undefined"; DispatchText(update_text, "", VarID.Quality); }
     }
 
     // Update is called once per frame
@@ -848,24 +844,24 @@ public class ThermoPresent : MonoBehaviour
         if (modified) genMesh();
 
         string update_text = "";
-        if (Math.Abs(state.pressure - state.prev_pressure) > ThermoMath.p_smallstep) { update_text = string.Format("P: " + DigitFormat.Pressure /*+ " " + Units.Pressure*/, (float)state.pressure / 1000f); GameMgr.Events.Dispatch(GameEvents.UpdateVarText, new VarUpdate(VarID.Pressure, update_text)); }
-        if (Math.Abs(state.temperature - state.prev_temperature) > ThermoMath.t_smallstep) { update_text = string.Format("T: " + DigitFormat.TemperatureK /*+ " " + Units.TemperatureK + " ({1:0.00}" + Units.TemperatureC + ")"*/, (float)state.temperature, (float)state.temperature - 273.15f); DispatchText(update_text, VarID.Temperature); }
-        if (Math.Abs(state.volume - state.prev_volume) > ThermoMath.v_smallstep) { update_text = string.Format("v: " + DigitFormat.Volume /*+ " " + Units.Volume*/, (float)state.volume); DispatchText(update_text, VarID.Volume); }
-        if (Math.Abs(state.internalenergy - state.prev_internalenergy) > ThermoMath.u_smallstep) { update_text = string.Format("u: " + DigitFormat.InternalEnergy /*+ " "+ Units.InternalEnergy*/, (float)state.internalenergy / 1000f); DispatchText(update_text, VarID.InternalEnergy); }
-        if (Math.Abs(state.entropy - state.prev_entropy) > ThermoMath.s_smallstep) { update_text = string.Format("s: " + DigitFormat.Entropy /*+ " " + Units.Entropy*/, (float)state.entropy / 1000f); DispatchText(update_text, VarID.Entropy); }
-        if (Math.Abs(state.enthalpy - state.prev_enthalpy) > ThermoMath.h_smallstep) { update_text = string.Format("h: " + DigitFormat.Enthalpy /*+ " " + Units.Enthalpy*/, (float)state.enthalpy / 1000f); DispatchText(update_text, VarID.Enthalpy); }
-        if (state.region == 1 && Math.Abs(state.quality - state.prev_quality) > ThermoMath.x_smallstep) { update_text = string.Format("x: " + DigitFormat.Quality /*+ " " + Units.Quality*/, (float)(state.quality * 100f)); DispatchText(update_text, VarID.Quality); }
+        if (Math.Abs(state.pressure - state.prev_pressure) > ThermoMath.p_smallstep) { update_text = string.Format("P: " + DigitFormat.Pressure, (float)state.pressure / 1000f); DispatchText(update_text, Units.Pressure, VarID.Pressure); }
+        if (Math.Abs(state.temperature - state.prev_temperature) > ThermoMath.t_smallstep) { update_text = string.Format("T: " + DigitFormat.TemperatureK + "    " + Units.TemperatureK + "  ({1:0.00} " + Units.TemperatureC + ")", (float)state.temperature, (float)state.temperature - 273.15f); DispatchText(update_text, "", VarID.Temperature); }
+        if (Math.Abs(state.volume - state.prev_volume) > ThermoMath.v_smallstep) { update_text = string.Format("v: " + DigitFormat.Volume, (float)state.volume); DispatchText(update_text, Units.Volume, VarID.Volume); }
+        if (Math.Abs(state.internalenergy - state.prev_internalenergy) > ThermoMath.u_smallstep) { update_text = string.Format("u: " + DigitFormat.InternalEnergy, (float)state.internalenergy / 1000f); DispatchText(update_text, Units.InternalEnergy, VarID.InternalEnergy); }
+        if (Math.Abs(state.entropy - state.prev_entropy) > ThermoMath.s_smallstep) { update_text = string.Format("s: " + DigitFormat.Entropy, (float)state.entropy / 1000f); DispatchText(update_text, Units.Entropy, VarID.Entropy); }
+        if (Math.Abs(state.enthalpy - state.prev_enthalpy) > ThermoMath.h_smallstep) { update_text = string.Format("h: " + DigitFormat.Enthalpy, (float)state.enthalpy / 1000f); DispatchText(update_text, Units.Enthalpy, VarID.Enthalpy); }
+        if (state.region == 1 && Math.Abs(state.quality - state.prev_quality) > ThermoMath.x_smallstep) { update_text = string.Format("x: " + DigitFormat.Quality, (float)(state.quality * 100f)); DispatchText(update_text, Units.Quality, VarID.Quality); }
         if (true /*state.region != state.prev_region*/) {
-            update_text = "Region: " + region_to_name(state.region); DispatchText(update_text, VarID.Region);
-            if (state.region == 1) { update_text = string.Format("x: " + DigitFormat.Quality /*+ " " + Units.Quality*/, (float)(state.quality * 100f)); DispatchText(update_text, VarID.Quality); }
-            else { update_text = "x: Undefined"; DispatchText(update_text, VarID.Quality); }
+            update_text = "Region: " + region_to_name(state.region); DispatchText(update_text, "", VarID.Region);
+            if (state.region == 1) { update_text = string.Format("x: " + DigitFormat.Quality, (float)(state.quality * 100f)); DispatchText(update_text, Units.Quality, VarID.Quality); }
+            else { update_text = "x: Undefined"; DispatchText(update_text, "", VarID.Quality); }
         }
 
         state.stamp_prev();
     }
 
-    private void DispatchText(string update_text, VarID varId) {
-        GameMgr.Events.Dispatch(GameEvents.UpdateVarText, new VarUpdate(varId, update_text));
+    private void DispatchText(string update_text, string units, VarID varId) {
+        GameMgr.Events.Dispatch(GameEvents.UpdateVarText, new VarUpdate(varId, update_text, units));
     }
 
 }

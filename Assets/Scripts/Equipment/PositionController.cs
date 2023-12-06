@@ -2,8 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace ThermoVR {
-    public class PistonController : MonoBehaviour
+namespace ThermoVR
+{
+    public class PositionController : MonoBehaviour
     {
         #region Editor
 
@@ -11,7 +12,8 @@ namespace ThermoVR {
         /// Position the piston in the scene at the desired min position, then run this function.
         /// </summary>
         [ContextMenu("Set Min Position")]
-        private void SetMinPos() {
+        protected void SetMinPos()
+        {
             m_MinPos = this.transform.localPosition;
         }
 
@@ -19,7 +21,8 @@ namespace ThermoVR {
         /// Position the piston in the scene at the desired min position, then run this function.
         /// </summary>
         [ContextMenu("Set Max Position")]
-        private void SetMaxPos() {
+        protected void SetMaxPos()
+        {
             m_MaxPos = this.transform.localPosition;
         }
 
@@ -27,7 +30,8 @@ namespace ThermoVR {
         /// Shortcut to preview max position
         /// </summary>
         [ContextMenu("Preview Max Position")]
-        private void PreviewMaxPos() {
+        protected void PreviewMaxPos()
+        {
             this.transform.localPosition = m_MaxPos;
         }
 
@@ -35,7 +39,8 @@ namespace ThermoVR {
         /// Shortcut to preview min position
         /// </summary>
         [ContextMenu("Preview Min Position")]
-        private void PreviewMinPos() {
+        protected void PreviewMinPos()
+        {
             this.transform.localPosition = m_MinPos;
         }
 
@@ -46,13 +51,14 @@ namespace ThermoVR {
         [SerializeField] private Vector3 m_MaxPos;
         [SerializeField] private Vector3 m_MinPos;
 
-        private float m_Span; // difference between min and max positions
+        protected float m_Span; // difference between min and max positions
 
         #endregion // Inspector
 
         #region Unity Callbacks
 
-        private void Awake() {
+        private void Awake()
+        {
             m_Span = m_MaxPos.y - m_MinPos.y;
         }
 
@@ -60,15 +66,18 @@ namespace ThermoVR {
 
         #region Accessors
 
-        public Vector3 GetMinPos() {
+        public Vector3 GetMinPos()
+        {
             return m_MinPos;
         }
 
-        public Vector3 GetMaxPos() {
+        public Vector3 GetMaxPos()
+        {
             return m_MaxPos;
         }
 
-        public float GetSpan() {
+        public float GetSpan()
+        {
             return m_Span;
         }
 

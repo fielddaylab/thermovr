@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using ThermoVR.Dials;
+using ThermoVR.State;
 using UnityEngine;
 
 namespace ThermoVR.Tools
@@ -105,7 +106,7 @@ namespace ThermoVR.Tools
                 dial_percentInsulation
             };
 
-            double kg_corresponding_to_10mpa = ThermoMath.surfacearea_insqr * (10 * 1453.8/*MPa->psi*/) * 0.453592/*lb->kg*/;
+            double kg_corresponding_to_10mpa = ThermoState.surfacearea_insqr * (10 * 1453.8/*MPa->psi*/) * 0.453592/*lb->kg*/;
             // double kg_corresponding_to_2mpa = ThermoMath.surfacearea_insqr * (2 * 1453.8/*MPa->psi*/) * 0.453592/*lb->kg*/; // 10 MPa seems way too big, sooooo... we'll just do 2 MPa.
 
             dial_stop1.Init((float)ThermoMath.v_min, (float)ThermoMath.v_max, DigitFormat.Volume);
@@ -115,7 +116,7 @@ namespace ThermoVR.Tools
             dial_weight.Init(0f, (float)kg_corresponding_to_10mpa / 5.0f, DigitFormat.Weight);
             dial_negativeWeight.Init(0f, -(float)kg_corresponding_to_10mpa / 5.0f, DigitFormat.Weight); // 500.0f
             dial_surroundingPressure.Init((float)ThermoMath.p_min, (float)ThermoMath.p_max, DigitFormat.AmbientPressure);
-            dial_surroundingTemp.Init(273, 366, DigitFormat.TemperatureK); // -100 to 200 fahrenheit // default val of 0.55 sets to 292 kelvin (72 degrees fahrenheit)
+            dial_surroundingTemp.Init(273, (float)ThermoMath.t_max, DigitFormat.TemperatureK);
             dial_percentInsulation.Init(0f, 100, DigitFormat.Percent);
 
             ResetDefaults();
@@ -337,11 +338,14 @@ namespace ThermoVR.Tools
 
 
         public void AllowTool(Tool t) {
-            // TODO: show on buttons
+            // TODO: show on buttons (dispatch event)
+            t.allowed = true;
         }
 
         public void DisallowTool(Tool t) {
-            // TODO: show on buttons 
+            // TODO: show on buttons (dispatch event)
+            t.allowed = false;
+
             DeactivateTool(t);
         }
 
@@ -450,6 +454,8 @@ namespace ThermoVR.Tools
 
 
         private void HandleResetPressed(object sender, System.EventArgs args) {
+            reset_button.ClickAudio.Play();
+
             GameMgr.Events.Dispatch(GameEvents.ResetPressed);
 
             ResetDefaults();

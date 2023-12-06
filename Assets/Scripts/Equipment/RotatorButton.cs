@@ -34,6 +34,8 @@ public class RotatorButton : MonoBehaviour
         if (m_rotationState.TryModifyVal(m_rotationStep)) {
             // within bounds; apply rotation
             m_rotationState.ReplaceCoordinatedRoutine(RotationRoutine());
+
+            m_button.ClickAudio.Play();
         }
     }
 

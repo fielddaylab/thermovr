@@ -45,8 +45,12 @@ public class ToolActivator : MonoBehaviour
         }
 
         foreach(var tool in m_tools) {
-            UpdateActiveMaterial();
+            if (!tool.allowed) {
+                continue;
+            }
 
+            UpdateActiveMaterial();
+            m_button.ClickAudio.Play();
             GameMgr.Events.Dispatch(GameEvents.PressedToolToggle, tool);
         }
     }

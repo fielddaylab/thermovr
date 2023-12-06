@@ -53,7 +53,7 @@ namespace ThermoVR.Controls {
 
             if (m_Dragging) {
                 Vector3 currPos = Camera.main.ScreenToWorldPoint(Input.mousePosition + new Vector3(0, 0, Vector3.Distance(Camera.main.transform.position, m_Dragging.transform.position)));
-                World.Instance.TryInteractable(m_Dragging, m_PrevWorldPos, ref currPos);
+                World.Instance.TryInteractable(ref m_Dragging, m_PrevWorldPos, ref currPos, null);
 
                 m_PrevWorldPos = currPos;
             }
