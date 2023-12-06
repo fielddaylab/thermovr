@@ -228,12 +228,14 @@ public class World : MonoBehaviour
 
         // get the amount of weight to apply, based on the difference between the total weight to be applied and how much is currently applied
         double delta_weight = (weight_pressure - thermo_present.get_pressure());
+        /*
         if (System.Math.Abs(delta_weight * delta_time) < World.DELTA_PRESSURE_CUTOFF) {
             // small enough step; finish transition
         }
         else {
             // delta_weight *= delta_time;
         }
+        */
 
         double insulation_coefficient;
 

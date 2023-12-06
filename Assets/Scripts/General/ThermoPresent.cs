@@ -154,7 +154,10 @@ public class ThermoPresent : MonoBehaviour
     private void HideError() {
         ThermoMath.got_error = false;
         error_flasher.Stop();
-        error_message.enabled = false;
+        if (error_message)
+        {
+            error_message.enabled = false;
+        }
     }
 
     //generates points from thermomath api, and stitches them together into a mesh (the "graph")
