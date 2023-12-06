@@ -1,3 +1,4 @@
+using BeauUtil;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -10,12 +11,13 @@ namespace ThermoVR.UI
     public class ThermoToggle : MonoBehaviour
     {
         [HideInInspector] public Pressable Pressable;
-        [SerializeField] private Toggle m_toggle;
+        [Required] [SerializeField] private ClickToggle m_toggle;
 
         public void Init() {
             Pressable = GetComponent<Pressable>();
 
             Pressable.OnPress += HandlePress;
+            m_toggle.PointerClicked.AddListener(HandlePointerClick);
         }
 
         public bool IsOn() {
@@ -25,10 +27,13 @@ namespace ThermoVR.UI
         #region Handlers
 
         private void HandlePress(object sender, EventArgs args) {
-            // TODO: UI click audio?
-
             m_toggle.isOn = !m_toggle.isOn;
             m_toggle.onValueChanged?.Invoke(m_toggle.isOn);
+        }
+
+        private void HandlePointerClick()
+        {
+            Pressable.Press(false);
         }
 
         #endregion // Handlers

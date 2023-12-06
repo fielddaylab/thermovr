@@ -284,6 +284,11 @@ PrefabInstance:
       propertyPath: m_text
       value: Graph Settings
       objectReference: {fileID: 0}
+    - target: {fileID: 3865961363502682538, guid: 2a0b64184e1cffc4e8bf44e0305bf60b,
+        type: 3}
+      propertyPath: m_RaycastTarget
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4192371893091607203, guid: 2a0b64184e1cffc4e8bf44e0305bf60b,
         type: 3}
       propertyPath: m_RootOrder
@@ -291,8 +296,13 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4192371893091607203, guid: 2a0b64184e1cffc4e8bf44e0305bf60b,
         type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 30.315
+      objectReference: {fileID: 0}
+    - target: {fileID: 4192371893091607203, guid: 2a0b64184e1cffc4e8bf44e0305bf60b,
+        type: 3}
       propertyPath: m_LocalPosition.z
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4192371893091607203, guid: 2a0b64184e1cffc4e8bf44e0305bf60b,
         type: 3}
@@ -302,7 +312,12 @@ PrefabInstance:
     - target: {fileID: 4192371893091607203, guid: 2a0b64184e1cffc4e8bf44e0305bf60b,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 4.44
+      value: 4.25
+      objectReference: {fileID: 0}
+    - target: {fileID: 7857431638352514292, guid: 2a0b64184e1cffc4e8bf44e0305bf60b,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8133588721402292561, guid: 2a0b64184e1cffc4e8bf44e0305bf60b,
         type: 3}

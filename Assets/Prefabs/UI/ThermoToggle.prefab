@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2918757162257390143}
-  - component: {fileID: 5958507485739689182}
+  - component: {fileID: 7577157059080999553}
   m_Layer: 0
   m_Name: Toggle
   m_TagString: Untagged
@@ -39,7 +39,7 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &5958507485739689182
+--- !u!114 &7577157059080999553
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -48,7 +48,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 659422458324840823}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9085046f02f69544eb97fd06b6048fe2, type: 3}
+  m_Script: {fileID: 11500000, guid: ff1c69c13acdac041bc19a3d865d497c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:
@@ -87,6 +87,9 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_IsOn: 0
+  PointerClicked:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &1443583258705237956
 GameObject:
   m_ObjectHideFlags: 0
@@ -423,6 +426,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: afd6f79acab78f847a707c9fa9d91272, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ClickAudio: {fileID: 0}
   m_touchTime: 0.7
 --- !u!114 &4526812069157035325
 MonoBehaviour:
@@ -437,7 +441,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Pressable: {fileID: 0}
-  m_toggle: {fileID: 5958507485739689182}
+  m_toggle: {fileID: 7577157059080999553}
 --- !u!65 &6664706490774789869
 BoxCollider:
   m_ObjectHideFlags: 0
