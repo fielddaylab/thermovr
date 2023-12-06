@@ -2803,6 +2803,7 @@ public static class IF97
       */
 
       double[] EFG = new double[3];
+      // double* EFG = stackalloc double[3]; // TODO: reduce temporary allocations
 
       // Each cycle can be vectorized
       EFG[0] = 1.0;
@@ -4346,6 +4347,8 @@ public static class IF97
     // Note that this routine returns only temperature (IF97_T).  All other values should be
     // calculated from this temperature and the known pressure using forward equations.
     // Setup Backward Regions for output
+
+    //TODO: optimize temporary alloc of classes (heap to stack)
     Backwards.Region1HS B1HS = new Backwards.Region1HS();
     Backwards.Region2aHS B2aHS = new Backwards.Region2aHS();
     Backwards.Region2bHS B2bHS = new Backwards.Region2bHS();

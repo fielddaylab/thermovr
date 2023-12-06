@@ -885,7 +885,6 @@ MonoBehaviour:
   min_pos: {fileID: 7546416110445245067}
   textv: {fileID: 6030497067206319096}
   meter: {fileID: 2136752545258839447}
-  interactableRange: {fileID: 0}
   response_power: 1
   default_val: 0
   m_effect_map: []
@@ -1282,11 +1281,31 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5651868827631162489, guid: 214a02dd1b6efa843bcc350f79f9c5d7,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 614af8d83b4917d409a4cc79a499c59b, type: 2}
     - target: {fileID: 9048457623654462198, guid: 214a02dd1b6efa843bcc350f79f9c5d7,
         type: 3}
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 9067214787932594106, guid: 214a02dd1b6efa843bcc350f79f9c5d7,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 4623f92edd332b343978d6a461dccbf2, type: 2}
+    - target: {fileID: 9067214787932594106, guid: 214a02dd1b6efa843bcc350f79f9c5d7,
+        type: 3}
+      propertyPath: m_Materials.Array.data[1]
+      value: 
+      objectReference: {fileID: 2100000, guid: 09119e9d14013da47a65a5614678431d, type: 2}
+    - target: {fileID: 9067214787932594106, guid: 214a02dd1b6efa843bcc350f79f9c5d7,
+        type: 3}
+      propertyPath: m_Materials.Array.data[3]
+      value: 
+      objectReference: {fileID: 2100000, guid: 614af8d83b4917d409a4cc79a499c59b, type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 214a02dd1b6efa843bcc350f79f9c5d7, type: 3}
 --- !u!4 &4782439999084141159 stripped
