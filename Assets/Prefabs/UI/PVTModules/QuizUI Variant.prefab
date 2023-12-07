@@ -12,25 +12,30 @@ PrefabInstance:
       propertyPath: m_Name
       value: QuizLabTasksModule
       objectReference: {fileID: 0}
+    - target: {fileID: 4502139680468049643, guid: 821017c9d8a432a4b85471c377c41954,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4747046242450537648, guid: 821017c9d8a432a4b85471c377c41954,
         type: 3}
       propertyPath: m_Size
-      value: 0.31355914
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4747046242450537648, guid: 821017c9d8a432a4b85471c377c41954,
         type: 3}
       propertyPath: m_Value
-      value: -0.00002314552
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5149300618241278889, guid: 821017c9d8a432a4b85471c377c41954,
         type: 3}
       propertyPath: m_AnchorMax.x
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5149300618241278889, guid: 821017c9d8a432a4b85471c377c41954,
         type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5599753360367557174, guid: 821017c9d8a432a4b85471c377c41954,
         type: 3}
@@ -164,10 +169,30 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 5013617373974195976}
     m_Modifications:
+    - target: {fileID: 723495999041477490, guid: 13f4f91d6c0ca5248864aa3248b03f61,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 723495999041477490, guid: 13f4f91d6c0ca5248864aa3248b03f61,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6163372479321717702, guid: 13f4f91d6c0ca5248864aa3248b03f61,
         type: 3}
       propertyPath: m_Name
-      value: QuizDefaultUI
+      value: QuizDefaultUI (Lab Selection)
+      objectReference: {fileID: 0}
+    - target: {fileID: 6163372479321717702, guid: 13f4f91d6c0ca5248864aa3248b03f61,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7497269577775806280, guid: 13f4f91d6c0ca5248864aa3248b03f61,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9115011402220988869, guid: 13f4f91d6c0ca5248864aa3248b03f61,
         type: 3}
@@ -350,21 +375,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_fontColor32.rgba
       value: 4294967295
-      objectReference: {fileID: 0}
-    - target: {fileID: 3865961363502682538, guid: 2a0b64184e1cffc4e8bf44e0305bf60b,
-        type: 3}
-      propertyPath: m_Color.b
-      value: 0.7176471
-      objectReference: {fileID: 0}
-    - target: {fileID: 3865961363502682538, guid: 2a0b64184e1cffc4e8bf44e0305bf60b,
-        type: 3}
-      propertyPath: m_Color.g
-      value: 0.11372549
-      objectReference: {fileID: 0}
-    - target: {fileID: 3865961363502682538, guid: 2a0b64184e1cffc4e8bf44e0305bf60b,
-        type: 3}
-      propertyPath: m_Color.r
-      value: 0.05882353
       objectReference: {fileID: 0}
     - target: {fileID: 4192371893091607203, guid: 2a0b64184e1cffc4e8bf44e0305bf60b,
         type: 3}
@@ -569,6 +579,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: QuizLoadedUI
+      objectReference: {fileID: 0}
+    - target: {fileID: 3329512101613584081, guid: 2db7a42657358324681a850d57d44cb6,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3435407720762141852, guid: 2db7a42657358324681a850d57d44cb6,
         type: 3}

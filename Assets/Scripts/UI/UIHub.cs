@@ -10,7 +10,7 @@ namespace ThermoVR.UI
         // PVT Tablet
         Readout,
         Sandbox,
-        Quiz,
+        Lab,
         Graph,
 
         // Quiz UI
