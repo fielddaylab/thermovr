@@ -73,6 +73,8 @@ namespace ThermoVR.Lab
             if (m_tabs.Count > 0) {
                 HandleLabTabPressed(0);
             }
+
+            // Disable placement ball
         }
 
         public override void Close() {
@@ -213,6 +215,9 @@ namespace ThermoVR.Lab
 
             // Limits
             World.Instance?.ModMgr.ResetLimits();
+
+            // Restore move ball functionality
+            World.Instance?.ModMgr.EnableGraphBallInteractions();
         }
 
         #region Handlers

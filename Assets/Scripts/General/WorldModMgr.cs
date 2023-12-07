@@ -15,6 +15,7 @@ namespace ThermoVR
         private List<ToolType> m_activeTools = new List<ToolType>();
         private LimitsGroup m_activeLimits = new LimitsGroup(true);
         private bool m_limitsEnabled; // whether sim needs to check for limits
+        private bool m_graphBallInteractable;
 
         private List<ToolType> m_allTools = new List<ToolType>();
 
@@ -24,6 +25,8 @@ namespace ThermoVR
             }
 
             m_limitsEnabled = false;
+
+            m_graphBallInteractable = true;
         }
 
         #region Tools
@@ -43,6 +46,21 @@ namespace ThermoVR
             m_activeTools.Clear();
             m_activeTools = new List<ToolType>(m_allTools);
             GameMgr.Events.Dispatch(GameEvents.ResetToolRestrictions);
+        }
+
+        public void EnableGraphBallInteractions()
+        {
+            m_graphBallInteractable = true;
+        }
+
+        public void DisableGraphBallInteractions()
+        {
+            m_graphBallInteractable = false;
+        }
+
+        public bool GraphBallInteractable()
+        {
+            return m_graphBallInteractable;
         }
 
         #endregion // Tools
