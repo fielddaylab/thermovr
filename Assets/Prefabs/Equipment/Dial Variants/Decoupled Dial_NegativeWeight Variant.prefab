@@ -142,6 +142,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 5.466
       objectReference: {fileID: 0}
+    - target: {fileID: 6516559620117621185, guid: 3c6e7a3c269e2e946a211ad467331063,
+        type: 3}
+      propertyPath: m_Materials.Array.data[1]
+      value: 
+      objectReference: {fileID: 2100000, guid: 614af8d83b4917d409a4cc79a499c59b, type: 2}
     - target: {fileID: 6516559620117621186, guid: 3c6e7a3c269e2e946a211ad467331063,
         type: 3}
       propertyPath: m_Mesh
@@ -279,7 +284,7 @@ PrefabInstance:
     - target: {fileID: 6030497066997557908, guid: c88177c188275f044a1eb03b4f18b830,
         type: 3}
       propertyPath: m_Name
-      value: Decoupled Dial_Balloon Variant
+      value: Decoupled Dial_NegativeWeight Variant
       objectReference: {fileID: 0}
     - target: {fileID: 6030497066997557909, guid: c88177c188275f044a1eb03b4f18b830,
         type: 3}
@@ -373,7 +378,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Animator: {fileID: 0}
   m_AnimationIndex: 0
-  test_val: 0
 --- !u!4 &6656294612171560863 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6030497066997557909, guid: c88177c188275f044a1eb03b4f18b830,

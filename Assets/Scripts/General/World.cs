@@ -346,20 +346,32 @@ public class World : MonoBehaviour
             // origin.transform.Translate(new Vector3(0, dy, 0));
         }
         else if (actable == graph) {
-            Vector3 localspace = graph.transform.InverseTransformPoint(hand_pos);
-            Vector3 correctedspace = new Vector3(localspace.z, localspace.y, -localspace.x) * 4.0f; //rotate 90, mul by 4 (inverse transform of gmodel)
-            //note: thermospace is v,p,t
-
-            //Vector3 thermoguess = thermo.guessPlot(ThermoMath.t_neutral, correctedspace.y, correctedspace.x);
-            Vector3 thermoguess = thermo_present.guessMeshPlot(correctedspace.x, correctedspace.y, correctedspace.z);
-            Vector3 localguess = thermo_present.plot(thermoguess.y, thermoguess.x, thermoguess.z); //note swizzle!
-
-            if (MathUtility.floatNumeric(localguess.x) && MathUtility.floatNumeric(localguess.y) && MathUtility.floatNumeric(localguess.z)) {
-                placement_dot.transform.localPosition = localguess;
-                placement_thermo = thermoguess;
-                placement_thermo_reasonable = true;
+            if (ModMgr.GraphBallInteractable())
+            {
+                // Player loaded a lab (or otherwise disable grabbing) while ball was grabbed and being moved
+                placement_thermo_reasonable = false;
             }
-            else placement_thermo_reasonable = false;
+            else
+            {
+                Vector3 localspace = graph.transform.InverseTransformPoint(hand_pos);
+                Vector3 correctedspace = new Vector3(localspace.z, localspace.y, -localspace.x) * 4.0f; //rotate 90, mul by 4 (inverse transform of gmodel)
+                                                                                                        //note: thermospace is v,p,t
+
+                //Vector3 thermoguess = thermo.guessPlot(ThermoMath.t_neutral, correctedspace.y, correctedspace.x);
+                Vector3 thermoguess = thermo_present.guessMeshPlot(correctedspace.x, correctedspace.y, correctedspace.z);
+                Vector3 localguess = thermo_present.plot(thermoguess.y, thermoguess.x, thermoguess.z); //note swizzle!
+
+                if (MathUtility.floatNumeric(localguess.x) && MathUtility.floatNumeric(localguess.y) && MathUtility.floatNumeric(localguess.z))
+                {
+                    placement_dot.transform.localPosition = localguess;
+                    placement_thermo = thermoguess;
+                    placement_thermo_reasonable = true;
+                }
+                else
+                {
+                    placement_thermo_reasonable = false;
+                }
+            }
         }
         else {
             //grabbing dial
@@ -484,11 +496,14 @@ public class World : MonoBehaviour
                   (left_hand && g.ltouch) ||
                   (!left_hand && g.rtouch)
                 ) {
-                    ref_grabbed = graph;
-                    state_dot.GetComponent<Renderer>().enabled = false;
-                    placement_dot.GetComponent<Renderer>().enabled = true;
-                    g.grabbed = true;
-                    if (ref_grabbed == ref_ograbbed) ref_ograbbed = null;
+                    if (ModMgr.GraphBallInteractable())
+                    {
+                        ref_grabbed = graph;
+                        state_dot.GetComponent<Renderer>().enabled = false;
+                        placement_dot.GetComponent<Renderer>().enabled = true;
+                        g.grabbed = true;
+                        if (ref_grabbed == ref_ograbbed) ref_ograbbed = null;
+                    }
                 }
             }
 
@@ -533,7 +548,10 @@ public class World : MonoBehaviour
             ref_grabbed = null;
         }
 
-        if (ref_grabbed) TryInteractable(ref ref_grabbed, hand_pos, ref ref_hand_pos, ref_hand);
+        if (ref_grabbed)
+        {
+            TryInteractable(ref ref_grabbed, hand_pos, ref ref_hand_pos, ref_hand);
+        }
 
         ref_hand_pos = hand_pos;
 
@@ -543,26 +561,6 @@ public class World : MonoBehaviour
 
             GameMgr.Events.Dispatch(GameEvents.CheckForPress, left_hand);
         }
-
-        /*
-        //centerer
-        if (vrcenter_fingertoggleable.finger) //finger hitting vrcenter object
-        {
-            if ( //we're currently checking the correct hand
-              (left_hand && vrcenter_fingertoggleable.lfinger) ||
-              (!left_hand && vrcenter_fingertoggleable.rfinger)
-            ) { //reset center position
-                vrcenter_backing_meshrenderer.material = tab_hisel;
-                UnityEngine.XR.InputTracking.Recenter();
-                OVRManager.display.RecenterPose();
-                Vector3 pos = cam_offset.transform.localPosition - (cam_offset.transform.localPosition + ceye.transform.localPosition);
-                pos.y = 0f;
-                cam_offset.transform.localPosition = pos;
-            }
-            else vrcenter_backing_meshrenderer.material = tab_hi;
-        }
-        else vrcenter_backing_meshrenderer.material = tab_default;
-        */
     }
 
     /*                 
