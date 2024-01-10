@@ -20,6 +20,11 @@ namespace ThermoVR.Lab
 
         #endregion // Inspector
 
+        public void SetSliderProportion(float proportion)
+        {
+            m_slider.value = proportion;
+        }
+
         #region Unity Callbacks
 
         private void Awake() {

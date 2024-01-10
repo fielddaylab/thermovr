@@ -79,6 +79,9 @@ public class ReadoutModule : UIModule
             toUpdate.ValueText.SetText(update.NewText);
             toUpdate.UnitText.SetText(update.Units);
 
+            // set slider value
+            toUpdate.SetSliderProportion(update.Proportion);
+
             // TextMeshPro thing;
             // thing.SetText(update.NewText);
         }

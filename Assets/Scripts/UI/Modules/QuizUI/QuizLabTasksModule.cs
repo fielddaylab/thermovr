@@ -17,6 +17,8 @@ namespace ThermoVR.Lab
 
         [SerializeField] private float m_xSpacing;
 
+        [SerializeField] private ThermoButton m_homeButton;
+
         private List<LabTab> m_tabs; // TODO: make these pools
         private List<LabTaskFrame> m_frames;
         private List<TaskInfo> m_tasks;
@@ -29,10 +31,11 @@ namespace ThermoVR.Lab
             base.Init();
 
             GameMgr.Events?.Register<LabInfo>(GameEvents.ActivateLab, HandleActivateLab);
-            GameMgr.Events?.Register<LabInfo>(GameEvents.DeactivateLab, HandleDeactivateLab);
+            GameMgr.Events?.Register(GameEvents.DeactivateLab, HandleDeactivateLab);
 
             GameMgr.Events?.Register(GameEvents.TaskResetPressed, HandleTaskResetPressed);
 
+            m_homeButton.OnButtonPressed += HandleHomeButtonPressed;
 
             m_tabs = new List<LabTab>();
             m_frames = new List<LabTaskFrame>();
@@ -226,7 +229,7 @@ namespace ThermoVR.Lab
             m_tasks = info.Tasks;
         }
 
-        private void HandleDeactivateLab(LabInfo info) {
+        private void HandleDeactivateLab() {
             m_tasks = null;
         }
 
@@ -251,6 +254,12 @@ namespace ThermoVR.Lab
 
         private void HandleTaskResetPressed() {
             ApplyWorldMods(m_tasks[m_activeTabIndex]);
+        }
+
+
+        private void HandleHomeButtonPressed(object sender, EventArgs args)
+        {
+            GameMgr.Events?.Dispatch(GameEvents.DeactivateLab);
         }
 
         #endregion // Handlers

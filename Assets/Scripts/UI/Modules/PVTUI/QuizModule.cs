@@ -18,7 +18,7 @@ public class QuizModule : UIModule
 
     #endregion // Inspector
 
-    private LabInfo m_activeLab;
+    private bool m_labIsActive;
 
 
     #region IUIModule
@@ -26,9 +26,10 @@ public class QuizModule : UIModule
     public override void Init() {
         base.Init();
 
-        // m_activeLab = null;
+        m_labIsActive = false;
 
         GameMgr.Events?.Register<LabInfo>(GameEvents.ActivateLab, HandleActivateLab);
+        GameMgr.Events?.Register(GameEvents.DeactivateLab, HandleDeactivateLab);
 
         GameMgr.Events?.Register(GameEvents.BeginLab, HandleBeginLab);
 
@@ -38,16 +39,12 @@ public class QuizModule : UIModule
     public override void Open() {
         base.Open();
 
-        /*
-        if (m_activeCartridge) {
-            m_hub.OpenUI(UIID.QuizLoaded);
+        if (m_labIsActive) {
+            m_hub.OpenUI(UIID.QuizLabTasks);
         }
         else {
-            m_hub.OpenUI(UIID.QuizDefault);
+            m_hub.OpenUI(UIID.QuizSelect);
         }
-        */
-
-        m_hub.OpenUI(UIID.QuizSelect);
     }
 
     public override void Close() {
@@ -62,13 +59,18 @@ public class QuizModule : UIModule
     private void HandleActivateLab(LabInfo labInfo) {
         Debug.Log("[Lab Activation] Lab " + labInfo.Name + " activated!");
 
+        m_labIsActive = true;
         m_hub.OpenUI(UIID.QuizLabTasks);
+    }
+
+    private void HandleDeactivateLab()
+    {
+        m_labIsActive = false;
+        m_hub.OpenUI(UIID.QuizSelect);
     }
 
     private void HandleBeginLab() {
         m_hub.OpenUI(UIID.QuizLabTasks);
-
-        // Pass in cartridge data
     }
 
     #endregion // Handlers
