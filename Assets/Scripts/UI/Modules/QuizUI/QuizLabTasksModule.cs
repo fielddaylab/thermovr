@@ -28,8 +28,8 @@ namespace ThermoVR.Lab
         public override void Init() {
             base.Init();
 
-            GameMgr.Events?.Register<Cartridge>(GameEvents.ActivateCartridge, HandleActivateCartridge);
-            GameMgr.Events?.Register<Cartridge>(GameEvents.DeactivateCartridge, HandleDeactivateCartridge);
+            GameMgr.Events?.Register<LabInfo>(GameEvents.ActivateLab, HandleActivateLab);
+            GameMgr.Events?.Register<LabInfo>(GameEvents.DeactivateLab, HandleDeactivateLab);
 
             GameMgr.Events?.Register(GameEvents.TaskResetPressed, HandleTaskResetPressed);
 
@@ -222,19 +222,11 @@ namespace ThermoVR.Lab
 
         #region Handlers
 
-        private void HandleActivateCartridge(Cartridge cartridge) {
-            switch (cartridge.GetCartridgeType()) {
-                case Cartridge.CartridgeType.Lab:
-                    m_tasks = cartridge.GetInfo().Tasks;
-                    break;
-                case Cartridge.CartridgeType.Sandbox:
-                    break;
-                default:
-                    break;
-            }
+        private void HandleActivateLab(LabInfo info) {
+            m_tasks = info.Tasks;
         }
 
-        private void HandleDeactivateCartridge(Cartridge cartridge) {
+        private void HandleDeactivateLab(LabInfo info) {
             m_tasks = null;
         }
 

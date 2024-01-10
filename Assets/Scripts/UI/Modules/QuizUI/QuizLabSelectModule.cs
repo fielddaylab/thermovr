@@ -47,6 +47,9 @@ namespace ThermoVR.Lab
                 option.transform.localPosition = new Vector3(option.transform.localPosition.x, option.transform.localPosition.y - (m_OptionSpacing * i), option.transform.localPosition.z);
                 option.LabTitle.text = LabMgr.Instance.AvailableLabs[i].Name;
                 option.LabAuthor.text = LabMgr.Instance.AvailableLabs[i].Author;
+                option.LoadButton.ClearListeners();
+                option.SetLabInfo(LabMgr.Instance.AvailableLabs[i]);
+
                 // TODO: set Slider progess
                 m_ActiveOptions.Add(option);
             }

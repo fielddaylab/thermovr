@@ -46,6 +46,11 @@ namespace ThermoVR.UI
             m_button.image.color = color;
         }
 
+        public void ClearListeners()
+        {
+            OnButtonPressed = null;
+        }
+
         #region Handlers
 
         private void HandlePress(object sender, EventArgs args) {
