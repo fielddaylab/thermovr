@@ -53,11 +53,11 @@ public class Touchable : MonoBehaviour
     }
 
     //[System.NonSerialized]
-    public bool ltouch = false;
+    [HideInInspector] public bool ltouch = false;
     //[System.NonSerialized]
-    public bool rtouch = false;
+    [HideInInspector] public bool rtouch = false;
     //[System.NonSerialized]
-    public bool touch = false;
+    [HideInInspector] public bool touch = false;
 
     public void deltaTouch(Collider c, bool delta) {
         if (cInHandList(c, true)) ltouch = delta;

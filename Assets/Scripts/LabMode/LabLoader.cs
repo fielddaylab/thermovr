@@ -13,6 +13,7 @@ namespace ThermoVR.Lab
     public struct LabInfo
     {
         public string Name;
+        public string Author;
         public List<TaskInfo> Tasks;
     }
 
@@ -214,6 +215,10 @@ namespace ThermoVR.Lab
                         if (currGroup.Contains("LAB-NAME")) {
                             ParseLabName(currGroup, ref newLabInfo);
                         }
+                        if (currGroup.Contains("LAB-AUTHOR"))
+                        {
+                            ParseLabAuthor(currGroup, ref newLabInfo);
+                        }
                         else if (currGroup.Contains("TASK")) {
                             ParseTaskInfo(currGroup, ref newLabInfo);
                         }
@@ -252,10 +257,18 @@ namespace ThermoVR.Lab
         }
 
         private void ParseLabName(string group, ref LabInfo labInfo) {
-            string labName = group.Substring(group.IndexOf(":") + 1).Trim();
+            string labName = group.Substring(group.IndexOf("LAB-NAME:") + "LAB-NAME:".Length).Trim();
             Debug.Log("[LabLoad] Lab Name: " + labName);
 
             labInfo.Name = labName;
+        }
+
+        private void ParseLabAuthor(string group, ref LabInfo labInfo)
+        {
+            string labAuthor = group.Substring(group.IndexOf("LAB-AUTHOR:") + "LAB-AUTHOR:".Length).Trim();
+            Debug.Log("[LabLoad] Lab Author: " + labAuthor);
+
+            labInfo.Author = labAuthor;
         }
 
         #endregion // Lab Parsing

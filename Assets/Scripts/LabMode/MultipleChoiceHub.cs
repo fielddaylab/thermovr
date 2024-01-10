@@ -3,7 +3,6 @@ using JetBrains.Annotations;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using ThermoVR.UI;
 using TMPro;
 using UnityEngine;
@@ -42,7 +41,6 @@ namespace ThermoVR.Lab
 
     public class MultipleChoiceHub : Evaluable
     {
-
         [SerializeField] private TMP_Text m_questionText;
         [SerializeField] private MultipleChoiceOption[] m_options; // option "slots"; not all questions will use all slots // TODO: make pools
         [SerializeField] private bool m_randomOrder = false;

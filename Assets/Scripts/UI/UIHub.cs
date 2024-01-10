@@ -14,8 +14,7 @@ namespace ThermoVR.UI
         Graph,
 
         // Quiz UI
-        QuizDefault,
-        QuizLoaded,
+        QuizSelect,
         QuizLabTasks
     }
 
@@ -33,8 +32,12 @@ namespace ThermoVR.UI
 
         public void Awake() {
             InitializeRegistered();
+        }
 
-            if (m_initialUI) {
+        private void Start()
+        {
+            if (m_initialUI)
+            {
                 OpenUI(m_initialUI.ID);
             }
         }

@@ -39,12 +39,16 @@ public class QuizModule : UIModule
     public override void Open() {
         base.Open();
 
+        /*
         if (m_activeCartridge) {
             m_hub.OpenUI(UIID.QuizLoaded);
         }
         else {
             m_hub.OpenUI(UIID.QuizDefault);
         }
+        */
+
+        m_hub.OpenUI(UIID.QuizSelect);
     }
 
     public override void Close() {
@@ -61,7 +65,7 @@ public class QuizModule : UIModule
                 Debug.Log("[Cartridge] Lab " + cartridge.GetInfo().Name + " activated!");
                 m_activeText.SetText("LOADED: \n" + cartridge.GetInfo().Name);
                 m_activeCartridge = cartridge;
-                m_hub.OpenUI(UIID.QuizLoaded);
+                // m_hub.OpenUI(UIID.QuizLoaded);
                 break;
             case Cartridge.CartridgeType.Sandbox:
                 /*
@@ -83,7 +87,7 @@ public class QuizModule : UIModule
             m_activeCartridge = null;
         }
 
-        m_hub.OpenUI(UIID.QuizDefault);
+        // m_hub.OpenUI(UIID.QuizDefault);
     }
 
     private void HandleBeginLab() {
