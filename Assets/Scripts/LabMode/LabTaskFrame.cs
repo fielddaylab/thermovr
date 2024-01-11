@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using ThermoVR.UI;
+using TMPro;
 using UnityEngine;
 
 namespace ThermoVR.Lab

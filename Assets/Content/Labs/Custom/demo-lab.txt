@@ -1,6 +1,11 @@
 || LAB-NAME: Demo Lab
 || LAB-AUTHOR: Field Day
 
+|| TOPIC
+
+|Header: "First, we’ll try out each feature of the simulator. Determine which property is being held constant and which one(s) are changing.
+	a. Bunsen Burner"
+
 || TASK
 
 |Type: [reach-state]
@@ -46,6 +51,11 @@
 	Which properties are changing?"
 	Answers: ["Pressure", "Volume"(c), "Temperature"(c), "None of the above"]
 |EfficiencyInfo:
+
+|| TOPIC
+
+|Header: "First, we’ll try out each feature of the simulator. Determine which property is being held constant and which one(s) are changing.
+	b. Cooling Coil"
 
 || TASK
 
@@ -93,6 +103,10 @@
 	Answers: ["Pressure", "Volume"(c), "Temperature"(c), "None of the above"]
 |EfficiencyInfo:
 
+|| TOPIC
+
+|Header: "First, we’ll try out each feature of the simulator. Determine which property is being held constant and which one(s) are changing.
+	c. Weight"
 
 || TASK
 
@@ -140,7 +154,10 @@
 	Answers: ["Pressure"(c), "Volume"(c), "Temperature"(c), "None of the above"]
 |EfficiencyInfo:
 
+|| TOPIC
 
+|Header: "First, we’ll try out each feature of the simulator. Determine which property is being held constant and which one(s) are changing.
+	d. Balloon"
 
 || TASK
 
@@ -156,8 +173,6 @@
 	Apply the balloon until P ≈ 50 kPa."
 	Requirements: [(Pressure:50:5)]
 |EfficiencyInfo:
-
-
 
 || TASK
 
@@ -190,6 +205,11 @@
 	Answers: ["Pressure"(c), "Volume"(c), "Temperature"(c), "None of the above"]
 |EfficiencyInfo:
 
+
+|| TOPIC
+
+|Header: "First, we’ll try out each feature of the simulator. Determine which property is being held constant and which one(s) are changing.
+	e. Volume Stops"
 
 || TASK
 
@@ -303,6 +323,9 @@ As you continue to apply heat, which property is held constant?"
 	Answers: ["Subcooled Liquid"(c), "Two-Phase", "Superheated Vapor"]
 |EfficiencyInfo:
 
+|| TOPIC
+
+|Header: "Next Header"
 
 || TASK
 
@@ -316,8 +339,6 @@ As you continue to apply heat, which property is held constant?"
 "Grab the state ball and drop it into a starting position in the Superheated Vapor region with P ≈ 95 kPa."
 	Requirements: [(Region:2:0), (Pressure:95:10)]
 |EfficiencyInfo:
-
-
 
 
 || TASK

@@ -14,7 +14,7 @@ namespace ThermoVR.Lab
     {
         public string Name;
         public string Author;
-        public List<TaskInfo> Tasks;
+        public List<TopicInfo> Topics;
     }
 
     /// <summary>
@@ -76,6 +76,13 @@ namespace ThermoVR.Lab
     }
 
     [Serializable]
+    public struct TopicInfo
+    {
+        public string TopicHeader;
+        public List<TaskInfo> Tasks;
+    }
+
+    [Serializable]
     public struct TaskInfo
     {
         // Common
@@ -115,8 +122,13 @@ namespace ThermoVR.Lab
 
         private static uint NUM_TASK_SECTIONS = 8; // 7 + 1 leading delim
 
+        private static uint TOPIC_HEADER_INDEX = 1;
+
+        private static uint NUM_TOPIC_SECTIONS = 2; // 1 + 1 leading delim
+
         private static string GROUP_DELIM = "||";
         private static string TASK_INFO_DELIM = "|";
+        private static string TOPIC_INFO_DELIM = "|";
         private static string QUIZ_ANSWER_DELIM = ",";
         private static string STATE_REQ_GROUP_DELIM = ",";
         private static string STATE_REQ_CHUNK_DELIM = ":";
@@ -204,9 +216,10 @@ namespace ThermoVR.Lab
 
             if (!succeeded) {
                 succeeded = true;
-                newLabInfo.Tasks = new List<TaskInfo>();
+                newLabInfo.Topics = new List<TopicInfo>();
 
-                try {
+                try
+                {
                     List<string> groups = TextIO.TextAssetToList(labInfoAsset, GROUP_DELIM);
 
                     for (int i = 0; i < groups.Count; i++) {
@@ -215,9 +228,13 @@ namespace ThermoVR.Lab
                         if (currGroup.Contains("LAB-NAME")) {
                             ParseLabName(currGroup, ref newLabInfo);
                         }
-                        if (currGroup.Contains("LAB-AUTHOR"))
+                        else if (currGroup.Contains("LAB-AUTHOR"))
                         {
                             ParseLabAuthor(currGroup, ref newLabInfo);
+                        }
+                        else if (currGroup.Contains("TOPIC"))
+                        {
+                            ParseTopicInfo(currGroup, ref newLabInfo);
                         }
                         else if (currGroup.Contains("TASK")) {
                             ParseTaskInfo(currGroup, ref newLabInfo);
@@ -274,6 +291,42 @@ namespace ThermoVR.Lab
         #endregion // Lab Parsing
 
         #region Task Parsing
+
+        private void ParseTopicInfo(string group, ref LabInfo labInfo) {
+            TopicInfo newTopicInfo = new TopicInfo();
+            newTopicInfo.Tasks = new List<TaskInfo>();
+
+            string[] sections = group.Split(TOPIC_INFO_DELIM);
+
+            if (sections.Length != NUM_TOPIC_SECTIONS)
+            {
+                Debug.Log("[LabLoad] TOPIC was in invalid format! Expecting " + NUM_TOPIC_SECTIONS + " fields, found " + sections.Length);
+                throw new InvalidDataException();
+            }
+
+            // HEADER
+            string headerInfo = sections[TOPIC_HEADER_INDEX].Trim();
+            string iterateTopicInfo = "";
+            if (headerInfo.Contains("Header:")) { 
+                ParseTopicHeader(ref headerInfo, ref iterateTopicInfo, ref newTopicInfo);
+            }
+            if (m_verboseDebug) { Debug.Log("[LabLoad] Topic Header Info: " + newTopicInfo); }
+
+            labInfo.Topics.Add(newTopicInfo);
+        }
+
+        private void ParseTopicHeader(ref string headerInfo, ref string iterateTopicInfo, ref TopicInfo newTopicInfo)
+        {
+            int preIndex = headerInfo.IndexOf("Header:");
+            iterateTopicInfo = headerInfo.Substring(preIndex);
+            int startIndex = iterateTopicInfo.IndexOf('"') + 1;
+            iterateTopicInfo = iterateTopicInfo.Substring(startIndex);
+            int endIndex = iterateTopicInfo.IndexOf('"');
+            int length = endIndex;
+            iterateTopicInfo = iterateTopicInfo.Substring(0, length);
+            newTopicInfo.TopicHeader = iterateTopicInfo;
+            if (m_verboseDebug) { Debug.Log("[LabLoad] Topic Header: " + newTopicInfo.TopicHeader); }
+        }
 
         private void ParseTaskInfo(string group, ref LabInfo labInfo) {
             TaskInfo newTaskInfo = new TaskInfo();
@@ -347,7 +400,7 @@ namespace ThermoVR.Lab
 
             // TODO: labInfo.etc = etcInfo
 
-            labInfo.Tasks.Add(newTaskInfo);
+            labInfo.Topics[labInfo.Topics.Count - 1].Tasks.Add(newTaskInfo);
         }
 
         private void ParseTaskTools(ref string toolInfo, ref TaskInfo newTaskInfo) {
