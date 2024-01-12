@@ -44,9 +44,11 @@ namespace ThermoVR.Lab
     public class MultipleChoiceHub : Evaluable
     {
         [SerializeField] private TMP_Text m_initText;
-        [SerializeField] private TMP_Text m_questionText;
+        // [SerializeField] private TMP_Text m_questionText;
         [SerializeField] private MultipleChoiceOption[] m_options; // option "slots"; not all questions will use all slots // TODO: make pools
         [SerializeField] private bool m_randomOrder = false;
+
+        [SerializeField] private InstructionLineGenerator m_lineGenerator;
 
         private MultipleChoiceDefinition m_definition;
 
@@ -121,13 +123,11 @@ namespace ThermoVR.Lab
 
             m_initText.SetText(m_definition.InitialConditionText);
 
-            string questionStr = "";
             for (int i = 0; i < m_definition.QuestionTexts.Length; i++)
             {
-                questionStr += m_definition.QuestionTexts[i];
-                questionStr += "\n";
+                var transform = m_lineGenerator.GenerateLine(m_definition.QuestionTexts[i]);
+                transform.localPosition += new Vector3(0, -1.3f * i, 0);
             }
-            m_questionText.SetText(questionStr);
 
             UpdateOptions(m_order);
             m_selectedID = uint.MaxValue;
