@@ -28,12 +28,14 @@ namespace ThermoVR.Lab
 
     public struct MultipleChoiceDefinition
     {
-        public string QuestionText;
+        public string InitialConditionText;
+        public string[] QuestionTexts;
         public string[] OptionTexts;
         public List<uint> CorrectIDs; // between 0 and number of options - 1
 
-        public MultipleChoiceDefinition(string qText, string[] optionTexts, List<uint> ids) {
-            QuestionText = qText;
+        public MultipleChoiceDefinition(string initText, string[] qTexts, string[] optionTexts, List<uint> ids) {
+            InitialConditionText = initText;
+            QuestionTexts = qTexts;
             OptionTexts = optionTexts;
             CorrectIDs = ids;
         }
@@ -41,6 +43,7 @@ namespace ThermoVR.Lab
 
     public class MultipleChoiceHub : Evaluable
     {
+        [SerializeField] private TMP_Text m_initText;
         [SerializeField] private TMP_Text m_questionText;
         [SerializeField] private MultipleChoiceOption[] m_options; // option "slots"; not all questions will use all slots // TODO: make pools
         [SerializeField] private bool m_randomOrder = false;
@@ -115,7 +118,17 @@ namespace ThermoVR.Lab
             base.ResetState();
 
             SetOrder(m_randomOrder);
-            m_questionText.SetText(m_definition.QuestionText);
+
+            m_initText.SetText(m_definition.InitialConditionText);
+
+            string questionStr = "";
+            for (int i = 0; i < m_definition.QuestionTexts.Length; i++)
+            {
+                questionStr += m_definition.QuestionTexts[i];
+                questionStr += "\n";
+            }
+            m_questionText.SetText(questionStr);
+
             UpdateOptions(m_order);
             m_selectedID = uint.MaxValue;
         }

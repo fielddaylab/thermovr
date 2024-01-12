@@ -10,12 +10,14 @@ namespace ThermoVR.Lab
 {
     public struct WordBankDefinition
     {
-        public string QuestionText;
+        public string InitialConditionText;
+        public string[] QuestionTexts;
         public string[] OptionTexts;
         public uint CorrectID; // between 0 and number of options - 1
 
-        public WordBankDefinition(string qText, string[] optionTexts, uint id) {
-            QuestionText = qText;
+        public WordBankDefinition(string initText, string[] qTexts, string[] optionTexts, uint id) {
+            InitialConditionText = initText;
+            QuestionTexts = qTexts;
             OptionTexts = optionTexts;
             CorrectID = id;
         }
@@ -23,6 +25,7 @@ namespace ThermoVR.Lab
 
     public class WordBankHub : Evaluable
     {
+        [SerializeField] private TMP_Text m_initText;
         [SerializeField] private TMP_Text m_questionText;
         [SerializeField] private TMP_Text m_answerText;
         [SerializeField] private Image m_answerBG;
@@ -84,7 +87,17 @@ namespace ThermoVR.Lab
             base.ResetState();
 
             SetOrder(m_randomOrder);
-            m_questionText.SetText(m_definition.QuestionText);
+
+            m_initText.SetText(m_definition.InitialConditionText);
+
+            string questionStr = "";
+            for (int i = 0; i < m_definition.QuestionTexts.Length; i++)
+            {
+                questionStr += m_definition.QuestionTexts[i];
+                questionStr += "\n";
+            }
+            m_questionText.SetText(questionStr);
+            
             UpdateOptions(m_order);
             m_selectedID = uint.MaxValue;
             m_answerBG.color = Color.white;
@@ -114,7 +127,13 @@ namespace ThermoVR.Lab
         }
 
         private void UpdateOptions(uint[] order) {
-            m_questionText.SetText(m_definition.QuestionText);
+            string questionStr = "";
+            for (int i = 0; i < m_definition.QuestionTexts.Length; i++)
+            {
+                questionStr += m_definition.QuestionTexts[i];
+                questionStr += "\n";
+            }
+            m_questionText.SetText(questionStr);
 
             // show options equal to number of options
             for (int i = 0; i < m_options.Length; i++) {

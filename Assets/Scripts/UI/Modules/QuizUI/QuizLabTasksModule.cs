@@ -164,7 +164,8 @@ namespace ThermoVR.Lab
                         MultipleChoiceHub mcHub = evaluables[i].GetComponent<MultipleChoiceHub>();
 
                         MultipleChoiceDefinition newDef = new MultipleChoiceDefinition();
-                        newDef.QuestionText = taskInfo.TaskQuestion;
+                        newDef.InitialConditionText = taskInfo.InitialConditions;
+                        newDef.QuestionTexts = taskInfo.TaskQuestions.ToArray();
                         newDef.OptionTexts = taskInfo.SecondaryTexts.ToArray();
                         newDef.CorrectIDs = taskInfo.CorrectIDs;
 
@@ -181,7 +182,8 @@ namespace ThermoVR.Lab
                         MultipleChoiceHubMulti mcHub = evaluables[i].GetComponent<MultipleChoiceHubMulti>();
 
                         MultipleChoiceDefinition newDef = new MultipleChoiceDefinition();
-                        newDef.QuestionText = taskInfo.TaskQuestion;
+                        newDef.InitialConditionText = taskInfo.InitialConditions;
+                        newDef.QuestionTexts = taskInfo.TaskQuestions.ToArray();
                         newDef.OptionTexts = taskInfo.SecondaryTexts.ToArray();
                         newDef.CorrectIDs = taskInfo.CorrectIDs;
 
@@ -198,7 +200,8 @@ namespace ThermoVR.Lab
                         WordBankHub wordBankHub = evaluables[i].GetComponent<WordBankHub>();
 
                         WordBankDefinition newDef = new WordBankDefinition();
-                        newDef.QuestionText = taskInfo.TaskQuestion;
+                        newDef.InitialConditionText = taskInfo.InitialConditions;
+                        newDef.QuestionTexts = taskInfo.TaskQuestions.ToArray();
                         newDef.OptionTexts = taskInfo.SecondaryTexts.ToArray();
                         newDef.CorrectID = taskInfo.CorrectIDs[0];
 
@@ -215,7 +218,8 @@ namespace ThermoVR.Lab
                         ReachStateHub reachStateHub = evaluables[i].GetComponent<ReachStateHub>();
 
                         ReachStateDefinition newDef = new ReachStateDefinition();
-                        newDef.QuestionText = taskInfo.TaskQuestion;
+                        newDef.InitialConditionText = taskInfo.InitialConditions;
+                        newDef.QuestionTexts = taskInfo.TaskQuestions.ToArray();
                         newDef.Targets = taskInfo.Targets;
 
                         reachStateHub.SetDefinition(newDef);

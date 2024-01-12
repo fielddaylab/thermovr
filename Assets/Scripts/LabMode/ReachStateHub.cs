@@ -12,11 +12,13 @@ namespace ThermoVR.Lab
 {
     public struct ReachStateDefinition
     {
-        public string QuestionText;
+        public string InitialConditionText;
+        public string[] QuestionTexts;
         public List<SimStateTarget> Targets;
 
-        public ReachStateDefinition(string qText, List<SimStateTarget> targets) {
-            QuestionText = qText;
+        public ReachStateDefinition(string initText, string[] qTexts, List<SimStateTarget> targets) {
+            InitialConditionText = initText;
+            QuestionTexts = qTexts;
             Targets = targets;
         }
     }
@@ -38,6 +40,7 @@ namespace ThermoVR.Lab
 
     public class ReachStateHub : Evaluable
     {
+        [SerializeField] private TMP_Text m_initText;
         [SerializeField] private TMP_Text m_questionText;
         [SerializeField] private Image m_completionState;
 
@@ -54,7 +57,16 @@ namespace ThermoVR.Lab
         public override void ResetState() {
             base.ResetState();
 
-            m_questionText.SetText(m_definition.QuestionText);
+            m_initText.SetText(m_definition.InitialConditionText);
+
+            string questionStr = "";
+            for (int i = 0; i < m_definition.QuestionTexts.Length; i++)
+            {
+                questionStr += m_definition.QuestionTexts[i];
+                questionStr += "\n";
+            }
+            m_questionText.SetText(questionStr);
+
             m_completionState.sprite = GameDB.Instance.SocketEmpty;
         }
 
