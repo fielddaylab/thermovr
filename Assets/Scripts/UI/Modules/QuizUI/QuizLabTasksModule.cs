@@ -12,6 +12,8 @@ namespace ThermoVR.Lab
         private const float TAB_HEIGHT_INACTIVE = 60f;
         private const float TAB_HEIGHT_ACTIVE = 70.66f;
 
+        #region Inspector
+
         [SerializeField] private RectTransform m_tabContainer;
         [SerializeField] private GameObject m_tabPrefab;
         [SerializeField] private RectTransform m_topicTabContainer;
@@ -27,6 +29,23 @@ namespace ThermoVR.Lab
         [SerializeField] private ThermoButton m_homeButton;
 
         [SerializeField] private TMP_Text m_topicHeader;
+
+        [Space(5)]
+        [Header("Scroll")]
+        [SerializeField] private Transform m_ScrollVerticalContainer;
+        [SerializeField] private float m_VerticalScrollSpacing;
+        [SerializeField] private ThermoButton m_ScrollUpBtn;
+        [SerializeField] private ThermoButton m_ScrollDownBtn;
+
+        [SerializeField] private Transform m_ScrollHorizontalContainer;
+        [SerializeField] private float m_HorizontalScrollSpacing;
+        [SerializeField] private ThermoButton m_ScrollLeftBtn;
+        [SerializeField] private ThermoButton m_ScrollRightBtn;
+
+        #endregion // Inspector
+
+        private float m_VerticalScrollOrigin;
+        private float m_HorizontalScrollOrigin;
 
         private List<LabTopicTab> m_tabs; // TODO: make these pools
         private List<List<LabTaskFrame>> m_frames;
@@ -54,6 +73,9 @@ namespace ThermoVR.Lab
             m_frames = new List<List<LabTaskFrame>>();
             m_activeTabIndex = -1;
             m_activeTopicIndex = -1;
+
+            m_VerticalScrollOrigin = m_ScrollVerticalContainer.localPosition.y;
+            m_HorizontalScrollOrigin = m_ScrollHorizontalContainer.localPosition.x;
         }
 
         public override void Open() {
@@ -64,6 +86,18 @@ namespace ThermoVR.Lab
             }
             m_tabs.Clear();
             m_frames.Clear();
+
+            // Add button listeners
+            m_ScrollUpBtn.OnButtonPressed -= HandleScrollUp;
+            m_ScrollDownBtn.OnButtonPressed -= HandleScrollDown;
+            m_ScrollLeftBtn.OnButtonPressed -= HandleScrollLeft;
+            m_ScrollRightBtn.OnButtonPressed -= HandleScrollRight;
+
+            m_ScrollUpBtn.OnButtonPressed += HandleScrollUp;
+            m_ScrollDownBtn.OnButtonPressed += HandleScrollDown;
+            m_ScrollLeftBtn.OnButtonPressed += HandleScrollLeft;
+            m_ScrollRightBtn.OnButtonPressed += HandleScrollRight;
+
 
             for (int topicIndex = 0; topicIndex < m_currLab.Topics.Count; topicIndex++) {
                 m_frames.Add(new List<LabTaskFrame>());
@@ -123,6 +157,12 @@ namespace ThermoVR.Lab
 
         public override void Close() {
             base.Close();
+
+            // Remove button listeners
+            m_ScrollUpBtn.OnButtonPressed -= HandleScrollUp;
+            m_ScrollDownBtn.OnButtonPressed -= HandleScrollDown;
+            m_ScrollLeftBtn.OnButtonPressed -= HandleScrollLeft;
+            m_ScrollRightBtn.OnButtonPressed -= HandleScrollRight;
 
             ResetWorldMods();
 
@@ -338,6 +378,32 @@ namespace ThermoVR.Lab
             GameMgr.Events?.Dispatch(GameEvents.DeactivateLab);
         }
 
+        private void HandleScrollUp(object sender, EventArgs args)
+        {
+            if (m_ScrollVerticalContainer.transform.localPosition.y <= m_VerticalScrollOrigin || Mathf.Approximately(m_ScrollVerticalContainer.transform.localPosition.x, m_VerticalScrollOrigin)) { return; }
+            m_ScrollVerticalContainer.transform.localPosition = m_ScrollVerticalContainer.transform.localPosition - new Vector3(0, m_VerticalScrollSpacing, 0);
+        }
+
+        private void HandleScrollDown(object sender, EventArgs args)
+        {
+            float comparePos = ((m_currLab.Topics.Count - 5) * m_VerticalScrollSpacing) + m_VerticalScrollOrigin;
+            if (m_ScrollVerticalContainer.transform.localPosition.y >= comparePos || Mathf.Approximately(m_ScrollVerticalContainer.transform.localPosition.x, comparePos)) { return; }
+            m_ScrollVerticalContainer.transform.localPosition = m_ScrollVerticalContainer.transform.localPosition + new Vector3(0, m_VerticalScrollSpacing, 0);
+        }
+
+        private void HandleScrollLeft(object sender, EventArgs args)
+        {
+            if (m_ScrollHorizontalContainer.transform.localPosition.x >= m_HorizontalScrollOrigin || Mathf.Approximately(m_ScrollHorizontalContainer.transform.localPosition.x, m_HorizontalScrollOrigin)) { return; }
+            m_ScrollHorizontalContainer.transform.localPosition = m_ScrollHorizontalContainer.transform.localPosition + new Vector3(m_HorizontalScrollSpacing, 0, 0);
+        }
+
+        private void HandleScrollRight(object sender, EventArgs args)
+        {
+            float comparePos = (-(m_currLab.Topics[m_activeTopicIndex].Tasks.Count - 4) * m_HorizontalScrollSpacing) + m_HorizontalScrollOrigin;
+            if (m_ScrollHorizontalContainer.transform.localPosition.x <= comparePos || Mathf.Approximately(m_ScrollHorizontalContainer.transform.localPosition.x, comparePos)) { return; }
+            m_ScrollHorizontalContainer.transform.localPosition = m_ScrollHorizontalContainer.transform.localPosition - new Vector3(m_HorizontalScrollSpacing, 0, 0);
+        }
+
         #endregion // Handlers
 
         private void ActivateTab(int topicIndex, int taskIndex)
@@ -369,6 +435,9 @@ namespace ThermoVR.Lab
 
             m_frames[topicIndex][0].gameObject.SetActive(true);
             m_tabs[topicIndex].TaskTabs[0].Button.SetColor(GameDB.Instance.TabSelectedColor);
+
+            m_ScrollHorizontalContainer.localPosition = new Vector3(m_HorizontalScrollOrigin, m_ScrollHorizontalContainer.localPosition.y, m_ScrollHorizontalContainer.localPosition.z);
+
             ApplyWorldMods(m_currLab.Topics[topicIndex].Tasks[0]);
         }
 
