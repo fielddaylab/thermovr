@@ -3,7 +3,6 @@ using JetBrains.Annotations;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using ThermoVR.UI;
 using TMPro;
 using UnityEngine;
@@ -29,12 +28,14 @@ namespace ThermoVR.Lab
 
     public struct MultipleChoiceDefinition
     {
-        public string QuestionText;
+        public string InitialConditionText;
+        public string[] QuestionTexts;
         public string[] OptionTexts;
         public List<uint> CorrectIDs; // between 0 and number of options - 1
 
-        public MultipleChoiceDefinition(string qText, string[] optionTexts, List<uint> ids) {
-            QuestionText = qText;
+        public MultipleChoiceDefinition(string initText, string[] qTexts, string[] optionTexts, List<uint> ids) {
+            InitialConditionText = initText;
+            QuestionTexts = qTexts;
             OptionTexts = optionTexts;
             CorrectIDs = ids;
         }
@@ -42,10 +43,12 @@ namespace ThermoVR.Lab
 
     public class MultipleChoiceHub : Evaluable
     {
-
-        [SerializeField] private TMP_Text m_questionText;
+        [SerializeField] private TMP_Text m_initText;
+        // [SerializeField] private TMP_Text m_questionText;
         [SerializeField] private MultipleChoiceOption[] m_options; // option "slots"; not all questions will use all slots // TODO: make pools
         [SerializeField] private bool m_randomOrder = false;
+
+        [SerializeField] private InstructionLineGenerator m_lineGenerator;
 
         private MultipleChoiceDefinition m_definition;
 
@@ -117,7 +120,15 @@ namespace ThermoVR.Lab
             base.ResetState();
 
             SetOrder(m_randomOrder);
-            m_questionText.SetText(m_definition.QuestionText);
+
+            m_initText.SetText(m_definition.InitialConditionText);
+
+            for (int i = 0; i < m_definition.QuestionTexts.Length; i++)
+            {
+                var transform = m_lineGenerator.GenerateLine(m_definition.QuestionTexts[i]);
+                transform.localPosition += new Vector3(0, -1.3f * i, 0);
+            }
+
             UpdateOptions(m_order);
             m_selectedID = uint.MaxValue;
         }

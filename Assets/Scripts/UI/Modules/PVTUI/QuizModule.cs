@@ -18,7 +18,7 @@ public class QuizModule : UIModule
 
     #endregion // Inspector
 
-    private Cartridge m_activeCartridge;
+    private bool m_labIsActive;
 
 
     #region IUIModule
@@ -26,24 +26,24 @@ public class QuizModule : UIModule
     public override void Init() {
         base.Init();
 
-        m_activeCartridge = null;
+        m_labIsActive = false;
 
-        GameMgr.Events?.Register<Cartridge>(GameEvents.ActivateCartridge, HandleActivateCartridge);
-        GameMgr.Events?.Register<Cartridge>(GameEvents.DeactivateCartridge, HandleDeactivateCartridge);
+        GameMgr.Events?.Register<LabInfo>(GameEvents.ActivateLab, HandleActivateLab);
+        GameMgr.Events?.Register(GameEvents.DeactivateLab, HandleDeactivateLab);
 
         GameMgr.Events?.Register(GameEvents.BeginLab, HandleBeginLab);
 
-        m_hub.InitializeRegistered(); //TODO: move away from Init(). This is a bit wonky
+        m_hub.InitializeRegistered();
     }
 
     public override void Open() {
         base.Open();
 
-        if (m_activeCartridge) {
-            m_hub.OpenUI(UIID.QuizLoaded);
+        if (m_labIsActive) {
+            m_hub.OpenUI(UIID.QuizLabTasks);
         }
         else {
-            m_hub.OpenUI(UIID.QuizDefault);
+            m_hub.OpenUI(UIID.QuizSelect);
         }
     }
 
@@ -55,41 +55,22 @@ public class QuizModule : UIModule
 
     #region Handlers
 
-    private void HandleActivateCartridge(Cartridge cartridge) {
-        switch (cartridge.GetCartridgeType()) {
-            case Cartridge.CartridgeType.Lab:
-                Debug.Log("[Cartridge] Lab " + cartridge.GetInfo().Name + " activated!");
-                m_activeText.SetText("LOADED: \n" + cartridge.GetInfo().Name);
-                m_activeCartridge = cartridge;
-                m_hub.OpenUI(UIID.QuizLoaded);
-                break;
-            case Cartridge.CartridgeType.Sandbox:
-                /*
-                Debug.Log("[Cartridge] Sandbox activated!");
-                m_activeText.SetText("LOADED: \n" + "Sandbox");
-                m_activeCartridge = cartridge;
-                m_hub.OpenUI(UIID.QuizLoaded);
-                */
-                break;
-            default:
-                break;
-        }
+    
+    private void HandleActivateLab(LabInfo labInfo) {
+        Debug.Log("[Lab Activation] Lab " + labInfo.Name + " activated!");
+
+        m_labIsActive = true;
+        m_hub.OpenUI(UIID.QuizLabTasks);
     }
 
-    private void HandleDeactivateCartridge(Cartridge cartridge) {
-        Debug.Log("[Cartridge] Cartridge Deactivated.");
-
-        if (m_activeCartridge == cartridge) {
-            m_activeCartridge = null;
-        }
-
-        m_hub.OpenUI(UIID.QuizDefault);
+    private void HandleDeactivateLab()
+    {
+        m_labIsActive = false;
+        m_hub.OpenUI(UIID.QuizSelect);
     }
 
     private void HandleBeginLab() {
         m_hub.OpenUI(UIID.QuizLabTasks);
-
-        // Pass in cartridge data
     }
 
     #endregion // Handlers

@@ -10,12 +10,11 @@ namespace ThermoVR.UI
         // PVT Tablet
         Readout,
         Sandbox,
-        Quiz,
+        Lab,
         Graph,
 
         // Quiz UI
-        QuizDefault,
-        QuizLoaded,
+        QuizSelect,
         QuizLabTasks
     }
 
@@ -33,8 +32,12 @@ namespace ThermoVR.UI
 
         public void Awake() {
             InitializeRegistered();
+        }
 
-            if (m_initialUI) {
+        private void Start()
+        {
+            if (m_initialUI)
+            {
                 OpenUI(m_initialUI.ID);
             }
         }

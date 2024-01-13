@@ -10,12 +10,14 @@ namespace ThermoVR.Lab
 {
     public struct WordBankDefinition
     {
-        public string QuestionText;
+        public string InitialConditionText;
+        public string[] QuestionTexts;
         public string[] OptionTexts;
         public uint CorrectID; // between 0 and number of options - 1
 
-        public WordBankDefinition(string qText, string[] optionTexts, uint id) {
-            QuestionText = qText;
+        public WordBankDefinition(string initText, string[] qTexts, string[] optionTexts, uint id) {
+            InitialConditionText = initText;
+            QuestionTexts = qTexts;
             OptionTexts = optionTexts;
             CorrectID = id;
         }
@@ -23,11 +25,14 @@ namespace ThermoVR.Lab
 
     public class WordBankHub : Evaluable
     {
-        [SerializeField] private TMP_Text m_questionText;
+        [SerializeField] private TMP_Text m_initText;
+        // [SerializeField] private TMP_Text m_questionText;
         [SerializeField] private TMP_Text m_answerText;
         [SerializeField] private Image m_answerBG;
         [SerializeField] private ThermoButton m_chooseButton;
         [SerializeField] private bool m_randomOrder = false;
+
+        [SerializeField] private InstructionLineGenerator m_lineGenerator;
 
         [SerializeField] private GameObject m_choicePanel;
         [SerializeField] private ThermoButton m_choicePanelCloseButton;
@@ -84,7 +89,15 @@ namespace ThermoVR.Lab
             base.ResetState();
 
             SetOrder(m_randomOrder);
-            m_questionText.SetText(m_definition.QuestionText);
+
+            m_initText.SetText(m_definition.InitialConditionText);
+
+            for (int i = 0; i < m_definition.QuestionTexts.Length; i++)
+            {
+                var transform = m_lineGenerator.GenerateLine(m_definition.QuestionTexts[i]);
+                transform.localPosition += new Vector3(0, -1.3f * i, 0);
+            }
+
             UpdateOptions(m_order);
             m_selectedID = uint.MaxValue;
             m_answerBG.color = Color.white;
@@ -114,7 +127,11 @@ namespace ThermoVR.Lab
         }
 
         private void UpdateOptions(uint[] order) {
-            m_questionText.SetText(m_definition.QuestionText);
+            for (int i = 0; i < m_definition.QuestionTexts.Length; i++)
+            {
+                var transform = m_lineGenerator.GenerateLine(m_definition.QuestionTexts[i]);
+                transform.localPosition += new Vector3(0, -1.3f * i, 0);
+            }
 
             // show options equal to number of options
             for (int i = 0; i < m_options.Length; i++) {

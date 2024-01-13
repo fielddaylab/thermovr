@@ -13,7 +13,8 @@ namespace ThermoVR.Lab
     public struct LabInfo
     {
         public string Name;
-        public List<TaskInfo> Tasks;
+        public string Author;
+        public List<TopicInfo> Topics;
     }
 
     /// <summary>
@@ -75,11 +76,19 @@ namespace ThermoVR.Lab
     }
 
     [Serializable]
+    public struct TopicInfo
+    {
+        public string TopicHeader;
+        public List<TaskInfo> Tasks;
+    }
+
+    [Serializable]
     public struct TaskInfo
     {
         // Common
         public TaskType TaskType;
-        public string TaskQuestion;
+        public string InitialConditions;
+        public List<string> TaskQuestions;
         public List<ToolType> AllowedTools;
         public SetGroup Sets; // p, v, and t values to set
         public LimitsGroup Limits; // stores limits for simulation variables
@@ -114,8 +123,13 @@ namespace ThermoVR.Lab
 
         private static uint NUM_TASK_SECTIONS = 8; // 7 + 1 leading delim
 
+        private static uint TOPIC_HEADER_INDEX = 1;
+
+        private static uint NUM_TOPIC_SECTIONS = 2; // 1 + 1 leading delim
+
         private static string GROUP_DELIM = "||";
         private static string TASK_INFO_DELIM = "|";
+        private static string TOPIC_INFO_DELIM = "|";
         private static string QUIZ_ANSWER_DELIM = ",";
         private static string STATE_REQ_GROUP_DELIM = ",";
         private static string STATE_REQ_CHUNK_DELIM = ":";
@@ -131,6 +145,11 @@ namespace ThermoVR.Lab
         private static string WORD_BANK_KEY = "word-bank";
         private static string REACH_STATE_KEY = "reach-state";
         private static string MC_MULTI_KEY = "multi-select-choice";
+
+        private static string QUESTIONS_START_KEY = "--Questions:";
+        private static string QUESTIONS_END_KEY = "Questions-->";
+
+        private static string QUESTION_START_KEY = "Question:";
 
         #endregion // Consts
 
@@ -203,9 +222,10 @@ namespace ThermoVR.Lab
 
             if (!succeeded) {
                 succeeded = true;
-                newLabInfo.Tasks = new List<TaskInfo>();
+                newLabInfo.Topics = new List<TopicInfo>();
 
-                try {
+                try
+                {
                     List<string> groups = TextIO.TextAssetToList(labInfoAsset, GROUP_DELIM);
 
                     for (int i = 0; i < groups.Count; i++) {
@@ -213,6 +233,14 @@ namespace ThermoVR.Lab
 
                         if (currGroup.Contains("LAB-NAME")) {
                             ParseLabName(currGroup, ref newLabInfo);
+                        }
+                        else if (currGroup.Contains("LAB-AUTHOR"))
+                        {
+                            ParseLabAuthor(currGroup, ref newLabInfo);
+                        }
+                        else if (currGroup.Contains("TOPIC"))
+                        {
+                            ParseTopicInfo(currGroup, ref newLabInfo);
                         }
                         else if (currGroup.Contains("TASK")) {
                             ParseTaskInfo(currGroup, ref newLabInfo);
@@ -252,18 +280,63 @@ namespace ThermoVR.Lab
         }
 
         private void ParseLabName(string group, ref LabInfo labInfo) {
-            string labName = group.Substring(group.IndexOf(":") + 1).Trim();
+            string labName = group.Substring(group.IndexOf("LAB-NAME:") + "LAB-NAME:".Length).Trim();
             Debug.Log("[LabLoad] Lab Name: " + labName);
 
             labInfo.Name = labName;
+        }
+
+        private void ParseLabAuthor(string group, ref LabInfo labInfo)
+        {
+            string labAuthor = group.Substring(group.IndexOf("LAB-AUTHOR:") + "LAB-AUTHOR:".Length).Trim();
+            Debug.Log("[LabLoad] Lab Author: " + labAuthor);
+
+            labInfo.Author = labAuthor;
         }
 
         #endregion // Lab Parsing
 
         #region Task Parsing
 
+        private void ParseTopicInfo(string group, ref LabInfo labInfo) {
+            TopicInfo newTopicInfo = new TopicInfo();
+            newTopicInfo.Tasks = new List<TaskInfo>();
+
+            string[] sections = group.Split(TOPIC_INFO_DELIM);
+
+            if (sections.Length != NUM_TOPIC_SECTIONS)
+            {
+                Debug.Log("[LabLoad] TOPIC was in invalid format! Expecting " + NUM_TOPIC_SECTIONS + " fields, found " + sections.Length);
+                throw new InvalidDataException();
+            }
+
+            // HEADER
+            string headerInfo = sections[TOPIC_HEADER_INDEX].Trim();
+            string iterateTopicInfo = "";
+            if (headerInfo.Contains("Header:")) { 
+                ParseTopicHeader(ref headerInfo, ref iterateTopicInfo, ref newTopicInfo);
+            }
+            if (m_verboseDebug) { Debug.Log("[LabLoad] Topic Header Info: " + newTopicInfo); }
+
+            labInfo.Topics.Add(newTopicInfo);
+        }
+
+        private void ParseTopicHeader(ref string headerInfo, ref string iterateTopicInfo, ref TopicInfo newTopicInfo)
+        {
+            int preIndex = headerInfo.IndexOf("Header:");
+            iterateTopicInfo = headerInfo.Substring(preIndex);
+            int startIndex = iterateTopicInfo.IndexOf('"') + 1;
+            iterateTopicInfo = iterateTopicInfo.Substring(startIndex);
+            int endIndex = iterateTopicInfo.IndexOf('"');
+            int length = endIndex;
+            iterateTopicInfo = iterateTopicInfo.Substring(0, length);
+            newTopicInfo.TopicHeader = iterateTopicInfo;
+            if (m_verboseDebug) { Debug.Log("[LabLoad] Topic Header: " + newTopicInfo.TopicHeader); }
+        }
+
         private void ParseTaskInfo(string group, ref LabInfo labInfo) {
             TaskInfo newTaskInfo = new TaskInfo();
+            newTaskInfo.TaskQuestions = new List<string>();
             newTaskInfo.SecondaryTexts = new List<string>();
             newTaskInfo.CorrectIDs = new List<uint>();
             newTaskInfo.Targets = new List<SimStateTarget>();
@@ -315,8 +388,12 @@ namespace ThermoVR.Lab
             string quizInfo = sections[QUIZ_INDEX].Trim();
             // get quiz question
             string iterateQuizInfo = "";
-            if (quizInfo.Contains("Question:")) {
-                ParseTaskQuestion(ref quizInfo, ref iterateQuizInfo, ref newTaskInfo);
+            if (quizInfo.Contains("Initial Conditions:"))
+            {
+                ParseTaskInitConditions(ref quizInfo, ref iterateQuizInfo, ref newTaskInfo);
+            }
+            if (quizInfo.Contains(QUESTIONS_START_KEY)) {
+                ParseTaskQuestions(ref quizInfo, ref iterateQuizInfo, ref newTaskInfo);
             }
             // get quiz options
             if (quizInfo.Contains("Answers:")) {
@@ -334,7 +411,7 @@ namespace ThermoVR.Lab
 
             // TODO: labInfo.etc = etcInfo
 
-            labInfo.Tasks.Add(newTaskInfo);
+            labInfo.Topics[labInfo.Topics.Count - 1].Tasks.Add(newTaskInfo);
         }
 
         private void ParseTaskTools(ref string toolInfo, ref TaskInfo newTaskInfo) {
@@ -545,16 +622,57 @@ namespace ThermoVR.Lab
             }
         }
 
-        private void ParseTaskQuestion(ref string quizInfo, ref string iterateQuizInfo, ref TaskInfo newTaskInfo) {
-            int preIndex = quizInfo.IndexOf("Question:");
+        private void ParseTaskInitConditions(ref string quizInfo, ref string iterateQuizInfo, ref TaskInfo newTaskInfo)
+        {
+            int preIndex = quizInfo.IndexOf("Initial Conditions:");
             iterateQuizInfo = quizInfo.Substring(preIndex);
             int startIndex = iterateQuizInfo.IndexOf('"') + 1;
             iterateQuizInfo = iterateQuizInfo.Substring(startIndex);
             int endIndex = iterateQuizInfo.IndexOf('"');
             int length = endIndex;
             iterateQuizInfo = iterateQuizInfo.Substring(0, length);
-            newTaskInfo.TaskQuestion = iterateQuizInfo;
-            if (m_verboseDebug) { Debug.Log("[LabLoad] Task Question: " + newTaskInfo.TaskQuestion); }
+            newTaskInfo.InitialConditions = iterateQuizInfo;
+
+            if (m_verboseDebug) { Debug.Log("[LabLoad] Initial Conditions: " + newTaskInfo.InitialConditions); }
+        }
+
+        private void ParseTaskQuestions(ref string quizInfo, ref string iterateQuizInfo, ref TaskInfo newTaskInfo) {
+            // isolate questions chunk
+            int questionsChunkPreIndex = quizInfo.IndexOf(QUESTIONS_START_KEY);
+            int questionsChunkEndIndex = quizInfo.IndexOf(QUESTIONS_END_KEY);
+
+            if (questionsChunkEndIndex == -1 || questionsChunkPreIndex == -1)
+            {
+                return;
+            }
+
+            iterateQuizInfo = quizInfo.Substring(questionsChunkPreIndex, questionsChunkEndIndex - questionsChunkPreIndex);
+
+            int preIndex;
+            int startIndex;
+            int endIndex;
+            int length;
+
+            string qStr;
+
+            int iters = 0; // prevent infinite loop if incorrect format
+
+            while (iterateQuizInfo.Contains(QUESTION_START_KEY) || iters > 10)
+            {
+                preIndex = iterateQuizInfo.IndexOf(QUESTION_START_KEY);
+                qStr = iterateQuizInfo.Substring(preIndex);
+                startIndex = qStr.IndexOf('"') + 1;
+                qStr = qStr.Substring(startIndex);
+                endIndex = qStr.IndexOf('"');
+                length = endIndex;
+                qStr = qStr.Substring(0, length);
+                newTaskInfo.TaskQuestions.Add(qStr);
+                if (m_verboseDebug) { Debug.Log("[LabLoad] Task Question: " + qStr); }
+
+                iterateQuizInfo = iterateQuizInfo.Substring(preIndex + startIndex + length);
+
+                iters++;
+            }
         }
 
         private void ParseTaskAnswers(ref string quizInfo, ref string iterateQuizInfo, ref TaskInfo newTaskInfo) {

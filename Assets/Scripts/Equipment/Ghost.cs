@@ -127,7 +127,7 @@ public class Ghost : MonoBehaviour
 
                             // Activate relevant lab
                             Cartridge cartridge = c.GetComponent<Cartridge>();
-                            GameMgr.Events.Dispatch(GameEvents.ActivateCartridge, cartridge);
+                            // GameMgr.Events.Dispatch(GameEvents.ActivateCartridge, cartridge);
                         }
                         else {
                             // Hide this ghost
@@ -158,7 +158,7 @@ public class Ghost : MonoBehaviour
                             m_occupied = false;
 
                             Cartridge cartridge = c.GetComponent<Cartridge>();
-                            GameMgr.Events.Dispatch(GameEvents.DeactivateCartridge, cartridge);
+                            // GameMgr.Events.Dispatch(GameEvents.DeactivateLab, cartridge);
                         }
                         else {
                             // Highlight active ghost if not occupied

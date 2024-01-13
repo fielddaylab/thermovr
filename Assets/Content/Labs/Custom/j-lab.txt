@@ -1,4 +1,9 @@
 || LAB-NAME: J Lab
+|| LAB-AUTHOR: John Pfotenhauer
+
+|| TOPIC
+
+|Header: "Determine the saturation temperature of H20: (constant pressure)"
 
 || TASK // Q 1
 
@@ -8,8 +13,11 @@
 |LimitInfo:
 |TargetInfo (property, value, valid-range):
 |QuizInfo: 
-	Question: "Determine the saturation temperature of H20: (constant pressure)
-	Initial pressure is 1.5e2 kPa. Apply the insulation layer and set the insulation slider to 100%. Add/remove heat until you are inside the vapor dome."
+	Initial Conditions: "Initial pressure is 1.5e2 kPa."
+	--Questions:
+	Question: "Apply the insulation layer and set the insulation slider to 100%."
+	Question: "Add/remove heat until you are inside the vapor dome."
+	Questions-->
 	Requirements: [(Region:1:0)]
 |EfficiencyInfo:
 
@@ -22,9 +30,10 @@
 |SetInfo: 
 |LimitInfo:
 |TargetInfo (property, value, valid-range):
-|QuizInfo: 
-	Question: "Determine the saturation temperature of H20: (constant pressure)
-	What is the saturation temperature of H20 when P = 1.50e2 kPa?"
+|QuizInfo:
+	--Questions:
+	Question: "What is the saturation temperature of H20 when P = 1.50e2 kPa?"
+	Questions-->
 	Answers: ["~ 3.35e2 K", "~ 3.85e2 K"(c), "~ 4.45e2 K"]
 |EfficiencyInfo:
 
@@ -37,8 +46,9 @@
 |LimitInfo:
 |TargetInfo (property, value, valid-range):
 |QuizInfo: 
-	Question: "Determine the saturation temperature of H20: (constant pressure)
-	Add/remove heat until T = 3.43e2 K (70 C)."
+	--Questions:
+	Question: "Add/remove heat until T = 3.43e2 K (70 C)."
+	Questions-->
 	Requirements: [(Temperature:343:5)]
 |EfficiencyInfo:
 
@@ -50,8 +60,9 @@
 |LimitInfo:
 |TargetInfo:
 |QuizInfo:
-	Question: "Determine the saturation temperature of H20: (constant pressure)
-	In which region are you?"
+	--Questions:
+	Question: "In which region are you?"
+	Questions-->
 	Answers: ["Subcooled Liquid"(c), "Two-phase", "Superheated Vapor"]
 |EfficiencyInfo: 
 
@@ -64,8 +75,9 @@
 |LimitInfo:
 |TargetInfo (property, value, valid-range):
 |QuizInfo: 
-	Question: "Determine the saturation temperature of H20: (constant pressure)
-	Add/remove heat until T = 4.23e2 K (150 C)."
+	--Questions:
+	Question: "Add/remove heat until T = 4.23e2 K (150 C)."
+	Questions-->
 	Requirements: [(Temperature:423:5)]
 |EfficiencyInfo:
 
@@ -77,11 +89,16 @@
 |LimitInfo:
 |TargetInfo:
 |QuizInfo:
-	Question: "Determine the saturation temperature of H20: (constant pressure)
-	In which region are you?"
+	--Questions:
+	Question: "In which region are you?"
+	Questions-->
 	Answers: ["Subcooled Liquid", "Two-phase", "Superheated Vapor"(c)]
 |EfficiencyInfo: 
 
+
+|| TOPIC
+
+|Header: "Determine the saturation pressure of H20: (constant temperature)"
 
 || TASK // Q 2
 
@@ -91,8 +108,10 @@
 |LimitInfo:
 |TargetInfo (property, value, valid-range):
 |QuizInfo: 
-	Question: "Determine the saturation pressure of H20: (constant temperature)
-	Initial temperature is 3.43e2 K. Add/remove pressure until you are inside the vapor dome."
+	Initial Conditions: "Initial temperature is 3.43e2 K."
+	--Questions:
+	Question: "Add/remove pressure until you are inside the vapor dome."
+	Questions-->
 	Requirements: [(Region:1:0)]
 |EfficiencyInfo:
 
@@ -105,8 +124,9 @@
 |LimitInfo:
 |TargetInfo (property, value, valid-range):
 |QuizInfo: 
-	Question: "Determine the saturation pressure of H20: (constant temperature)
-	What is the saturation pressure of H20 when T = 3.43e2 K (70 C)?"
+	--Questions:
+	Question: "What is the saturation pressure of H20 when T = 3.43e2 K (70 C)?"
+	Questions-->
 	Answers: ["~ 2.50e2 kPa", "~ 1.50e2 kPa", "~ 5.0e1 kPa"(c)]
 |EfficiencyInfo:
 
@@ -119,8 +139,9 @@
 |LimitInfo:
 |TargetInfo (property, value, valid-range):
 |QuizInfo: 
-	Question: "Determine the saturation pressure of H20: (constant temperature)
-	Now add/remove pressure until P = 1.01e2 kPa."
+	--Questions:
+	Question: "Now add/remove pressure until P = 1.01e2 kPa."
+	Questions-->
 	Requirements: [(Region:0:0), (Pressure:101:10)]
 |EfficiencyInfo:
 
@@ -132,8 +153,9 @@
 |LimitInfo:
 |TargetInfo:
 |QuizInfo:
-	Question: "Determine the saturation pressure of H20: (constant temperature)
-	In which region are you?"
+	--Questions:
+	Question: "In which region are you?"
+	Questions-->
 	Answers: ["Subcooled Liquid"(c), "Two-phase", "Superheated Vapor"]
 |EfficiencyInfo: 
 
@@ -145,8 +167,9 @@
 |LimitInfo:
 |TargetInfo (property, value, valid-range):
 |QuizInfo: 
-	Question: "Determine the saturation pressure of H20: (constant temperature)
-	Add/remove pressure until P = 1.0e1 kPa."
+	--Questions:
+	Question: "Add/remove pressure until P = 1.0e1 kPa."
+	Questions-->
 	Requirements: [(Region:1:0)]
 |EfficiencyInfo:
 
@@ -158,10 +181,15 @@
 |LimitInfo:
 |TargetInfo:
 |QuizInfo:
-	Question: "Determine the saturation pressure of H20: (constant temperature)
-	In which region are you?"
+	--Questions:
+	Question: "In which region are you?"
+	Questions-->
 	Answers: ["Subcooled Liquid", "Two-phase"(c), "Superheated Vapor"]
 |EfficiencyInfo: 
+
+|| TOPIC
+
+|Header: "What kind of process is this? (What remains constant?)"
 
 || TASK // Q 3a
 
@@ -171,8 +199,10 @@
 |LimitInfo:
 |TargetInfo:
 |QuizInfo:
-	Question: "What kind of process is this? (What remains constant?)
-	Initial pressure is 1.01e2 kPa, and initial volume is 1.0e-1 m^3/kg. Add insulation layer and set its value to 100%. Add mass until P = 8.8e2 kPa."
+	Initial Conditions: "Initial pressure is 1.01e2 kPa, and initial volume is 1.0e-1 m^3/kg."
+	--Questions:
+	Question: "Add insulation layer and set its value to 100%. Add mass until P = 8.8e2 kPa."
+	Questions-->
 	Requirements: [(Pressure:880:1)]
 |EfficiencyInfo: 
 
@@ -185,8 +215,9 @@
 |LimitInfo:
 |TargetInfo:
 |QuizInfo:
-	Question: "What kind of process is this? (What remains constant?)
-	In which region are you?"
+	--Questions:
+	Question: "In which region are you?"
+	Questions-->
 	Answers: ["Subcooled Liquid"(c), "Two-phase", "Superheated Vapor"]
 |EfficiencyInfo: 
 
@@ -198,11 +229,16 @@
 |LimitInfo:
 |TargetInfo:
 |QuizInfo:
-	Question: "What kind of process is this? (What remains constant?)
-	What type of thermodynamic path did you use in this process?"
+	--Questions:
+	Question: "What type of thermodynamic path did you use in this process?"
+	Questions-->
 	Answers: ["constant pressure", "constant volume", "constant temperature", "constant entropy"(c), "constant enthalpy"]
 |EfficiencyInfo: 
 
+
+|| TOPIC
+
+|Header: "Q 3b"
 
 || TASK // Q 3b
 
@@ -212,8 +248,9 @@
 |LimitInfo:
 |TargetInfo:
 |QuizInfo:
-	Question: "What kind of process is this? (What remains constant?)
-	Bring the pressure to 1.01e2 kPa and temperature to 4.50e2 K."
+	--Questions:
+	Question: "Bring the pressure to 1.01e2 kPa and temperature to 4.50e2 K."
+	Questions-->
 	Requirements: [(Pressure:101:1), (Temperature:450:2)]
 |EfficiencyInfo: 
 
@@ -226,8 +263,9 @@
 |LimitInfo:
 |TargetInfo:
 |QuizInfo:
-	Question: "What kind of process is this? (What remains constant?)
-	In which region are you?"
+	--Questions:
+	Question: "In which region are you?"
+	Questions-->
 	Answers: ["Subcooled Liquid", "Two-phase", "Superheated Vapor"(c)] 
 |EfficiencyInfo: 
 
@@ -240,8 +278,10 @@
 |LimitInfo:
 |TargetInfo:
 |QuizInfo:
-	Question: "What kind of process is this? (What remains constant?)
-	Add insulation layer, set insulation value at 100%. Add mass to top of piston and increase maass until pressure = 8.8e2 kPa."
+	--Questions:
+	Question: "Add insulation layer, set insulation value at 100%."
+	Question: "Add mass to top of piston and increase maass until pressure = 8.8e2 kPa."
+	Questions-->
 	Requirements: [(Pressure:880:1)]
 |EfficiencyInfo: 
 
@@ -253,10 +293,15 @@
 |LimitInfo:
 |TargetInfo:
 |QuizInfo:
-	Question: "What kind of process is this? (What remains constant?)
-	What type of thermodynamic path did you use in this process?"
+	--Questions:
+	Question: "What type of thermodynamic path did you use in this process?"
+	Questions-->
 	Answers: ["constant pressure", "constant volume", "constant temperature", "constant entropy"(c), "constant enthalpy"]
 |EfficiencyInfo: 
+
+|| TOPIC
+
+|Header: "Combined processes: constant P, constant V"
 
 || TASK // Q 4b
 
@@ -266,8 +311,12 @@
 |LimitInfo:
 |TargetInfo:
 |QuizInfo:
-	Question: "Combined processes: constant P, constant V
-	Initial pressure is 1.01e2 kPa, initial temperature is 2.93e2 K. Attach the insulation layer and set insulation to 100%. Set the upper volume stop to 3.0e-1 m^3/kg. Apply the Bunsen burner until the piston just hits the stop, v = 3.0e-1 m^3/kg."
+	Initial Conditions: "Initial pressure is 1.01e2 kPa, initial temperature is 2.93e2 K."
+	--Questions:
+	Question: "Attach the insulation layer and set insulation to 100%."
+	Question: "Set the upper volume stop to 3.0e-1 m^3/kg."
+	Question: "Apply the Bunsen burner until the piston just hits the stop, v = 3.0e-1 m^3/kg."
+	Questions-->
 	Requirements: [(Volume:0.3:0.05)]
 |EfficiencyInfo: 
 
@@ -280,8 +329,9 @@
 |LimitInfo:
 |TargetInfo:
 |QuizInfo:
-	Question: "Combined processes: constant P, constant V
-	Continue to add heat until P = 2.00e2 kPa."
+	--Questions:
+	Question: "Continue to add heat until P = 2.00e2 kPa."
+	Questions-->
 	Requirements: [(Pressure:200:1)]
 |EfficiencyInfo: 
 
@@ -293,8 +343,9 @@
 |LimitInfo:
 |TargetInfo:
 |QuizInfo:
-	Question: "Combined processes: constant P, constant V
-	What is the final temperature?"
+	--Questions:
+	Question: "What is the final temperature?"
+	Questions-->
 	Answers: ["~ 3.53e2 K", "~ 3.73e2 K", "~ 3.93e2 K"(c)]
 |EfficiencyInfo: 
 
@@ -307,8 +358,10 @@
 |LimitInfo:
 |TargetInfo:
 |QuizInfo:
-	Question: "Combined processes: constant P, constant V
-	Set the lower volume stop to 1.0e-1 m^3/kg. Apply the cooling coil until the piston just hits the stop, v = 2.0e-1 m^3/kg."
+	--Questions:
+	Question: "Set the lower volume stop to 1.0e-1 m^3/kg."
+	Question: "Apply the cooling coil until the piston just hits the stop, v = 2.0e-1 m^3/kg."
+	Questions-->
 	Requirements: [(Volume:0.1:0.05)]
 |EfficiencyInfo: 
 
@@ -320,8 +373,9 @@
 |LimitInfo:
 |TargetInfo:
 |QuizInfo:
-	Question: "Combined processes: constant P, constant V
-	Continue to add cooling until P = 4.0e1 kPa."
+	--Questions:
+	Question: "Continue to add cooling until P = 4.0e1 kPa."
+	Questions-->
 	Requirements: [(Pressure:40:0.1)]
 |EfficiencyInfo: 
 
@@ -333,12 +387,10 @@
 |LimitInfo:
 |TargetInfo:
 |QuizInfo:
-	Question: "Combined processes: constant P, constant V
-	What is the final temperature?"
+	--Questions:
+	Question: "What is the final temperature?"
+	Questions-->
 	Answers: ["~ 3.49e2 K"(c), "~ 3.69e2 K", "~ 3.89e2 K"]
 |EfficiencyInfo: 
 
 || END
-
-
-

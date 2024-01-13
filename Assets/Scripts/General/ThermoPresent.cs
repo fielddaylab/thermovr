@@ -65,6 +65,14 @@ public class ThermoPresent : MonoBehaviour
 
     public float size_p;
 
+    private double pressure_range;
+    private double temperature_range;
+    private double volume_range;
+    private double internal_energy_range;
+    private double enthalpy_range;
+    private double entropy_range;
+    private double quality_range;
+
     void Awake() {
         ThermoMath.Init();
         state = this.GetComponent<ThermoState>();
@@ -78,6 +86,14 @@ public class ThermoPresent : MonoBehaviour
         //(these are just used to detect editor deltas on a frame boundary)
         sample_lbase_prev = sample_lbase;
         plot_lbase_prev = plot_lbase;
+
+        pressure_range = ThermoMath.p_max - ThermoMath.p_min;
+        temperature_range = ThermoMath.t_max - ThermoMath.t_min;
+        volume_range = ThermoMath.v_max - ThermoMath.v_min;
+        internal_energy_range = 3670000f;
+        enthalpy_range = 4130000f;
+        entropy_range = 11500f;
+        quality_range = 1;
 
         findObjects();
         genMesh();
@@ -832,9 +848,10 @@ public class ThermoPresent : MonoBehaviour
 
     private void Start() {
         string update_text = "";
-        update_text = "region: " + region_to_name(state.region); DispatchText(update_text, "", VarID.Region);
-        if (state.region == 1) { update_text = string.Format("x: {0:0.000}", (float)(state.quality * 100f)); DispatchText(update_text, Units.Quality, VarID.Quality); }
-        else { update_text = "x: Undefined"; DispatchText(update_text, "", VarID.Quality); }
+        update_text = "region: " + region_to_name(state.region); DispatchText(update_text, "", state.region / 2.0f, VarID.Region);
+        if (state.region == 1) { update_text = string.Format("x: {0:0.000}", (float)(state.quality * 100f)); DispatchText(update_text, Units.Quality, state.quality / quality_range, VarID.Quality); }
+        else if (state.region == 0) { update_text = "x: Undefined"; DispatchText(update_text, "", 0, VarID.Quality); }
+        else { update_text = "x: Undefined"; DispatchText(update_text, "", 1, VarID.Quality); }
     }
 
     // Update is called once per frame
@@ -847,24 +864,25 @@ public class ThermoPresent : MonoBehaviour
         if (modified) genMesh();
 
         string update_text = "";
-        if (Math.Abs(state.pressure - state.prev_pressure) > ThermoMath.p_smallstep) { update_text = string.Format("P: " + DigitFormat.Pressure, (float)state.pressure / 1000f); DispatchText(update_text, Units.Pressure, VarID.Pressure); }
-        if (Math.Abs(state.temperature - state.prev_temperature) > ThermoMath.t_smallstep) { update_text = string.Format("T: " + DigitFormat.TemperatureK + "    " + Units.TemperatureK + "  ({1:0.00} " + Units.TemperatureC + ")", (float)state.temperature, (float)state.temperature - 273.15f); DispatchText(update_text, "", VarID.Temperature); }
-        if (Math.Abs(state.volume - state.prev_volume) > ThermoMath.v_smallstep) { update_text = string.Format("v: " + DigitFormat.Volume, (float)state.volume); DispatchText(update_text, Units.Volume, VarID.Volume); }
-        if (Math.Abs(state.internalenergy - state.prev_internalenergy) > ThermoMath.u_smallstep) { update_text = string.Format("u: " + DigitFormat.InternalEnergy, (float)state.internalenergy / 1000f); DispatchText(update_text, Units.InternalEnergy, VarID.InternalEnergy); }
-        if (Math.Abs(state.entropy - state.prev_entropy) > ThermoMath.s_smallstep) { update_text = string.Format("s: " + DigitFormat.Entropy, (float)state.entropy / 1000f); DispatchText(update_text, Units.Entropy, VarID.Entropy); }
-        if (Math.Abs(state.enthalpy - state.prev_enthalpy) > ThermoMath.h_smallstep) { update_text = string.Format("h: " + DigitFormat.Enthalpy, (float)state.enthalpy / 1000f); DispatchText(update_text, Units.Enthalpy, VarID.Enthalpy); }
-        if (state.region == 1 && Math.Abs(state.quality - state.prev_quality) > ThermoMath.x_smallstep) { update_text = string.Format("x: " + DigitFormat.Quality, (float)(state.quality * 100f)); DispatchText(update_text, Units.Quality, VarID.Quality); }
+        if (Math.Abs(state.pressure - state.prev_pressure) > ThermoMath.p_smallstep) { update_text = string.Format("P: " + DigitFormat.Pressure, (float)state.pressure / 1000f); DispatchText(update_text, Units.Pressure, (state.pressure - ThermoMath.p_min) / pressure_range, VarID.Pressure); }
+        if (Math.Abs(state.temperature - state.prev_temperature) > ThermoMath.t_smallstep) { update_text = string.Format("T: " + DigitFormat.TemperatureK + "    " + Units.TemperatureK + "  ({1:0.00} " + Units.TemperatureC + ")", (float)state.temperature, (float)state.temperature - 273.15f); DispatchText(update_text, "", (state.temperature - ThermoMath.t_min) / temperature_range, VarID.Temperature); }
+        if (Math.Abs(state.volume - state.prev_volume) > ThermoMath.v_smallstep) { update_text = string.Format("v: " + DigitFormat.Volume, (float)state.volume); DispatchText(update_text, Units.Volume, (state.volume - ThermoMath.v_min) / volume_range, VarID.Volume); }
+        if (Math.Abs(state.internalenergy - state.prev_internalenergy) > ThermoMath.u_smallstep) { update_text = string.Format("u: " + DigitFormat.InternalEnergy, (float)state.internalenergy / 1000f); DispatchText(update_text, Units.InternalEnergy, state.internalenergy / internal_energy_range, VarID.InternalEnergy); }
+        if (Math.Abs(state.entropy - state.prev_entropy) > ThermoMath.s_smallstep) { update_text = string.Format("s: " + DigitFormat.Entropy, (float)state.entropy / 1000f); DispatchText(update_text, Units.Entropy, state.entropy / entropy_range, VarID.Entropy); }
+        if (Math.Abs(state.enthalpy - state.prev_enthalpy) > ThermoMath.h_smallstep) { update_text = string.Format("h: " + DigitFormat.Enthalpy, (float)state.enthalpy / 1000f); DispatchText(update_text, Units.Enthalpy, state.enthalpy / enthalpy_range, VarID.Enthalpy); }
+        if (state.region == 1 && Math.Abs(state.quality - state.prev_quality) > ThermoMath.x_smallstep) { update_text = string.Format("x: " + DigitFormat.Quality, (float)(state.quality * 100f)); DispatchText(update_text, Units.Quality, state.quality / quality_range, VarID.Quality); }
         if (true /*state.region != state.prev_region*/) {
-            update_text = "Region: " + region_to_name(state.region); DispatchText(update_text, "", VarID.Region);
-            if (state.region == 1) { update_text = string.Format("x: " + DigitFormat.Quality, (float)(state.quality * 100f)); DispatchText(update_text, Units.Quality, VarID.Quality); }
-            else { update_text = "x: Undefined"; DispatchText(update_text, "", VarID.Quality); }
+            update_text = "Region: " + region_to_name(state.region); DispatchText(update_text, "", state.region / 2.0f, VarID.Region);
+            if (state.region == 1) { update_text = string.Format("x: " + DigitFormat.Quality, (float)(state.quality * 100f)); DispatchText(update_text, Units.Quality, state.quality / quality_range, VarID.Quality); }
+            else if (state.region == 0) { update_text = "x: Undefined"; DispatchText(update_text, "", 0, VarID.Quality); }
+            else { update_text = "x: Undefined"; DispatchText(update_text, "", 1, VarID.Quality); }
         }
 
         state.stamp_prev();
     }
 
-    private void DispatchText(string update_text, string units, VarID varId) {
-        GameMgr.Events.Dispatch(GameEvents.UpdateVarText, new VarUpdate(varId, update_text, units));
+    private void DispatchText(string update_text, string units, double proportion, VarID varId) {
+        GameMgr.Events.Dispatch(GameEvents.UpdateVarText, new VarUpdate(varId, update_text, units, (float)proportion));
     }
 
 }
