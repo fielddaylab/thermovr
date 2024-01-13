@@ -36,6 +36,8 @@ namespace ThermoVR
 
         private List<Pressable> m_tabButtons;
 
+        private UIID m_currID;
+
         public void Init() {
             // Add buttons to list
             m_tabButtons = new List<Pressable> {
@@ -50,6 +52,8 @@ namespace ThermoVR
             m_labModeButton.OnPress += HandleQuizTabPress;
             m_graphTabButton.OnPress += HandleGraphTabPress;
             m_resetButton.OnPress += HandleResetPress;
+
+            m_currID = UIID.Sandbox;
 
             HidePullout();
         }
@@ -69,6 +73,9 @@ namespace ThermoVR
         private void HandleSandboxTabPress(object sender, EventArgs args) {
             PlayClick(m_sandboxTabButton);
 
+            if (m_currID == UIID.Sandbox) { return; }
+            m_currID = UIID.Sandbox;
+
             // Open Sandbox UI
             m_hub.OpenUI(UIID.Sandbox);
 
@@ -78,15 +85,20 @@ namespace ThermoVR
         private void HandleQuizTabPress(object sender, EventArgs args) {
             PlayClick(m_labModeButton);
 
+            if (m_currID == UIID.Lab) { return; }
+            m_currID = UIID.Lab;
+
             // Open Quiz UI
             m_hub.OpenUI(UIID.Lab);
 
             ShowPullout();
-
         }
 
         private void HandleGraphTabPress(object sender, EventArgs args) {
             PlayClick(m_graphTabButton);
+
+            if (m_currID == UIID.Graph) { return; }
+            m_currID = UIID.Graph;
 
             // Open Graph UI
             m_hub.OpenUI(UIID.Graph);
