@@ -79,11 +79,11 @@ namespace ThermoVR.Lab
         }
 
         public override void Open() {
+            // clear previous tabs
+            Close();
+
             base.Open();
 
-            if (!m_labIsActive) {
-                return;
-            }
             m_tabs.Clear();
             m_frames.Clear();
 
@@ -144,6 +144,9 @@ namespace ThermoVR.Lab
                     {
                         newTab.RegisterFrame(newFrame);
                     }
+
+                    // tabs start hidden
+                    DeactivateTopicTab(topicIndex);
                 }
             }
 
