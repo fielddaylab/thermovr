@@ -51,6 +51,8 @@ MonoBehaviour:
   m_labModeButton: {fileID: 4090263682583273797}
   m_graphTabButton: {fileID: 5337745394441629169}
   m_resetButton: {fileID: 3039919479871027695}
+  m_pulloutReadoutModel: {fileID: 3968748780484151135}
+  m_pulloutReadoutScreen: {fileID: 3342380733410299714}
 --- !u!1 &589305813407869420
 GameObject:
   m_ObjectHideFlags: 0
@@ -945,6 +947,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 500aa4ef66adce243a6175c400d2636c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &3342380733410299714 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5718549406875405956, guid: 2b0afc7fcd7b1f949a2d2ec117349236,
+    type: 3}
+  m_PrefabInstance: {fileID: 7007279904078397894}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &8551985416623938443
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1428,6 +1436,12 @@ MonoBehaviour:
 --- !u!4 &3732383622469062860 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -4223577877591766201, guid: 8d30df8bb674ad54eb0273bcaa632255,
+    type: 3}
+  m_PrefabInstance: {fileID: 8551985416623938443}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &3968748780484151135 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4736962793246629076, guid: 8d30df8bb674ad54eb0273bcaa632255,
     type: 3}
   m_PrefabInstance: {fileID: 8551985416623938443}
   m_PrefabAsset: {fileID: 0}

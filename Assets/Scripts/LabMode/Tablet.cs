@@ -29,6 +29,11 @@ namespace ThermoVR
         [Header("Functions")]
         [SerializeField] private Pressable m_resetButton;
 
+        [Space(5)]
+        [Header("Pullout Readout")]
+        [SerializeField] private GameObject m_pulloutReadoutModel;
+        [SerializeField] private GameObject m_pulloutReadoutScreen;
+
         private List<Pressable> m_tabButtons;
 
         public void Init() {
@@ -46,6 +51,7 @@ namespace ThermoVR
             m_graphTabButton.OnPress += HandleGraphTabPress;
             m_resetButton.OnPress += HandleResetPress;
 
+            HidePullout();
         }
 
         #region World Interactions
@@ -65,6 +71,8 @@ namespace ThermoVR
 
             // Open Sandbox UI
             m_hub.OpenUI(UIID.Sandbox);
+
+            HidePullout();
         }
 
         private void HandleQuizTabPress(object sender, EventArgs args) {
@@ -72,6 +80,9 @@ namespace ThermoVR
 
             // Open Quiz UI
             m_hub.OpenUI(UIID.Lab);
+
+            ShowPullout();
+
         }
 
         private void HandleGraphTabPress(object sender, EventArgs args) {
@@ -79,6 +90,8 @@ namespace ThermoVR
 
             // Open Graph UI
             m_hub.OpenUI(UIID.Graph);
+
+            ShowPullout();
         }
 
         private void HandleResetPress(object sender, EventArgs args)
@@ -91,5 +104,17 @@ namespace ThermoVR
         }
 
         #endregion // Handlers
+
+        private void ShowPullout()
+        {
+            m_pulloutReadoutModel.SetActive(true);
+            m_pulloutReadoutScreen.SetActive(true);
+        }
+
+        private void HidePullout()
+        {
+            m_pulloutReadoutModel.SetActive(false);
+            m_pulloutReadoutScreen.SetActive(false);
+        }
     }
 }
