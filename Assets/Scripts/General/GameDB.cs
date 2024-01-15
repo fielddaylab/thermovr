@@ -16,6 +16,8 @@ public class GameDB : MonoBehaviour
     public Sprite SocketEmpty;
     public Sprite Correct, Incorrect, Missed;
 
+    public Sprite ReachStateIncomplete, ReachStateComplete;
+
     public Color TabSelectedColor, TabDefaultColor;
 
     private void Awake() {

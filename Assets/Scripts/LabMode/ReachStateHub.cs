@@ -67,7 +67,7 @@ namespace ThermoVR.Lab
                 transform.localPosition += new Vector3(0, -1.3f * i, 0);
             }
 
-            m_completionState.sprite = GameDB.Instance.SocketEmpty;
+            m_completionState.sprite = GameDB.Instance.ReachStateIncomplete;
         }
 
         public override bool AnswerSelected() {
@@ -81,7 +81,7 @@ namespace ThermoVR.Lab
             }
 
             if (correct) {
-                m_completionState.sprite = GameDB.Instance.Correct;
+                m_completionState.sprite = GameDB.Instance.ReachStateComplete;
 
                 m_evaluated = true;
             }

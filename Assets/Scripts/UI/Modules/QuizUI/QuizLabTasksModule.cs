@@ -132,9 +132,11 @@ namespace ThermoVR.Lab
                     newTab.Button.SetText("Task " + (taskIndex + 1));
                     int currTabIndex = taskIndex;
                     int currTopicIndex = topicIndex;
+                    newTab.HideCompletionSprite();
                     newTab.Button.OnButtonPressed += delegate { HandleLabTabPressed(currTopicIndex, currTabIndex); };
 
                     LabTaskFrame newFrame = PopulateLabTaskFrame(m_currLab.Topics[topicIndex].Tasks[currTabIndex], currTopicIndex);
+                    // m_frames[topicIndex].Add(newFrame);
 
                     RectTransform tabRect = newTabObj.GetComponent<RectTransform>();
                     float tabBuffer = m_xSpacing - tabRect.sizeDelta.x * tabRect.localScale.x;
@@ -173,6 +175,7 @@ namespace ThermoVR.Lab
                 for (int j = 0; j < m_tabs[i].TaskTabs.Count; j++) {
                     Destroy(m_tabs[i].TaskTabs[j].gameObject);
                 }
+                Destroy(m_tabs[i].gameObject);
             }
             m_tabs.Clear();
 
