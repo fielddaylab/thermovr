@@ -272,8 +272,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2561429150387138394, guid: 948c9d963642c6e478aa25174a356344,
         type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2561429150387138394, guid: 948c9d963642c6e478aa25174a356344,
+        type: 3}
       propertyPath: m_SizeDelta.x
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2561429150387138394, guid: 948c9d963642c6e478aa25174a356344,
+        type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 60
       objectReference: {fileID: 0}
     - target: {fileID: 2561429150387138394, guid: 948c9d963642c6e478aa25174a356344,
         type: 3}
@@ -284,6 +294,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_AnchoredPosition.x
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2561429150387138394, guid: 948c9d963642c6e478aa25174a356344,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -30
       objectReference: {fileID: 0}
     - target: {fileID: 8110500313337203388, guid: 948c9d963642c6e478aa25174a356344,
         type: 3}
@@ -313,6 +328,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 948c9d963642c6e478aa25174a356344, type: 3}
+--- !u!114 &1971586817934305230 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8110500313337203388, guid: 948c9d963642c6e478aa25174a356344,
+    type: 3}
+  m_PrefabInstance: {fileID: 7769328191570292082}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7652221900659321091}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &7025824411292246952 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 743811646755835610, guid: 948c9d963642c6e478aa25174a356344,
@@ -345,6 +372,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_thermoButton: {fileID: 7025824411292246952}
   m_completionSocket: {fileID: 6288379221725422679}
+  ButtonImage: {fileID: 1971586817934305230}
+  ButtonRect: {fileID: 8837746287013790168}
 --- !u!224 &8837746287013790168 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 1258696447034240170, guid: 948c9d963642c6e478aa25174a356344,

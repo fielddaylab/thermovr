@@ -13,7 +13,10 @@ namespace ThermoVR.Lab
         [SerializeField] private ThermoButton m_thermoButton;
         [SerializeField] private Image m_completionSocket;
 
-        public LabTaskFrame m_taskFrame;
+        public Image ButtonImage;
+        public RectTransform ButtonRect;
+
+        private LabTaskFrame m_taskFrame;
 
         public ThermoButton Button {
             get { return m_thermoButton; }
