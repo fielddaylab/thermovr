@@ -51,6 +51,11 @@ namespace ThermoVR.UI
             OnButtonPressed = null;
         }
 
+        public void SetInteractable(bool interactable)
+        {
+            m_button.interactable = interactable;
+        }
+
         #region Handlers
 
         private void HandlePress(object sender, EventArgs args) {

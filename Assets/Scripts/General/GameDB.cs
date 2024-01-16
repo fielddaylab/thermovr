@@ -21,6 +21,7 @@ public class GameDB : MonoBehaviour
     public Sprite LabTopicTabInactive, LabTopicTabActive;
 
     public Color TabSelectedColor, TabDefaultColor;
+    public Color MCSelectedBG, MCUnselectedBG, MCIncorrectBG;
 
     private void Awake() {
         Instance = this;

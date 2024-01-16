@@ -16,10 +16,31 @@ namespace ThermoVR.Lab
 
         private void OnEnable() {
             TaskResetButton.OnButtonPressed += HandleResetPressed;
+
+            UpdateResetButtonState();
         }
 
         private void OnDisable() {
             TaskResetButton.OnButtonPressed -= HandleResetPressed;
+        }
+
+        private void Update()
+        {
+            UpdateResetButtonState();
+        }
+
+        private void UpdateResetButtonState()
+        {
+            bool anyEvaluated = false;
+            foreach (var evaluable in m_evaluables)
+            {
+                if (evaluable.HasBeenEvaluated())
+                {
+                    anyEvaluated = true;
+                }
+            }
+
+            TaskResetButton.gameObject.SetActive(anyEvaluated);
         }
 
         public Evaluable[] GetEvaluables() {

@@ -25,7 +25,7 @@ namespace ThermoVR.Lab
         private void OnEnable() {
             if (!m_constantCheck) {
                 m_submitButton.OnButtonPressed += HandleSubmitPressed;
-
+                m_submitButton.SetInteractable(false);
             }
         }
 
@@ -55,6 +55,17 @@ namespace ThermoVR.Lab
                     }
                 }
             }
+
+            bool allSelected = true;
+            for (int i = 0; i < m_toEvaluate.Length; i++)
+            {
+                if (!m_toEvaluate[i].AnswerSelected())
+                {
+                    allSelected = false;
+                }
+            }
+
+            m_submitButton.SetInteractable(allSelected);
         }
 
         private void HandleSubmitPressed(object sender, EventArgs args) {

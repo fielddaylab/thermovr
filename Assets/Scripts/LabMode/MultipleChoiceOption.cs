@@ -16,6 +16,8 @@ namespace ThermoVR
         [SerializeField] private ThermoButton m_button;
         [SerializeField] private TMP_Text m_optionText;
         [SerializeField] private Image m_fill; // fill in bubble
+        [SerializeField] private Graphic m_bg; // background rect
+        [SerializeField] private Graphic m_thermoBtnImg;
 
         private uint m_choiceID; // unique identifier used for determining correct answer
 
@@ -45,21 +47,30 @@ namespace ThermoVR
 
         public void SetSelected(bool selected) {
             m_fill.enabled = selected;
+            m_bg.color = selected ? GameDB.Instance.MCSelectedBG : GameDB.Instance.MCUnselectedBG;
         }
 
         public void SetEvaluatedState(EvalState state) { // black, green, or red img depending on evaluation state
             switch (state) {
                 case EvalState.Pending:
                     m_fill.sprite = GameDB.Instance?.MCFill;
+                    m_bg.color = GameDB.Instance.MCSelectedBG;
+                    m_thermoBtnImg.enabled = true;
                     break;
                 case EvalState.Correct:
                     m_fill.sprite = GameDB.Instance?.Correct;
+                    m_bg.color = GameDB.Instance.MCSelectedBG;
+                    m_thermoBtnImg.enabled = false;
                     break;
                 case EvalState.Incorrect:
                     m_fill.sprite = GameDB.Instance?.Incorrect;
+                    m_bg.color = GameDB.Instance.MCIncorrectBG;
+                    m_thermoBtnImg.enabled = false;
                     break;
                 case EvalState.Missed:
                     m_fill.sprite = GameDB.Instance?.Missed;
+                    m_bg.color = GameDB.Instance.MCIncorrectBG;
+                    m_thermoBtnImg.enabled = false;
                     break;
                 default:
                     break;
