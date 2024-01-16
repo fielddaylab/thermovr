@@ -13,6 +13,9 @@ namespace ThermoVR.Lab
         [SerializeField] private ThermoButton m_thermoButton;
         [SerializeField] private Image m_completionSocket;
 
+        public Image ButtonImage;
+        public RectTransform ButtonRect;
+
         private LabTaskFrame m_taskFrame;
 
         public ThermoButton Button {
@@ -26,11 +29,33 @@ namespace ThermoVR.Lab
             }
         }
 
+        public void OnEnable()
+        {
+            if (m_taskFrame != null)
+            {
+                m_taskFrame.AnswerEvaluator.OnEvaluationUpdated -= HandleEvalUpdate;
+                m_taskFrame.TaskResetButton.OnButtonPressed -= HandleFrameReset;
+
+                m_taskFrame.AnswerEvaluator.OnEvaluationUpdated += HandleEvalUpdate;
+                m_taskFrame.TaskResetButton.OnButtonPressed += HandleFrameReset;
+            }
+        }
+
         public void RegisterFrame(LabTaskFrame frame) {
             m_taskFrame = frame;
 
             m_taskFrame.AnswerEvaluator.OnEvaluationUpdated += HandleEvalUpdate;
             m_taskFrame.TaskResetButton.OnButtonPressed += HandleFrameReset;
+        }
+
+        public void ShowCompletionSprite()
+        {
+            m_completionSocket.enabled = true;
+        }
+
+        public void HideCompletionSprite()
+        {
+            m_completionSocket.enabled = false;
         }
 
         public void SetSocketSprite(Sprite newSprite) {
@@ -40,15 +65,15 @@ namespace ThermoVR.Lab
 
         private void HandleEvalUpdate(object sender, BoolEventArgs args) {
             if (args.Value) {
-                SetSocketSprite(GameDB.Instance.Correct);
+                ShowCompletionSprite();
             }
             else {
-                SetSocketSprite(GameDB.Instance.Incorrect);
+                HideCompletionSprite();
             }
         }
 
         private void HandleFrameReset(object sender, EventArgs args) {
-            SetSocketSprite(GameDB.Instance.SocketEmpty);
+            HideCompletionSprite();
         }
     }
 }

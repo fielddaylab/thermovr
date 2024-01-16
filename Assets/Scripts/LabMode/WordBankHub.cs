@@ -28,7 +28,7 @@ namespace ThermoVR.Lab
         [SerializeField] private TMP_Text m_initText;
         // [SerializeField] private TMP_Text m_questionText;
         [SerializeField] private TMP_Text m_answerText;
-        [SerializeField] private Image m_answerBG;
+        [SerializeField] private Graphic m_answerBG;
         [SerializeField] private ThermoButton m_chooseButton;
         [SerializeField] private bool m_randomOrder = false;
 

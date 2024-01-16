@@ -13,6 +13,7 @@ namespace ThermoVR.Lab
         public List<LabTab> TaskTabs;
 
         [SerializeField] private ThermoButton m_thermoButton;
+        public Image ButtonImage;
 
         public LabTopicTab()
         {

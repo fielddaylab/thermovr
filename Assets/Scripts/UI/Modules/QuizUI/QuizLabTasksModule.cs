@@ -132,9 +132,11 @@ namespace ThermoVR.Lab
                     newTab.Button.SetText("Task " + (taskIndex + 1));
                     int currTabIndex = taskIndex;
                     int currTopicIndex = topicIndex;
+                    newTab.HideCompletionSprite();
                     newTab.Button.OnButtonPressed += delegate { HandleLabTabPressed(currTopicIndex, currTabIndex); };
 
                     LabTaskFrame newFrame = PopulateLabTaskFrame(m_currLab.Topics[topicIndex].Tasks[currTabIndex], currTopicIndex);
+                    // m_frames[topicIndex].Add(newFrame);
 
                     RectTransform tabRect = newTabObj.GetComponent<RectTransform>();
                     float tabBuffer = m_xSpacing - tabRect.sizeDelta.x * tabRect.localScale.x;
@@ -173,6 +175,7 @@ namespace ThermoVR.Lab
                 for (int j = 0; j < m_tabs[i].TaskTabs.Count; j++) {
                     Destroy(m_tabs[i].TaskTabs[j].gameObject);
                 }
+                Destroy(m_tabs[i].gameObject);
             }
             m_tabs.Clear();
 
@@ -414,7 +417,10 @@ namespace ThermoVR.Lab
             // TODO: highlight active tab
 
             m_frames[topicIndex][taskIndex].gameObject.SetActive(true);
-            m_tabs[topicIndex].TaskTabs[taskIndex].Button.SetColor(GameDB.Instance.TabSelectedColor);
+
+            m_tabs[topicIndex].TaskTabs[taskIndex].ButtonImage.sprite = GameDB.Instance.LabTaskTabActive;
+            m_tabs[topicIndex].TaskTabs[taskIndex].ButtonRect.sizeDelta = new Vector2(m_tabs[topicIndex].TaskTabs[taskIndex].ButtonRect.sizeDelta.x, TAB_HEIGHT_ACTIVE);
+
             ApplyWorldMods(m_currLab.Topics[topicIndex].Tasks[taskIndex]);
         }
 
@@ -423,7 +429,10 @@ namespace ThermoVR.Lab
             // TODO: un-highlight prev active tab
 
             m_frames[topicIndex][taskIndex].gameObject.SetActive(false);
-            m_tabs[topicIndex].TaskTabs[taskIndex].Button.SetColor(GameDB.Instance.TabDefaultColor);
+
+            m_tabs[topicIndex].TaskTabs[taskIndex].ButtonImage.sprite = GameDB.Instance.LabTaskTabInactive;
+            m_tabs[topicIndex].TaskTabs[taskIndex].ButtonRect.sizeDelta = new Vector2(m_tabs[topicIndex].TaskTabs[taskIndex].ButtonRect.sizeDelta.x, TAB_HEIGHT_INACTIVE);
+
         }
 
         private void ActivateTopicTab(int topicIndex)
@@ -437,7 +446,11 @@ namespace ThermoVR.Lab
             }
 
             m_frames[topicIndex][0].gameObject.SetActive(true);
-            m_tabs[topicIndex].TaskTabs[0].Button.SetColor(GameDB.Instance.TabSelectedColor);
+
+            m_tabs[topicIndex].ButtonImage.sprite = GameDB.Instance.LabTopicTabActive;
+            m_tabs[topicIndex].ButtonImage.SetNativeSize();
+            m_tabs[topicIndex].TaskTabs[0].ButtonImage.sprite = GameDB.Instance.LabTaskTabActive;
+            m_tabs[topicIndex].TaskTabs[0].ButtonRect.sizeDelta = new Vector2(m_tabs[topicIndex].TaskTabs[0].ButtonRect.sizeDelta.x, TAB_HEIGHT_ACTIVE);
 
             m_ScrollHorizontalContainer.localPosition = new Vector3(m_HorizontalScrollOrigin, m_ScrollHorizontalContainer.localPosition.y, m_ScrollHorizontalContainer.localPosition.z);
 
@@ -453,8 +466,13 @@ namespace ThermoVR.Lab
             {
                 m_frames[topicIndex][i].gameObject.SetActive(false);
                 m_tabs[topicIndex].TaskTabs[i].gameObject.SetActive(false);
-                m_tabs[topicIndex].TaskTabs[i].Button.SetColor(GameDB.Instance.TabDefaultColor);
+
+                m_tabs[topicIndex].TaskTabs[i].ButtonImage.sprite = GameDB.Instance.LabTaskTabInactive;
+                m_tabs[topicIndex].TaskTabs[i].ButtonRect.sizeDelta = new Vector2(m_tabs[topicIndex].TaskTabs[i].ButtonRect.sizeDelta.x, TAB_HEIGHT_INACTIVE);
             }
+
+            m_tabs[topicIndex].ButtonImage.sprite = GameDB.Instance.LabTopicTabInactive;
+            m_tabs[topicIndex].ButtonImage.SetNativeSize();
         }
     }
 
