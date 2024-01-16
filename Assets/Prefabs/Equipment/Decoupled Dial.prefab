@@ -885,6 +885,9 @@ MonoBehaviour:
   min_pos: {fileID: 7546416110445245067}
   textv: {fileID: 6030497067206319096}
   meter: {fileID: 2136752545258839447}
+  nudgeUpBtn: {fileID: 7657833560794868434}
+  nudgeDownBtn: {fileID: 5383032121643572665}
+  nudgeAmt: 0.01
   response_power: 1
   default_val: 0
   m_effect_map: []
@@ -1314,3 +1317,27 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 677857812284668249}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &5383032121643572665 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4889892314780427488, guid: 214a02dd1b6efa843bcc350f79f9c5d7,
+    type: 3}
+  m_PrefabInstance: {fileID: 677857812284668249}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: afd6f79acab78f847a707c9fa9d91272, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &7657833560794868434 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7146697050582504331, guid: 214a02dd1b6efa843bcc350f79f9c5d7,
+    type: 3}
+  m_PrefabInstance: {fileID: 677857812284668249}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: afd6f79acab78f847a707c9fa9d91272, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

@@ -63,6 +63,10 @@ namespace ThermoVR.Dials
         public TextMeshPro textv;
         [SerializeField] private GameObject meter; // (Knob)
 
+        [SerializeField] private Pressable nudgeUpBtn;
+        [SerializeField] private Pressable nudgeDownBtn;
+        [SerializeField] private float nudgeAmt = 0.05f;
+
         // [SerializeField] private CollisionRange interactableRange;
 
         [System.NonSerialized]
@@ -134,6 +138,9 @@ namespace ThermoVR.Dials
             if (activator_button != null) {
                 activator_button.SetTools(relevant_tools);
             }
+
+            nudgeUpBtn.OnPress += HandleNudgeUpPressed;
+            nudgeDownBtn.OnPress += HandleNudgeDownPressed;
 
             total_dist = Vector3.Distance(max_pos.position, min_pos.position);
             initial_offset = meter.transform.localPosition;
@@ -272,6 +279,22 @@ namespace ThermoVR.Dials
          */
         private float mapSharp() { return min_map + (max_map - min_map) * Mathf.Pow(val, response_power); }
 
+        private void nudgeValUp()
+        {
+            if (val + nudgeAmt <= 1)
+            {
+                set_val(val + nudgeAmt);
+            }
+        }
+
+        private void nudgeValDown()
+        {
+            if (val - nudgeAmt >= 0)
+            {
+                set_val(val - nudgeAmt);
+            }
+        }
+
         /// <summary>
         /// Updates val via grab position
         /// </summary>
@@ -383,6 +406,26 @@ namespace ThermoVR.Dials
             if (relevant_tools.Contains(tool)) {
                 Reset(false);
             }
+        }
+
+        private void HandleNudgeUpPressed(object sender, EventArgs args)
+        {
+            if (!AnyToolsActive())
+            {
+                return;
+            }
+
+            nudgeValUp();
+        }
+
+        private void HandleNudgeDownPressed(object sender, EventArgs args)
+        {
+            if (!AnyToolsActive())
+            {
+                return;
+            }
+
+            nudgeValDown();
         }
 
         #endregion // Handlers
