@@ -42,6 +42,11 @@ public class Touchable : MonoBehaviour
         }
     }
 
+    private void OnDisable()
+    {
+        rtouch = ltouch = false;
+    }
+
     /*
      * Check if the given collider is in the list of colliders found on
      * the left/right hand.
@@ -60,10 +65,27 @@ public class Touchable : MonoBehaviour
     [HideInInspector] public bool touch = false;
 
     public void deltaTouch(Collider c, bool delta) {
+        //bool prev_l_touch = ltouch;
+        //bool prev_r_touch = rtouch;
+        //bool in_either_hand = cInHandList(c, true) || cInHandList(c, false);
         if (cInHandList(c, true)) ltouch = delta;
         if (cInHandList(c, false)) rtouch = delta;
 
         touch = (ltouch || rtouch);
+
+        /*
+        string name = this.gameObject.name;
+        if (touch && in_either_hand)
+        {
+            Debug.Log("[Touch] " + name + " started touching " + c.name + ": l--" + ltouch + "|| r--" + rtouch);
+            Debug.Log("[Touch] prev was : l--" + prev_l_touch + "|| r--" + prev_r_touch);
+        }
+        else if (in_either_hand)
+        {
+            Debug.Log("[Touch] " + name + " stopped touching " + c.name + ": l--" + ltouch + "|| r--" + rtouch);
+            Debug.Log("[Touch] prev was : l--" + prev_l_touch + "|| r--" + prev_r_touch);
+        }
+        */
 
         if (lightables != null) {
             foreach (Lightable light in lightables) {
@@ -82,11 +104,11 @@ public class Touchable : MonoBehaviour
         if (this.rtouch) { rtouch = true; }
     }
 
-    protected virtual void OnTriggerEnter(Collider c) {
+    protected void OnTriggerEnter(Collider c) {
         deltaTouch(c, true);
     }
 
-    protected virtual void OnTriggerExit(Collider c) {
+    protected void OnTriggerExit(Collider c) {
         deltaTouch(c, false);
     }
 

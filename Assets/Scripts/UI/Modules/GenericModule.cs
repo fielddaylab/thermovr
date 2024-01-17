@@ -8,11 +8,11 @@ public class GenericModule : UIModule
     #region IUIModule
 
     public override void Open() {
-        base.Open();
+        this.gameObject.SetActive(true);
     }
 
     public override void Close() {
-        base.Close();
+        this.gameObject.SetActive(false);
     }
 
     #endregion // IUIModule

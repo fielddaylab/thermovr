@@ -37,7 +37,7 @@ public class QuizModule : UIModule
     }
 
     public override void Open() {
-        base.Open();
+        this.gameObject.SetActive(true);
 
         if (m_labIsActive) {
             m_hub.OpenUI(UIID.QuizLabTasks);
@@ -48,7 +48,7 @@ public class QuizModule : UIModule
     }
 
     public override void Close() {
-        base.Close();
+        this.gameObject.SetActive(false);
     }
 
     #endregion // IUIModule

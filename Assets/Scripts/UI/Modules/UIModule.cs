@@ -6,7 +6,7 @@ using UnityEngine;
 namespace ThermoVR.UI
 {
     // [RequireComponent(typeof(Canvas))]
-    public class UIModule : MonoBehaviour, IUIModule
+    public abstract class UIModule : MonoBehaviour, IUIModule
     {
         [SerializeField] private UIID m_id;
 
@@ -22,12 +22,8 @@ namespace ThermoVR.UI
             m_hub = this.GetComponent<UIHub>();
         }
 
-        public virtual void Close() {
-            this.gameObject.SetActive(false);
-        }
+        public abstract void Close();
 
-        public virtual void Open() { 
-            this.gameObject.SetActive(true);
-        }
+        public abstract void Open();
     }
 }

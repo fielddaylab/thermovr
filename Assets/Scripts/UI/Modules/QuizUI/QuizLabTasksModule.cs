@@ -78,11 +78,16 @@ namespace ThermoVR.Lab
             m_HorizontalScrollOrigin = m_ScrollHorizontalContainer.localPosition.x;
         }
 
+        private void OnDisable()
+        {
+            Close();
+        }
+
         public override void Open() {
             // clear previous tabs
             Close();
 
-            base.Open();
+            this.gameObject.SetActive(true);
 
             m_tabs.Clear();
             m_frames.Clear();
@@ -161,7 +166,7 @@ namespace ThermoVR.Lab
         }
 
         public override void Close() {
-            base.Close();
+            this.gameObject.SetActive(false);
 
             // Remove button listeners
             m_ScrollUpBtn.OnButtonPressed -= HandleScrollUp;
@@ -303,6 +308,9 @@ namespace ThermoVR.Lab
 
             // Limits
             World.Instance.ModMgr.SetLimits(mods.Limits);
+
+            // prevent move ball functionality
+            World.Instance?.ModMgr.DisableGraphBallInteractions();
         }
 
         private void ResetWorldMods() {
