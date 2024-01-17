@@ -27,7 +27,7 @@ namespace ThermoVR.UI
             RectTransform rect = GetComponent<RectTransform>();
             BoxCollider collider = GetComponent<BoxCollider>();
             Vector3 currSize = collider.size;
-            GetComponent<BoxCollider>().size = new Vector3(rect.sizeDelta.x, rect.sizeDelta.y, currSize.z);
+            // GetComponent<BoxCollider>().size = new Vector3(rect.sizeDelta.x, rect.sizeDelta.y, currSize.z);
 
             // Register ray touch
             m_button.onClick.AddListener(HandleClick);

@@ -49,10 +49,10 @@ namespace ThermoVR.Lab
                     }
 
                     // Only update result when requirements have been met
-                    if (m_toEvaluate[i].IsCorrect()) {
+                    // if (m_toEvaluate[i].IsCorrect()) {
                         m_toEvaluate[i].HandleEvaluation(m_toEvaluate[i].IsCorrect());
                         OnEvaluationUpdated?.Invoke(this, new BoolEventArgs(m_toEvaluate[i].IsCorrect()));
-                    }
+                    // }
                 }
             }
 

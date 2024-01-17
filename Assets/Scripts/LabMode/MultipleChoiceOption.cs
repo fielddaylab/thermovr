@@ -13,6 +13,10 @@ namespace ThermoVR
     {
         public event EventHandler<IDEventArgs> OnChoiceSelected; // used by MultipleChoiceHub
 
+        [SerializeField] private BoxCollider m_collider;
+        [SerializeField] private Vector3 m_ExemplaryMCOptionCenter;
+        [SerializeField] private Vector3 m_ExemplaryMCOptionSize;
+
         [SerializeField] private ThermoButton m_button;
         [SerializeField] private TMP_Text m_optionText;
         [SerializeField] private Image m_fill; // fill in bubble
@@ -25,6 +29,8 @@ namespace ThermoVR
 
         private void OnEnable() {
             m_button.OnButtonPressed += HandleButtonPressed;
+
+            FixCollider();
         }
 
         private void OnDisable() {
@@ -75,6 +81,12 @@ namespace ThermoVR
                 default:
                     break;
             }
+        }
+
+        public void FixCollider()
+        {
+            m_collider.center = m_ExemplaryMCOptionCenter;
+            m_collider.size = m_ExemplaryMCOptionSize;
         }
 
         #region Handlers

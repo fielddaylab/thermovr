@@ -32,7 +32,7 @@
 |TargetInfo (property, value, valid-range):
 |QuizInfo:
 	--Questions:
-	Question: "What is the saturation temperature of H20 when P = 1.50e2 kPa?"
+	Question: "What is the approximate saturation temperature of H20 when P = 1.50e2 kPa?"
 	Questions-->
 	Answers: ["~ 3.35e2 K", "~ 3.85e2 K"(c), "~ 4.45e2 K"]
 |EfficiencyInfo:
@@ -125,9 +125,9 @@
 |TargetInfo (property, value, valid-range):
 |QuizInfo: 
 	--Questions:
-	Question: "What is the saturation pressure of H20 when T = 3.43e2 K (70 C)?"
+	Question: "What is the approximate saturation pressure of H20 when T = 3.43e2 K (70 C)?"
 	Questions-->
-	Answers: ["~ 2.50e2 kPa", "~ 1.50e2 kPa", "~ 5.0e1 kPa"(c)]
+	Answers: ["~ 2.25e2 kPa", "~ 1.25e2 kPa", "~ 3.25e1 kPa"(c)]
 |EfficiencyInfo:
 
 
@@ -140,7 +140,7 @@
 |TargetInfo (property, value, valid-range):
 |QuizInfo: 
 	--Questions:
-	Question: "Now add/remove pressure until P = 1.01e2 kPa."
+	Question: "Now add/remove pressure until P is approximately 1.01e2 kPa."
 	Questions-->
 	Requirements: [(Region:0:0), (Pressure:101:10)]
 |EfficiencyInfo:
@@ -168,7 +168,7 @@
 |TargetInfo (property, value, valid-range):
 |QuizInfo: 
 	--Questions:
-	Question: "Add/remove pressure until P = 1.0e1 kPa."
+	Question: "Add/remove pressure until P is approximately 3.35e1 kPa."
 	Questions-->
 	Requirements: [(Region:1:0)]
 |EfficiencyInfo:
@@ -243,7 +243,7 @@
 || TASK // Q 3b
 
 |Type: [reach-state]
-|ToolInfo:  [Weight, NegativeWeight, Insulator]
+|ToolInfo:  [Weight, NegativeWeight, Burner, Coil, Insulator]
 |SetInfo:
 |LimitInfo:
 |TargetInfo:
@@ -258,7 +258,7 @@
 || TASK
 
 |Type: [multiple-choice]
-|ToolInfo:  [Weight, NegativeWeight, Insulator]
+|ToolInfo:  [Weight, NegativeWeight, Burner, Coil, Insulator]
 |SetInfo: 
 |LimitInfo:
 |TargetInfo:

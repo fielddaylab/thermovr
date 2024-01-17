@@ -75,16 +75,23 @@ namespace ThermoVR.Lab
         }
 
         public override void HandleEvaluation(bool correct) {
+            /* Reach State checks are continuous
             if (m_evaluated) {
                 // no need for duplicate evaluations
                 return;
             }
+            */
 
             if (correct) {
                 m_completionState.sprite = GameDB.Instance.ReachStateComplete;
-
-                m_evaluated = true;
             }
+            else
+            {
+                m_completionState.sprite = GameDB.Instance.ReachStateIncomplete;
+            }
+        
+            m_evaluated = false;
+            // m_evaluated = correct;
         }
 
         public override bool IsCorrect() {

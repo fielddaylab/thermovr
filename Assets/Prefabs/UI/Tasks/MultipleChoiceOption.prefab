@@ -52,6 +52,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aff6c74d372914e4aad80e7d887c9987, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_collider: {fileID: 6790291170679286968}
+  m_ExemplaryMCOptionCenter: {x: -151.28319, y: 0.16197146, z: 0.43656906}
+  m_ExemplaryMCOptionSize: {x: 329.10095, y: 9.502272, z: 2.2596283}
   m_button: {fileID: 8549229943325951918}
   m_optionText: {fileID: 3766702380975639678}
   m_fill: {fileID: 374828003000231166}
@@ -470,12 +473,12 @@ PrefabInstance:
     - target: {fileID: 2507816980937106892, guid: 948c9d963642c6e478aa25174a356344,
         type: 3}
       propertyPath: m_Size.x
-      value: 326.58728
+      value: 329.10095
       objectReference: {fileID: 0}
     - target: {fileID: 2507816980937106892, guid: 948c9d963642c6e478aa25174a356344,
         type: 3}
       propertyPath: m_Size.y
-      value: 19.045633
+      value: 9.502272
       objectReference: {fileID: 0}
     - target: {fileID: 2507816980937106892, guid: 948c9d963642c6e478aa25174a356344,
         type: 3}
@@ -485,17 +488,17 @@ PrefabInstance:
     - target: {fileID: 2507816980937106892, guid: 948c9d963642c6e478aa25174a356344,
         type: 3}
       propertyPath: m_Center.x
-      value: -150.54527
+      value: -151.28319
       objectReference: {fileID: 0}
     - target: {fileID: 2507816980937106892, guid: 948c9d963642c6e478aa25174a356344,
         type: 3}
       propertyPath: m_Center.y
-      value: 0.08623279
+      value: 0.16197146
       objectReference: {fileID: 0}
     - target: {fileID: 2507816980937106892, guid: 948c9d963642c6e478aa25174a356344,
         type: 3}
       propertyPath: m_Center.z
-      value: 0.436525
+      value: 0.43656906
       objectReference: {fileID: 0}
     - target: {fileID: 8110500313337203388, guid: 948c9d963642c6e478aa25174a356344,
         type: 3}
@@ -532,6 +535,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!65 &6790291170679286968 stripped
+BoxCollider:
+  m_CorrespondingSourceObject: {fileID: 2507816980937106892, guid: 948c9d963642c6e478aa25174a356344,
+    type: 3}
+  m_PrefabInstance: {fileID: 9004520389346167156}
+  m_PrefabAsset: {fileID: 0}
 --- !u!224 &7890783915155662302 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 1258696447034240170, guid: 948c9d963642c6e478aa25174a356344,
