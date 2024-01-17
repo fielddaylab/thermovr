@@ -65,6 +65,11 @@ namespace ThermoVR.Lab
             else {
                 // ResetState();
             }
+
+            for (int i = 0; i < m_options.Length; i++)
+            {
+                m_options[i].FixCollider();
+            }
         }
 
         #endregion // Unity Callbacks
@@ -91,6 +96,8 @@ namespace ThermoVR.Lab
                 uint choiceOptionIndex = order[i];
                 m_options[i].SetChoiceID(choiceOptionIndex);
                 m_options[i].SetOptionText(m_definition.OptionTexts[choiceOptionIndex]);
+
+                m_options[i].FixCollider();
             }
         }
 
