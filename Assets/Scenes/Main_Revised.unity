@@ -11769,7 +11769,7 @@ PrefabInstance:
         type: 3}
       propertyPath: reset_button
       value: 
-      objectReference: {fileID: 2083209049}
+      objectReference: {fileID: 6820430344834341605}
     - target: {fileID: 5943454709359365371, guid: fd9e7f31046f39c46a3fb1d9fd9683d9,
         type: 3}
       propertyPath: halfer_button
@@ -14808,7 +14808,12 @@ PrefabInstance:
     - target: {fileID: 4608346533408481544, guid: 06b9e94301f4b664d8103168d4722295,
         type: 3}
       propertyPath: m_Name
-      value: Reset
+      value: Reset_OLD
+      objectReference: {fileID: 0}
+    - target: {fileID: 4608346533408481544, guid: 06b9e94301f4b664d8103168d4722295,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4608346533408481545, guid: 06b9e94301f4b664d8103168d4722295,
         type: 3}
@@ -19491,6 +19496,18 @@ MonoBehaviour:
   m_ToSpace: []
   m_StartPos: {fileID: 0}
   m_SpacingPerChunk: 0.018
+--- !u!114 &6820430344834341605 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3039919479871027695, guid: 9077b291381065a4789a5b6eaee38839,
+    type: 3}
+  m_PrefabInstance: {fileID: 6820430344834341601}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: afd6f79acab78f847a707c9fa9d91272, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!33 &6830571862307815727
 MeshFilter:
   m_ObjectHideFlags: 0

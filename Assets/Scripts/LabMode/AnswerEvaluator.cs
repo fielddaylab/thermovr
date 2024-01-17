@@ -94,5 +94,20 @@ namespace ThermoVR.Lab
                 Debug.Log("[Q] Not crrect!");
             }
         }
+
+        public bool HasBeenEvaluated()
+        {
+            bool eval = true;
+
+            for (int i = 0; i < m_toEvaluate.Length; i++)
+            {
+                if (!m_toEvaluate[i].HasBeenEvaluated())
+                {
+                    eval = false;
+                }
+            }
+
+            return eval;
+        }
     }
 }

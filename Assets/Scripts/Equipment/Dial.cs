@@ -285,6 +285,11 @@ namespace ThermoVR.Dials
             {
                 set_val(val + nudgeAmt);
             }
+            else
+            {
+                // clamp to top
+                set_val(1);
+            }
         }
 
         private void nudgeValDown()
@@ -292,6 +297,11 @@ namespace ThermoVR.Dials
             if (val - nudgeAmt >= 0)
             {
                 set_val(val - nudgeAmt);
+            }
+            else
+            {
+                // clamp to bottom
+                set_val(0);
             }
         }
 

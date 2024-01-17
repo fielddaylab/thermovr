@@ -14,6 +14,7 @@ static public class GameEvents
     static public readonly StringHash32 ColliderGrabbed = "world:collider-grabbed"; // Collider
     static public readonly StringHash32 ObjectReleased = "world:object-released"; // GameObject
     static public readonly StringHash32 ObjectGrabbed = "world:object-grabbed"; // GameObject
+    static public readonly StringHash32 PreActivateLab = "world:preactivate-lab"; // LabInfo
     static public readonly StringHash32 ActivateLab = "world:activate-lab"; // LabInfo
     static public readonly StringHash32 DeactivateLab = "world:deactivate-lab"; // LabInfo
     static public readonly StringHash32 TaskResetPressed = "world:task-reset-pressed";

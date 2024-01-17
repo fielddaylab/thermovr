@@ -34,6 +34,7 @@ namespace ThermoVR.Lab
 
         private void OnLoadButtonPressed(object sender, EventArgs args)
         {
+            GameMgr.Events?.Dispatch(GameEvents.PreActivateLab, m_Lab);
             GameMgr.Events?.Dispatch(GameEvents.ActivateLab, m_Lab);
         }
     }
