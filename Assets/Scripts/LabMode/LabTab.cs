@@ -22,6 +22,11 @@ namespace ThermoVR.Lab
             get { return m_thermoButton; }
         }
 
+        public bool HasBeenEvaluated()
+        {
+            return m_taskFrame.AnswerEvaluator.HasBeenEvaluated();
+        }
+
         public void OnDisable() {
             if (m_taskFrame != null) {
                 m_taskFrame.AnswerEvaluator.OnEvaluationUpdated -= HandleEvalUpdate;

@@ -429,7 +429,10 @@ namespace ThermoVR.Lab
             m_tabs[topicIndex].TaskTabs[taskIndex].ButtonImage.sprite = GameDB.Instance.LabTaskTabActive;
             m_tabs[topicIndex].TaskTabs[taskIndex].ButtonRect.sizeDelta = new Vector2(m_tabs[topicIndex].TaskTabs[taskIndex].ButtonRect.sizeDelta.x, TAB_HEIGHT_ACTIVE);
 
-            ApplyWorldMods(m_currLab.Topics[topicIndex].Tasks[taskIndex]);
+            if (!m_tabs[topicIndex].TaskTabs[taskIndex].HasBeenEvaluated())
+            {
+                ApplyWorldMods(m_currLab.Topics[topicIndex].Tasks[taskIndex]);
+            }
         }
 
         private void DeactivateTab(int topicIndex, int taskIndex)
@@ -462,7 +465,10 @@ namespace ThermoVR.Lab
 
             m_ScrollHorizontalContainer.localPosition = new Vector3(m_HorizontalScrollOrigin, m_ScrollHorizontalContainer.localPosition.y, m_ScrollHorizontalContainer.localPosition.z);
 
-            ApplyWorldMods(m_currLab.Topics[topicIndex].Tasks[0]);
+            //if (!m_tabs[topicIndex].TaskTabs[0].HasBeenEvaluated())
+            //{
+                ApplyWorldMods(m_currLab.Topics[topicIndex].Tasks[0]);
+            //}
         }
 
         private void DeactivateTopicTab(int topicIndex)
