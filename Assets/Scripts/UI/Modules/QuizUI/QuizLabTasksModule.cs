@@ -62,7 +62,7 @@ namespace ThermoVR.Lab
         public override void Init() {
             base.Init();
 
-            GameMgr.Events?.Register<LabInfo>(GameEvents.ActivateLab, HandleActivateLab);
+            GameMgr.Events?.Register<LabInfo>(GameEvents.PreActivateLab, HandlePreActivateLab);
             GameMgr.Events?.Register(GameEvents.DeactivateLab, HandleDeactivateLab);
 
             GameMgr.Events?.Register(GameEvents.TaskResetPressed, HandleTaskResetPressed);
@@ -329,7 +329,7 @@ namespace ThermoVR.Lab
 
         #region Handlers
 
-        private void HandleActivateLab(LabInfo info) {
+        private void HandlePreActivateLab(LabInfo info) {
             m_currLab = info;
             m_labIsActive = true;
         }

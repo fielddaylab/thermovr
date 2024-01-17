@@ -45,7 +45,7 @@ namespace ThermoVR
         public void ResetToolRestrictions() {
             m_activeTools.Clear();
             m_activeTools = new List<ToolType>(m_allTools);
-            GameMgr.Events.Dispatch(GameEvents.ResetToolRestrictions);
+            GameMgr.Events?.Dispatch(GameEvents.ResetToolRestrictions);
         }
 
         public void EnableGraphBallInteractions()
