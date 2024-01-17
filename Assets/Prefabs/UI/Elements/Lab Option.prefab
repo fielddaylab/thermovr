@@ -688,8 +688,8 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 1.702996, y: 1.4313967, z: 0.40767813}
-  m_Center: {x: -0.0061612795, y: -0.02430436, z: -0.07092859}
+  m_Size: {x: 1.702996, y: 1.4313967, z: 0.022243474}
+  m_Center: {x: -0.006159003, y: -0.024304362, z: 0.0030084178}
 --- !u!114 &8410878757042378611
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1048,6 +1048,7 @@ MonoBehaviour:
   LabTitle: {fileID: 1639692709095984757}
   LabAuthor: {fileID: 7833706895996149299}
   LoadButton: {fileID: 8410878757042378611}
+  Collider: {fileID: 118221227947221804}
   m_Slider: {fileID: 6567383507250414928}
 --- !u!1 &8842150514811051561
 GameObject:

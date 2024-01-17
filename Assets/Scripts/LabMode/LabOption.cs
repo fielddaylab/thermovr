@@ -14,6 +14,8 @@ namespace ThermoVR.Lab
         public TMP_Text LabAuthor;
         public ThermoButton LoadButton;
 
+        public BoxCollider Collider;
+
         [SerializeField] private Slider m_Slider;
 
         private LabInfo m_Lab;
@@ -22,6 +24,12 @@ namespace ThermoVR.Lab
         {
             m_Lab = labInfo;
             LoadButton.OnButtonPressed += OnLoadButtonPressed;
+        }
+
+        public void FixCollider(BoxCollider compare)
+        {
+            Collider.center = compare.center;
+            Collider.size = compare.size;
         }
 
         private void OnLoadButtonPressed(object sender, EventArgs args)

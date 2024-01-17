@@ -30,7 +30,7 @@ namespace ThermoVR.Lab
 
         public override void Open()
         {
-            base.Open();
+            this.gameObject.SetActive(true);
 
             FreeLabs();
 
@@ -49,6 +49,7 @@ namespace ThermoVR.Lab
                 option.LabAuthor.text = LabMgr.Instance.AvailableLabs[i].Author;
                 option.LoadButton.ClearListeners();
                 option.SetLabInfo(LabMgr.Instance.AvailableLabs[i]);
+                option.FixCollider(m_OptionPool.Prefab.Collider);
 
                 // TODO: set Slider progess
                 m_ActiveOptions.Add(option);
@@ -57,7 +58,7 @@ namespace ThermoVR.Lab
 
         public override void Close()
         {
-            base.Close();
+            this.gameObject.SetActive(false);
 
             // Remove button listeners
             m_ScrollUpBtn.OnButtonPressed -= HandleScrollUp;

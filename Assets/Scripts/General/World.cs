@@ -346,7 +346,7 @@ public class World : MonoBehaviour
             // origin.transform.Translate(new Vector3(0, dy, 0));
         }
         else if (actable == graph) {
-            if (ModMgr.GraphBallInteractable())
+            if (!ModMgr.GraphBallInteractable())
             {
                 // Player loaded a lab (or otherwise disable grabbing) while ball was grabbed and being moved
                 placement_thermo_reasonable = false;

@@ -10,13 +10,13 @@ public class QuizLoadedModule : UIModule
     #region IUIModule
 
     public override void Open() {
-        base.Open();
+        this.gameObject.SetActive(true);
 
         m_beginButton.OnButtonPressed += HandleBeginPressed;
     }
 
     public override void Close() {
-        base.Close();
+        this.gameObject.SetActive(false);
 
         m_beginButton.OnButtonPressed -= HandleBeginPressed;
     }
