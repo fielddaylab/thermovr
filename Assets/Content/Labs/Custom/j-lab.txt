@@ -203,7 +203,7 @@
 	--Questions:
 	Question: "Add insulation layer and set its value to 100%. Add mass until P = 8.8e2 kPa."
 	Questions-->
-	Requirements: [(Pressure:880:1)]
+	Requirements: [(Pressure:880:20)]
 |EfficiencyInfo: 
 
 
@@ -251,7 +251,7 @@
 	--Questions:
 	Question: "Bring the pressure to 1.01e2 kPa and temperature to 4.50e2 K."
 	Questions-->
-	Requirements: [(Pressure:101:1), (Temperature:450:2)]
+	Requirements: [(Pressure:101:10), (Temperature:450:10)]
 |EfficiencyInfo: 
 
 
@@ -282,7 +282,7 @@
 	Question: "Add insulation layer, set insulation value at 100%."
 	Question: "Add mass to top of piston and increase mass until pressure = 8.8e2 kPa."
 	Questions-->
-	Requirements: [(Pressure:880:1)]
+	Requirements: [(Pressure:880:20)]
 |EfficiencyInfo: 
 
 || TASK
@@ -314,7 +314,7 @@
 	Initial Conditions: "Initial pressure is 1.01e2 kPa, initial temperature is 2.93e2 K."
 	--Questions:
 	Question: "Attach the insulation layer and set insulation to 100%."
-	Question: "Set the upper volume stop to 3.0e-1 m^3/kg."
+	Question: "Set a volume stop to 3.0e-1 m^3/kg."
 	Question: "Apply the Bunsen burner until the piston just hits the stop, v = 3.0e-1 m^3/kg."
 	Questions-->
 	Requirements: [(Volume:0.3:0.05)]
@@ -332,7 +332,7 @@
 	--Questions:
 	Question: "Continue to add heat until P = 2.00e2 kPa."
 	Questions-->
-	Requirements: [(Pressure:200:1)]
+	Requirements: [(Pressure:200:10)]
 |EfficiencyInfo: 
 
 || TASK
@@ -359,10 +359,10 @@
 |TargetInfo:
 |QuizInfo:
 	--Questions:
-	Question: "Set the lower volume stop to 1.0e-1 m^3/kg."
-	Question: "Apply the cooling coil until the piston just hits the stop, v = 2.0e-1 m^3/kg."
+	Question: "Set a volume stop to 1.0e-1 m^3/kg."
+	Question: "Apply the cooling coil until the piston just hits the stop, v = 1.0e-1 m^3/kg."
 	Questions-->
-	Requirements: [(Volume:0.1:0.05)]
+	Requirements: [(Region:1:0), (Volume:0.1:0.09)]
 |EfficiencyInfo: 
 
 || TASK
@@ -376,7 +376,7 @@
 	--Questions:
 	Question: "Continue to add cooling until P = 4.0e1 kPa."
 	Questions-->
-	Requirements: [(Pressure:40:0.1)]
+	Requirements: [(Pressure:40:1)]
 |EfficiencyInfo: 
 
 || TASK
