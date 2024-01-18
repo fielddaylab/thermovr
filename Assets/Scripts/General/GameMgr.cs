@@ -23,6 +23,7 @@ namespace ThermoVR
             m_thermo_present.Init();
             m_world.Init();
             m_thermo_present.Reset();
+            Events.Dispatch(GameEvents.InitialLoadComplete);
         }
 
         private void FixedUpdate() {
