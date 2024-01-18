@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 namespace ThermoVR.UI
 {
+    [DefaultExecutionOrder(5)]
     public class UILoading : MonoBehaviour
     {
         [SerializeField] private Image m_loadIcon;
