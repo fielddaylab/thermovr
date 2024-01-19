@@ -103,7 +103,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2136752545258839447}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.018, y: 0.0236, z: -0}
+  m_LocalPosition: {x: 0.024, y: 0.0236, z: -0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -167,7 +167,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2136752545258839447}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3b01d45e31f1de844bbcd66cfa349b15, type: 3}
   m_Name: 
@@ -199,7 +199,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2598771837921138655}
   m_LocalRotation: {x: -0, y: -0, z: 0.11112201, w: 0.99380684}
-  m_LocalPosition: {x: -0.1522, y: -0.0053, z: -0}
+  m_LocalPosition: {x: -0.139, y: -0.002, z: -0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -230,7 +230,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2787332236449371758}
   m_LocalRotation: {x: -0, y: -0, z: 0.11112201, w: 0.99380684}
-  m_LocalPosition: {x: 0.0173, y: 0.0068, z: -0}
+  m_LocalPosition: {x: 0.0015, y: 0.0199, z: -0}
   m_LocalScale: {x: 1.0000001, y: 1.0000001, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -865,7 +865,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ebcac9b616909a4380a72e50249cee2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  has_lightables: 1
+  has_lightables: 0
   ltouch: 0
   rtouch: 0
   touch: 0
@@ -888,6 +888,10 @@ MonoBehaviour:
   nudgeUpBtn: {fileID: 7657833560794868434}
   nudgeDownBtn: {fileID: 5383032121643572665}
   nudgeAmt: 0.001
+  knob_renderers:
+  - {fileID: 3317261218618807632}
+  nudge_up_renderer: {fileID: 8373637421563490065}
+  nudge_down_renderer: {fileID: 2298914956271297274}
   response_power: 1
   default_val: 0
   m_effect_map: []
@@ -1311,6 +1315,12 @@ PrefabInstance:
       objectReference: {fileID: 2100000, guid: 614af8d83b4917d409a4cc79a499c59b, type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 214a02dd1b6efa843bcc350f79f9c5d7, type: 3}
+--- !u!23 &2298914956271297274 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 1625622367941254051, guid: 214a02dd1b6efa843bcc350f79f9c5d7,
+    type: 3}
+  m_PrefabInstance: {fileID: 677857812284668249}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &4782439999084141159 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5419694855086727998, guid: 214a02dd1b6efa843bcc350f79f9c5d7,
@@ -1341,3 +1351,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: afd6f79acab78f847a707c9fa9d91272, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!23 &8373637421563490065 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 9033410272643438152, guid: 214a02dd1b6efa843bcc350f79f9c5d7,
+    type: 3}
+  m_PrefabInstance: {fileID: 677857812284668249}
+  m_PrefabAsset: {fileID: 0}

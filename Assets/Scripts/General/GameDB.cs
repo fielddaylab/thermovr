@@ -23,6 +23,14 @@ public class GameDB : MonoBehaviour
     public Color TabSelectedColor, TabDefaultColor;
     public Color MCSelectedBG, MCUnselectedBG, MCIncorrectBG;
 
+    [Space(5)]
+    [Header("Tool Activation")]
+
+    public Material KnobActive;
+    public Material KnobInactive;
+    public Material KnobLocked;
+    public Material NudgeActive, NudgeInactive, NudgeLocked;
+
     private void Awake() {
         Instance = this;
     }

@@ -58,6 +58,9 @@ namespace ThermoVR.Dials
     [RequireComponent(typeof(Touchable))]
     public class Dial : MonoBehaviour
     {
+        private const int KNOB_MAT_INDEX = 0;
+        private const int NUDGE_MAT_INDEX = 0;
+
         [SerializeField] private Transform max_pos;
         [SerializeField] private Transform min_pos;
         public TextMeshPro textv;
@@ -66,6 +69,16 @@ namespace ThermoVR.Dials
         [SerializeField] private Pressable nudgeUpBtn;
         [SerializeField] private Pressable nudgeDownBtn;
         [SerializeField] private float nudgeAmt = 0.05f;
+
+        [Space(5)]
+        [Header("Activation")]
+
+        [SerializeField] private MeshRenderer[] knob_renderers;
+        [SerializeField] private MeshRenderer nudge_up_renderer;
+        [SerializeField] private MeshRenderer nudge_down_renderer;
+
+        [Space(5)]
+        [Header("Other")]
 
         // [SerializeField] private CollisionRange interactableRange;
 
@@ -142,14 +155,16 @@ namespace ThermoVR.Dials
             nudgeUpBtn.OnPress += HandleNudgeUpPressed;
             nudgeDownBtn.OnPress += HandleNudgeDownPressed;
 
-            total_dist = Vector3.Distance(max_pos.position, min_pos.position);
+            total_dist = Vector3.Distance(max_pos.localPosition, min_pos.localPosition);
             initial_offset = meter.transform.localPosition;
 
             touchable = this.GetComponent<Touchable>();
             textv_tmpro = textv.GetComponent<TextMeshPro>();
 
             GameMgr.Events?.Register<Tool>(GameEvents.ActivateTool, HandleActivateTool, this)
-                .Register<Tool>(GameEvents.DeactivateTool, HandleDeactivateTool, this);
+                .Register<Tool>(GameEvents.DeactivateTool, HandleDeactivateTool, this)
+                .Register<Tool>(GameEvents.AllowTool, HandleAllowTool, this)
+                .Register<Tool>(GameEvents.DisallowTool, HandleDisallowTool, this);
 
             Reset(true);
         }
@@ -194,7 +209,7 @@ namespace ThermoVR.Dials
 
             bool anyActive = false;
             for (int i = 0; i < relevant_tools.Count; i++) {
-                if (relevant_tools[i].engaged) {
+                if (relevant_tools[i].engaged && relevant_tools[i].allowed) {
                     anyActive = true;
                 }
             }
@@ -404,17 +419,83 @@ namespace ThermoVR.Dials
             RecalibratePos();
         }
 
+        private void UpdateSliderMaterials(bool engaged, bool allowed)
+        {
+            Material knobMat = GameDB.Instance.KnobInactive; // default
+            Material nudgeMat = GameDB.Instance.NudgeInactive; // default
+
+            if (!allowed)
+            {
+                // locked
+                knobMat = GameDB.Instance.KnobLocked;
+                nudgeMat = GameDB.Instance.NudgeLocked;
+            }
+            else if (engaged)
+            {
+                // active
+                knobMat = GameDB.Instance.KnobActive;
+                nudgeMat = GameDB.Instance.NudgeActive;
+            }
+
+            Material[] materials;
+
+            for (int i = 0; i < knob_renderers.Length; i++)
+            {
+                materials = knob_renderers[i].materials;
+                materials[KNOB_MAT_INDEX] = knobMat;
+                knob_renderers[i].materials = materials;
+            }
+
+            materials = nudge_up_renderer.materials;
+            materials[NUDGE_MAT_INDEX] = nudgeMat;
+            nudge_up_renderer.materials = materials;
+
+            materials = nudge_down_renderer.materials;
+            materials[NUDGE_MAT_INDEX] = nudgeMat;
+            nudge_down_renderer.materials = materials;
+        }
+
         #region Handlers
 
         private void HandleActivateTool(Tool tool) {
             if (relevant_tools.Contains(tool)) {
                 Reset(true);
+
+                UpdateSliderMaterials(tool.engaged, tool.allowed);
             }
         }
 
         private void HandleDeactivateTool(Tool tool) {
             if (relevant_tools.Contains(tool)) {
                 Reset(false);
+
+                UpdateSliderMaterials(tool.engaged, tool.allowed);
+            }
+        }
+
+        private void HandleAllowTool(Tool tool)
+        {
+            if (relevant_tools.Contains(tool))
+            {
+                // TODO: show locked
+                // Reset(true);
+
+                UpdateSliderMaterials(tool.engaged, tool.allowed);
+
+                Debug.Log("[Allow] Allowing " + tool.name);
+            }
+        }
+
+        private void HandleDisallowTool(Tool tool)
+        {
+            if (relevant_tools.Contains(tool))
+            {
+                // TODO: show unlocked
+                // Reset(false);
+
+                UpdateSliderMaterials(tool.engaged, tool.allowed);
+
+                Debug.Log("[Allow] Disallowing " + tool.name);
             }
         }
 

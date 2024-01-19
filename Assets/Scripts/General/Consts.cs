@@ -24,6 +24,8 @@ static public class GameEvents
     static public readonly StringHash32 WarpPVT = "sim:warp-pvt";
     static public readonly StringHash32 ActivateTool = "sim:activate-tool"; // Tool
     static public readonly StringHash32 DeactivateTool = "sim:deactivate-tool"; // Tool
+    static public readonly StringHash32 AllowTool = "sim:allow-tool"; // Tool
+    static public readonly StringHash32 DisallowTool = "sim:disallow-tool"; // Tool
     static public readonly StringHash32 UpdateAllowedTools = "sim:update-allowed-tools"; // List<ToolType>
     static public readonly StringHash32 ResetPressed = "sim:reset-pressed";
     static public readonly StringHash32 ResetToolRestrictions = "sim:reset-tool-restrictions";
