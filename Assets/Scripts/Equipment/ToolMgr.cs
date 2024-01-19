@@ -119,6 +119,8 @@ namespace ThermoVR.Tools
             dial_surroundingTemp.Init(273, (float)ThermoMath.t_max, DigitFormat.TemperatureK);
             dial_percentInsulation.Init(0f, 100, DigitFormat.Percent);
 
+            toggle_heatTransfer.IsActiveImpl = () => { return tool_surroundingTemp.allowed; };
+
             ResetDefaults();
 
             // Initialize Buttons
@@ -340,6 +342,8 @@ namespace ThermoVR.Tools
         public void AllowTool(Tool t) {
             // TODO: show on buttons (dispatch event)
             t.allowed = true;
+
+            GameMgr.Events?.Dispatch(GameEvents.AllowTool, t);
         }
 
         public void DisallowTool(Tool t) {
@@ -347,6 +351,8 @@ namespace ThermoVR.Tools
             t.allowed = false;
 
             DeactivateTool(t);
+
+            GameMgr.Events?.Dispatch(GameEvents.DisallowTool, t);
         }
 
         public void UpdateApplyTool(Tool t) //alters "applied_x"
@@ -515,9 +521,11 @@ namespace ThermoVR.Tools
                 if (allowed.Contains(tools[i].tool_type)) {
                     AllowTool(tools[i]);
                 }
+                /*
                 else if (tools[i].always_engaged) {
                     AllowTool(tools[i]);
                 }
+                */
                 else {
                     DisallowTool(tools[i]);
                 }

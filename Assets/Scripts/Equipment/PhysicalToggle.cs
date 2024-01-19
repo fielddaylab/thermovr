@@ -9,12 +9,18 @@ public class PhysicalToggle : MonoBehaviour
     [SerializeField] private Pressable m_button;
     [SerializeField] private MeshRenderer m_renderer;
 
+    public delegate bool IsActiveDelegate();
+
+    public IsActiveDelegate IsActiveImpl;
+
     private bool m_isOn;
 
     private void Awake() {
         m_isOn = false;
 
         m_button.OnPress += HandleTogglePressed;
+
+        IsActiveImpl = () => { return true; };
     }
 
     public bool IsOn() {
@@ -46,6 +52,11 @@ public class PhysicalToggle : MonoBehaviour
     #region Handlers
 
     private void HandleTogglePressed(object sender, EventArgs args) {
+        if (!IsActiveImpl())
+        {
+            return;
+        }
+
         m_isOn = !m_isOn;
         UpdateActiveMaterial();
         m_button.ClickAudio.Play();

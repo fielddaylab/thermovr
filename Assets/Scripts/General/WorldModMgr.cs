@@ -37,7 +37,7 @@ namespace ThermoVR
                 m_activeTools = new List<ToolType>(m_allTools);
             }
             else {
-                m_activeTools = allowedTools;
+                m_activeTools = new List<ToolType>(allowedTools);
             }
             GameMgr.Events.Dispatch(GameEvents.UpdateAllowedTools, m_activeTools);
         }
