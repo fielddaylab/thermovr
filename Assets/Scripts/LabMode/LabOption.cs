@@ -32,6 +32,16 @@ namespace ThermoVR.Lab
             Collider.size = compare.size;
         }
 
+        public void EnableCollider()
+        {
+            Collider.enabled = true;
+        }
+
+        public void DisableCollider()
+        {
+            Collider.enabled = false;
+        }
+
         private void OnLoadButtonPressed(object sender, EventArgs args)
         {
             GameMgr.Events?.Dispatch(GameEvents.PreActivateLab, m_Lab);

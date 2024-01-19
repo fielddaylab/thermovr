@@ -36,11 +36,15 @@ namespace ThermoVR.Lab
         [SerializeField] private float m_VerticalScrollSpacing;
         [SerializeField] private ThermoButton m_ScrollUpBtn;
         [SerializeField] private ThermoButton m_ScrollDownBtn;
+        private int m_ScrollVerticalValidVisibleIndex;
+        private const int SCROLL_VERTICAL_NUM = 5;
 
         [SerializeField] private Transform m_ScrollHorizontalContainer;
         [SerializeField] private float m_HorizontalScrollSpacing;
         [SerializeField] private ThermoButton m_ScrollLeftBtn;
         [SerializeField] private ThermoButton m_ScrollRightBtn;
+        private int m_ScrollHorizontalValidVisibleIndex;
+        private const int SCROLL_HORIZONTAL_NUM = 4;
 
         #endregion // Inspector
 
@@ -378,8 +382,11 @@ namespace ThermoVR.Lab
                 ActivateTopicTab(newTopicIndex);
             }
 
+            m_ScrollHorizontalValidVisibleIndex = 0;
             m_activeTabIndex = 0;
             m_activeTopicIndex = newTopicIndex;
+
+            RefreshInteractableTabs();
         }
 
         private void HandleTaskResetPressed() {
@@ -396,26 +403,38 @@ namespace ThermoVR.Lab
         {
             if (m_ScrollVerticalContainer.transform.localPosition.y <= m_VerticalScrollOrigin || Mathf.Approximately(m_ScrollVerticalContainer.transform.localPosition.x, m_VerticalScrollOrigin)) { return; }
             m_ScrollVerticalContainer.transform.localPosition = m_ScrollVerticalContainer.transform.localPosition - new Vector3(0, m_VerticalScrollSpacing, 0);
+            m_ScrollVerticalValidVisibleIndex--;
+
+            RefreshInteractableTabs();
         }
 
         private void HandleScrollDown(object sender, EventArgs args)
         {
-            float comparePos = ((m_currLab.Topics.Count - 5) * m_VerticalScrollSpacing) + m_VerticalScrollOrigin;
+            float comparePos = ((m_currLab.Topics.Count - SCROLL_VERTICAL_NUM) * m_VerticalScrollSpacing) + m_VerticalScrollOrigin;
             if (m_ScrollVerticalContainer.transform.localPosition.y >= comparePos || Mathf.Approximately(m_ScrollVerticalContainer.transform.localPosition.x, comparePos)) { return; }
             m_ScrollVerticalContainer.transform.localPosition = m_ScrollVerticalContainer.transform.localPosition + new Vector3(0, m_VerticalScrollSpacing, 0);
+            m_ScrollVerticalValidVisibleIndex++;
+
+            RefreshInteractableTabs();
         }
 
         private void HandleScrollLeft(object sender, EventArgs args)
         {
             if (m_ScrollHorizontalContainer.transform.localPosition.x >= m_HorizontalScrollOrigin || Mathf.Approximately(m_ScrollHorizontalContainer.transform.localPosition.x, m_HorizontalScrollOrigin)) { return; }
             m_ScrollHorizontalContainer.transform.localPosition = m_ScrollHorizontalContainer.transform.localPosition + new Vector3(m_HorizontalScrollSpacing, 0, 0);
+            m_ScrollHorizontalValidVisibleIndex--;
+
+            RefreshInteractableTabs();
         }
 
         private void HandleScrollRight(object sender, EventArgs args)
         {
-            float comparePos = (-(m_currLab.Topics[m_activeTopicIndex].Tasks.Count - 4) * m_HorizontalScrollSpacing) + m_HorizontalScrollOrigin;
+            float comparePos = (-(m_currLab.Topics[m_activeTopicIndex].Tasks.Count - SCROLL_HORIZONTAL_NUM) * m_HorizontalScrollSpacing) + m_HorizontalScrollOrigin;
             if (m_ScrollHorizontalContainer.transform.localPosition.x <= comparePos || Mathf.Approximately(m_ScrollHorizontalContainer.transform.localPosition.x, comparePos)) { return; }
             m_ScrollHorizontalContainer.transform.localPosition = m_ScrollHorizontalContainer.transform.localPosition - new Vector3(m_HorizontalScrollSpacing, 0, 0);
+            m_ScrollHorizontalValidVisibleIndex++;
+
+            RefreshInteractableTabs();
         }
 
         #endregion // Handlers
@@ -488,6 +507,36 @@ namespace ThermoVR.Lab
             m_tabs[topicIndex].ButtonImage.sprite = GameDB.Instance.LabTopicTabInactive;
             m_tabs[topicIndex].ButtonImage.SetNativeSize();
         }
+
+        private void RefreshInteractableTabs()
+        {
+            for (int i = 0; i < m_tabs.Count; i++)
+            {
+                if (i >= m_ScrollVerticalValidVisibleIndex && i <= m_ScrollVerticalValidVisibleIndex + SCROLL_VERTICAL_NUM - 1)
+                {
+                    // not masked
+                    m_tabs[i].EnableCollider();
+                }
+                else
+                {
+                    m_tabs[i].DisableCollider();
+                }
+            }
+
+            for (int i = 0; i < m_tabs[m_activeTopicIndex].TaskTabs.Count; i++)
+            {
+                if (i >= m_ScrollHorizontalValidVisibleIndex && i <= m_ScrollHorizontalValidVisibleIndex + SCROLL_HORIZONTAL_NUM - 1)
+                {
+                    // not masked
+                    m_tabs[m_activeTopicIndex].TaskTabs[i].EnableCollider();
+                }
+                else
+                {
+                    m_tabs[m_activeTopicIndex].TaskTabs[i].DisableCollider();
+                }
+            }
+        }
+
     }
 
 }

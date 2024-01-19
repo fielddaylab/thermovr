@@ -256,6 +256,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!65 &5790704992908852615 stripped
+BoxCollider:
+  m_CorrespondingSourceObject: {fileID: 2507816980937106892, guid: 948c9d963642c6e478aa25174a356344,
+    type: 3}
+  m_PrefabInstance: {fileID: 8255443103290972235}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &8318478736649460794 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 135131718963872881, guid: 948c9d963642c6e478aa25174a356344,
@@ -277,6 +283,7 @@ MonoBehaviour:
   TaskTabs: []
   m_thermoButton: {fileID: 8701997929964328593}
   ButtonImage: {fileID: 152964964635890423}
+  m_collider: {fileID: 5790704992908852615}
 --- !u!114 &8701997929964328593 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 743811646755835610, guid: 948c9d963642c6e478aa25174a356344,
