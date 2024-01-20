@@ -8,6 +8,8 @@ namespace ThermoVR
 {
     public class GameMgr : Singleton<GameMgr>
     {
+        public bool AudioEnabled = false;
+
         public bool IsAlphaRelease = true; // temp solution to managing alpha release channel
 
         private readonly EventDispatcher<object> m_EventDispatcher = new EventDispatcher<object>();
@@ -20,9 +22,13 @@ namespace ThermoVR
         }
 
         private void Start() {
+            AudioEnabled = false;
+
             m_thermo_present.Init();
             m_world.Init();
             m_thermo_present.Reset();
+
+            AudioEnabled = true;
             Events.Dispatch(GameEvents.InitialLoadComplete);
         }
 

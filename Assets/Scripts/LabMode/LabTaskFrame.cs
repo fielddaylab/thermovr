@@ -12,6 +12,8 @@ namespace ThermoVR.Lab
         public AnswerEvaluator AnswerEvaluator;
         public ThermoButton TaskResetButton;
 
+        [SerializeField] AudioClip m_taskResetClip;
+
         [SerializeField] private Evaluable[] m_evaluables;
 
         private void OnEnable() {
@@ -51,6 +53,8 @@ namespace ThermoVR.Lab
             for (int i = 0; i < m_evaluables.Length; i++) {
                 m_evaluables[i].ResetState();
             }
+
+            if (GameMgr.I.AudioEnabled) { Tablet.Instance.PlayUIAudio(m_taskResetClip); }
 
             GameMgr.Events.Dispatch(GameEvents.TaskResetPressed);
         }

@@ -460,7 +460,7 @@ namespace ThermoVR.Tools
 
 
         private void HandleResetPressed(object sender, System.EventArgs args) {
-            reset_button.ClickAudio.Play();
+            if (GameMgr.I.AudioEnabled) { reset_button.ClickAudio.Play(); }
 
             GameMgr.Events.Dispatch(GameEvents.ResetPressed);
 

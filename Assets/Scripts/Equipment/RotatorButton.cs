@@ -35,7 +35,7 @@ public class RotatorButton : MonoBehaviour
             // within bounds; apply rotation
             m_rotationState.ReplaceCoordinatedRoutine(RotationRoutine());
 
-            m_button.ClickAudio.Play();
+            if (GameMgr.I.AudioEnabled) { m_button.ClickAudio.Play(); }
         }
     }
 

@@ -27,6 +27,7 @@ namespace ThermoVR.Lab
         [SerializeField] private float m_ySpacing;
 
         [SerializeField] private ThermoButton m_homeButton;
+        [SerializeField] private AudioClip m_homeAudioClip;
 
         [SerializeField] private TMP_Text m_topicHeader;
 
@@ -45,6 +46,7 @@ namespace ThermoVR.Lab
         [SerializeField] private ThermoButton m_ScrollRightBtn;
         private int m_ScrollHorizontalValidVisibleIndex;
         private const int SCROLL_HORIZONTAL_NUM = 4;
+
 
         #endregion // Inspector
 
@@ -396,6 +398,11 @@ namespace ThermoVR.Lab
 
         private void HandleHomeButtonPressed(object sender, EventArgs args)
         {
+            if (GameMgr.I.AudioEnabled)
+            {
+                Tablet.Instance.PlayUIAudio(m_homeAudioClip);
+            }
+
             GameMgr.Events?.Dispatch(GameEvents.DeactivateLab);
         }
 

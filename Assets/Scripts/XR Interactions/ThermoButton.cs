@@ -66,6 +66,10 @@ namespace ThermoVR.UI
         }
 
         private void HandleClick() {
+            if (GameMgr.I.AudioEnabled) { 
+                Pressable.ClickAudio.PlayOneShot(Pressable.ClickAudio.clip);
+            }
+
             OnButtonPressed?.Invoke(this, EventArgs.Empty);
         }
 

@@ -97,6 +97,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   AnswerEvaluator: {fileID: 6158933441054652829}
   TaskResetButton: {fileID: 3685242239216116168}
+  m_taskResetClip: {fileID: 8300000, guid: 6ad851833fd5df24c84fbadccdab63d2, type: 3}
   m_evaluables: []
 --- !u!1 &3879229536564295190
 GameObject:
@@ -496,7 +497,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_TargetGraphic
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 8495332452685522490}
     - target: {fileID: 8110500313337203388, guid: 948c9d963642c6e478aa25174a356344,
         type: 3}
       propertyPath: m_Color.b
