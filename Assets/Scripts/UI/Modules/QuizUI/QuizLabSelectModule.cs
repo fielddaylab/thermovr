@@ -24,6 +24,9 @@ namespace ThermoVR.Lab
 
         #endregion // Inspector
 
+        private int m_ScrollVerticalValidVisibleIndex;
+        private const int SCROLL_VERTICAL_NUM = 3;
+
         private List<LabOption> m_ActiveOptions = new List<LabOption>();
 
         #region IUIModule
@@ -54,6 +57,9 @@ namespace ThermoVR.Lab
                 // TODO: set Slider progess
                 m_ActiveOptions.Add(option);
             }
+
+            m_ScrollVerticalValidVisibleIndex = 0;
+            RefreshInteractableTabs();
         }
 
         public override void Close()
@@ -76,12 +82,20 @@ namespace ThermoVR.Lab
         {
             if (m_ScrollContainer.transform.localPosition.y <= 0) { return; }
             m_ScrollContainer.transform.localPosition = m_ScrollContainer.transform.localPosition - new Vector3(0, m_OptionSpacing, 0);
+
+            m_ScrollVerticalValidVisibleIndex--;
+
+            RefreshInteractableTabs();
         }
 
         private void HandleScrollDown(object sender, EventArgs args)
         {
             if (m_ScrollContainer.transform.localPosition.y >= ((m_ActiveOptions.Count - 3) * m_OptionSpacing)) { return; }
             m_ScrollContainer.transform.localPosition = m_ScrollContainer.transform.localPosition + new Vector3(0, m_OptionSpacing, 0);
+
+            m_ScrollVerticalValidVisibleIndex++;
+
+            RefreshInteractableTabs();
         }
 
         #endregion // Handlers
@@ -93,6 +107,22 @@ namespace ThermoVR.Lab
                 m_OptionPool.Free(option);
             }
             m_ActiveOptions.Clear();
+        }
+
+        private void RefreshInteractableTabs()
+        {
+            for (int i = 0; i < m_ActiveOptions.Count; i++)
+            {
+                if (i >= m_ScrollVerticalValidVisibleIndex && i <= m_ScrollVerticalValidVisibleIndex + SCROLL_VERTICAL_NUM - 1)
+                {
+                    // not masked
+                    m_ActiveOptions[i].EnableCollider();
+                }
+                else
+                {
+                    m_ActiveOptions[i].DisableCollider();
+                }
+            }
         }
     }
 

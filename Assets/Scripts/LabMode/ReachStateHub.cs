@@ -61,11 +61,7 @@ namespace ThermoVR.Lab
 
             m_initText.SetText(m_definition.InitialConditionText);
 
-            for (int i = 0; i < m_definition.QuestionTexts.Length; i++)
-            {
-                var transform = m_lineGenerator.GenerateLine(m_definition.QuestionTexts[i]);
-                transform.localPosition += new Vector3(0, -1.3f * i, 0);
-            }
+            m_lineGenerator.GenerateLines(m_definition.QuestionTexts);
 
             m_completionState.sprite = GameDB.Instance.ReachStateIncomplete;
         }

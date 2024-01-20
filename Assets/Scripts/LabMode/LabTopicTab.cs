@@ -15,6 +15,18 @@ namespace ThermoVR.Lab
         [SerializeField] private ThermoButton m_thermoButton;
         public Image ButtonImage;
 
+        [SerializeField] private BoxCollider m_collider;
+
+        public void EnableCollider()
+        {
+            m_collider.enabled = true;
+        }
+
+        public void DisableCollider()
+        {
+            m_collider.enabled = false;
+        }
+
         public LabTopicTab()
         {
             TaskTabs = new List<LabTab>();

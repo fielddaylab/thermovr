@@ -13,6 +13,8 @@ namespace ThermoVR.Lab
         [SerializeField] private ThermoButton m_thermoButton;
         [SerializeField] private Image m_completionSocket;
 
+        [SerializeField] private BoxCollider m_collider;
+
         public Image ButtonImage;
         public RectTransform ButtonRect;
 
@@ -20,6 +22,16 @@ namespace ThermoVR.Lab
 
         public ThermoButton Button {
             get { return m_thermoButton; }
+        }
+
+        public void EnableCollider()
+        {
+            m_collider.enabled = true;
+        }
+
+        public void DisableCollider()
+        {
+            m_collider.enabled = false;
         }
 
         public bool HasBeenEvaluated()

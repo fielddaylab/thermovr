@@ -12,9 +12,11 @@ using static UnityEngine.InputSystem.HID.HID;
 
 namespace ThermoVR
 {
-
+    [RequireComponent(typeof(AudioSource))]
     public class Tablet : MonoBehaviour
     {
+        public static Tablet Instance;
+
         public Touchable touchable;
 
         [SerializeField] private UIHub m_hub;
@@ -38,7 +40,20 @@ namespace ThermoVR
 
         private UIID m_currID;
 
+        private AudioSource m_audioSource;
+
         public void Init() {
+            if (Instance == null)
+            {
+                Instance = this;
+            }
+            else if (this != Instance)
+            {
+                return;
+            }
+
+            m_audioSource = this.GetComponent<AudioSource>();
+
             // Add buttons to list
             m_tabButtons = new List<Pressable> {
                 m_sandboxTabButton,
@@ -64,6 +79,12 @@ namespace ThermoVR
             for (int i = 0; i < m_tabButtons.Count; i++) {
                 m_tabButtons[i].SetFingerTouches(ref ltouch, ref rtouch);
             }
+        }
+
+        // Constant source for UI elements that often show/hide on click
+        public void PlayUIAudio(AudioClip clip)
+        {
+            m_audioSource.PlayOneShot(clip);
         }
 
         #endregion // World Interactions
@@ -112,7 +133,8 @@ namespace ThermoVR
         }
 
         private void PlayClick(Pressable pressable) {
-            pressable.ClickAudio.Play();
+            if (GameMgr.I.AudioEnabled) { pressable.ClickAudio.Play(); }
+
         }
 
         #endregion // Handlers

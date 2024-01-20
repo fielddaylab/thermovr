@@ -17,6 +17,7 @@ namespace ThermoVR.Lab
         public BoxCollider Collider;
 
         [SerializeField] private Slider m_Slider;
+        [SerializeField] private AudioClip m_audioClip;
 
         private LabInfo m_Lab;
 
@@ -32,8 +33,23 @@ namespace ThermoVR.Lab
             Collider.size = compare.size;
         }
 
+        public void EnableCollider()
+        {
+            Collider.enabled = true;
+        }
+
+        public void DisableCollider()
+        {
+            Collider.enabled = false;
+        }
+
         private void OnLoadButtonPressed(object sender, EventArgs args)
         {
+            if (GameMgr.I.AudioEnabled)
+            {
+                Tablet.Instance.PlayUIAudio(m_audioClip);
+            }
+
             GameMgr.Events?.Dispatch(GameEvents.PreActivateLab, m_Lab);
             GameMgr.Events?.Dispatch(GameEvents.ActivateLab, m_Lab);
         }

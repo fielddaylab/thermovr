@@ -92,11 +92,9 @@ namespace ThermoVR.Lab
 
             m_initText.SetText(m_definition.InitialConditionText);
 
-            for (int i = 0; i < m_definition.QuestionTexts.Length; i++)
-            {
-                var transform = m_lineGenerator.GenerateLine(m_definition.QuestionTexts[i]);
-                transform.localPosition += new Vector3(0, -1.3f * i, 0);
-            }
+            m_lineGenerator.GenerateLines(m_definition.QuestionTexts);
+
+            m_lineGenerator.GenerateLines(m_definition.QuestionTexts);
 
             UpdateOptions(m_order);
             m_selectedID = uint.MaxValue;
@@ -127,11 +125,7 @@ namespace ThermoVR.Lab
         }
 
         private void UpdateOptions(uint[] order) {
-            for (int i = 0; i < m_definition.QuestionTexts.Length; i++)
-            {
-                var transform = m_lineGenerator.GenerateLine(m_definition.QuestionTexts[i]);
-                transform.localPosition += new Vector3(0, -1.3f * i, 0);
-            }
+            m_lineGenerator.GenerateLines(m_definition.QuestionTexts);
 
             // show options equal to number of options
             for (int i = 0; i < m_options.Length; i++) {

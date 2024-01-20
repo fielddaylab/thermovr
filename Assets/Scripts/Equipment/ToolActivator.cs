@@ -50,7 +50,9 @@ public class ToolActivator : MonoBehaviour
             }
 
             UpdateActiveMaterial();
-            m_button.ClickAudio.Play();
+
+            if (GameMgr.I.AudioEnabled) { m_button.ClickAudio.Play(); }
+            
             GameMgr.Events.Dispatch(GameEvents.PressedToolToggle, tool);
         }
     }

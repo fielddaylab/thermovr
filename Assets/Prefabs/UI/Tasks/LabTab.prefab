@@ -243,7 +243,7 @@ PrefabInstance:
     - target: {fileID: 2507816980937106892, guid: 948c9d963642c6e478aa25174a356344,
         type: 3}
       propertyPath: m_Size.x
-      value: 133.8952
+      value: 120
       objectReference: {fileID: 0}
     - target: {fileID: 2507816980937106892, guid: 948c9d963642c6e478aa25174a356344,
         type: 3}
@@ -300,6 +300,11 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: -30
       objectReference: {fileID: 0}
+    - target: {fileID: 5446628436118575637, guid: 948c9d963642c6e478aa25174a356344,
+        type: 3}
+      propertyPath: ClickAudio
+      value: 
+      objectReference: {fileID: 1777591294997122790}
     - target: {fileID: 7964662629359460338, guid: 948c9d963642c6e478aa25174a356344,
         type: 3}
       propertyPath: m_Colors.m_PressedColor.b
@@ -371,8 +376,19 @@ PrefabInstance:
       propertyPath: m_Color.r
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 8320812691909829524, guid: 948c9d963642c6e478aa25174a356344,
+        type: 3}
+      propertyPath: m_audioClip
+      value: 
+      objectReference: {fileID: 8300000, guid: 6ad851833fd5df24c84fbadccdab63d2, type: 3}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 948c9d963642c6e478aa25174a356344, type: 3}
+--- !u!82 &1777591294997122790 stripped
+AudioSource:
+  m_CorrespondingSourceObject: {fileID: 8320812691909829524, guid: 948c9d963642c6e478aa25174a356344,
+    type: 3}
+  m_PrefabInstance: {fileID: 7769328191570292082}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &1971586817934305230 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 8110500313337203388, guid: 948c9d963642c6e478aa25174a356344,
@@ -385,6 +401,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!65 &5269137425632544958 stripped
+BoxCollider:
+  m_CorrespondingSourceObject: {fileID: 2507816980937106892, guid: 948c9d963642c6e478aa25174a356344,
+    type: 3}
+  m_PrefabInstance: {fileID: 7769328191570292082}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &7025824411292246952 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 743811646755835610, guid: 948c9d963642c6e478aa25174a356344,
@@ -417,6 +439,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_thermoButton: {fileID: 7025824411292246952}
   m_completionSocket: {fileID: 6288379221725422679}
+  m_collider: {fileID: 5269137425632544958}
   ButtonImage: {fileID: 1971586817934305230}
   ButtonRect: {fileID: 8837746287013790168}
 --- !u!224 &8837746287013790168 stripped

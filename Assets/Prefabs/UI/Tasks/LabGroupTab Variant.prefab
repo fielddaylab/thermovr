@@ -216,6 +216,11 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.x
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5446628436118575637, guid: 948c9d963642c6e478aa25174a356344,
+        type: 3}
+      propertyPath: ClickAudio
+      value: 
+      objectReference: {fileID: 137446433774353375}
     - target: {fileID: 8110500313337203388, guid: 948c9d963642c6e478aa25174a356344,
         type: 3}
       propertyPath: m_Type
@@ -242,8 +247,19 @@ PrefabInstance:
       propertyPath: m_Color.r
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 8320812691909829524, guid: 948c9d963642c6e478aa25174a356344,
+        type: 3}
+      propertyPath: m_audioClip
+      value: 
+      objectReference: {fileID: 8300000, guid: 6ad851833fd5df24c84fbadccdab63d2, type: 3}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 948c9d963642c6e478aa25174a356344, type: 3}
+--- !u!82 &137446433774353375 stripped
+AudioSource:
+  m_CorrespondingSourceObject: {fileID: 8320812691909829524, guid: 948c9d963642c6e478aa25174a356344,
+    type: 3}
+  m_PrefabInstance: {fileID: 8255443103290972235}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &152964964635890423 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 8110500313337203388, guid: 948c9d963642c6e478aa25174a356344,
@@ -256,6 +272,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!65 &5790704992908852615 stripped
+BoxCollider:
+  m_CorrespondingSourceObject: {fileID: 2507816980937106892, guid: 948c9d963642c6e478aa25174a356344,
+    type: 3}
+  m_PrefabInstance: {fileID: 8255443103290972235}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &8318478736649460794 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 135131718963872881, guid: 948c9d963642c6e478aa25174a356344,
@@ -277,6 +299,7 @@ MonoBehaviour:
   TaskTabs: []
   m_thermoButton: {fileID: 8701997929964328593}
   ButtonImage: {fileID: 152964964635890423}
+  m_collider: {fileID: 5790704992908852615}
 --- !u!114 &8701997929964328593 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 743811646755835610, guid: 948c9d963642c6e478aa25174a356344,

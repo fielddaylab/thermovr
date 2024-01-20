@@ -8,7 +8,7 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 3163336409572146361}
+  - component: {fileID: 1155763372871263924}
   m_Layer: 0
   m_Name: Instruction Line Container
   m_TagString: Untagged
@@ -16,8 +16,8 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &3163336409572146361
-Transform:
+--- !u!224 &1155763372871263924
+RectTransform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -31,6 +31,11 @@ Transform:
   m_Father: {fileID: 6880839284824407983}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &3728658788288257340
 GameObject:
   m_ObjectHideFlags: 0
@@ -94,7 +99,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 5259050606805271034}
-  - {fileID: 3163336409572146361}
+  - {fileID: 1155763372871263924}
   - {fileID: 4115227835955656696}
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -128,7 +133,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_linePrefab: {fileID: 4297753407894949729, guid: 91dedeaa399839a45ba2024200864fd6,
     type: 3}
-  m_lineContainer: {fileID: 3163336409572146361}
+  m_lineContainer: {fileID: 1155763372871263924}
+  m_spacing: 1.3
 --- !u!1 &5589418923280252711
 GameObject:
   m_ObjectHideFlags: 0

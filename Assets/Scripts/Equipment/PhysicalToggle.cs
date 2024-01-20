@@ -59,7 +59,8 @@ public class PhysicalToggle : MonoBehaviour
 
         m_isOn = !m_isOn;
         UpdateActiveMaterial();
-        m_button.ClickAudio.Play();
+
+        if (GameMgr.I.AudioEnabled) { m_button.ClickAudio.Play(); }
     }
 
     #endregion // Handlers

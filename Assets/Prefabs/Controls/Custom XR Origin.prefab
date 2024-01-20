@@ -76,6 +76,7 @@ GameObject:
   - component: {fileID: 8596095803994565700}
   - component: {fileID: 8596095803994565701}
   - component: {fileID: 7054154938042844197}
+  - component: {fileID: 9086606884449549798}
   m_Layer: 0
   m_Name: Custom XR Origin
   m_TagString: Untagged
@@ -145,6 +146,19 @@ MonoBehaviour:
   m_InitialHeight: 0.425
   m_CenterEye: {fileID: 8596095802523667356}
   m_Origin: {fileID: 8596095803994565700}
+--- !u!114 &9086606884449549798
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8596095803994565698}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 791ea32d06225e4498bc2e7c12b7ca45, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_listener: {fileID: 8596095803487832375}
 --- !u!1001 &7202434019138529601
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -248,3 +262,15 @@ Camera:
     type: 3}
   m_PrefabInstance: {fileID: 7202434019138529601}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &8596095803487832375 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1495010368449060982, guid: 9964d0d35be7efa46a1c3c15f551192f,
+    type: 3}
+  m_PrefabInstance: {fileID: 7202434019138529601}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8596095802523375546}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 113e4aa2cd3db44d1ac0cb7e9794964b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
