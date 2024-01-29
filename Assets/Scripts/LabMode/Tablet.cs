@@ -70,7 +70,10 @@ namespace ThermoVR
 
             GameMgr.Events.Register(GameEvents.UISwitched, HandleUISwitched);
 
-            OVRManager.display.RecenteredPose += DisconnectGrab;
+            if (!GameMgr.I.IsDesktop)
+            {
+                OVRManager.display.RecenteredPose += DisconnectGrab;
+            }
 
             m_currID = UIID.Sandbox;
 
