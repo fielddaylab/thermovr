@@ -68,18 +68,16 @@ namespace ThermoVR
             m_graphTabButton.OnPress += HandleGraphTabPress;
             m_resetButton.OnPress += HandleResetPress;
 
+            GameMgr.Events.Register(GameEvents.UISwitched, HandleUISwitched);
+
+            OVRManager.display.RecenteredPose += DisconnectGrab;
+
             m_currID = UIID.Sandbox;
 
             HidePullout();
         }
 
         #region World Interactions
-
-        public void SetFingerTouches(ref bool ltouch, ref bool rtouch) {
-            for (int i = 0; i < m_tabButtons.Count; i++) {
-                m_tabButtons[i].SetFingerTouches(ref ltouch, ref rtouch);
-            }
-        }
 
         // Constant source for UI elements that often show/hide on click
         public void PlayUIAudio(AudioClip clip)
@@ -130,6 +128,19 @@ namespace ThermoVR
         private void HandleResetPress(object sender, EventArgs args)
         {
             PlayClick(m_graphTabButton);
+        }
+
+        private void HandleUISwitched()
+        {
+            DisconnectGrab();
+        }
+
+        private void DisconnectGrab()
+        {
+            touchable.rtouch = false;
+            touchable.ltouch = false;
+            touchable.touch = false;
+            touchable.grabbed = false;
         }
 
         private void PlayClick(Pressable pressable) {

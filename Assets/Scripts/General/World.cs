@@ -124,6 +124,9 @@ public class World : MonoBehaviour
 
         GameMgr.Events?.Register(GameEvents.ResetPressed, HandleResetPressed);
 
+        GameMgr.Events.Register(GameEvents.UISwitched, HandleUISwitched);
+
+        OVRManager.display.RecenteredPose += DisconnectGrab;
 
         movables = new List<Touchable>();
     }
@@ -757,6 +760,29 @@ public class World : MonoBehaviour
     private void HandleRegisterMovable(Touchable touchable) {
         if (!movables.Contains(touchable)) {
             movables.Add(touchable);
+        }
+    }
+
+    private void HandleUISwitched()
+    {
+        DisconnectGrab();
+    }
+
+    private void DisconnectGrab()
+    {
+        if (rgrabbed)
+        {
+            rgrabbed.GetComponent<Touchable>().grabbed = false;
+            rgrabbed.transform.SetParent(rgrabbed.GetComponent<Touchable>().og_parent);
+
+            rgrabbed = null;
+        }
+        if (lgrabbed)
+        {
+            lgrabbed.GetComponent<Touchable>().grabbed = false;
+            lgrabbed.transform.SetParent(lgrabbed.GetComponent<Touchable>().og_parent);
+
+            lgrabbed = null;
         }
     }
 

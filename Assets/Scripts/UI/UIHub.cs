@@ -70,6 +70,8 @@ namespace ThermoVR.UI
             }
 
             toOpen.Open();
+
+            GameMgr.Events.Dispatch(GameEvents.UISwitched);
         }
     }
 }

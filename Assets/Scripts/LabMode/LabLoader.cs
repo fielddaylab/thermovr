@@ -90,6 +90,7 @@ namespace ThermoVR.Lab
         public string InitialConditions;
         public List<string> TaskQuestions;
         public List<ToolType> AllowedTools;
+        public bool GrabAllowed;
         public SetGroup Sets; // p, v, and t values to set
         public LimitsGroup Limits; // stores limits for simulation variables
 
@@ -432,6 +433,8 @@ namespace ThermoVR.Lab
             bool allowAll = iterateToolInfo.ToLower().Contains("all");
             List<ToolType> allowedTools = new List<ToolType>();
 
+            newTaskInfo.GrabAllowed = false;
+
             if (allowAll) {
                 allowedTools.Clear();
                 foreach (ToolType tool in Enum.GetValues(typeof(ToolType))) {
@@ -446,6 +449,15 @@ namespace ThermoVR.Lab
                     else {
                         Debug.Log("[LabLoad] Unrecognized tool type: " + tool);
                     }
+                }
+            }
+
+            foreach (var tool in tools)
+            {
+                if (tool.Trim().Equals("Grab"))
+                {
+                    // enable grab
+                    newTaskInfo.GrabAllowed = true;
                 }
             }
 
