@@ -11,6 +11,7 @@ namespace ThermoVR
         public bool AudioEnabled = false;
 
         public bool IsAlphaRelease = true; // temp solution to managing alpha release channel
+        public bool IsDesktop = false;
 
         private readonly EventDispatcher<object> m_EventDispatcher = new EventDispatcher<object>();
 

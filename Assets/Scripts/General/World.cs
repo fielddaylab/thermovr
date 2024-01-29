@@ -126,7 +126,10 @@ public class World : MonoBehaviour
 
         GameMgr.Events.Register(GameEvents.UISwitched, HandleUISwitched);
 
-        OVRManager.display.RecenteredPose += DisconnectGrab;
+        if (!GameMgr.I.IsDesktop)
+        {
+            OVRManager.display.RecenteredPose += DisconnectGrab;
+        }
 
         movables = new List<Touchable>();
     }
