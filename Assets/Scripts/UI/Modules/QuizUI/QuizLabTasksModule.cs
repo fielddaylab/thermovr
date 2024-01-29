@@ -316,7 +316,14 @@ namespace ThermoVR.Lab
             World.Instance.ModMgr.SetLimits(mods.Limits);
 
             // prevent move ball functionality
-            World.Instance?.ModMgr.DisableGraphBallInteractions();
+            if (mods.GrabAllowed)
+            {
+                World.Instance?.ModMgr.EnableGraphBallInteractions();
+            }
+            else
+            {
+                World.Instance?.ModMgr.DisableGraphBallInteractions();
+            }
         }
 
         private void ResetWorldMods() {

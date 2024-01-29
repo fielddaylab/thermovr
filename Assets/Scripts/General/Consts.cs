@@ -32,6 +32,7 @@ static public class GameEvents
     static public readonly StringHash32 UpdateVaporFlow = "sim:vapor-update-flow"; // double
     static public readonly StringHash32 UpdateVarText = "sim:update-var-text"; // VarUpdate
     static public readonly StringHash32 UpdateGraphSetting = "sim:update-graph-setting"; // GraphSettingUpdate
+    static public readonly StringHash32 UISwitched = "sim:ui-switched"; // GraphSettingUpdate
 
 }
 

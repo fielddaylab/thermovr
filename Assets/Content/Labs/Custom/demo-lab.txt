@@ -157,7 +157,7 @@
 || TOPIC
 
 |Header: "First, we’ll try out each feature of the simulator. Determine which property is being held constant and which one(s) are changing.
-	d. Balloon"
+	d. Negative Weight"
 
 || TASK
 
@@ -169,7 +169,7 @@
 |QuizInfo:
 	--Questions:
 	Question:
-"Apply the balloon until P ≈ 50 kPa."
+"Apply the negative weight until P ≈ 50 kPa."
 	Questions-->
 	Requirements: [(Pressure:50:5)]
 |EfficiencyInfo:
@@ -342,7 +342,7 @@
 || TASK
 
 |Type: [reach-state]
-|ToolInfo:
+|ToolInfo: [all, Grab]
 |SetInfo:
 |LimitInfo:
 |TargetInfo:
@@ -365,7 +365,7 @@
 |QuizInfo: 
 	--Questions:
 	Question:
-"Now apply the balloon and lower the pressure to 85 kPa (ambient pressure in Denver)."
+"Now apply the negative weight, lowering the pressure to 85 kPa (ambient pressure in Denver)."
 	Questions-->
 	Requirements: [(Pressure:82.5:2.5)]
 |EfficiencyInfo:
@@ -381,7 +381,7 @@
 |QuizInfo: 
 	--Questions:
 	Question:
-"Leave the balloon in place."
+"Leave the negative weight in place."
 	Question:
 "Apply the insulation and cooling coil to bring the ball into the 2-phase region, maintaining P ≈ 85 kPa."
 	Questions-->
