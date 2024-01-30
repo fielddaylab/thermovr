@@ -19,6 +19,9 @@ namespace ThermoVR
 
         private List<ToolType> m_allTools = new List<ToolType>();
 
+        private SetGroup m_lastKnownSets;
+        private bool m_modsActive;
+
         private void Awake() {
             foreach (ToolType tool in Enum.GetValues(typeof(ToolType))) {
                 m_allTools.Add(tool);
@@ -132,5 +135,36 @@ namespace ThermoVR
         }
 
         #endregion // Limits
+
+        public void SetActiveMods(TaskInfo newMods)
+        {
+            if (!newMods.Sets.IsEmpty())
+            {
+                m_lastKnownSets = newMods.Sets;
+            }
+            m_modsActive = true;
+        }
+
+        public void DeactivateMods()
+        {
+            m_modsActive = false;
+        }
+
+        public bool AreModsActive()
+        {
+            return m_modsActive;
+        }
+
+        public void ApplySets()
+        {
+            int validCount = 0;
+            if (m_lastKnownSets.P != -1) { validCount++; }
+            if (m_lastKnownSets.V != -1) { validCount++; }
+            if (m_lastKnownSets.T != -1) { validCount++; }
+            if (validCount >= 2)
+            {
+                World.Instance.WarpPVTPartial(m_lastKnownSets.P, m_lastKnownSets.V, m_lastKnownSets.T);
+            }
+        }
     }
 }
