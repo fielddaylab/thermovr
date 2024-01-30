@@ -1,4 +1,4 @@
-name: Thermo VR Desktop Build
+name: Thermo Desktop Build
 
 # Controls when the action will run. Triggers the workflow on creation of 
 # tags.  Creating new 'versions' via github is the most straightforward 
@@ -29,7 +29,7 @@ jobs:
       run: echo ${{ secrets.FIELDDAY_VPN_PASSWORD }} | sudo openconnect --protocol=gp -u ${{ secrets.FIELDDAY_VPN_USERNAME }} --passwd-on-stdin soe.vpn.wisc.edu &
       
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
       with:
         lfs: true
       
@@ -70,8 +70,13 @@ jobs:
         path: Library
         key: Library
     
+    # Build
     - name: Build project
-      uses: game-ci/unity-builder@v2
+      uses: game-ci/unity-builder@v4
+      env:
+        UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+        UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
       with:
         unityVersion: ${{ env.UNITY_VERSION }}
         targetPlatform: WebGL
