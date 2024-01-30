@@ -49,7 +49,7 @@
 	Question:
 "Which properties are changing?"
 	Questions-->
-	Answers: ["Pressure", "Volume"(c), "Temperature"(c), "None of the above"]
+	Answers: ["Pressure", "Volume", "Temperature"(c), "None of the above"]
 |EfficiencyInfo:
 
 || TOPIC
@@ -100,7 +100,7 @@
 	Question:
 "Which properties are changing?"
 	Questions-->
-	Answers: ["Pressure", "Volume"(c), "Temperature"(c), "None of the above"]
+	Answers: ["Pressure", "Volume", "Temperature"(c), "None of the above"]
 |EfficiencyInfo:
 
 || TOPIC
@@ -135,7 +135,7 @@
 	Question:
 "Which property is held constant?"
 	Questions-->
-	Answers: ["Pressure", "Volume", "Temperature", "None of the above"(c)]
+	Answers: ["Pressure", "Volume"(c), "Temperature", "None of the above"]
 |EfficiencyInfo:
 
 
@@ -151,7 +151,7 @@
 	Question:
 "Which properties are changing?"
 	Questions-->
-	Answers: ["Pressure"(c), "Volume"(c), "Temperature"(c), "None of the above"]
+	Answers: ["Pressure"(c), "Volume", "Temperature", "None of the above"]
 |EfficiencyInfo:
 
 || TOPIC
@@ -186,7 +186,7 @@
 	Question:
 "Which property is held constant?"
 	Questions-->
-	Answers: ["Pressure", "Volume", "Temperature", "None of the above"(c)]
+	Answers: ["Pressure"(c), "Volume", "Temperature", "None of the above"]
 |EfficiencyInfo:
 
 
@@ -221,7 +221,7 @@
 |QuizInfo: 
 	--Questions:
 	Question:
-"Apply a stop in the two-phase region, near V = 0.08 m³/kg."
+"Apply the upper stop in the two-phase region, near V = 0.08 m³/kg."
 	Questions-->
 	Requirements: [(VolumeStop:0.08:0.02)]
 |EfficiencyInfo:

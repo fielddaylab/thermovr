@@ -314,7 +314,7 @@
 	Initial Conditions: "Initial pressure is 1.01e2 kPa, initial temperature is 2.93e2 K."
 	--Questions:
 	Question: "Attach the insulation layer and set insulation to 100%."
-	Question: "Set a volume stop to 3.0e-1 m^3/kg."
+	Question: "Set the Upper Stop to 3.0e-1 m^3/kg."
 	Question: "Apply the Bunsen burner until the piston just hits the stop, v = 3.0e-1 m^3/kg."
 	Questions-->
 	Requirements: [(Volume:0.3:0.05)]
@@ -359,7 +359,7 @@
 |TargetInfo:
 |QuizInfo:
 	--Questions:
-	Question: "Set a volume stop to 1.0e-1 m^3/kg."
+	Question: "Set the Lower Stop to 1.0e-1 m^3/kg."
 	Question: "Apply the cooling coil until the piston just hits the stop, v = 1.0e-1 m^3/kg."
 	Questions-->
 	Requirements: [(Region:1:0), (Volume:0.1:0.09)]
