@@ -38,6 +38,11 @@ namespace ThermoVR.Lab
             V = v;
             T = t;
         }
+
+        public bool IsEmpty()
+        {
+            return P == -1 && V == -1 && T == -1;
+        }
     }
 
     [Serializable]

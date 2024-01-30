@@ -300,16 +300,16 @@ namespace ThermoVR.Lab
         }
 
         private void ApplyWorldMods(TaskInfo mods) {
+            World.Instance.ModMgr.SetActiveMods(mods);
+
             // Tools
             World.Instance.ModMgr.SetAllowedTools(mods.AllowedTools);
 
             // Sets
-            int validCount = 0;
-            if (mods.Sets.P != -1) { validCount++; }
-            if (mods.Sets.V != -1) { validCount++; }
-            if (mods.Sets.T != -1) { validCount++; }
-            if (validCount >= 2) {
-                World.Instance.WarpPVTPartial(mods.Sets.P, mods.Sets.V, mods.Sets.T);
+            // only override the previous state if this task explicitly sets a new state
+            if (!mods.Sets.IsEmpty())
+            {
+                World.Instance.ModMgr.ApplySets();
             }
 
             // Limits
@@ -338,6 +338,8 @@ namespace ThermoVR.Lab
 
             // Restore move ball functionality
             World.Instance?.ModMgr.EnableGraphBallInteractions();
+
+            World.Instance.ModMgr.DeactivateMods();
         }
 
         #region Handlers
