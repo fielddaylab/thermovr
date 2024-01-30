@@ -70,6 +70,8 @@ namespace ThermoVR.Dials
         [SerializeField] private Pressable nudgeDownBtn;
         [SerializeField] private float nudgeAmt = 0.05f;
 
+        [SerializeField] private BoxCollider sliderCollider;
+
         [Space(5)]
         [Header("Activation")]
 
@@ -336,32 +338,44 @@ namespace ThermoVR.Dials
             float dy = r_hand_pos.y - prev_hand_pos.y;
             float dz = r_hand_pos.z - prev_hand_pos.z;
 
+            Vector3 dVector = new Vector3(dx, dy, dz);
+
             Vector3 movement_vector = new Vector3(
                 (dx) * orientation_dir.x,
                 (dy) * orientation_dir.y,
                 (dz) * orientation_dir.z
                 );
 
-            movement_vector *= -10f;
-            // float dx = (r_hand_pos.x - hand_pos.x) * -10f;
-            // constrain vector to relative orientation
-            float magnitude = movement_vector.magnitude;
+            float new_val;
+            if (GameMgr.I.IsDesktop) {
+                movement_vector *= -10f;
+                // float dx = (r_hand_pos.x - hand_pos.x) * -10f;
+                // constrain vector to relative orientation
+                float magnitude = movement_vector.magnitude;
 
-            bool orient_positive = (orientation_dir.x + orientation_dir.y + orientation_dir.z) >= 0; // whether orientation vector is overall positively directioned
-            bool delta_positive = (dx + dy + dz) >= 0; // whether movement vector is overall positively directioned
+                bool orient_positive = (orientation_dir.x + orientation_dir.y + orientation_dir.z) >= 0; // whether orientation vector is overall positively directioned
+                bool delta_positive = (dx + dy + dz) >= 0; // whether movement vector is overall positively directioned
 
-            if (orient_positive != delta_positive) {
-                // if not heading in same direction, decrease value
-                magnitude *= -1;
+                if (orient_positive != delta_positive)
+                {
+                    // if not heading in same direction, decrease value
+                    magnitude *= -1;
+                }
+
+                prev_val = val;
+                // float prev_map = map;
+
+                new_val = prev_val - magnitude;
+            }
+            else
+            {
+                new_val = Vector3.Distance(min_pos.position, sliderCollider.ClosestPoint(r_hand_pos)) / total_dist;
             }
 
-            prev_val = val;
-            // float prev_map = map;
-
-            float new_val = Mathf.Clamp(prev_val - magnitude, min_constraint, max_constraint);
+            new_val = Mathf.Clamp(new_val, min_constraint, max_constraint); ;
             //if this close to either end, assume user wants min/max
-            if (new_val < min_constraint + 0.005) new_val = min_constraint;
-            if (new_val > max_constraint - 0.005) new_val = max_constraint;
+            if (new_val < min_constraint + 0.05) new_val = min_constraint;
+            if (new_val > max_constraint - 0.05) new_val = max_constraint;
 
             set_val(new_val);
         }

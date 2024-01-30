@@ -230,7 +230,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2787332236449371758}
   m_LocalRotation: {x: -0, y: -0, z: 0.11112201, w: 0.99380684}
-  m_LocalPosition: {x: 0.0015, y: 0.0199, z: -0}
+  m_LocalPosition: {x: 0.024, y: 0.0236, z: 0}
   m_LocalScale: {x: 1.0000001, y: 1.0000001, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -835,8 +835,8 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 0.21957998, y: 0.04, z: 0.01000009}
-  m_Center: {x: -0.046850048, y: 0.009999976, z: -5.1616805e-12}
+  m_Size: {x: 0.18114911, y: 0.04, z: 0.010000149}
+  m_Center: {x: -0.0660655, y: 0.009999849, z: -5.9244285e-12}
 --- !u!54 &6030497066997557905
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -888,6 +888,7 @@ MonoBehaviour:
   nudgeUpBtn: {fileID: 7657833560794868434}
   nudgeDownBtn: {fileID: 5383032121643572665}
   nudgeAmt: 0.001
+  sliderCollider: {fileID: 6030497066997557904}
   knob_renderers:
   - {fileID: 3317261218618807632}
   nudge_up_renderer: {fileID: 8373637421563490065}
