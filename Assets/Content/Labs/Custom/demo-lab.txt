@@ -270,66 +270,6 @@
 |EfficiencyInfo:
 
 
-|| TASK
-
-|Type: [multiple-choice]
-|ToolInfo:
-|SetInfo:
-|LimitInfo:
-|TargetInfo:
-|QuizInfo: 
-	--Questions:
-	Question: "What region will the ball be in if T = 373.15 K and P < P_sat?"
-	Questions-->
-	Answers: ["Subcooled Liquid", "Two-Phase"(c), "Superheated Vapor"]
-|EfficiencyInfo:
-
-
-
-|| TASK
-
-|Type: [multiple-choice]
-|ToolInfo:
-|SetInfo:
-|LimitInfo:
-|TargetInfo:
-|QuizInfo: 
-	--Questions:
-	Question: "What region will the ball be in if T = 373.15 K and P > P_sat?"
-	Questions-->
-	Answers: ["Subcooled Liquid"(c), "Two-Phase", "Superheated Vapor"]
-|EfficiencyInfo:
-
-
-|| TASK
-
-|Type: [multiple-choice]
-|ToolInfo:
-|SetInfo:
-|LimitInfo:
-|TargetInfo:
-|QuizInfo: 
-	--Questions:
-	Question: "What region will the ball be in if P = 101 kPa and T > 373.15 K?"
-	Questions-->
-	Answers: ["Subcooled Liquid", "Two-Phase", "Superheated Vapor"(c)]
-|EfficiencyInfo:
-
-
-|| TASK
-
-|Type: [multiple-choice]
-|ToolInfo:
-|SetInfo:
-|LimitInfo:
-|TargetInfo:
-|QuizInfo: 
-	--Questions:
-	Question: "What region will the ball be in if P = 101 kPa and T < 373.15 K?"
-	Questions-->
-	Answers: ["Subcooled Liquid"(c), "Two-Phase", "Superheated Vapor"]
-|EfficiencyInfo:
-
 || TOPIC
 
 |Header: "First, we’ll try out each feature of the simulator.
