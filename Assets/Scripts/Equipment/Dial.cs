@@ -88,8 +88,10 @@ namespace ThermoVR.Dials
         public TextMeshPro textv_tmpro;
 
         public int response_power; //sometimes, we want log mapping
-        [System.NonSerialized]
+
+        // [System.NonSerialized]
         public float val = 0.0f; //abstract 0-1 representing knob position
+
         [System.NonSerialized]
         public float prev_val = 0.0f;
         public float default_val = 0;
@@ -123,11 +125,21 @@ namespace ThermoVR.Dials
         private float min_constraint;
         private float max_constraint;
 
+        private float min_override; // prevents dial from ever going less than override value (useful for volume stops, where min val is technically 0 but we never want it below ThermoMath.v_min)
+
         [HideInInspector] public UnityEvent DialMoved;
 
-        public void Init(float min_map, float max_map, string valFormat) {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="min_map"></param>
+        /// <param name="max_map"></param>
+        /// <param name="valFormat"></param>
+        /// <param name="min_override_real">The mapped value of the min override</param>
+        public void Init(float min_map, float max_map, string valFormat, float min_override_real = 0) {
             this.min_map = min_map;
             this.max_map = max_map;
+            this.min_override = MapToDialVal(min_override_real);
             this.valFormat = valFormat;
             if (min_pos == null) {
                 orientation_dir = new Vector3(1, 0, 0);
@@ -219,9 +231,14 @@ namespace ThermoVR.Dials
             return anyActive;
         }
 
+        public float MapToDialVal(float inMap)
+        {
+            return Mathf.Pow(inMap, 1 / (float)response_power);
+        }
+
         public void forceMap() {
             //map = min_map+(max_map-min_map)*val;
-            map = response_power > 1 ? mapSharp() : mapLinear();
+            map = response_power > 1 ? mapSharp(val) : mapLinear(val);
         }
 
         public void Reset(bool isActive) {
@@ -255,7 +272,7 @@ namespace ThermoVR.Dials
         }
 
         public void set_mapped_val(float target_map) {
-            float newVal = Mathf.Pow(target_map, 1 / (float)response_power);
+            float newVal = MapToDialVal(target_map);
 
             set_val(newVal);
         }
@@ -286,7 +303,7 @@ namespace ThermoVR.Dials
         /*
          * Standard way to map from 0-1 slder "val" range to min-max "tool" range.
          */
-        private float mapLinear() { return min_map + (max_map - min_map) * val; }
+        private float mapLinear(float inVal) { return min_map + (max_map - min_map) * inVal; }
 
         /*
          * Non-linear mapping, which raises the 0-1 "val" to given power.
@@ -294,7 +311,7 @@ namespace ThermoVR.Dials
          * accelerating as we approach 1.
          * Useful for sliders whose tool's influence tends to apply too rapidly at small values.
          */
-        private float mapSharp() { return min_map + (max_map - min_map) * Mathf.Pow(val, response_power); }
+        private float mapSharp(float inVal) { return min_map + (max_map - min_map) * Mathf.Pow(inVal, response_power); }
 
         private void nudgeValUp()
         {
@@ -372,9 +389,9 @@ namespace ThermoVR.Dials
                 new_val = Vector3.Distance(min_pos.position, sliderCollider.ClosestPoint(r_hand_pos)) / total_dist;
             }
 
-            new_val = Mathf.Clamp(new_val, min_constraint, max_constraint); ;
+            new_val = Mathf.Clamp(new_val, Math.Max(min_constraint, min_override), max_constraint);
             //if this close to either end, assume user wants min/max
-            if (new_val < min_constraint + 0.05) new_val = min_constraint;
+            if (new_val < Math.Max(min_constraint, min_override) + 0.05) new_val = Math.Max(min_constraint, min_override);
             if (new_val > max_constraint - 0.05) new_val = max_constraint;
 
             set_val(new_val);

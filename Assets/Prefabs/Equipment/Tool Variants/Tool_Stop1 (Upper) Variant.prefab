@@ -239,7 +239,7 @@ PrefabInstance:
     - target: {fileID: 1469844742514000810, guid: 65b0020cd06dbeb4d8b64470f234f970,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.197
+      value: -0.263
       objectReference: {fileID: 0}
     - target: {fileID: 1469844742514000810, guid: 65b0020cd06dbeb4d8b64470f234f970,
         type: 3}
@@ -318,9 +318,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aacb888d85a9b0942911e934272b8fda, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_MaxPos: {x: 0, y: 0.4398, z: 0}
-  m_MinPos: {x: 0, y: -0.187, z: 0}
-  m_PistonCapHeight: 0.11
+  m_MaxPos: {x: 0, y: 0.3691, z: 0}
+  m_MinPos: {x: 0, y: -0.263, z: 0}
+  m_PistonCapHeight: 0.063
+  m_minOffsetVal: 0.2406678
   m_MappingType: 1
 --- !u!114 &6332528390907336406
 MonoBehaviour:

@@ -129,6 +129,8 @@ namespace ThermoVR.Lab
                 float topicTabBuffer = m_ySpacing - topicTabRect.sizeDelta.y * topicTabRect.localScale.y;
                 // m_topicTabContainer.sizeDelta = new Vector2((topicStartingOffset + topicTabRect.sizeDelta.x * topicTabRect.localScale.x + topicTabBuffer) * m_currLab.Topics.Count, m_topicTabContainer.sizeDelta.y);
 
+                bool allTasksInTopicCorrect = true;
+
                 // Create lab task tabs
                 for (int taskIndex = 0; taskIndex < m_currLab.Topics[topicIndex].Tasks.Count; taskIndex++)
                 {
@@ -137,16 +139,29 @@ namespace ThermoVR.Lab
                     GameObject newTabObj = Instantiate(m_tabPrefab, m_tabContainer.transform);
                     newTabObj.transform.localPosition += new Vector3(startingOffset + m_xSpacing * taskIndex, 0, 0);
 
+                    int currTopicIndex = topicIndex;
+
                     LabTab newTab = newTabObj.GetComponent<LabTab>();
                     m_tabs[topicIndex].TaskTabs.Add(newTab);
+                    m_tabs[topicIndex].TaskTabs[taskIndex].OnCompletionStateUpdated += delegate { HandleLabTaskCompletionUpdated(currTopicIndex); };
 
                     newTab.Button.SetText("Task " + (taskIndex + 1));
                     int currTabIndex = taskIndex;
-                    int currTopicIndex = topicIndex;
-                    newTab.HideCompletionSprite();
+
+                    m_tabs[topicIndex].TaskTabs[taskIndex].CompletedAndCorrect = LabMgr.Instance.Stats.LabMap[m_currLab.ID].CompletionState[topicIndex][taskIndex];
+                    if (m_tabs[topicIndex].TaskTabs[taskIndex].CompletedAndCorrect)
+                    {
+                        newTab.ShowCompletionSprite();
+                    }
+                    else
+                    {
+                        newTab.HideCompletionSprite();
+                        allTasksInTopicCorrect = false;
+                    }
+
                     newTab.Button.OnButtonPressed += delegate { HandleLabTabPressed(currTopicIndex, currTabIndex); };
 
-                    LabTaskFrame newFrame = PopulateLabTaskFrame(m_currLab.Topics[topicIndex].Tasks[currTabIndex], currTopicIndex);
+                    LabTaskFrame newFrame = PopulateLabTaskFrame(m_currLab.Topics[topicIndex].Tasks[currTabIndex], currTopicIndex, m_tabs[topicIndex].TaskTabs[taskIndex].CompletedAndCorrect);
                     // m_frames[topicIndex].Add(newFrame);
 
                     RectTransform tabRect = newTabObj.GetComponent<RectTransform>();
@@ -160,6 +175,15 @@ namespace ThermoVR.Lab
 
                     // tabs start hidden
                     DeactivateTopicTab(topicIndex);
+                }
+
+                if (allTasksInTopicCorrect)
+                {
+                    newTopicTab.ShowCompletionSprite();
+                }
+                else
+                {
+                    newTopicTab.HideCompletionSprite();
                 }
             }
 
@@ -184,6 +208,7 @@ namespace ThermoVR.Lab
 
             for (int i = 0; i < m_tabs.Count; i++) {
                 for (int j = 0; j < m_tabs[i].TaskTabs.Count; j++) {
+                    m_tabs[i].TaskTabs[j].RemoveCompletionStateListeners();
                     Destroy(m_tabs[i].TaskTabs[j].gameObject);
                 }
                 Destroy(m_tabs[i].gameObject);
@@ -204,7 +229,7 @@ namespace ThermoVR.Lab
 
         #endregion // IUIModule
 
-        private LabTaskFrame PopulateLabTaskFrame(TaskInfo taskInfo, int currTopicIndex) {
+        private LabTaskFrame PopulateLabTaskFrame(TaskInfo taskInfo, int currTopicIndex, bool completed) {
             GameObject newFrameObj = null;
             LabTaskFrame newFrame = null;
 
@@ -289,7 +314,7 @@ namespace ThermoVR.Lab
                     break;
             }
 
-
+            newFrame.LoadCompleted(completed);
 
             if (framePopulated) {
                 newFrameObj.SetActive(false);
@@ -451,6 +476,40 @@ namespace ThermoVR.Lab
             m_ScrollHorizontalValidVisibleIndex++;
 
             RefreshInteractableTabs();
+        }
+
+        private void HandleLabTaskCompletionUpdated(int topicIndex)
+        {
+            LabStats currStats;
+
+            bool allCorrect = true;
+            for (int i = 0; i < m_tabs[topicIndex].TaskTabs.Count; i++)
+            {
+                if (!m_tabs[topicIndex].TaskTabs[i].CompletedAndCorrect)
+                {
+                    allCorrect = false;
+                }
+
+                currStats = LabMgr.Instance.Stats.LabMap[m_currLab.ID];
+                currStats.CompletionState[topicIndex][i] = m_tabs[topicIndex].TaskTabs[i].CompletedAndCorrect;
+                LabMgr.Instance.Stats.LabMap[m_currLab.ID] = currStats;
+            }
+
+            if (allCorrect)
+            {
+                // Display green checkmark
+                m_tabs[topicIndex].ShowCompletionSprite();
+            }
+            else
+            {
+                // Remove green checkmark
+                m_tabs[topicIndex].HideCompletionSprite();
+            }
+
+            // Refresh Player Progress
+            currStats = LabMgr.Instance.Stats.LabMap[m_currLab.ID];
+            currStats.RefreshProgress();
+            LabMgr.Instance.Stats.LabMap[m_currLab.ID] = currStats;
         }
 
         #endregion // Handlers

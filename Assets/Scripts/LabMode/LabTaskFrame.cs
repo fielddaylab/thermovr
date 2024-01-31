@@ -26,6 +26,11 @@ namespace ThermoVR.Lab
             TaskResetButton.OnButtonPressed -= HandleResetPressed;
         }
 
+        public void LoadCompleted(bool completed)
+        {
+            AnswerEvaluator.LoadCompleted(completed);
+        }
+
         private void Update()
         {
             UpdateResetButtonState();

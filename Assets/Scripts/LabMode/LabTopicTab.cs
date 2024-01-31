@@ -17,6 +17,8 @@ namespace ThermoVR.Lab
 
         [SerializeField] private BoxCollider m_collider;
 
+        [SerializeField] private Image m_completionSocket;
+
         public void EnableCollider()
         {
             m_collider.enabled = true;
@@ -25,6 +27,16 @@ namespace ThermoVR.Lab
         public void DisableCollider()
         {
             m_collider.enabled = false;
+        }
+
+        public void ShowCompletionSprite()
+        {
+            m_completionSocket.enabled = true;
+        }
+
+        public void HideCompletionSprite()
+        {
+            m_completionSocket.enabled = false;
         }
 
         public LabTopicTab()

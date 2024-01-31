@@ -72,6 +72,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: ChamberPressure_Gauge
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 7df9d313a3024d949b274ca49c7ab073,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7df9d313a3024d949b274ca49c7ab073, type: 3}
 --- !u!23 &3715577274515359266 stripped
@@ -189,6 +194,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4fd9fbe85fb32634d8397baf9722b542, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  allowed: 0
   always_engaged: 1
   tool_type: 6
   ModelContainer: {fileID: 5503698224716658803}
@@ -267,6 +273,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: PressureGauge_Needle
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: ef7fb65d953d3b241aa5a61e13843098,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ef7fb65d953d3b241aa5a61e13843098, type: 3}

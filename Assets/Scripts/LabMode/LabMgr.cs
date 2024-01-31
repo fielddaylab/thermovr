@@ -8,6 +8,8 @@ namespace ThermoVR.Lab
     {
         public static LabMgr Instance;
 
+        public LabStatsMgr Stats;
+
         public List<LabInfo> AvailableLabs;
         // dict to list of completed questions
 
@@ -30,6 +32,16 @@ namespace ThermoVR.Lab
 
         private void HandleLabLoaded(LabInfo labInfo) {
             AvailableLabs.Add(labInfo);
+
+            LabStats newStats = new LabStats();
+            newStats.CompletionState = new bool[labInfo.Topics.Count][];
+            for (int i = 0; i < labInfo.Topics.Count; i++)
+            {
+                newStats.CompletionState[i] = new bool[labInfo.Topics[i].Tasks.Count];
+            }
+            newStats.Progress = 0;
+
+            Stats.LabMap.Add(labInfo.ID, newStats);
         }
 
         #endregion // Handlers

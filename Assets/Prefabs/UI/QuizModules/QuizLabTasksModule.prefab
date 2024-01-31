@@ -160,8 +160,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -0.22399902}
-  m_SizeDelta: {x: 0.75, y: -5.088}
+  m_AnchoredPosition: {x: 0, y: -0.19200134}
+  m_SizeDelta: {x: 0.75, y: -5.024}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4688881082876102961
 CanvasRenderer:
@@ -466,12 +466,12 @@ MonoBehaviour:
   m_taskFramePrefabReachState: {fileID: 3797071151462014909, guid: c68e239297b376947b92b698b6edb27e,
     type: 3}
   m_xSpacing: 2.125
-  m_ySpacing: 0.95
+  m_ySpacing: 0.97
   m_homeButton: {fileID: 3312221021462906448}
   m_homeAudioClip: {fileID: 8300000, guid: 6ad851833fd5df24c84fbadccdab63d2, type: 3}
   m_topicHeader: {fileID: 5419212630959485208}
   m_ScrollVerticalContainer: {fileID: 4269014658452222480}
-  m_VerticalScrollSpacing: 0.95
+  m_VerticalScrollSpacing: 0.97
   m_ScrollUpBtn: {fileID: 1573669568201312332}
   m_ScrollDownBtn: {fileID: 2728236057985771228}
   m_ScrollHorizontalContainer: {fileID: 5292719370241887439}
@@ -1177,7 +1177,7 @@ PrefabInstance:
     - target: {fileID: 7198705472157709537, guid: 0659a796980476c4dbfb9e3a565a4840,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: -0.069999695
       objectReference: {fileID: 0}
     - target: {fileID: 7198705472157709537, guid: 0659a796980476c4dbfb9e3a565a4840,
         type: 3}
@@ -1202,7 +1202,7 @@ PrefabInstance:
     - target: {fileID: 8318478736649460794, guid: 0659a796980476c4dbfb9e3a565a4840,
         type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0659a796980476c4dbfb9e3a565a4840, type: 3}
@@ -1386,6 +1386,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 5292719370241887439}
     m_Modifications:
+    - target: {fileID: 6288379221725422679, guid: e43b2f3987d3d2f45805e2d07afc17fb,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7652221900659321091, guid: e43b2f3987d3d2f45805e2d07afc17fb,
         type: 3}
       propertyPath: m_Name

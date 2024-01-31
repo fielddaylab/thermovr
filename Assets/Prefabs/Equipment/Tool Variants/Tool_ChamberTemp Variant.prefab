@@ -67,6 +67,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: TempGauge_Needle
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 78bae49149492404f8b671a9a9dc37d2,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 78bae49149492404f8b671a9a9dc37d2, type: 3}
 --- !u!1001 &7420871942765223649
@@ -166,6 +171,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2671cd91acdecbc43b32ddf7700de2d4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  allowed: 0
   always_engaged: 1
   tool_type: 5
   ModelContainer: {fileID: 8257855382351835781}
@@ -261,6 +267,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: ChamberTemp_Gauge
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 6856b8e261155f54b8da9aa4f336180e,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6856b8e261155f54b8da9aa4f336180e, type: 3}
