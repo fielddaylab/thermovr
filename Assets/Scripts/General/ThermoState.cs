@@ -94,6 +94,7 @@ namespace ThermoVR.State
         public double v_stop2; // volume stop specified by tool_stop2
 
         private static double STOP_BUFFER = 0.005f;
+        private static double STOP_MARGIN = 0.00001f;
         private static double LIQ_2_DIVISION = 0.002;
 
         private void OnEnable()
@@ -289,6 +290,69 @@ namespace ThermoVR.State
             }
         }
 
+        public void warp_pv_unobtrusive(double p, double v, double t)
+        {
+            try
+            {
+                pressure = p;
+                volume = v;
+                temperature = t;
+
+                // iterative_weight = ambient_pressure;
+
+                region = ThermoMath.region_given_pvt(pressure, volume, temperature);
+                if (region == ThermoMath.region_twophase)
+                {
+                    try
+                    {
+                        entropy = ThermoMath.s_given_px(pressure, quality, region);
+                        enthalpy = ThermoMath.h_given_px(pressure, quality, region);
+                    }
+                    catch (Exception ex)
+                    {
+                        ThermoMath.got_error = true;
+                    }
+                }
+                else
+                {
+                    entropy = ThermoMath.s_given_vt(volume, temperature, region);
+                    enthalpy = ThermoMath.h_given_vt(volume, temperature, region);
+                }
+
+                // region = ThermoMath.region_given_ps(pressure, entropy);
+
+                switch (region)
+                {
+                    case ThermoMath.region_liquid:
+                        {
+                            quality = 0;
+                            internalenergy = ThermoMath.u_given_vt(volume, temperature, region);
+                            break;
+                        }
+                    case ThermoMath.region_twophase:
+                        {
+                            // temperature = prev_temperature;
+                            // pressure = prev_pressure;
+                            // volume = prev_volume;
+                            // region = prev_region;
+                            quality = ThermoMath.x_given_pv(pressure, volume, region);
+                            entropy = ThermoMath.s_given_px(pressure, quality, region);
+                            enthalpy = ThermoMath.h_given_px(pressure, quality, region);
+                            internalenergy = ThermoMath.u_given_px(pressure, quality);
+                            break;
+                        }
+                    case ThermoMath.region_vapor:
+                        {
+                            quality = 1;
+                            internalenergy = ThermoMath.u_given_vt(volume, temperature, region);
+                            break;
+                        }
+                }
+            }
+            catch (Exception e) { }
+            clamp_state();
+        }
+
         public void warp_pv(double p, double v, double t) {
             try {
                 pressure = p;
@@ -395,9 +459,10 @@ namespace ThermoVR.State
             }
 
             // determine whether currently applied tools force a constant volume
-            bool constant_v = treat_as_constant_v_add_heat(applied_heat, insulation_coefficient, delta_time, p_outside);
+            bool constant_v = treat_as_constant_v_add_heat(applied_heat, insulation_coefficient, delta_time, p_outside, out double stopV);
 
             if (constant_v) {
+                volume = stopV;
                 add_heat_constant_v_per_delta_time(applied_heat, insulation_coefficient, delta_time);
             }
             else {
@@ -672,7 +737,7 @@ namespace ThermoVR.State
         }
 
         public void add_pressure_uninsulated_per_delta_time(double p, double delta_time, double insulation_coefficient, double p_outside, double temperature_gradient) {
-            if (blocked_by_stops(p_outside)) {
+            if (blocked_by_stops(p_outside, out double stopV, false)) {
                 return;
             }
 
@@ -890,8 +955,8 @@ namespace ThermoVR.State
             clamp_state();
         }
 
-        private bool blocked_by_stops(double p_outside) {
-            if (region == 0) { return false; } // liquid volume doesn't change
+        private bool blocked_by_stops(double p_outside, out double stopV, bool isHeat, double applied_heat = 0) {
+            if (region == 0) { stopV = -1;  return false; } // liquid volume doesn't change
 
             bool within_vstop_buffer = false;
 
@@ -907,19 +972,58 @@ namespace ThermoVR.State
 
                 if (within_vstop_buffer) {
                     if (volume < compare_v && pressure >= p_outside) {
+                        stopV = volume;
+                        if (isHeat)
+                        {
+                            if (applied_heat > 0)
+                            {
+                                stopV = compare_v - STOP_MARGIN;
+                                return true;
+                            }
+                            else if (pressure > p_outside)
+                            {
+                                return true;
+                            }
+                            else
+                            {
+                                return false;
+                            }
+
+                        }
                         return true;
                     }
                     else if (volume > compare_v && pressure <= p_outside) {
+                        stopV = volume;
+                        if (isHeat)
+                        {
+                            if (applied_heat < 0)
+                            {
+                                stopV = compare_v + STOP_MARGIN;
+                                return true;
+                            }
+                            else if (pressure < p_outside)
+                            {
+                                return true;
+                            }
+                            else
+                            {
+                                return false;
+                            }
+
+                        }
                         return true;
                     }
                 }
             }
 
+            // needs a way to escape from the buffer zone in 1 tick
+
+            stopV = -1;
             return false;
         }
 
         public void add_pressure_insulated_per_delta_time(double p, double delta_time, double p_outside, double temperature_gradient) {
-            if (blocked_by_stops(p_outside)) {
+            if (blocked_by_stops(p_outside, out double stopV, false)) {
                 return;
             }
 
@@ -1082,8 +1186,8 @@ namespace ThermoVR.State
         /// <param name="insulation_coefficient"></param>
         /// <param name="delta_time"></param>
         /// <returns></returns>
-        private bool treat_as_constant_v_add_heat(double applied_heat, double insulation_coefficient, double delta_time, double p_outside) {
-            bool blocked = blocked_by_stops(p_outside); // first pass
+        private bool treat_as_constant_v_add_heat(double applied_heat, double insulation_coefficient, double delta_time, double p_outside, out double stopV) {
+            bool blocked = blocked_by_stops(p_outside, out stopV, true, applied_heat); // first pass
             if (applied_heat <= ToolMgr.BURNER_MAX && applied_heat >= ToolMgr.COIL_MAX) {
                 // normal tool adjustments
                 return blocked;
