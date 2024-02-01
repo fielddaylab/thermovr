@@ -736,7 +736,8 @@ namespace ThermoVR.State
             clamp_state();
         }
 
-        public void add_pressure_uninsulated_per_delta_time(double p, double delta_time, double insulation_coefficient, double p_outside, double temperature_gradient) {
+        public void add_pressure_uninsulated_per_delta_time(double p, double delta_time, double insulation_coefficient, double p_outside, double temperature_gradient, out bool tryIterate) {
+            tryIterate = false;
             if (blocked_by_stops(p_outside, out double stopV, false)) {
                 return;
             }
@@ -765,6 +766,7 @@ namespace ThermoVR.State
                 }
             }
             if (treat_as_constant_v_add_p_uninsulated(new_p, added_p, iterative_dif, delta_time, insulation_coefficient)) {
+                tryIterate = true;
                 return;
             }
             if (new_p < ThermoMath.psat_min) {
@@ -988,7 +990,10 @@ namespace ThermoVR.State
                             {
                                 return false;
                             }
-
+                        }
+                        else
+                        {
+                            // TODO: similar stop margin logic for pressure
                         }
                         return true;
                     }
@@ -1009,7 +1014,10 @@ namespace ThermoVR.State
                             {
                                 return false;
                             }
-
+                        }
+                        else
+                        {
+                            // TODO: similar stop margin logic for pressure
                         }
                         return true;
                     }
@@ -1022,7 +1030,8 @@ namespace ThermoVR.State
             return false;
         }
 
-        public void add_pressure_insulated_per_delta_time(double p, double delta_time, double p_outside, double temperature_gradient) {
+        public void add_pressure_insulated_per_delta_time(double p, double delta_time, double p_outside, double temperature_gradient, out bool tryIterate) {
+            tryIterate = false;
             if (blocked_by_stops(p_outside, out double stopV, false)) {
                 return;
             }
@@ -1043,6 +1052,7 @@ namespace ThermoVR.State
                 }
             }
             if (treat_as_constant_v_add_p_insulated(p, delta_time)) {
+                tryIterate = true;
                 return;
             }
             if (new_p < ThermoMath.psat_min) {
