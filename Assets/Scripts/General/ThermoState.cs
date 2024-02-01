@@ -93,7 +93,7 @@ namespace ThermoVR.State
         public double v_stop1; // volume stop specified by tool_stop1
         public double v_stop2; // volume stop specified by tool_stop2
 
-        private static float STOP_BUFFER = 0.005f;
+        private static double STOP_BUFFER = 0.005f;
         private static double LIQ_2_DIVISION = 0.002;
 
         private void OnEnable()

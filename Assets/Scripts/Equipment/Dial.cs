@@ -324,6 +324,11 @@ namespace ThermoVR.Dials
                 // clamp to top
                 set_val(1);
             }
+
+            for (int t = 0; t < relevant_tools.Count; t++)
+            {
+                World.Instance.ToolMgr.UpdateApplyTool(relevant_tools[t]);
+            }
         }
 
         private void nudgeValDown()
@@ -336,6 +341,11 @@ namespace ThermoVR.Dials
             {
                 // clamp to bottom
                 set_val(0);
+            }
+
+            for (int t = 0; t < relevant_tools.Count; t++)
+            {
+                World.Instance.ToolMgr.UpdateApplyTool(relevant_tools[t]);
             }
         }
 
