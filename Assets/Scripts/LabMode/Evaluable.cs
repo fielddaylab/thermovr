@@ -25,6 +25,14 @@ namespace ThermoVR.Lab
 
         public abstract void HandleEvaluation(bool correct);
 
+        public void LoadCompleted(bool completed)
+        {
+            if (completed)
+            {
+                m_evaluated = true;
+            }
+        }
+
         #endregion // IEvaluable
     }
 }

@@ -65,6 +65,7 @@ public static class ThermoMath
     public static double psat_max;
     //M³/kg
     public static double v_min;
+    public static double v_effective_min; // observed minimum volume of the system
     public static double v_max;
     public static double[] v_neutral;
     public static double v_smallstep;
@@ -117,6 +118,7 @@ public static class ThermoMath
 
         //M³/kg
         v_min = 1.0 / 3000;  // 0.0003
+        v_effective_min = 0.00100176631280715;
         v_max = 1.0 / 0.001; // 1000
         v_neutral = new double[] { 0.001, 21.85, 0 }; //note: v_neutral[2] calculated/set below
         v_smallstep = 0.00001;

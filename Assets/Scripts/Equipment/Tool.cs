@@ -27,14 +27,23 @@ namespace ThermoVR.Tools
         Stops
     }
 
+    public enum StopDir
+    {
+        None,
+        Increase,
+        Decrease
+    }
+
     public struct VolumeStop
     {
         public double Volume;
         public Tool Source;
+        public StopDir StoppedDir;
 
         public VolumeStop(double volume, Tool source) {
             Volume = volume;
             Source = source;
+            StoppedDir = StopDir.None;
         }
     }
 

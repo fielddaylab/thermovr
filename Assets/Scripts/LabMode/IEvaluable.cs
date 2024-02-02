@@ -15,6 +15,8 @@ namespace ThermoVR {
         public abstract void ResetState();
 
         public abstract void HandleEvaluation(bool correct);
+
+        public void LoadCompleted(bool completed);
     }
 }
 

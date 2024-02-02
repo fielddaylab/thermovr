@@ -64,6 +64,7 @@ namespace ThermoVR.Tools {
         [SerializeField] private Vector3 m_MaxPos;
         [SerializeField] private Vector3 m_MinPos;
         [SerializeField] private float m_PistonCapHeight;
+        [SerializeField] private float m_minOffsetVal; // offset from volume stop position at 0 volume to position at ThemoMath.v_min volume, which is the acting min position
 
         protected float m_Span; // difference between min and max positions
 
@@ -105,6 +106,10 @@ namespace ThermoVR.Tools {
             {
                 return;
             }
+            if (!m_Tool.engaged)
+            {
+                return;
+            }
 
             float newToolVal = 0;
 
@@ -128,6 +133,9 @@ namespace ThermoVR.Tools {
                 }
 
                 m_Tool.transform.localPosition = new_tool_pos;
+
+                // Add dial val offset
+
             }
         }
 

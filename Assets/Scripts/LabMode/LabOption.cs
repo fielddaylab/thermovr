@@ -27,6 +27,11 @@ namespace ThermoVR.Lab
             LoadButton.OnButtonPressed += OnLoadButtonPressed;
         }
 
+        public void SetSlider(float val)
+        {
+            m_Slider.value = val;
+        }
+
         public void FixCollider(BoxCollider compare)
         {
             Collider.center = compare.center;

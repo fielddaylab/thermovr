@@ -22,6 +22,15 @@ namespace ThermoVR {
         private void SetMaxScale() {
             m_MaxScale = this.transform.localScale;
         }
+        /// <summary>
+        /// Position the piston in the scene at the desired min position, then run this function.
+        /// </summary>
+        [ContextMenu("Set Default Scale")]
+        private void SetDefaultScale()
+        {
+            m_DefaultScale = this.transform.localScale;
+        }
+
 
         /// <summary>
         /// Shortcut to preview max scale
@@ -39,6 +48,15 @@ namespace ThermoVR {
             this.transform.localScale = m_MinScale;
         }
 
+        /// <summary>
+        /// Shortcut to preview min scale
+        /// </summary>
+        [ContextMenu("Preview Default Scale")]
+        private void PreviewDefaultScale()
+        {
+            this.transform.localScale = m_DefaultScale;
+        }
+
         #endregion // Editor
 
         #region Inspector
@@ -49,6 +67,7 @@ namespace ThermoVR {
         [SerializeField] private GameObject m_ContentsContainer;
         [SerializeField] private Vector3 m_MaxScale;
         [SerializeField] private Vector3 m_MinScale;
+        [SerializeField] private Vector3 m_DefaultScale;
 
         private float m_Span; // difference between min and max positions
 

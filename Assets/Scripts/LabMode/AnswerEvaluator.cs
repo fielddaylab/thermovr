@@ -109,5 +109,13 @@ namespace ThermoVR.Lab
 
             return eval;
         }
+
+        public void LoadCompleted(bool completed)
+        {
+            for (int i = 0; i < m_toEvaluate.Length; i++)
+            {
+                m_toEvaluate[i].LoadCompleted(completed);
+            }
+        }
     }
 }

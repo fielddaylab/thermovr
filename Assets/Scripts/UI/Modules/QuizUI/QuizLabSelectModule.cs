@@ -53,8 +53,8 @@ namespace ThermoVR.Lab
                 option.LoadButton.ClearListeners();
                 option.SetLabInfo(LabMgr.Instance.AvailableLabs[i]);
                 option.FixCollider(m_OptionPool.Prefab.Collider);
+                option.SetSlider(LabMgr.Instance.Stats.LabMap[LabMgr.Instance.AvailableLabs[i].ID].Progress);
 
-                // TODO: set Slider progess
                 m_ActiveOptions.Add(option);
             }
 

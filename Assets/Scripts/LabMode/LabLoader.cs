@@ -12,6 +12,7 @@ namespace ThermoVR.Lab
     [Serializable]
     public struct LabInfo
     {
+        public StringHash32 ID;
         public string Name;
         public string Author;
         public List<TopicInfo> Topics;
@@ -266,6 +267,7 @@ namespace ThermoVR.Lab
                 }
             }
 
+            newLabInfo.ID = newLabInfo.Name + newLabInfo.Author;
             return succeeded;
         }
 

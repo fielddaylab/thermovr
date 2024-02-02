@@ -20,6 +20,9 @@ namespace ThermoVR.Lab
 
         private LabTaskFrame m_taskFrame;
 
+        public bool CompletedAndCorrect;
+        public event EventHandler OnCompletionStateUpdated;
+
         public ThermoButton Button {
             get { return m_thermoButton; }
         }
@@ -58,6 +61,11 @@ namespace ThermoVR.Lab
             }
         }
 
+        public void RemoveCompletionStateListeners()
+        {
+            OnCompletionStateUpdated = null;
+        }
+
         public void RegisterFrame(LabTaskFrame frame) {
             m_taskFrame = frame;
 
@@ -83,14 +91,20 @@ namespace ThermoVR.Lab
         private void HandleEvalUpdate(object sender, BoolEventArgs args) {
             if (args.Value) {
                 ShowCompletionSprite();
+                CompletedAndCorrect = true;
             }
             else {
                 HideCompletionSprite();
+                CompletedAndCorrect = false;
             }
+            OnCompletionStateUpdated?.Invoke(this, EventArgs.Empty);
         }
 
         private void HandleFrameReset(object sender, EventArgs args) {
             HideCompletionSprite();
+            CompletedAndCorrect = false;
+
+            OnCompletionStateUpdated?.Invoke(this, EventArgs.Empty);
         }
     }
 }

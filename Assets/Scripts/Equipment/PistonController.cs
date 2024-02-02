@@ -16,11 +16,20 @@ namespace ThermoVR {
         }
 
         /// <summary>
-        /// Position the piston in the scene at the desired min position, then run this function.
+        /// Position the piston in the scene at the desired max position, then run this function.
         /// </summary>
         [ContextMenu("Set Max Position")]
         private void SetMaxPos() {
             m_MaxPos = this.transform.localPosition;
+        }
+
+        /// <summary>
+        /// Position the piston in the scene at the desired default position, then run this function.
+        /// </summary>
+        [ContextMenu("Set Default Position")]
+        private void SetDefaultPos()
+        {
+            m_DefaultPos = this.transform.localPosition;
         }
 
         /// <summary>
@@ -39,12 +48,22 @@ namespace ThermoVR {
             this.transform.localPosition = m_MinPos;
         }
 
+        /// <summary>
+        /// Shortcut to preview min position
+        /// </summary>
+        [ContextMenu("Preview Default Position")]
+        private void PreviewDefaultPos()
+        {
+            this.transform.localPosition = m_DefaultPos;
+        }
+
         #endregion // Editor
 
         #region Inspector
 
         [SerializeField] private Vector3 m_MaxPos;
         [SerializeField] private Vector3 m_MinPos;
+        [SerializeField] private Vector3 m_DefaultPos;
 
         private float m_Span; // difference between min and max positions
 

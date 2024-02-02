@@ -740,12 +740,40 @@ public class ThermoPresent : MonoBehaviour
     }
 
     public void add_pressure_uninsulated_per_delta_time(double p, double delta_time, double insulation_coefficient, double p_outside, double temperature_gradient) {
-        state.add_pressure_uninsulated_per_delta_time(p, delta_time, insulation_coefficient, p_outside, temperature_gradient);
+        state.add_pressure_uninsulated_per_delta_time(p, delta_time, insulation_coefficient, p_outside, temperature_gradient, out bool tryIterate);
+        if (tryIterate)
+        {
+            // pressure change was too extreme to handle in one go
+            int numIters = 4;
+            for (int i = 0; i < numIters; i++)
+            {
+                state.add_pressure_uninsulated_per_delta_time(p / numIters, delta_time, insulation_coefficient, p_outside, temperature_gradient, out tryIterate);
+                if (tryIterate)
+                {
+                    // give up on iteration
+                    break;
+                }
+            }
+        }
         visualize_state();
     }
 
     public void add_pressure_insulated_per_delta_time(double p, double delta_time, double p_outside, double temperature_gradient) {
-        state.add_pressure_insulated_per_delta_time(p, delta_time, p_outside, temperature_gradient);
+        state.add_pressure_insulated_per_delta_time(p, delta_time, p_outside, temperature_gradient, out bool tryIterate);
+        if (tryIterate)
+        {
+            // pressure change was too extreme to handle in one go
+            int numIters = 4;
+            for (int i = 0; i < numIters; i++)
+            {
+                state.add_pressure_insulated_per_delta_time(p / numIters, delta_time, p_outside, temperature_gradient, out tryIterate);
+                if (tryIterate)
+                {
+                    // give up on iteration
+                    break;
+                }
+            }
+        }
         visualize_state();
     }
 

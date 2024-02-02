@@ -35,7 +35,7 @@ public class World : MonoBehaviour
     #region Inspector
 
     public WorldModMgr ModMgr;
-    [SerializeField] private ToolMgr ToolMgr;
+    public ToolMgr ToolMgr;
 
     public Material hand_empty;
     Material[] hand_emptys;
