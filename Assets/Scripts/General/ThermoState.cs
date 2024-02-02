@@ -569,7 +569,7 @@ namespace ThermoVR.State
 
         private void add_heat_constant_v_per_delta_time(double applied_heat, double insulation_coefficient, double delta_time) { // Volume Constrained -> Insulated && Uninsulated ->  delta energy     // time eqtn 6a
             try {
-                double delta_u = delta_time / mass * (applied_heat * insulation_coefficient); // time eqtn 6b
+                double delta_u = (applied_heat * insulation_coefficient) * delta_time / mass; // time eqtn 6b
 
                 double new_u = internalenergy + delta_u;
                 double new_t = temperature;
@@ -597,22 +597,45 @@ namespace ThermoVR.State
                 // two-phase region
                 if (region == ThermoMath.region_twophase) //either newly, or all along
                 {
+                    /*
+                    new_t = ThermoMath.iterate_t_given_v_verify_u(temperature, volume, new_u, region); //try to move t assuming we stay in starting region
+                    if (pressure >= ThermoMath.psat_max && new_t <= ThermoMath.tsat_given_p(pressure)) //overshoot to liquid
+                    {
+                        region = ThermoMath.region_liquid;
+                    }
+                    else if (pressure >= ThermoMath.psat_max && new_t >= ThermoMath.tsat_given_p(pressure)) //overshoot to vapor
+                    {
+                        region = ThermoMath.region_vapor;
+                    }
+                    else
+                    {
+                        
+                    }
+                    */
                     double new_p = ThermoMath.iterate_p_given_vu(pressure, volume, new_u, region); // time eqtn 6
+                    
                     // TODO: not pushing over the edge from two-phase into vapor like it should
-                    // This pushes it over the edge, but it jumps afterwards
-                    if (new_p == pressure) {
-                        if (new_u > internalenergy) {
+                    // This pushes it over the edge, but it jumps afterwards...
+                    if (new_p == pressure)
+                    {
+                        if (new_u > internalenergy)
+                        {
                             new_p += 1;
+                            // new_u = internalenergy + 1;
                         }
-                        else if (new_u < internalenergy) {
+                        else if (new_u < internalenergy)
+                        {
                             new_p -= 1;
+                            // new_u = internalenergy - 1;
                         }
                     }
 
-                    try {
+                    try
+                    {
                         new_t = ThermoMath.tsat_given_p(new_p, region, true);
                     }
-                    catch { 
+                    catch
+                    {
                         // reached minimum pressure
                         return;
                     }
@@ -620,22 +643,62 @@ namespace ThermoVR.State
                     internalenergy = new_u;
                     pressure = new_p;
                     temperature = new_t;
-                    quality = ThermoMath.x_given_pv(pressure, volume, region);
-                    try {
+
+                    // This solves the over the edge issues going up, but creates new problems coming down
+                    /*
+                    quality = ThermoMath.x_given_pu(pressure, new_u);
+                    if (quality > 0 && quality < 1)
+                    {
                         enthalpy = ThermoMath.h_given_px(pressure, quality, region);
                         entropy = ThermoMath.s_given_px(pressure, quality, region);
                     }
-                    catch (Exception e) {
+                    else
+                    {
+                        quality = ThermoMath.x_given_pv(pressure, volume, region);
+
+                        try
+                        {
+                            enthalpy = ThermoMath.h_given_px(pressure, quality, region);
+                            entropy = ThermoMath.s_given_px(pressure, quality, region);
+                        }
+                        catch
+                        {
+                            // quality out of range
+                            enthalpy = ThermoMath.h_given_vt(volume, temperature, region);
+                            entropy = ThermoMath.s_given_vt(volume, temperature, region);
+                            if (quality == 0)
+                            {
+                                region = ThermoMath.region_liquid;
+                            }
+                            else if (quality == 1)
+                            {
+                                region = ThermoMath.region_vapor;
+                            }
+                        }
+                    }
+                    */
+                    quality = ThermoMath.x_given_pv(pressure, volume, region);
+                    try
+                    {
+                        enthalpy = ThermoMath.h_given_px(pressure, quality, region);
+                        entropy = ThermoMath.s_given_px(pressure, quality, region);
+                    }
+                    catch (Exception e)
+                    {
                         // quality out of range
                         enthalpy = ThermoMath.h_given_vt(volume, temperature, region);
                         entropy = ThermoMath.s_given_vt(volume, temperature, region);
-                        if (quality < 0) {
+                        if (quality < 0)
+                        {
                             region = ThermoMath.region_liquid;
                         }
-                        else if (quality > 1) {
+                        else if (quality > 1)
+                        {
                             region = ThermoMath.region_vapor;
+                            // temperature = ThermoMath.iterate_t_given_v_verify_u(temperature, volume, new_u, region); //try to move t assuming we stay in starting region
                         }
                     }
+
                 }
                 else {
                     enthalpy = ThermoMath.h_given_vt(volume, temperature, region);
