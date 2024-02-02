@@ -112,7 +112,7 @@ namespace ThermoVR.State
 
         public void reset() {
             // Lab case
-            if (World.Instance.ModMgr.AreModsActive())
+            if (World.Instance && World.Instance.ModMgr.AreModsActive())
             {
                 World.Instance.ModMgr.ApplySets();
                 return;
