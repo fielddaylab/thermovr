@@ -127,6 +127,8 @@ namespace ThermoVR.Dials
 
         private float min_override; // prevents dial from ever going less than override value (useful for volume stops, where min val is technically 0 but we never want it below ThermoMath.v_min)
 
+        private bool preserve_during_locked;
+
         [HideInInspector] public UnityEvent DialMoved;
 
         /// <summary>
@@ -159,6 +161,11 @@ namespace ThermoVR.Dials
                 for (int t = 0; t < group.ToAffect.Count; t++) {
                     Tool tool = group.ToAffect[t];
                     relevant_tools.Add(tool);
+
+                    if (tool.always_engaged)
+                    {
+                        preserve_during_locked = true;
+                    }
                 }
             }
 
@@ -244,11 +251,16 @@ namespace ThermoVR.Dials
         public void Reset(bool isActive) {
             float prev_val = val;
 
-            if (isActive) {
-                set_val(default_val);
-            }
-            else {
-                set_val(0);
+            if (!preserve_during_locked)
+            {
+                if (isActive)
+                {
+                    set_val(default_val);
+                }
+                else
+                {
+                    set_val(0);
+                }
             }
 
             // reset active button materials
