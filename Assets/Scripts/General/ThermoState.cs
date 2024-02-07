@@ -976,6 +976,21 @@ namespace ThermoVR.State
                     double delta_h = delta_time / mass * (delta_t * insulation_coefficient);  // time eqtn 6a
                     new_h = enthalpy + delta_h;
 
+                    /*
+                    if (insulation_coefficient == 1)
+                    {
+                        // constant T at 0% insulation
+                        new_t = temperature;
+                        new_p = pressure;
+                    }
+                    else
+                    {
+                        new_t = ThermoMath.t_given_ph(new_p, new_h);
+                    }
+                    */
+
+                    new_t = ThermoMath.t_given_ph(new_p, new_h);
+
                     // from this point, we have enough internal state to derive the rest
 
                     new_x = ThermoMath.x_given_ph(new_p, new_h);
@@ -997,7 +1012,6 @@ namespace ThermoVR.State
 
                     pressure = new_p;
                     enthalpy = new_h;
-                    // enthalpy = ThermoMath.h_given_vt(new_v, new_t, region);
 
                     try {
                         enthalpy = ThermoMath.h_given_px(new_p, new_x, region);
