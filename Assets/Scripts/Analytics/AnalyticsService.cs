@@ -35,9 +35,10 @@ namespace ThermoVR.Analytics
             WEB
         }
 
-        private enum Hand {
+        public enum Hand {
             LEFT,
-            RIGHT
+            RIGHT,
+            WEB // desktop
         }
 
         private enum GraphElement
@@ -112,6 +113,7 @@ namespace ThermoVR.Analytics
             public List<TaskLogData> Tasks;
         }
 
+
         #endregion // Logging Enums & Structs
 
         #region Logging Variables
@@ -119,6 +121,9 @@ namespace ThermoVR.Analytics
         private OGDLog m_Log;
 
         private GamePlatform m_Platform;
+
+        private LabInfo m_ActiveLabInfo;
+        private Hand m_LastHandPress;
 
         [NonSerialized] private bool m_Debug;
 
@@ -136,7 +141,12 @@ namespace ThermoVR.Analytics
             // General Events
             //Game.Events.Register(GameEvents.StoryEvalBegin, OnFeedbackBegin, this)
             //    .Register<string>(GameEvents.ProfileStarting, SetUserCode, this)
-            GameMgr.Events.Register<string>(GameEvents.NewNameGenerated, SetUserCode, this);
+            GameMgr.Events.Register<string>(GameEvents.NewNameGenerated, SetUserCode, this)
+                .Register<bool>(GameEvents.HandStartPress, OnHandStartPress, this)
+                .Register<LabInfo>(GameEvents.ActivateLab, OnActivateLab, this)
+                .Register(GameEvents.SelectLab, LogSelectLab, this)
+                .Register(GameEvents.ClickLabHome, LogClickLabHome, this)
+                .Register(GameEvents.StartGame, LogStartGame, this);
 
             // Analytics Events
             // text click
@@ -168,8 +178,6 @@ namespace ThermoVR.Analytics
 #elif UNITY_ANDROID
             m_Platform = GamePlatform.VR;
 #endif
-
-            LogStartGame();
         }
 
         private void SetUserCode(string userCode)
@@ -536,24 +544,24 @@ namespace ThermoVR.Analytics
             }
         }
 
-        private void LogSelectLab(string labName, Hand inHand)
+        private void LogSelectLab()
         {
-            Debug.Log("[Analytics] event: select_lab");
+            Debug.Log("[Analytics] event: select_lab" + "\n lab name: " + m_ActiveLabInfo.Name + " \n hand: " + m_LastHandPress);
 
             using (var e = m_Log.NewEvent("select_lab"))
             {
-                e.Param("lab_name", labName);
-                e.Param("hand", inHand.ToString());
+                e.Param("lab_name", m_ActiveLabInfo.Name);
+                e.Param("hand", m_LastHandPress.ToString());
             }
         }
 
-        private void LogClickLabHome(Hand inHand)
+        private void LogClickLabHome()
         {
-            Debug.Log("[Analytics] event: click_lab_home");
+            Debug.Log("[Analytics] event: click_lab_home" + "\n hand: " + m_LastHandPress);
 
             using (var e = m_Log.NewEvent("click_lab_home"))
             {
-                e.Param("hand", inHand.ToString());
+                e.Param("hand", m_LastHandPress.ToString());
             }
         }
 
@@ -748,7 +756,15 @@ namespace ThermoVR.Analytics
 
         #region Other Events
 
+        private void OnActivateLab(LabInfo lab)
+        {
+            m_ActiveLabInfo = lab;
+        }
 
+        private void OnHandStartPress(bool leftHand)
+        {
+            m_LastHandPress = leftHand ? Hand.LEFT : Hand.RIGHT;
+        }
 
         #endregion // Other Events
 

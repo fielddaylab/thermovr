@@ -33,7 +33,8 @@ namespace ThermoVR.UI
 
         private void HandlePointerClick()
         {
-            Pressable.Press(false);
+            // TODO: handle pointer clicks
+            Pressable.Press(false, true, false);
         }
 
         #endregion // Handlers

@@ -111,7 +111,6 @@ namespace ThermoVR
         }
 
         private void HandleQuizTabPress(object sender, EventArgs args) {
-            GameMgr.Events.Dispatch(GameEvents.TryNewName);
             PlayClick(m_labModeButton);
 
             if (m_currID == UIID.Lab) { return; }

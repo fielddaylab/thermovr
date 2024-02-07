@@ -37,7 +37,7 @@ namespace ThermoVR.Controls {
                     Pressable btnPressable = objHit.GetComponent<Pressable>();
                     if (btnPressable) {
                         // trigger press
-                        btnPressable.Press(false);
+                        btnPressable.Press(false, true, false);
                     }
 
                     // handle dial knobs

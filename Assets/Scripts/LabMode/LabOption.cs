@@ -57,6 +57,7 @@ namespace ThermoVR.Lab
 
             GameMgr.Events?.Dispatch(GameEvents.PreActivateLab, m_Lab);
             GameMgr.Events?.Dispatch(GameEvents.ActivateLab, m_Lab);
+            GameMgr.Events?.Dispatch(GameEvents.SelectLab);
         }
     }
 }

@@ -38,8 +38,7 @@ namespace ThermoVR
 
             m_ProfileName = string.Empty;
 
-            Events.Register(GameEvents.TryNewName, OnTryNewName, this)
-                .Register<string>(GameEvents.TryNewGame, OnTryNewGame, this);
+            Events.Register(GameEvents.TryNewName, OnTryNewName, this);
 
             Events.Dispatch(GameEvents.InitialLoadComplete);
         }
@@ -77,6 +76,8 @@ namespace ThermoVR
 
             GameMgr.Events.Dispatch(GameEvents.NewNameGenerated, inName);
             m_ProfileName = inName;
+
+            GameMgr.Events.Dispatch(GameEvents.StartGame);
         }
 
         private void OnNewNameFail(OGD.Core.Error error)
@@ -84,28 +85,8 @@ namespace ThermoVR
             Debug.Log("[Analytics] New failed.");
 
             Log.Error("[Game] Generating new player id failed: {0}", error.Msg);
-        }
 
-        private void OnTryNewGame(string inName)
-        {
-            Routine.Start(this, NewGame(inName));
-        }
-
-        private IEnumerator NewGame(string inName)
-        {
-            Future<bool> newSave = m_SaveSystem.NewServerSave(inName);
-            yield return newSave;
-
-            if (!newSave.IsComplete())
-            {
-
-            }
-            else
-            {
-                GameMgr.Events.Dispatch(GameEvents.ProfileStarting, m_ProfileName);
-                GameMgr.Events.Dispatch(GameEvents.NewGameSuccess);
-            }
-
+            GameMgr.Events.Dispatch(GameEvents.StartGame);
         }
 
         #endregion // New Game

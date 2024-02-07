@@ -438,6 +438,7 @@ namespace ThermoVR.Lab
             }
 
             GameMgr.Events?.Dispatch(GameEvents.DeactivateLab);
+            GameMgr.Events?.Dispatch(GameEvents.ClickLabHome);
         }
 
         private void HandleScrollUp(object sender, EventArgs args)
