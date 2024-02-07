@@ -9,6 +9,7 @@ namespace ThermoVR.Tools
     {
         [SerializeField] private GameObject m_Left;
         [SerializeField] private GameObject m_Right;
+        [SerializeField] private ToolPositionController m_Controller;
 
         private float m_LeftStartAngle, m_RightStartAngle;
         private float m_StartY;
@@ -22,17 +23,19 @@ namespace ThermoVR.Tools
             m_LeftStartAngle = m_Left.transform.eulerAngles.y;
             m_RightStartAngle = m_Right.transform.eulerAngles.y;
 
-            m_StartY = m_Left.transform.position.y;
+            m_StartY = m_Left.transform.localPosition.y;
 
             m_Elements.Add(m_Left);
             m_Elements.Add(m_Right);
         }
 
         protected override IEnumerator ActivationRoutine() {
-            Vector3 currLeft = m_Left.transform.position;
-            m_Left.transform.position = new Vector3(currLeft.x, m_StartY, currLeft.z);
-            Vector3 currRight = m_Right.transform.position;
-            m_Right.transform.position = new Vector3(currRight.x, m_StartY, currRight.z);
+            m_Controller.Init();
+
+            Vector3 currLeft = m_Left.transform.localPosition;
+            m_Left.transform.localPosition = new Vector3(currLeft.x, m_StartY, currLeft.z);
+            Vector3 currRight = m_Right.transform.localPosition;
+            m_Right.transform.localPosition = new Vector3(currRight.x, m_StartY, currRight.z);
 
             gameObject.SetActive(true);
             yield return null;

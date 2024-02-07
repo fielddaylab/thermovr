@@ -76,7 +76,9 @@ namespace ThermoVR.Tools {
 
         #region Unity Callbacks 
 
-        private void OnEnable()
+        #endregion // Unity Callbacks
+
+        public void Init()
         {
             m_Tool = this.GetComponent<Tool>();
 
@@ -87,16 +89,6 @@ namespace ThermoVR.Tools {
 
             m_Span = m_MaxPos.y - m_MinPos.y - m_PistonCapHeight;
         }
-
-        private void OnDisable()
-        {
-            if (m_Tool)
-            {
-                m_Tool.ValUpdated.RemoveListener(HandleToolValUpdated);
-            }
-        }
-
-        #endregion // Unity Callbacks
 
         #region Handlers
 

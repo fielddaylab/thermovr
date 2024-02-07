@@ -412,9 +412,30 @@ namespace ThermoVR.Dials
             }
 
             new_val = Mathf.Clamp(new_val, Math.Max(min_constraint, min_override), max_constraint);
+
             //if this close to either end, assume user wants min/max
-            if (new_val < Math.Max(min_constraint, min_override) + 0.05) new_val = Math.Max(min_constraint, min_override);
-            if (new_val > max_constraint - 0.05) new_val = max_constraint;
+            if (Math.Max(min_constraint, min_override) == 0)
+            {
+                // allow snapping
+                if (new_val < Math.Max(min_constraint, min_override) + 0.05) new_val = Math.Max(min_constraint, min_override);
+            }
+            else
+            {
+                // disallow snapping
+                if (new_val < Math.Max(min_constraint, min_override)) new_val = Math.Max(min_constraint, min_override);
+
+            }
+
+            if (max_constraint == 1)
+            {
+                // allow snapping
+                if (new_val > max_constraint - 0.05) new_val = max_constraint;
+            }
+            else
+            {
+                // disallow snapping
+                if (new_val > max_constraint) new_val = max_constraint;
+            }
 
             set_val(new_val);
         }
