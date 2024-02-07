@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8367924436574712420}
   - component: {fileID: 8367924436574712423}
+  - component: {fileID: 3955357059504493542}
   m_Layer: 0
   m_Name: OGD
   m_TagString: Untagged
@@ -53,3 +54,17 @@ MonoBehaviour:
     MessagingSenderId: 13469436996
     AppId: 1:13469436996:android:a5c621cbe5869ffe08c011
     MeasurementId: 
+--- !u!114 &3955357059504493542
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8367924436574712421}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2820a7a4d0cb4cb4289998de35a862eb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_ServerAddress: https://fieldday-web.wcer.wisc.edu/wsgi-bin/opengamedata.wsgi
+  m_SaveRetryDelay: 10

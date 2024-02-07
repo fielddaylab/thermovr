@@ -34,6 +34,12 @@ static public class GameEvents
     static public readonly StringHash32 UpdateGraphSetting = "sim:update-graph-setting"; // GraphSettingUpdate
     static public readonly StringHash32 UISwitched = "sim:ui-switched"; // GraphSettingUpdate
 
+    static public readonly StringHash32 ProfileStarting = "profile:starting"; // string userName
+    static public readonly StringHash32 TryNewName = "game:new-name";
+    static public readonly StringHash32 TryNewGame = "game:new-game";
+    static public readonly StringHash32 NewGameSuccess = "game:new-game-success";
+    static public readonly StringHash32 NewNameGenerated = "game:new-name-generated";
+
 }
 
 static public class ObjectIDs

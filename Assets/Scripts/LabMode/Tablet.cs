@@ -36,6 +36,10 @@ namespace ThermoVR
         [SerializeField] private GameObject m_pulloutReadoutModel;
         [SerializeField] private GameObject m_pulloutReadoutScreen;
 
+        [Space(5)]
+        [Header("Analytics")]
+        [SerializeField] private TMP_Text[] m_PlayerCodeDisplays;
+
         private List<Pressable> m_tabButtons;
 
         private UIID m_currID;
@@ -68,7 +72,9 @@ namespace ThermoVR
             m_graphTabButton.OnPress += HandleGraphTabPress;
             m_resetButton.OnPress += HandleResetPress;
 
-            GameMgr.Events.Register(GameEvents.UISwitched, HandleUISwitched);
+            GameMgr.Events.Register(GameEvents.UISwitched, HandleUISwitched)
+                .Register<string>(GameEvents.NewNameGenerated, SetUserCode, this);
+
 
             if (!GameMgr.I.IsDesktop && OVRManager.display != null)
             {
@@ -105,6 +111,7 @@ namespace ThermoVR
         }
 
         private void HandleQuizTabPress(object sender, EventArgs args) {
+            GameMgr.Events.Dispatch(GameEvents.TryNewName);
             PlayClick(m_labModeButton);
 
             if (m_currID == UIID.Lab) { return; }
@@ -136,6 +143,17 @@ namespace ThermoVR
         private void HandleUISwitched()
         {
             DisconnectGrab();
+        }
+
+        private void SetUserCode(string userCode)
+        {
+            for (int i = 0; i < m_PlayerCodeDisplays.Length; i++)
+            {
+                if (m_PlayerCodeDisplays[i])
+                {
+                    m_PlayerCodeDisplays[i].SetText(userCode);
+                }
+            }
         }
 
         private void DisconnectGrab()

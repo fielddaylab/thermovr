@@ -54,6 +54,8 @@ MonoBehaviour:
   m_resetButton: {fileID: 3039919479871027695}
   m_pulloutReadoutModel: {fileID: 3968748780484151135}
   m_pulloutReadoutScreen: {fileID: 3342380733410299714}
+  m_PlayerCodeDisplays:
+  - {fileID: 5820150759042748623}
 --- !u!82 &7208974349697579921
 AudioSource:
   m_ObjectHideFlags: 0
@@ -912,6 +914,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: UIHub_Revised
       objectReference: {fileID: 0}
+    - target: {fileID: 3601630335498260745, guid: 2b0afc7fcd7b1f949a2d2ec117349236,
+        type: 3}
+      propertyPath: m_text
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 4035919280068110164, guid: 2b0afc7fcd7b1f949a2d2ec117349236,
         type: 3}
       propertyPath: m_AnchorMax.x
@@ -1057,6 +1064,18 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 7007279904078397894}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &5820150759042748623 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3601630335498260745, guid: 2b0afc7fcd7b1f949a2d2ec117349236,
+    type: 3}
+  m_PrefabInstance: {fileID: 7007279904078397894}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &8551985416623938443
 PrefabInstance:
   m_ObjectHideFlags: 0
