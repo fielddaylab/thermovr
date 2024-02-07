@@ -136,13 +136,13 @@ namespace ThermoVR.Analytics
             // General Events
             //Game.Events.Register(GameEvents.StoryEvalBegin, OnFeedbackBegin, this)
             //    .Register<string>(GameEvents.ProfileStarting, SetUserCode, this)
+            GameMgr.Events.Register<string>(GameEvents.NewNameGenerated, SetUserCode, this);
 
-            
             // Analytics Events
             // text click
             //Game.Events.Register(GameEvents.TextClicked, LogTextClick, this)
             // display text dialog
-                
+
             // SceneHelper.OnSceneLoaded += LogSceneChanged;
 
             // CrashHandler.OnCrash += OnCrash;
