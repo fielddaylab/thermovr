@@ -128,7 +128,7 @@ namespace ThermoVR.Lab
 
                 newTopicTab.Button.SetText("" + (topicIndex + 1));
                 int topicTabIndex = topicIndex;
-                newTopicTab.Button.OnButtonPressed += delegate { HandleLabTopicTabPressed(topicTabIndex); };
+                newTopicTab.Button.OnButtonPressed += delegate { HandleLabTopicTabPressed(topicTabIndex, true); };
 
                 float topicStartingOffset = 0.1f;
                 RectTransform topicTabRect = newTopicTab.GetComponent<RectTransform>();
@@ -196,7 +196,7 @@ namespace ThermoVR.Lab
 
             // Open first tab
             if (m_tabs.Count > 0) {
-                HandleLabTopicTabPressed(0);
+                HandleLabTopicTabPressed(0, false);
             }
 
             // Disable placement ball
@@ -409,10 +409,10 @@ namespace ThermoVR.Lab
             m_activeTopicIndex = newTopicIndex;
         }
 
-        private void HandleLabTopicTabPressed(int newTopicIndex) {
+        private void HandleLabTopicTabPressed(int newTopicIndex, bool fromPlayerAction) {
             if (m_activeTopicIndex == -1) {
                 // no tab activated yet; activate new tab
-                ActivateTopicTab(newTopicIndex);
+                ActivateTopicTab(newTopicIndex, fromPlayerAction);
             }
             else if (m_activeTopicIndex == newTopicIndex) {
                 // same as current tab; no change needed
@@ -422,7 +422,7 @@ namespace ThermoVR.Lab
                 DeactivateTopicTab(m_activeTopicIndex);
 
                 // activate new tab
-                ActivateTopicTab(newTopicIndex);
+                ActivateTopicTab(newTopicIndex, fromPlayerAction);
             }
 
             m_ScrollHorizontalValidVisibleIndex = 0;
@@ -572,7 +572,7 @@ namespace ThermoVR.Lab
 
         }
 
-        private void ActivateTopicTab(int topicIndex)
+        private void ActivateTopicTab(int topicIndex, bool fromPlayerAction)
         {
             int newTaskIndex = 0;
 
@@ -595,7 +595,11 @@ namespace ThermoVR.Lab
 
             GameMgr.Events.Dispatch(GameEvents.TaskSwitched, newTaskIndex);
             GameMgr.Events.Dispatch(GameEvents.SectionSwitched, topicIndex);
-            GameMgr.Events.Dispatch(GameEvents.ClickSelectSection, m_currLab.Topics[topicIndex]);
+
+            if (fromPlayerAction)
+            {
+                GameMgr.Events.Dispatch(GameEvents.ClickSelectSection, m_currLab.Topics[topicIndex]);
+            }
 
             //if (!m_tabs[topicIndex].TaskTabs[0].HasBeenEvaluated())
             //{

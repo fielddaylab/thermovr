@@ -162,7 +162,7 @@ namespace ThermoVR.Analytics
             // General Events
             GameMgr.Events.Register<string>(GameEvents.NewNameGenerated, SetUserCode, this)
                 .Register<bool>(GameEvents.HandStartPress, OnHandStartPress, this)
-                .Register<LabInfo>(GameEvents.ActivateLab, OnActivateLab, this)
+                .Register<LabInfo>(GameEvents.PreActivateLab, OnPreActivateLab, this)
                 .Register<int>(GameEvents.SectionSwitched, OnSectionSwitched, this)
                 .Register<int>(GameEvents.TaskSwitched, OnTaskSwitched, this)
                 .Register<List<string>>(GameEvents.TaskChoiceSelected, OnTaskChoiceSelected);
@@ -860,7 +860,7 @@ namespace ThermoVR.Analytics
 
         #region Other Events
 
-        private void OnActivateLab(LabInfo lab)
+        private void OnPreActivateLab(LabInfo lab)
         {
             m_ActiveLabInfo = lab;
         }

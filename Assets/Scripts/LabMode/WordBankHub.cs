@@ -165,8 +165,6 @@ namespace ThermoVR.Lab
                 return;
             }
 
-            ClosePanel();
-
             bool deselectOld = false;
             uint prevSelection = m_selectedID;
             if (m_selectedID != uint.MaxValue)
@@ -176,6 +174,8 @@ namespace ThermoVR.Lab
 
             m_selectedID = args.ID;
             m_answerText.SetText(m_definition.OptionTexts[m_selectedID]);
+
+            ClosePanel();
 
             List<string> selectedStrs = new List<string> { m_definition.OptionTexts[m_selectedID] };
             GameMgr.Events.Dispatch(GameEvents.TaskChoiceSelected, selectedStrs);

@@ -90,8 +90,8 @@ namespace ThermoVR.Lab
         }
 
 
-        private void HandleEvalUpdate(object sender, BoolEventArgs args) {
-            if (args.Value) {
+        private void HandleEvalUpdate(object sender, EvalUpdateEventArgs args) {
+            if (args.IsCorrect) {
                 ShowCompletionSprite();
                 CompletedAndCorrect = true;
             }
@@ -99,7 +99,10 @@ namespace ThermoVR.Lab
                 HideCompletionSprite();
                 CompletedAndCorrect = false;
             }
-            OnCompletionStateSubmitted?.Invoke(this, EventArgs.Empty);
+            if (args.FromPlayerAction)
+            {
+                OnCompletionStateSubmitted?.Invoke(this, EventArgs.Empty);
+            }
         }
 
         private void HandleFrameReset(object sender, EventArgs args) {
