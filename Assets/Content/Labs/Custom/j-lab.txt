@@ -169,9 +169,9 @@
 |TargetInfo (property, value, valid-range):
 |QuizInfo: 
 	--Questions:
-	Question: "Add/remove pressure until P is approximately 3.35e1 kPa."
+	Question: "Slowly decrease the pressure until P is approximately 1.11e1 kPa."
 	Questions-->
-	Requirements: [(Region:1:0)]
+	Requirements: [(Region:2:0)]
 |EfficiencyInfo:
 
 || TASK
@@ -185,7 +185,7 @@
 	--Questions:
 	Question: "In which region are you?"
 	Questions-->
-	Answers: ["Subcooled Liquid", "Two-phase"(c), "Superheated Vapor"]
+	Answers: ["Subcooled Liquid", "Two-phase", "Superheated Vapor"(c)]
 |EfficiencyInfo: 
 
 || TOPIC
