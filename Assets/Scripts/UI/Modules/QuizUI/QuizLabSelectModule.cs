@@ -7,6 +7,7 @@ using BeauPools;
 using BeauUtil;
 using BeauRoutine;
 using System.Collections.Generic;
+using ThermoVR.Analytics;
 
 namespace ThermoVR.Lab
 {
@@ -28,6 +29,8 @@ namespace ThermoVR.Lab
         private const int SCROLL_VERTICAL_NUM = 3;
 
         private List<LabOption> m_ActiveOptions = new List<LabOption>();
+
+        private List<IndexedLabInfo> m_visibleLabs = new List<IndexedLabInfo>();
 
         #region IUIModule
 
@@ -86,6 +89,8 @@ namespace ThermoVR.Lab
             m_ScrollVerticalValidVisibleIndex--;
 
             RefreshInteractableTabs();
+
+            GameMgr.Events.Dispatch(GameEvents.ClickLabScrollUp);
         }
 
         private void HandleScrollDown(object sender, EventArgs args)
@@ -96,6 +101,8 @@ namespace ThermoVR.Lab
             m_ScrollVerticalValidVisibleIndex++;
 
             RefreshInteractableTabs();
+
+            GameMgr.Events.Dispatch(GameEvents.ClickLabScrollDown);
         }
 
         #endregion // Handlers
@@ -111,18 +118,25 @@ namespace ThermoVR.Lab
 
         private void RefreshInteractableTabs()
         {
+            m_visibleLabs.Clear();
+
             for (int i = 0; i < m_ActiveOptions.Count; i++)
             {
                 if (i >= m_ScrollVerticalValidVisibleIndex && i <= m_ScrollVerticalValidVisibleIndex + SCROLL_VERTICAL_NUM - 1)
                 {
                     // not masked
                     m_ActiveOptions[i].EnableCollider();
+
+                    m_visibleLabs.Add(new IndexedLabInfo(i, m_ActiveOptions[i].GetLabInfo()));
                 }
                 else
                 {
                     m_ActiveOptions[i].DisableCollider();
                 }
             }
+
+            GameMgr.Events.Dispatch(GameEvents.LabMenuDisplayed, m_visibleLabs);
+
         }
     }
 

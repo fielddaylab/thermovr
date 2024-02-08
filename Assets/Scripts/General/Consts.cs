@@ -38,9 +38,33 @@ static public class GameEvents
     static public readonly StringHash32 NewNameGenerated = "game:new-name-generated";
     static public readonly StringHash32 StartGame = "game:start-game";
 
-    static public readonly StringHash32 SelectLab = "lab:select-lab";
     static public readonly StringHash32 HandStartPress = "world:hand-start-press";
+    
+    static public readonly StringHash32 SelectLab = "lab:select-lab";
     static public readonly StringHash32 ClickLabHome = "lab:click-lab-home";
+    static public readonly StringHash32 ClickSelectTask = "lab:click-select-task";
+    static public readonly StringHash32 ClickSelectSection = "lab:click-select-section";
+    static public readonly StringHash32 SectionSwitched = "lab:section-switched"; // int
+    static public readonly StringHash32 TaskSwitched = "lab:task-switched"; // int
+    static public readonly StringHash32 ClickTaskScrollLeft = "lab:task-scroll-left";
+    static public readonly StringHash32 ClickTaskScrollRight = "lab:task-scroll-right";
+    static public readonly StringHash32 ClickSectionScrollUp = "lab:section-scroll-up";
+    static public readonly StringHash32 ClickSectionScrollDown = "lab:section-scroll-down";
+    static public readonly StringHash32 ClickLabScrollUp = "lab:lab-scroll-up";
+    static public readonly StringHash32 ClickLabScrollDown = "lab:lab-scroll-down";
+    static public readonly StringHash32 TaskListDisplayed = "lab:task-list-displayed"; // List<IndexedTaskInfo>
+    static public readonly StringHash32 SectionListDisplayed = "lab:section-list-displayed"; // List<IndexedTopicInfo>
+    static public readonly StringHash32 LabMenuDisplayed = "lab:lab-menu-displayed"; // List<IndexedLabInfo>
+    static public readonly StringHash32 TaskChoiceSelected = "lab:task-choice-selected";
+    static public readonly StringHash32 TargetStateReached = "lab:target-state-reached";
+    static public readonly StringHash32 TargetStateLost = "lab:target-state-lost";
+    static public readonly StringHash32 ClickSelectAnswer = "lab:click-select-answer";
+    static public readonly StringHash32 ClickDeselectAnswer = "lab:click-deselect-answer";
+    static public readonly StringHash32 ClickSubmitAnswer = "lab:click-submit-answer";
+    static public readonly StringHash32 ClickResetQuiz = "lab:click-reset-quiz";
+    static public readonly StringHash32 ClickOpenWordBank = "lab:click-open-word-bank";
+    static public readonly StringHash32 WordBankDisplayed = "lab:word-bank-displayed";
+    static public readonly StringHash32 WordBankClosed = "lab:word-bank-closed";
 }
 
 static public class ObjectIDs

@@ -29,6 +29,11 @@ namespace ThermoVR.Lab
             m_button.SetText(text);
         }
 
+        public string GetOptionText()
+        {
+            return m_button.GetText();
+        }
+
         #region Unity Callbacks
 
         private void OnEnable() {

@@ -113,7 +113,8 @@ namespace ThermoVR.Lab
         MultipleChoice, // single-select multiple choice
         WordBank,
         ReachState, // reach a given state in the sim
-        MultipleChoiceMulti // multi-select multiple choice
+        MultipleChoiceMulti, // multi-select multiple choice
+        ConstantVariable
     }
 
     public class LabLoader : MonoBehaviour

@@ -27,6 +27,11 @@ namespace ThermoVR.Lab
             LoadButton.OnButtonPressed += OnLoadButtonPressed;
         }
 
+        public LabInfo GetLabInfo()
+        {
+            return m_Lab;
+        }
+
         public void SetSlider(float val)
         {
             m_Slider.value = val;

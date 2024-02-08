@@ -41,6 +41,8 @@ namespace ThermoVR.Lab
             }
             newStats.Progress = 0;
 
+            newStats.SelectedOptionsState = new List<string>[labInfo.Topics.Count][];
+
             Stats.LabMap.Add(labInfo.ID, newStats);
         }
 

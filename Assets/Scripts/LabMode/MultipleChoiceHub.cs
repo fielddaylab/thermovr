@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using ThermoVR.UI;
 using TMPro;
 using UnityEngine;
+using static ThermoVR.Analytics.AnalyticsService;
 
 namespace ThermoVR.Lab
 {
@@ -110,13 +111,7 @@ namespace ThermoVR.Lab
         #region IEvaluable
 
         public override bool IsCorrect() {
-            for (int i = 0; i < m_definition.OptionTexts.Length; i++) {
-                if (m_definition.CorrectIDs[0] == m_selectedID) {
-                    return true;
-                }
-            }
-
-            return false;
+            return IsSingleAnswerCorrect(m_selectedID);
         }
 
         public override bool AnswerSelected() {
@@ -168,6 +163,19 @@ namespace ThermoVR.Lab
             }
         }
 
+        private bool IsSingleAnswerCorrect(uint selectedID)
+        {
+            for (int i = 0; i < m_definition.OptionTexts.Length; i++)
+            {
+                if (m_definition.CorrectIDs[0] == selectedID)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         #region Handlers
 
         private void HandleChoiceSelected(object sender, IDEventArgs args) {
@@ -176,12 +184,36 @@ namespace ThermoVR.Lab
                 return;
             }
 
+            bool deselectOld = false;
+            uint prevSelection = m_selectedID;
+            if (m_selectedID != uint.MaxValue)
+            {
+                deselectOld = true;
+            }
+
             m_selectedID = args.ID;
 
+            List<string> selectedStrs = new List<string>();
             // Reset selected state
             for (int i = 0; i < m_order.Length; i++) {
                 m_options[i].SetSelected(m_options[i].GetChoiceID() == m_selectedID);
+
+                if (m_options[i].GetChoiceID() == m_selectedID)
+                {
+                    selectedStrs.Add(m_options[i].GetOptionText());
+                }
             }
+  
+            GameMgr.Events.Dispatch(GameEvents.TaskChoiceSelected, selectedStrs);
+
+            if (deselectOld)
+            {
+                GameMgr.Events.Dispatch(GameEvents.ClickDeselectAnswer, new AnswerSelectLogData(prevSelection, IsSingleAnswerCorrect(prevSelection)));
+            }
+
+            bool isCorrect = IsSingleAnswerCorrect(args.ID);
+            uint index = args.ID;
+            GameMgr.Events.Dispatch(GameEvents.ClickSelectAnswer, new AnswerSelectLogData(index, isCorrect));
         }
 
         #endregion // Handlers

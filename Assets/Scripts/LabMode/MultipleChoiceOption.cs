@@ -51,6 +51,11 @@ namespace ThermoVR
             m_optionText.text = text;
         }
 
+        public string GetOptionText()
+        {
+            return m_optionText.text;
+        }
+
         public void SetSelected(bool selected) {
             m_fill.enabled = selected;
             m_bg.color = selected ? GameDB.Instance.MCSelectedBG : GameDB.Instance.MCUnselectedBG;

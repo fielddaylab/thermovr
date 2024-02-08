@@ -5,6 +5,7 @@ using ThermoVR.UI;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using static ThermoVR.Analytics.AnalyticsService;
 
 namespace ThermoVR.Lab
 {
@@ -56,13 +57,7 @@ namespace ThermoVR.Lab
         #region IEvaluable
 
         public override bool IsCorrect() {
-            for (int i = 0; i < m_definition.OptionTexts.Length; i++) {
-                if (m_definition.CorrectID == m_selectedID) {
-                    return true;
-                }
-            }
-
-            return false;
+            return IsSingleAnswerCorrect(m_selectedID);
         }
 
         public override bool AnswerSelected() {
@@ -103,6 +98,19 @@ namespace ThermoVR.Lab
         }
 
         #endregion // IEvaluable
+
+        private bool IsSingleAnswerCorrect(uint selectedID)
+        {
+            for (int i = 0; i < m_definition.OptionTexts.Length; i++)
+            {
+                if (m_definition.CorrectID == m_selectedID)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
 
         public void SetDefinition(WordBankDefinition def) {
             m_definition = def;
@@ -157,12 +165,29 @@ namespace ThermoVR.Lab
                 return;
             }
 
-            m_choicePanel.SetActive(false);
+            ClosePanel();
+
+            bool deselectOld = false;
+            uint prevSelection = m_selectedID;
+            if (m_selectedID != uint.MaxValue)
+            {
+                deselectOld = true;
+            }
 
             m_selectedID = args.ID;
             m_answerText.SetText(m_definition.OptionTexts[m_selectedID]);
 
-            // Set answer text
+            List<string> selectedStrs = new List<string> { m_definition.OptionTexts[m_selectedID] };
+            GameMgr.Events.Dispatch(GameEvents.TaskChoiceSelected, selectedStrs);
+
+            if (deselectOld)
+            {
+                GameMgr.Events.Dispatch(GameEvents.ClickDeselectAnswer, new AnswerSelectLogData(prevSelection, IsSingleAnswerCorrect(prevSelection)));
+            }
+
+            bool isCorrect = IsSingleAnswerCorrect(args.ID);
+            uint index = args.ID;
+            GameMgr.Events.Dispatch(GameEvents.ClickSelectAnswer, new AnswerSelectLogData(index, isCorrect));
         }
 
         private void HandleChoosePressed(object sender, EventArgs args) {
@@ -174,11 +199,29 @@ namespace ThermoVR.Lab
             // display available choices
             m_choicePanel.SetActive(true);
             // show option buttons
-            // add HandleCHoiceSelected
+
+            GameMgr.Events.Dispatch(GameEvents.ClickOpenWordBank);
+
+
+            List<string> displayedWords = new List<string>();
+            for (int i = 0; i < m_options.Length; i++)
+            {
+                displayedWords.Add(m_options[i].GetOptionText());
+            }
+            GameMgr.Events.Dispatch(GameEvents.WordBankDisplayed, displayedWords);
         }
 
+        /*
         private void HandleChoicePanelClosePressed(object sender, EventArgs args) {
-            
+            ClosePanel();
+        }
+        */
+
+        private void ClosePanel()
+        {
+            m_choicePanel.SetActive(false);
+
+            GameMgr.Events.Dispatch(GameEvents.WordBankClosed, m_definition.OptionTexts[m_selectedID]);
         }
 
         #endregion // Handlers
