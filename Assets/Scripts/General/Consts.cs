@@ -28,6 +28,7 @@ static public class GameEvents
     static public readonly StringHash32 DisallowTool = "sim:disallow-tool"; // Tool
     static public readonly StringHash32 UpdateAllowedTools = "sim:update-allowed-tools"; // List<ToolType>
     static public readonly StringHash32 ResetPressed = "sim:reset-pressed";
+    static public readonly StringHash32 ResetSimClicked = "sim:reset-sim-clicked";
     static public readonly StringHash32 ResetToolRestrictions = "sim:reset-tool-restrictions";
     static public readonly StringHash32 UpdateVaporFlow = "sim:vapor-update-flow"; // double
     static public readonly StringHash32 UpdateVarText = "sim:update-var-text"; // VarUpdate
@@ -36,6 +37,7 @@ static public class GameEvents
 
     static public readonly StringHash32 TryNewName = "game:new-name";
     static public readonly StringHash32 NewNameGenerated = "game:new-name-generated";
+    static public readonly StringHash32 StartSession = "game:start-session";
     static public readonly StringHash32 StartGame = "game:start-game";
 
     static public readonly StringHash32 HandStartPress = "world:hand-start-press";
@@ -65,6 +67,24 @@ static public class GameEvents
     static public readonly StringHash32 ClickOpenWordBank = "lab:click-open-word-bank";
     static public readonly StringHash32 WordBankDisplayed = "lab:word-bank-displayed";
     static public readonly StringHash32 WordBankClosed = "lab:word-bank-closed";
+    static public readonly StringHash32 SandboxModeClicked = "lab:sandbox-mode-clicked";
+    static public readonly StringHash32 LabModeClicked = "lab:lab-mode-clicked";
+    static public readonly StringHash32 TaskCompleted = "lab:task-completed";
+    static public readonly StringHash32 SectionCompleted = "lab:section-completed";
+    static public readonly StringHash32 LabCompleted = "lab:lab-completed";
+
+    static public readonly StringHash32 TabletGrabbed = "world:tablet-grabbed";
+    static public readonly StringHash32 TabletReleased = "world:tablet-released";
+    static public readonly StringHash32 WorkspaceHandleGrabbed = "world:workspace-handle-grabbed";
+    static public readonly StringHash32 WorkspaceHandleReleased = "world:workspace-handle-released";
+    static public readonly StringHash32 RotateGraphClickedCW = "world:rotate-graph-clicked-cw";
+    static public readonly StringHash32 RotateGraphClickedCCW = "world:rotate-graph-clicked-ccw";
+    static public readonly StringHash32 GraphBallGrabbed = "world:graph-ball-grabbed";
+    static public readonly StringHash32 GraphBallReleased = "world:graph-ball-released";
+    static public readonly StringHash32 HeadsetOn = "world:headset-on";
+    static public readonly StringHash32 HeadsetOff = "world:headset-off";
+
+
 }
 
 static public class ObjectIDs

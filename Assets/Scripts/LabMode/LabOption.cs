@@ -20,10 +20,12 @@ namespace ThermoVR.Lab
         [SerializeField] private AudioClip m_audioClip;
 
         private LabInfo m_Lab;
+        private int m_LabIndex;
 
-        public void SetLabInfo(LabInfo labInfo)
+        public void SetLabInfo(LabInfo labInfo, int labIndex)
         {
             m_Lab = labInfo;
+            m_LabIndex = labIndex;
             LoadButton.OnButtonPressed += OnLoadButtonPressed;
         }
 
@@ -60,7 +62,7 @@ namespace ThermoVR.Lab
                 Tablet.Instance.PlayUIAudio(m_audioClip);
             }
 
-            GameMgr.Events?.Dispatch(GameEvents.PreActivateLab, m_Lab);
+            GameMgr.Events?.Dispatch(GameEvents.PreActivateLab, new Tuple<LabInfo, int>(m_Lab, m_LabIndex));
             GameMgr.Events?.Dispatch(GameEvents.SelectLab);
             GameMgr.Events?.Dispatch(GameEvents.ActivateLab, m_Lab);
         }

@@ -56,6 +56,9 @@ namespace ThermoVR
                 return;
             }
 
+            touchable.OnGrab += HandleGrabbed;
+            touchable.OnRelease += HandleReleased;
+
             m_audioSource = this.GetComponent<AudioSource>();
 
             // Add buttons to list
@@ -107,6 +110,8 @@ namespace ThermoVR
             // Open Sandbox UI
             m_hub.OpenUI(UIID.Sandbox);
 
+            GameMgr.Events?.Dispatch(GameEvents.SandboxModeClicked);
+
             HidePullout();
         }
 
@@ -118,6 +123,8 @@ namespace ThermoVR
 
             // Open Quiz UI
             m_hub.OpenUI(UIID.Lab);
+
+            GameMgr.Events?.Dispatch(GameEvents.LabModeClicked);
 
             ShowPullout();
         }
@@ -157,15 +164,27 @@ namespace ThermoVR
 
         private void DisconnectGrab()
         {
+            bool wasAny = touchable.ltouch || touchable.rtouch;
+            bool wasLeft = touchable.ltouch;
             touchable.rtouch = false;
             touchable.ltouch = false;
             touchable.touch = false;
-            touchable.grabbed = false;
+            if (wasAny) { touchable.SetGrabbed(false, wasLeft); }
         }
 
         private void PlayClick(Pressable pressable) {
             if (GameMgr.I.AudioEnabled) { pressable.ClickAudio.Play(); }
 
+        }
+
+        private void HandleGrabbed(object sender, bool arg)
+        {
+            GameMgr.Events?.Dispatch(GameEvents.TabletGrabbed, this.transform);
+        }
+
+        private void HandleReleased(object sender, bool arg)
+        {
+            GameMgr.Events?.Dispatch(GameEvents.TabletReleased, this.transform);
         }
 
         #endregion // Handlers

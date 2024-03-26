@@ -38,7 +38,7 @@ namespace ThermoVR.Analytics
         public enum Hand {
             LEFT,
             RIGHT,
-            WEB // desktop
+            MOUSE // desktop
         }
 
         private enum GraphElement
@@ -60,6 +60,18 @@ namespace ThermoVR.Analytics
             public double s;
             public double h;
             public double x;
+
+            public StateProperties(string inRegion, double inP, double inV, double inT, double inU, double inS, double inH, double inX)
+            {
+                Region = inRegion;
+                P = inP;
+                V = inV;
+                T = inT;
+                u = inU;
+                s = inS;
+                h = inH;
+                x = inX;
+            }
         }
 
         [Serializable]
@@ -94,6 +106,7 @@ namespace ThermoVR.Analytics
             public SliderSettings ChamberTemperature;
         }
 
+        [Serializable]
         public struct LabLogData
         {
             public int Index;
@@ -104,6 +117,7 @@ namespace ThermoVR.Analytics
             public List<SectionLogData> Sections;
         }
 
+        [Serializable]
         public struct SectionLogData
         {
             public int Index;
@@ -136,6 +150,8 @@ namespace ThermoVR.Analytics
         private GamePlatform m_Platform;
 
         private LabInfo m_ActiveLabInfo;
+        private int m_ActiveLabIndex;
+        private LabLogData m_ActiveLabLogData;
         private int m_ActiveSectionIndex;
         private int m_ActiveTaskIndex;
         private Hand m_LastHandPress;
@@ -162,13 +178,14 @@ namespace ThermoVR.Analytics
             // General Events
             GameMgr.Events.Register<string>(GameEvents.NewNameGenerated, SetUserCode, this)
                 .Register<bool>(GameEvents.HandStartPress, OnHandStartPress, this)
-                .Register<LabInfo>(GameEvents.PreActivateLab, OnPreActivateLab, this)
+                .Register<Tuple<LabInfo, int>>(GameEvents.PreActivateLab, OnPreActivateLab, this)
                 .Register<int>(GameEvents.SectionSwitched, OnSectionSwitched, this)
                 .Register<int>(GameEvents.TaskSwitched, OnTaskSwitched, this)
                 .Register<List<string>>(GameEvents.TaskChoiceSelected, OnTaskChoiceSelected);
 
             // Analytics Events
             GameMgr.Events.Register(GameEvents.StartGame, LogStartGame, this)
+                .Register(GameEvents.StartSession, LogStartSession, this)
                 .Register(GameEvents.SelectLab, LogSelectLab, this)
                 .Register(GameEvents.ClickLabHome, LogClickLabHome, this)
                 .Register<TaskInfo>(GameEvents.ClickSelectTask, LogClickSelectTask, this)
@@ -190,7 +207,24 @@ namespace ThermoVR.Analytics
                 .Register<string>(GameEvents.WordBankClosed, LogWordBankClosed, this)
                 .Register<List<IndexedTaskInfo>>(GameEvents.TaskListDisplayed, LogTaskListDisplayed, this)
                 .Register<List<IndexedTopicInfo>>(GameEvents.SectionListDisplayed, LogSectionListDisplayed, this)
-                .Register<List<IndexedLabInfo>>(GameEvents.LabMenuDisplayed, LogLabMenuDisplayed, this);
+                .Register<List<IndexedLabInfo>>(GameEvents.LabMenuDisplayed, LogLabMenuDisplayed, this)
+                .Register<StateProperties>(GameEvents.ResetSimClicked, LogClickResetSim, this)
+                .Register<Tuple<Transform, bool>>(GameEvents.TabletGrabbed, LogGrabTablet, this)
+                .Register<Tuple<Transform, bool>>(GameEvents.TabletReleased, LogReleaseTablet, this)
+                .Register<Tuple<Transform, bool>>(GameEvents.WorkspaceHandleGrabbed, LogGrabWorkstationHandle, this)
+                .Register<Tuple<Transform, bool>>(GameEvents.WorkspaceHandleReleased, LogReleaseWorkstationHandle, this)
+                .Register<Tuple<float, float>>(GameEvents.RotateGraphClickedCW, LogClickRotateGraphCW, this)
+                .Register<Tuple<float, float>>(GameEvents.RotateGraphClickedCCW, LogClickRotateGraphCCW, this)
+                .Register(GameEvents.GraphBallGrabbed, LogGrabGraphBall, this)
+                .Register(GameEvents.GraphBallReleased, LogReleaseGraphBall, this)
+                .Register(GameEvents.SandboxModeClicked, LogClickSandboxMode, this)
+                .Register(GameEvents.LabModeClicked, LogClickLabMode, this)
+                .Register(GameEvents.TaskCompleted, LogCompleteTask, this)
+                .Register(GameEvents.SectionCompleted, LogCompleteSection, this)
+                .Register(GameEvents.LabCompleted, LogCompleteLab, this)
+                .Register(GameEvents.HeadsetOn, LogHeadsetOn, this)
+                .Register(GameEvents.HeadsetOff, LogHeadsetOff, this)
+                ;
 
             m_Log = new OGDLog(new OGDLogConsts() {
                 AppId = m_AppId,
@@ -286,14 +320,28 @@ namespace ThermoVR.Analytics
 
         private void LogStartGame()
         {
-            Debug.Log("[Analytics] event: start_game" + "\n" + "Platform: " + m_Platform);
+            Debug.Log("[Analytics] event: game_start" + "\n" + "Platform: " + m_Platform);
 
-            using (var e = m_Log.NewEvent("start_game"))
+            using (var e = m_Log.NewEvent("game_start"))
             {
                 e.Param("mode", m_Platform.ToString());
             }
         }
 
+        private void LogStartSession()
+        {
+            Debug.Log("[Analytics] event: session_start" + "\n" + "Platform: " + m_Platform);
+
+            using (var e = m_Log.NewEvent("session_start"))
+            {
+                e.Param("mode", m_Platform.ToString());
+            }
+        }
+
+        /// <summary>
+        /// We don't currently have a "new game" button in the interface. But if we add one,
+        /// this is what would log it.
+        /// </summary>
         private void LogClickNewGame()
         {
             Debug.Log("[Analytics] event: click_new_game" + "\n" + "hand: " + m_LastHandPress);
@@ -304,14 +352,14 @@ namespace ThermoVR.Analytics
             }
         }
 
-        private void LogClickResetSim(StateProperties resetToProperties)
+        private void LogClickResetSim(StateProperties resetTo)
         {
             Debug.Log("[Analytics] event: click_reset_sim" + "\n" + "hand: " + m_LastHandPress);
 
-            using (var e = m_Log.NewEvent("click_new_game"))
+            using (var e = m_Log.NewEvent("click_reset_sim"))
             {
                 e.Param("hand", m_LastHandPress.ToString());
-                e.Param("default_state", JsonConvert.SerializeObject(resetToProperties));
+                e.Param("default_state", JsonConvert.SerializeObject(resetTo));
             }
         }
 
@@ -334,74 +382,74 @@ namespace ThermoVR.Analytics
             right_hand_data { array of ~30 frame samples, each has { pos_x, pos_y, pos_z, rot_x, rot_y, rot_z, rot_w } of right hand position/rotation at each frame }
         */
         
-        private void LogGrabTablet(Vector3 startPos, Quaternion startRot)
+        private void LogGrabTablet(Tuple<Transform, bool> args)
         {
             Debug.Log("[Analytics] event: grab_tablet");
 
             using (var e = m_Log.NewEvent("grab_tablet"))
             {
-                e.Param("start_pos", JsonConvert.SerializeObject(startPos));
-                e.Param("start_rot", JsonConvert.SerializeObject(startRot));
-                e.Param("hand", m_LastHandPress.ToString());
+                e.Param("start_pos", JsonConvert.SerializeObject(args.Item1.position));
+                e.Param("start_rot", JsonConvert.SerializeObject(args.Item1.eulerAngles));
+                e.Param("hand", (args.Item2 ? Hand.LEFT : Hand.RIGHT).ToString());
             }
         }
 
-        private void LogReleaseTablet(Vector3 endPos, Quaternion endRot)
+        private void LogReleaseTablet(Tuple<Transform, bool> args)
         {
             Debug.Log("[Analytics] event: release_tablet");
 
             using (var e = m_Log.NewEvent("release_tablet"))
             {
-                e.Param("end_pos", JsonConvert.SerializeObject(endPos));
-                e.Param("end_rot", JsonConvert.SerializeObject(endRot));
-                e.Param("hand", m_LastHandPress.ToString());
+                e.Param("end_pos", JsonConvert.SerializeObject(args.Item1.position));
+                e.Param("end_rot", JsonConvert.SerializeObject(args.Item1.eulerAngles));
+                e.Param("hand", (args.Item2 ? Hand.LEFT : Hand.RIGHT).ToString());
             }
         }
 
-        private void LogGrabWorkstationHandle(Vector3 startPos, Quaternion startRot)
+        private void LogGrabWorkstationHandle(Tuple<Transform, bool> args)
         {
             Debug.Log("[Analytics] event: grab_workstation_handle");
 
             using (var e = m_Log.NewEvent("grab_workstation_handle"))
             {
-                e.Param("start_pos", JsonConvert.SerializeObject(startPos));
-                e.Param("start_rot", JsonConvert.SerializeObject(startRot));
-                e.Param("hand", m_LastHandPress.ToString());
+                e.Param("start_pos", JsonConvert.SerializeObject(args.Item1.position));
+                e.Param("start_rot", JsonConvert.SerializeObject(args.Item1.eulerAngles));
+                e.Param("hand", (args.Item2 ? Hand.LEFT : Hand.RIGHT).ToString());
             }
         }
 
-        private void LogReleaseWorkstationHandle(Vector3 endPos, Quaternion endRot)
+        private void LogReleaseWorkstationHandle(Tuple<Transform, bool> args)
         {
             Debug.Log("[Analytics] event: release_workstation_handle");
 
             using (var e = m_Log.NewEvent("release_workstation_handle"))
             {
-                e.Param("end_pos", JsonConvert.SerializeObject(endPos));
-                e.Param("end_rot", JsonConvert.SerializeObject(endRot));
-                e.Param("hand", m_LastHandPress.ToString());
+                e.Param("end_pos", JsonConvert.SerializeObject(args.Item1.position));
+                e.Param("end_rot", JsonConvert.SerializeObject(args.Item1.eulerAngles));
+                e.Param("hand", (args.Item2 ? Hand.LEFT : Hand.RIGHT).ToString());
             }
         }
 
-        private void LogClickRotateGraphCW(int startDegrees, int endDegrees)
+        private void LogClickRotateGraphCW(Tuple<float, float> degrees)
         {
             Debug.Log("[Analytics] event: click_rotate_graph_cw");
 
             using (var e = m_Log.NewEvent("click_rotate_graph_cw"))
             {
-                e.Param("start_degrees", startDegrees);
-                e.Param("end_degrees", endDegrees);
+                e.Param("start_degrees", degrees.Item1);
+                e.Param("end_degrees", degrees.Item2);
                 e.Param("hand", m_LastHandPress.ToString());
             }
         }
 
-        private void LogClickRotateGraphCCW(int startDegrees, int endDegrees)
+        private void LogClickRotateGraphCCW(Tuple<float, float> degrees)
         {
             Debug.Log("[Analytics] event: click_rotate_graph_ccw");
 
             using (var e = m_Log.NewEvent("click_rotate_graph_ccw"))
             {
-                e.Param("start_degrees", startDegrees);
-                e.Param("end_degrees", endDegrees);
+                e.Param("start_degrees", degrees.Item1);
+                e.Param("end_degrees", degrees.Item2);
                 e.Param("hand", m_LastHandPress.ToString());
             }
         }
@@ -492,25 +540,25 @@ namespace ThermoVR.Analytics
         /*  TODO: 
             gaze_object_end { object : enum(TABLET, PISTON, GRAPH, CONTROLS), gaze_duration }
         */
-        
-        private void LogToggleSetting(GraphElement elementType, bool enabled)
-        {
-            Debug.Log("[Analytics] event: toggle_setting");
 
-            using (var e = m_Log.NewEvent("toggle_setting"))
+        private void LogClickViewSettings(GraphElement elementType, bool enabled)
+        {
+            Debug.Log("[Analytics] event: click_view_settings");
+
+            using (var e = m_Log.NewEvent("click_view_settings"))
             {
-                e.Param("setting", elementType.ToString());
-                e.Param("enabled", enabled);
+                e.Param("hand", m_LastHandPress.ToString());
             }
         }
 
-        private void LogClickSandboxMode()
+        private void LogClickToggleSetting(GraphElement elementType, bool enabled)
         {
-            Debug.Log("[Analytics] event: click_sandbox_mode");
+            Debug.Log("[Analytics] event: click_toggle_setting");
 
-            using (var e = m_Log.NewEvent("click_sandbox_mode"))
+            using (var e = m_Log.NewEvent("click_toggle_setting"))
             {
-                e.Param("hand", m_LastHandPress.ToString());
+                e.Param("setting", elementType.ToString());
+                e.Param("enabled", enabled);
             }
         }
 
@@ -535,13 +583,23 @@ namespace ThermoVR.Analytics
             }
         }
 
-        private void LogClickLabMode(LabLogData lab)
+        private void LogClickSandboxMode()
+        {
+            Debug.Log("[Analytics] event: click_sandbox_mode");
+
+            using (var e = m_Log.NewEvent("click_sandbox_mode"))
+            {
+                e.Param("hand", m_LastHandPress.ToString());
+            }
+        }
+
+        private void LogClickLabMode()
         {
             Debug.Log("[Analytics] event: click_lab_mode");
 
             using (var e = m_Log.NewEvent("click_lab_mode"))
             {
-                e.Param("initial_lab", JsonConvert.SerializeObject(lab));
+                e.Param("initial_lab", JsonConvert.SerializeObject(m_ActiveLabInfo));
                 e.Param("hand", m_LastHandPress.ToString());
             }
         }
@@ -602,55 +660,6 @@ namespace ThermoVR.Analytics
             using (var e = m_Log.NewEvent("click_lab_home"))
             {
                 e.Param("hand", m_LastHandPress.ToString());
-            }
-        }
-
-        private void LogClickSelectTask(TaskInfo task)
-        {
-            TaskLogData taskData = TaskInfoToTaskLogData(task, m_ActiveSectionIndex, m_ActiveTaskIndex, false);
-
-            Debug.Log("[Analytics] event: click_select_task");
-
-            using (var e = m_Log.NewEvent("click_select_task"))
-            {
-                e.Param("hand", m_LastHandPress.ToString());
-                e.Param("task", JsonConvert.SerializeObject(taskData));
-            }
-        }
-
-        private void LogClickTaskScrollLeft()
-        {
-            Debug.Log("[Analytics] event: click_task_scroll_left");
-
-            using (var e = m_Log.NewEvent("click_task_scroll_left"))
-            {
-                e.Param("hand", m_LastHandPress.ToString());
-            }
-        }
-
-        private void LogClickTaskScrollRight()
-        {
-            Debug.Log("[Analytics] event: click_task_scroll_right");
-
-            using (var e = m_Log.NewEvent("click_task_scroll_right"))
-            {
-                e.Param("hand", m_LastHandPress.ToString());
-            }
-        }
-
-        private void LogTaskListDisplayed(List<IndexedTaskInfo> tasks)
-        {
-            List<TaskLogData> tasksData = new List<TaskLogData>();
-            foreach (IndexedTaskInfo task in tasks)
-            {
-                tasksData.Add(TaskInfoToTaskLogData(task.Info, m_ActiveSectionIndex, task.Index, false));
-            }
-
-            Debug.Log("[Analytics] event: task_list_displayed");
-
-            using (var e = m_Log.NewEvent("task_list_displayed"))
-            {
-                e.Param("task_list", JsonConvert.SerializeObject(tasksData));
             }
         }
 
@@ -719,6 +728,55 @@ namespace ThermoVR.Analytics
             using (var e = m_Log.NewEvent("section_list_displayed"))
             {
                 e.Param("available_sections", JsonConvert.SerializeObject(sectionsData));
+            }
+        }
+
+        private void LogClickSelectTask(TaskInfo task)
+        {
+            TaskLogData taskData = TaskInfoToTaskLogData(task, m_ActiveSectionIndex, m_ActiveTaskIndex, false);
+
+            Debug.Log("[Analytics] event: click_select_task");
+
+            using (var e = m_Log.NewEvent("click_select_task"))
+            {
+                e.Param("hand", m_LastHandPress.ToString());
+                e.Param("task", JsonConvert.SerializeObject(taskData));
+            }
+        }
+
+        private void LogClickTaskScrollLeft()
+        {
+            Debug.Log("[Analytics] event: click_task_scroll_left");
+
+            using (var e = m_Log.NewEvent("click_task_scroll_left"))
+            {
+                e.Param("hand", m_LastHandPress.ToString());
+            }
+        }
+
+        private void LogClickTaskScrollRight()
+        {
+            Debug.Log("[Analytics] event: click_task_scroll_right");
+
+            using (var e = m_Log.NewEvent("click_task_scroll_right"))
+            {
+                e.Param("hand", m_LastHandPress.ToString());
+            }
+        }
+
+        private void LogTaskListDisplayed(List<IndexedTaskInfo> tasks)
+        {
+            List<TaskLogData> tasksData = new List<TaskLogData>();
+            foreach (IndexedTaskInfo task in tasks)
+            {
+                tasksData.Add(TaskInfoToTaskLogData(task.Info, m_ActiveSectionIndex, task.Index, false));
+            }
+
+            Debug.Log("[Analytics] event: task_list_displayed");
+
+            using (var e = m_Log.NewEvent("task_list_displayed"))
+            {
+                e.Param("task_list", JsonConvert.SerializeObject(tasksData));
             }
         }
 
@@ -856,13 +914,59 @@ namespace ThermoVR.Analytics
             }
         }
 
+        private void LogCompleteLab()
+        {
+            LabLogData completedLab = LabInfoToLabLogData(m_ActiveLabInfo, m_ActiveLabIndex, false);
+            Debug.Log("[Analytics] event: complete_lab");
+
+            using (var e = m_Log.NewEvent("complete_lab"))
+            {
+                e.Param("lab", JsonConvert.SerializeObject(completedLab));
+            }
+        }
+
+        private void LogCompleteSection()
+        {
+            TopicInfo section = m_ActiveLabInfo.Topics[m_ActiveSectionIndex];
+
+            SectionLogData sectionData;
+
+            List<TaskLogData> tasksData = new List<TaskLogData>();
+            for (int taskIdx = 0; taskIdx < section.Tasks.Count; taskIdx++)
+            {
+                tasksData.Add(TaskInfoToTaskLogData(section.Tasks[taskIdx], m_ActiveSectionIndex, taskIdx, true));
+            }
+
+            sectionData = TopicInfoToSectionLogData(section, m_ActiveSectionIndex, tasksData, false);
+
+            Debug.Log("[Analytics] event: complete_section");
+
+            using (var e = m_Log.NewEvent("complete_section"))
+            {
+                e.Param("section", JsonConvert.SerializeObject(sectionData));
+            }
+        }
+
+        private void LogCompleteTask()
+        {
+            var data = TaskInfoToTaskLogData(m_ActiveLabInfo.Topics[m_ActiveSectionIndex].Tasks[m_ActiveTaskIndex], m_ActiveSectionIndex, m_ActiveTaskIndex, false);
+
+            Debug.Log("[Analytics] event: complete_task");
+
+            using (var e = m_Log.NewEvent("complete_task"))
+            {
+                e.Param("task", JsonConvert.SerializeObject(data));
+            }
+        }
+
         #endregion // Log Events
 
         #region Other Events
 
-        private void OnPreActivateLab(LabInfo lab)
+        private void OnPreActivateLab(Tuple<LabInfo, int> labInfo)
         {
-            m_ActiveLabInfo = lab;
+            m_ActiveLabInfo = labInfo.Item1;
+            m_ActiveLabIndex = labInfo.Item2;
         }
 
         private void OnHandStartPress(bool leftHand)

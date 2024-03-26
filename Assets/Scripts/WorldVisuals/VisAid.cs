@@ -45,7 +45,7 @@ public class VisAid : MonoBehaviour
   void Update()
   {
     t_free += Time.deltaTime;
-    if(!stored && !touchable.grabbed && t_free > 1.0f)
+    if(!stored && !touchable.IsGrabbed() && t_free > 1.0f)
     {
       rigidbody.isKinematic = true;
       Vector3 og_position = touchable.og_parent.position+og_localPosition;
@@ -61,7 +61,7 @@ public class VisAid : MonoBehaviour
         gameObject.transform.localRotation = og_localRotation;
       }
     }
-    else if(stored || touchable.grabbed)
+    else if(stored || touchable.IsGrabbed())
       t_free = 0.0f;
   }
 

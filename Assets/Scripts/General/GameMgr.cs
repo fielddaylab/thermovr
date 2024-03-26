@@ -77,6 +77,7 @@ namespace ThermoVR
             GameMgr.Events.Dispatch(GameEvents.NewNameGenerated, inName);
             m_ProfileName = inName;
 
+            GameMgr.Events.Dispatch(GameEvents.StartSession);
             GameMgr.Events.Dispatch(GameEvents.StartGame);
         }
 
@@ -86,6 +87,7 @@ namespace ThermoVR
 
             Log.Error("[Game] Generating new player id failed: {0}", error.Msg);
 
+            GameMgr.Events.Dispatch(GameEvents.StartSession);
             GameMgr.Events.Dispatch(GameEvents.StartGame);
         }
 

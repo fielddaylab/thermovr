@@ -167,9 +167,14 @@ public class World : MonoBehaviour
 
         workspace = GameObject.Find("Workspace");
         handle_workspace_touchable = handle_workspace.GetComponent<Touchable>();
+        handle_workspace_touchable.OnGrab += HandleWorkspaceHandleGrabbed;
+        handle_workspace_touchable.OnRelease += HandleWorkspaceHandleReleased;
 
         graph = GameObject.Find("Graph");
         graph_touchable = graph.GetComponent<Touchable>();
+        graph_touchable.OnGrab += HandleGraphBallGrabbed;
+        graph_touchable.OnRelease += HandleGraphBallReleased;
+
         state_dot = GameObject.Find("gstate");
         placement_dot = GameObject.Find("tstate");
         placement_dot.GetComponent<Renderer>().enabled = false;
@@ -446,14 +451,14 @@ public class World : MonoBehaviour
         if (ref_grabbed == null && ((ref_htrigger_delta == 1 && ref_itrigger) || (ref_htrigger && ref_itrigger_delta == 1))) {
             //first try movables
             for (int i = 0; ref_grabbed == null && i < movables.Count; i++) {
-                if ( //object newly grabbed
-                   (left_hand && movables[i].ltouch) ||
-                   (!left_hand && movables[i].rtouch)
-                  ) {
+                bool leftGrab = left_hand && movables[i].ltouch;
+                bool rightGrab = !left_hand && movables[i].rtouch;
+                //object newly grabbed
+                if (leftGrab || rightGrab) {
                     ref_grabbed = movables[i].gameObject;
                     ref_grabbed.transform.SetParent(ref_hand.transform);
                     if (ref_grabbed == ref_ograbbed) ref_ograbbed = null;
-                    movables[i].grabbed = true;
+                    movables[i].SetGrabbed(true, leftGrab);
                     VisAid v = ref_grabbed.GetComponent<VisAid>();
                     if (v) //newly grabbed object is a visaid
                     {
@@ -470,12 +475,12 @@ public class World : MonoBehaviour
             //then dials
             if (ref_grabbed == null) {
                 for (int i = 0; i < ToolMgr.Dials.Count; i++) {
-                    if ( //dial newly grabbed
-                           (left_hand && ToolMgr.Dials[i].touchable.ltouch) ||
-                           (!left_hand && ToolMgr.Dials[i].touchable.rtouch)
-                          ) {
+                    bool leftGrab = left_hand && ToolMgr.Dials[i].touchable.ltouch;
+                    bool rightGrab = !left_hand && ToolMgr.Dials[i].touchable.rtouch;
+                    //dial newly grabbed
+                    if (leftGrab || rightGrab) {
                         ref_grabbed = ToolMgr.Dials[i].gameObject;
-                        ToolMgr.Dials[i].touchable.grabbed = true;
+                        ToolMgr.Dials[i].touchable.SetGrabbed(true, leftGrab);
                         if (ref_grabbed == ref_ograbbed) ref_ograbbed = null;
                     }
                 }
@@ -485,12 +490,12 @@ public class World : MonoBehaviour
             if (ref_grabbed == null) //still not holding anything
             {
                 Touchable g = handle_workspace_touchable;
-                if ( //handle newly grabbed
-                  (left_hand && g.ltouch) ||
-                  (!left_hand && g.rtouch)
-                ) {
+                bool leftGrab = left_hand && g.ltouch;
+                bool rightGrab = !left_hand && g.rtouch;
+                //handle newly grabbed
+                if ( leftGrab || rightGrab) {
                     ref_grabbed = handle_workspace;
-                    g.grabbed = true;
+                    g.SetGrabbed(true, leftGrab);
                     if (ref_grabbed == ref_ograbbed) ref_ograbbed = null;
                 }
             }
@@ -498,16 +503,16 @@ public class World : MonoBehaviour
             if (ref_grabbed == null) //still not holding anything
             {
                 Touchable g = graph_touchable;
-                if ( //graph newly grabbed
-                  (left_hand && g.ltouch) ||
-                  (!left_hand && g.rtouch)
-                ) {
+                bool leftGrab = left_hand && g.ltouch;
+                bool rightGrab = !left_hand && g.rtouch;
+                //graph newly grabbed
+                if (leftGrab || rightGrab) {
                     if (ModMgr.GraphBallInteractable())
                     {
                         ref_grabbed = graph;
                         state_dot.GetComponent<Renderer>().enabled = false;
                         placement_dot.GetComponent<Renderer>().enabled = true;
-                        g.grabbed = true;
+                        g.SetGrabbed(true, leftGrab);
                         if (ref_grabbed == ref_ograbbed) ref_ograbbed = null;
                     }
                 }
@@ -550,7 +555,7 @@ public class World : MonoBehaviour
 
             GameMgr.Events.Dispatch(GameEvents.ObjectReleased, ref_grabbed);
 
-            ref_grabbed.GetComponent<Touchable>().grabbed = false;
+            ref_grabbed.GetComponent<Touchable>().SetGrabbed(false, left_hand);
             ref_grabbed = null;
         }
 
@@ -751,7 +756,7 @@ public class World : MonoBehaviour
     #region Handlers
 
     private void HandleResetPressed() {
-        thermo_present.Reset();
+        thermo_present.Reset(true);
     }
 
     private void HandleRegisterPressable(Pressable pressable) {
@@ -775,18 +780,38 @@ public class World : MonoBehaviour
     {
         if (rgrabbed)
         {
-            rgrabbed.GetComponent<Touchable>().grabbed = false;
+            rgrabbed.GetComponent<Touchable>().SetGrabbed(false, false);
             rgrabbed.transform.SetParent(rgrabbed.GetComponent<Touchable>().og_parent);
 
             rgrabbed = null;
         }
         if (lgrabbed)
         {
-            lgrabbed.GetComponent<Touchable>().grabbed = false;
+            lgrabbed.GetComponent<Touchable>().SetGrabbed(false, true);
             lgrabbed.transform.SetParent(lgrabbed.GetComponent<Touchable>().og_parent);
 
             lgrabbed = null;
         }
+    }
+
+    private void HandleWorkspaceHandleGrabbed(object sender, bool arg)
+    {
+        GameMgr.Events?.Dispatch(GameEvents.WorkspaceHandleGrabbed, new Tuple<Transform, bool>(handle_workspace_touchable.transform, arg));
+    }
+
+    private void HandleWorkspaceHandleReleased(object sender, bool arg)
+    {
+        GameMgr.Events?.Dispatch(GameEvents.WorkspaceHandleReleased, new Tuple<Transform, bool>(handle_workspace_touchable.transform, arg));
+    }
+
+    private void HandleGraphBallGrabbed(object sender, bool arg)
+    {
+        GameMgr.Events?.Dispatch(GameEvents.GraphBallGrabbed, new Tuple<Transform, bool>(placement_dot.transform, arg));
+    }
+
+    private void HandleGraphBallReleased(object sender, bool arg)
+    {
+        GameMgr.Events?.Dispatch(GameEvents.GraphBallReleased, new Tuple<Transform, bool>(placement_dot.transform, arg));
     }
 
     #endregion // Handlers

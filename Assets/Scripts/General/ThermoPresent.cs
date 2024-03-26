@@ -103,8 +103,8 @@ public class ThermoPresent : MonoBehaviour
         HideError();
     }
 
-    public void Reset() {
-        state.reset();
+    public void Reset(bool fromClick = false) {
+        state.reset(fromClick);
         visualize_state();
         HideError();
     }
@@ -864,7 +864,7 @@ public class ThermoPresent : MonoBehaviour
     }
 
 
-    string region_to_name(int region) //0 subcooled liquid, 1 two-phase, 2 superheated vapor
+    public static string region_to_name(int region) //0 subcooled liquid, 1 two-phase, 2 superheated vapor
     {
         switch (region) {
             case ThermoMath.region_liquid: return "Subcooled Liquid";

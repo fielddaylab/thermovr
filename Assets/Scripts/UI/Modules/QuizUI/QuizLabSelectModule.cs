@@ -54,7 +54,7 @@ namespace ThermoVR.Lab
                 option.LabTitle.text = LabMgr.Instance.AvailableLabs[i].Name;
                 option.LabAuthor.text = LabMgr.Instance.AvailableLabs[i].Author;
                 option.LoadButton.ClearListeners();
-                option.SetLabInfo(LabMgr.Instance.AvailableLabs[i]);
+                option.SetLabInfo(LabMgr.Instance.AvailableLabs[i], i);
                 option.FixCollider(m_OptionPool.Prefab.Collider);
                 option.SetSlider(LabMgr.Instance.Stats.LabMap[LabMgr.Instance.AvailableLabs[i].ID].Progress);
 

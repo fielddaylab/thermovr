@@ -12,15 +12,29 @@ namespace ThermoVR.Controls
         [SerializeField] private Transform m_CenterEye;
         [SerializeField] private XROrigin m_Origin;
 
-        private bool initialSet = false;
+        private bool initialSetCompleted = false;
+        private bool presenceState = false; // true when player has headset on
 
         private void Update() {
             InputDevices.GetDeviceAtXRNode(XRNode.Head).TryGetFeatureValue(UnityEngine.XR.CommonUsages.userPresence, out bool isPresent);
 
-            if (!initialSet && isPresent) {
+            if (!initialSetCompleted && isPresent) {
                 SetHeight();
 
-                initialSet = true;
+                initialSetCompleted = true;
+            }
+
+            if (presenceState != isPresent)
+            {
+                presenceState = isPresent;
+                if (presenceState)
+                {
+                    GameMgr.Events?.Dispatch(GameEvents.HeadsetOn);
+                }
+                else
+                {
+                    GameMgr.Events?.Dispatch(GameEvents.HeadsetOff);
+                }
             }
         }
 

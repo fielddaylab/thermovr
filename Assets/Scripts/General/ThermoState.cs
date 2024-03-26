@@ -11,6 +11,7 @@ using System.IO;
 using System.Collections.Generic;
 using UnityEngine;
 using ThermoVR.Tools;
+using ThermoVR.Analytics;
 
 namespace ThermoVR.State
 {
@@ -110,7 +111,7 @@ namespace ThermoVR.State
             }
         }
 
-        public void reset() {
+        public void reset(bool fromClick = false) {
             // Lab case
             if (World.Instance && World.Instance.ModMgr.AreModsActive())
             {
@@ -152,6 +153,15 @@ namespace ThermoVR.State
             prev_enthalpy = -1;
             prev_quality = -1;
             prev_region = region;
+
+            if (fromClick)
+            {
+                AnalyticsService.StateProperties resetProperties = new AnalyticsService.StateProperties(
+                    ThermoPresent.region_to_name(region), pressure, volume, temperature, internalenergy, entropy, enthalpy, quality
+                    );
+
+                GameMgr.Events.Dispatch(GameEvents.ResetSimClicked, resetProperties);
+            }
 
             GameMgr.Events.Dispatch(GameEvents.WarpPVT, new Tuple<double, double, double>(pressure, volume, temperature));
         }

@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine;
@@ -13,13 +14,19 @@ public class Touchable : MonoBehaviour
     protected GameObject lhand;
     protected GameObject rhand;
     [System.NonSerialized]
-    public bool grabbed = false;
+    private bool grabbed = false;
     protected Collider lhand_c;
     protected Collider rhand_c;
     [System.NonSerialized]
     public Transform og_parent;
     private Lightable[] lightables;
     public bool has_lightables = true;
+
+    private bool l_grab;
+    private bool r_grab;
+
+    public event EventHandler<bool> OnGrab;
+    public event EventHandler<bool> OnRelease;
 
     void Awake() {
         lhand = GameObject.Find("LeftControllerAnchor");
@@ -45,6 +52,33 @@ public class Touchable : MonoBehaviour
     private void OnDisable()
     {
         rtouch = ltouch = false;
+    }
+
+    public void SetGrabbed(bool isGrabbed, bool isLeftGrab)
+    {
+        bool changeInGrab = grabbed != isGrabbed;
+
+        grabbed = isGrabbed;
+
+        if (changeInGrab)
+        {
+            if (isGrabbed)
+            {
+                l_grab = isLeftGrab;
+                r_grab = !isLeftGrab;
+                OnGrab?.Invoke(this, isLeftGrab);
+            }
+            else
+            {
+                l_grab = r_grab = false;
+                OnRelease?.Invoke(this, isLeftGrab);
+            }
+        }
+    }
+
+    public bool IsGrabbed()
+    {
+        return grabbed;
     }
 
     /*

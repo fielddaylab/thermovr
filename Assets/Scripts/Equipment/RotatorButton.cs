@@ -51,6 +51,9 @@ public class RotatorButton : MonoBehaviour
         Vector3 targetRotation = targetTransform.localEulerAngles;
         targetRotation.y = targetYRotation;
 
+        if (m_rotationStep > 0) { GameMgr.Events.Dispatch(GameEvents.RotateGraphClickedCW, new Tuple<float, float>(targetTransform.eulerAngles.y, targetRotation.y)); }
+        else { GameMgr.Events.Dispatch(GameEvents.RotateGraphClickedCCW, new Tuple<float, float>(targetTransform.eulerAngles.y, targetRotation.y)); }
+        
         yield return targetTransform.RotateTo(targetRotation, 0.5f, Axis.Y);
 
         yield return null;

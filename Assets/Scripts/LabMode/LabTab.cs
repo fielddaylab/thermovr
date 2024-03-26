@@ -93,6 +93,7 @@ namespace ThermoVR.Lab
         private void HandleEvalUpdate(object sender, EvalUpdateEventArgs args) {
             if (args.IsCorrect) {
                 ShowCompletionSprite();
+                if (!CompletedAndCorrect) { GameMgr.Events.Dispatch(GameEvents.TaskCompleted); }
                 CompletedAndCorrect = true;
             }
             else {

@@ -72,7 +72,7 @@ namespace ThermoVR.Lab
         public override void Init() {
             base.Init();
 
-            GameMgr.Events?.Register<LabInfo>(GameEvents.PreActivateLab, HandlePreActivateLab);
+            GameMgr.Events?.Register<Tuple<LabInfo, int>>(GameEvents.PreActivateLab, HandlePreActivateLab);
             GameMgr.Events?.Register(GameEvents.DeactivateLab, HandleDeactivateLab);
 
             GameMgr.Events?.Register(GameEvents.TaskResetPressed, HandleTaskResetPressed);
@@ -376,8 +376,8 @@ namespace ThermoVR.Lab
 
         #region Handlers
 
-        private void HandlePreActivateLab(LabInfo info) {
-            m_currLab = info;
+        private void HandlePreActivateLab(Tuple<LabInfo, int> info) {
+            m_currLab = info.Item1;
             m_labIsActive = true;
         }
 
@@ -518,6 +518,7 @@ namespace ThermoVR.Lab
             {
                 // Display green checkmark
                 m_tabs[topicIndex].ShowCompletionSprite();
+                GameMgr.Events.Dispatch(GameEvents.SectionCompleted);
             }
             else
             {
@@ -538,6 +539,11 @@ namespace ThermoVR.Lab
             if (!fromReset)
             {
                 GameMgr.Events.Dispatch(GameEvents.ClickSubmitAnswer);
+            }
+
+            if (currStats.Progress == 1)
+            {
+                GameMgr.Events.Dispatch(GameEvents.LabCompleted);
             }
         }
 
