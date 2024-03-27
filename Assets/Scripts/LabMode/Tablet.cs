@@ -138,6 +138,8 @@ namespace ThermoVR
             // Open Graph UI
             m_hub.OpenUI(UIID.Graph);
 
+            GameMgr.Events?.Dispatch(GameEvents.SettingsViewClicked);
+
             ShowPullout();
         }
 

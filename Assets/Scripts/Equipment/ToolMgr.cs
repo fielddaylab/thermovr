@@ -225,6 +225,20 @@ namespace ThermoVR.Tools
             return toggle_heatTransfer.IsOn();
         }
 
+        public int IdentifyStop(Tool tool)
+        {
+            if (tool == tool_stop1)
+            {
+                return 1;
+            }
+            else if (tool == tool_stop2)
+            {
+                return 2;
+            }
+
+            return 0;
+        }
+
         #endregion // Accessors
 
         #region Volume Stops
@@ -293,12 +307,16 @@ namespace ThermoVR.Tools
 
             GameObject o = t.gameObject;
             t.engaged = true;
+            int uniqueStopID = 0;
             if (t == tool_stop1) {
                 AddVStop(tool_stop1.GetVal(), t);
+                uniqueStopID = 1;
             }
             else if (t == tool_stop2) {
                 AddVStop(tool_stop2.GetVal(), t);
+                uniqueStopID = 2;
             }
+            GameMgr.Events?.Dispatch(GameEvents.ToolTogglePressed, new Tuple<ToolType, bool, bool, int>(t.tool_type, true, false, uniqueStopID));
             GameMgr.Events?.Dispatch(GameEvents.ActivateTool, t);
             UpdateApplyTool(t);
 
@@ -307,18 +325,25 @@ namespace ThermoVR.Tools
         }
 
         public void DeactivateTool(Tool t) {
+            bool toolReset = false;
             if (!t.always_engaged) {
                 // Trigger tool's deactivation animations
                 t.TriggerDeactivation();
 
                 t.engaged = false;
+                toolReset = true;
             }
+            int uniqueStopID = 0;
             if (t == tool_stop1) {
                 ReleaseVStop(t);
+                uniqueStopID = 1;
             }
             else if (t == tool_stop2) {
                 ReleaseVStop(t);
+                uniqueStopID = 2;
             }
+
+            GameMgr.Events?.Dispatch(GameEvents.ToolTogglePressed, new Tuple<ToolType, bool, bool, int>(t.tool_type, false, toolReset, uniqueStopID));
             GameMgr.Events?.Dispatch(GameEvents.DeactivateTool, t);
             UpdateApplyTool(t);
         }

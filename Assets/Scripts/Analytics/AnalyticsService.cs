@@ -13,6 +13,8 @@ using BeauPools;
 using ThermoVR.Lab;
 using ThermoVR.Tools;
 using Newtonsoft.Json;
+using ThermoVR.UI.GraphElements;
+using ThermoVR.Controls;
 
 namespace ThermoVR.Analytics
 {
@@ -47,6 +49,20 @@ namespace ThermoVR.Analytics
             GRID_LINES,
             REGION_LABELS,
             AXIS_TRACKERS
+        }
+
+        private enum LogToolType
+        {
+            INSULATION,
+            LOWER_STOP,
+            UPPER_STOP,
+            INCREASE_WEIGHT,
+            DECREASE_WEIGHT,
+            HEAT,
+            COOLING,
+            CHAMBER_TERMPERATURE,
+            CHAMBER_PRESSURE,
+            UNKOWN
         }
 
         [Serializable]
@@ -215,8 +231,8 @@ namespace ThermoVR.Analytics
                 .Register<Tuple<Transform, bool>>(GameEvents.WorkspaceHandleReleased, LogReleaseWorkstationHandle, this)
                 .Register<Tuple<float, float>>(GameEvents.RotateGraphClickedCW, LogClickRotateGraphCW, this)
                 .Register<Tuple<float, float>>(GameEvents.RotateGraphClickedCCW, LogClickRotateGraphCCW, this)
-                .Register(GameEvents.GraphBallGrabbed, LogGrabGraphBall, this)
-                .Register(GameEvents.GraphBallReleased, LogReleaseGraphBall, this)
+                .Register<bool>(GameEvents.GraphBallGrabbed, LogGrabGraphBall, this)
+                .Register<bool>(GameEvents.GraphBallReleased, LogReleaseGraphBall, this)
                 .Register(GameEvents.SandboxModeClicked, LogClickSandboxMode, this)
                 .Register(GameEvents.LabModeClicked, LogClickLabMode, this)
                 .Register(GameEvents.TaskCompleted, LogCompleteTask, this)
@@ -224,6 +240,16 @@ namespace ThermoVR.Analytics
                 .Register(GameEvents.LabCompleted, LogCompleteLab, this)
                 .Register(GameEvents.HeadsetOn, LogHeadsetOn, this)
                 .Register(GameEvents.HeadsetOff, LogHeadsetOff, this)
+                .Register<Tuple<ToolType, bool, bool, int>>(GameEvents.ToolTogglePressed, LogClickToolToggle, this)
+                .Register<Tuple<ToolType, float, int>>(GameEvents.ClickToolIncrease, LogClickToolIncrease, this)
+                .Register<Tuple<ToolType, float, int>>(GameEvents.ClickToolDecrease, LogClickToolDecrease, this)
+                .Register<Tuple<ToolType, float, bool, bool, int>>(GameEvents.ReleaseToolSlider, LogReleaseToolSlider, this)
+                .Register<Tuple<ToolType, float, bool, int>>(GameEvents.GrabToolSlider, LogGrabToolSlider, this)
+                .Register<Tool>(GameEvents.AllowTool, LogToolUnlocked, this)
+                .Register<Tool>(GameEvents.DisallowTool, LogToolLocked, this)
+                .Register(GameEvents.SettingsViewClicked, LogClickViewSettings, this)
+                .Register<GraphSettingUpdate>(GameEvents.UpdateGraphSetting, LogClickToggleSetting)
+                .Register<Tuple<GazeTargetType, float>>(GameEvents.GazeEnd, LogGazeObjectEnd)
                 ;
 
             m_Log = new OGDLog(new OGDLogConsts() {
@@ -454,94 +480,112 @@ namespace ThermoVR.Analytics
             }
         }
 
-        private void LogGrabGraphBall()
+        private void LogGrabGraphBall(bool leftHand)
         {
             Debug.Log("[Analytics] event: grab_graph_ball");
 
             using (var e = m_Log.NewEvent("grab_graph_ball"))
             {
-                e.Param("hand", m_LastHandPress.ToString());
+                e.Param("hand", (leftHand ? Hand.LEFT : Hand.RIGHT).ToString());
             }
         }
 
-        private void LogReleaseGraphBall()
+        private void LogReleaseGraphBall(bool leftHand)
         {
             Debug.Log("[Analytics] event: release_graph_ball");
 
             using (var e = m_Log.NewEvent("release_graph_ball"))
             {
-                e.Param("hand", m_LastHandPress.ToString());
+                e.Param("hand", (leftHand ? Hand.LEFT : Hand.RIGHT).ToString());
             }
         }
 
-        private void LogClickToolToggle(ToolType toolName, bool toolReset, bool toolEnabled)
+        private void LogClickToolToggle(Tuple<ToolType, bool, bool, int> args)
         {
+            LogToolType type = ToolTypeToLogToolType(args.Item1, args.Item4);
+
             Debug.Log("[Analytics] event: click_tool_toggle");
 
             using (var e = m_Log.NewEvent("click_tool_toggle"))
             {
-                e.Param("tool_name", toolName.ToString());
-                e.Param("tool_reset", toolReset);
+                e.Param("tool_name", type.ToString());
+                e.Param("tool_enabled", args.Item2);
+                e.Param("tool_reset", args.Item3);
                 e.Param("hand", m_LastHandPress.ToString());
-                e.Param("enabled", toolEnabled);
             }
         }
 
-        private void LogClickToolIncrease(ToolType toolName, float endVal)
+        private void LogClickToolIncrease(Tuple<ToolType, float, int> args)
         {
+            LogToolType type = ToolTypeToLogToolType(args.Item1, args.Item3);
+
             Debug.Log("[Analytics] event: click_tool_increase");
 
             using (var e = m_Log.NewEvent("click_tool_increase"))
             {
-                e.Param("tool_name", toolName.ToString());
-                e.Param("end_value", endVal);
+                e.Param("tool_name", type.ToString());
+                e.Param("end_value", args.Item2);
                 e.Param("hand", m_LastHandPress.ToString());
             }
         }
 
-        private void LogClickToolDecrease(ToolType toolName, float endVal)
+        private void LogClickToolDecrease(Tuple<ToolType, float, int> args)
         {
+            LogToolType type = ToolTypeToLogToolType(args.Item1, args.Item3);
+
             Debug.Log("[Analytics] event: click_tool_decrease");
 
             using (var e = m_Log.NewEvent("click_tool_decrease"))
             {
-                e.Param("tool_name", toolName.ToString());
-                e.Param("end_value", endVal);
+                e.Param("tool_name", type.ToString());
+                e.Param("end_value", args.Item2);
                 e.Param("hand", m_LastHandPress.ToString());
             }
         }
 
-        private void LogGrabToolSlider(ToolType toolName, float startVal)
+        private void LogGrabToolSlider(Tuple<ToolType, float, bool, int> args)
         {
+            LogToolType type = ToolTypeToLogToolType(args.Item1, args.Item4);
+
             Debug.Log("[Analytics] event: grab_tool_slider");
 
             using (var e = m_Log.NewEvent("grab_tool_slider"))
             {
-                e.Param("tool_name", toolName.ToString());
-                e.Param("start_val", startVal);
-                e.Param("hand", m_LastHandPress.ToString());
+                e.Param("tool_name", type.ToString());
+                e.Param("start_val", args.Item2);
+                e.Param("hand", (args.Item3 ? Hand.LEFT : Hand.RIGHT).ToString());
             }
         }
 
         // release_tool_slider { tool_name, end_value // in physical units, not 0-1, hand : enum(LEFT, RIGHT), auto_release : bool // true if slider was automatically released due to hand getting to far away, or sim was reset }
-        private void LogReleaseToolSlider(ToolType toolName, float endVal, bool autoRelease)
+        private void LogReleaseToolSlider(Tuple<ToolType, float, bool, bool, int> args)
         {
+            LogToolType type = ToolTypeToLogToolType(args.Item1, args.Item5);
+
             Debug.Log("[Analytics] event: release_tool_slider");
 
             using (var e = m_Log.NewEvent("release_tool_slider"))
             {
-                e.Param("tool_name", toolName.ToString());
-                e.Param("end_value", endVal);
-                e.Param("hand", m_LastHandPress.ToString());
-                e.Param("auto_release", autoRelease);
+                e.Param("tool_name", type.ToString());
+                e.Param("end_value", args.Item2);
+                e.Param("hand", (args.Item3 ? Hand.LEFT : Hand.RIGHT).ToString());
+                e.Param("auto_release", args.Item4);
             }
         }
 
-        /*  TODO: 
-            gaze_object_end { object : enum(TABLET, PISTON, GRAPH, CONTROLS), gaze_duration }
-        */
+        // gaze_object_end { object : enum(TABLET, PISTON, GRAPH, CONTROLS), gaze_duration }
+        private void LogGazeObjectEnd(Tuple<GazeTargetType, float> args)
+        {
+            Debug.Log("[Analytics] event: gaze_object_end");
 
-        private void LogClickViewSettings(GraphElement elementType, bool enabled)
+            using (var e = m_Log.NewEvent("gaze_object_end"))
+            {
+                e.Param("object", args.Item1.ToString());
+                e.Param("gaze_duration", args.Item2);
+            }
+        }
+
+        private void LogClickViewSettings()
         {
             Debug.Log("[Analytics] event: click_view_settings");
 
@@ -551,35 +595,39 @@ namespace ThermoVR.Analytics
             }
         }
 
-        private void LogClickToggleSetting(GraphElement elementType, bool enabled)
+        private void LogClickToggleSetting(GraphSettingUpdate settingUpdate)
         {
             Debug.Log("[Analytics] event: click_toggle_setting");
 
             using (var e = m_Log.NewEvent("click_toggle_setting"))
             {
-                e.Param("setting", elementType.ToString());
-                e.Param("enabled", enabled);
+                e.Param("setting", settingUpdate.GraphElementID.ToString());
+                e.Param("enabled", settingUpdate.ToggleVal);
             }
         }
 
-        private void LogToolLocked(ToolType tool)
+        private void LogToolLocked(Tool tool)
         {
+            LogToolType type = ToolTypeToLogToolType(tool.tool_type, tool.unique_id);
+
             Debug.Log("[Analytics] event: tool_locked");
 
             using (var e = m_Log.NewEvent("tool_locked"))
             {
-                e.Param("tool", tool.ToString());
+                e.Param("tool", type.ToString());
             }
         }
 
 
-        private void LogToolUnlocked(ToolType tool)
+        private void LogToolUnlocked(Tool tool)
         {
+            LogToolType type = ToolTypeToLogToolType(tool.tool_type, tool.unique_id);
+
             Debug.Log("[Analytics] event: tool_unlocked");
 
             using (var e = m_Log.NewEvent("tool_unlocked"))
             {
-                e.Param("tool", tool.ToString());
+                e.Param("tool", type.ToString());
             }
         }
 
@@ -1092,6 +1140,33 @@ namespace ThermoVR.Analytics
             if (includeSections) { labData.Sections = null; }  // TODO: sections
 
             return labData;
+        }
+
+        private LogToolType ToolTypeToLogToolType(ToolType inType, int uniqueStopID)
+        {
+            switch(inType)
+            {
+                case ToolType.Burner:
+                    return LogToolType.HEAT;
+                case ToolType.Coil:
+                    return LogToolType.COOLING;
+                case ToolType.Insulator:
+                    return LogToolType.INSULATION;
+                case ToolType.NegativeWeight:
+                    return LogToolType.DECREASE_WEIGHT;
+                case ToolType.Weight:
+                    return LogToolType.INCREASE_WEIGHT;
+                case ToolType.Stops:
+                    if (uniqueStopID == 1) { return LogToolType.LOWER_STOP; }
+                    else if (uniqueStopID == 2) { return LogToolType.UPPER_STOP; }
+                    else { return LogToolType.UNKOWN; }
+                case ToolType.SurroundingPressure:
+                    return LogToolType.CHAMBER_PRESSURE;
+                case ToolType.SurroundingTemperature:
+                    return LogToolType.CHAMBER_TERMPERATURE;
+                default:
+                    return LogToolType.UNKOWN;
+            }
         }
 
         #endregion // Helpers

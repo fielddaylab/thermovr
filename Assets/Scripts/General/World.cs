@@ -349,7 +349,7 @@ public class World : MonoBehaviour
     /// <param name="actable"></param>
     /// <param name="hand_pos">prev hand position</param>
     /// <param name="r_hand_pos">ref to curr hand position</param>
-    public void TryInteractable(ref GameObject actable, Vector3 hand_pos, ref Vector3 r_hand_pos, GameObject hand_obj) {
+    public void TryInteractable(ref GameObject actable, Vector3 hand_pos, ref Vector3 r_hand_pos, GameObject hand_obj, bool left_hand) {
         //grabbing handle
         if (actable == handle_workspace) {
             float dy = (r_hand_pos.y - hand_pos.y);
@@ -403,7 +403,10 @@ public class World : MonoBehaviour
                 }
                 else
                 {
+                    ReleaseDial(dd, left_hand, true);
+
                     // stop grabbing
+                    actable.GetComponent<Touchable>().SetGrabbed(false, left_hand);
                     actable = null;
                 }
             }
@@ -482,6 +485,9 @@ public class World : MonoBehaviour
                         ref_grabbed = ToolMgr.Dials[i].gameObject;
                         ToolMgr.Dials[i].touchable.SetGrabbed(true, leftGrab);
                         if (ref_grabbed == ref_ograbbed) ref_ograbbed = null;
+
+                        Dial dd = ToolMgr.Dials[i];
+                        GrabDial(dd, left_hand);
                     }
                 }
             }
@@ -555,13 +561,20 @@ public class World : MonoBehaviour
 
             GameMgr.Events.Dispatch(GameEvents.ObjectReleased, ref_grabbed);
 
+            Dial dd = ref_grabbed.GetComponent<Dial>();
+
+            if (dd != null)
+            {
+                ReleaseDial(dd, left_hand, false);
+            }
+
             ref_grabbed.GetComponent<Touchable>().SetGrabbed(false, left_hand);
             ref_grabbed = null;
         }
 
         if (ref_grabbed)
         {
-            TryInteractable(ref ref_grabbed, hand_pos, ref ref_hand_pos, ref_hand);
+            TryInteractable(ref ref_grabbed, hand_pos, ref ref_hand_pos, ref_hand, left_hand);
         }
 
         ref_hand_pos = hand_pos;
@@ -590,6 +603,42 @@ public class World : MonoBehaviour
             pressable.SetFingerTouches(ref ltouch, ref rtouch);
             continue;
         }
+    }
+
+    private void ReleaseDial(Dial dd, bool left_hand, bool autoRelease)
+    {
+        ToolType firstType = ToolType.Burner;
+        bool leftRelase = left_hand;
+        int uniqueStopID = 0;
+        List<Tool> relevant_tools = dd.get_relevant_tools();
+        if (relevant_tools.Count > 0)
+        {
+            firstType = relevant_tools[0].tool_type;
+            if (firstType == ToolType.Stops)
+            {
+                uniqueStopID = ToolMgr.Instance.IdentifyStop(relevant_tools[0]);
+            }
+        }
+
+        GameMgr.Events.Dispatch(GameEvents.ReleaseToolSlider, new Tuple<ToolType, float, bool, bool, int>(firstType, dd.map, leftRelase, autoRelease, uniqueStopID));
+    }
+
+    private void GrabDial(Dial dd, bool left_hand)
+    {
+        ToolType firstType = ToolType.Burner;
+        bool leftGrab = left_hand;
+        int uniqueStopID = 0;
+        List<Tool> relevant_tools = dd.get_relevant_tools();
+        if (relevant_tools.Count > 0)
+        {
+            firstType = relevant_tools[0].tool_type;
+            if (firstType == ToolType.Stops)
+            {
+                uniqueStopID = ToolMgr.Instance.IdentifyStop(relevant_tools[0]);
+            }
+        }
+
+        GameMgr.Events.Dispatch(GameEvents.GrabToolSlider, new Tuple<ToolType, float, bool, int>(firstType, dd.map, leftGrab, uniqueStopID));
     }
 
     private void update_meshes(ref bool ltouch, ref bool rtouch) {
@@ -806,12 +855,12 @@ public class World : MonoBehaviour
 
     private void HandleGraphBallGrabbed(object sender, bool arg)
     {
-        GameMgr.Events?.Dispatch(GameEvents.GraphBallGrabbed, new Tuple<Transform, bool>(placement_dot.transform, arg));
+        GameMgr.Events?.Dispatch(GameEvents.GraphBallGrabbed, arg);
     }
 
     private void HandleGraphBallReleased(object sender, bool arg)
     {
-        GameMgr.Events?.Dispatch(GameEvents.GraphBallReleased, new Tuple<Transform, bool>(placement_dot.transform, arg));
+        GameMgr.Events?.Dispatch(GameEvents.GraphBallReleased, arg);
     }
 
     #endregion // Handlers

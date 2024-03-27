@@ -77,6 +77,7 @@ GameObject:
   - component: {fileID: 8596095803994565701}
   - component: {fileID: 7054154938042844197}
   - component: {fileID: 9086606884449549798}
+  - component: {fileID: 7665829753213464275}
   m_Layer: 0
   m_Name: Custom XR Origin
   m_TagString: Untagged
@@ -159,6 +160,22 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_listener: {fileID: 8596095803487832375}
+--- !u!114 &7665829753213464275
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8596095803994565698}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 527def2646b72ca4cba34f21d0b4790a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GazeOrigin: {fileID: 8596095802523667356}
+  GazeLayer:
+    serializedVersion: 2
+    m_Bits: 4096
 --- !u!1001 &7202434019138529601
 PrefabInstance:
   m_ObjectHideFlags: 0

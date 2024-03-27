@@ -69,6 +69,7 @@ static public class GameEvents
     static public readonly StringHash32 WordBankClosed = "lab:word-bank-closed";
     static public readonly StringHash32 SandboxModeClicked = "lab:sandbox-mode-clicked";
     static public readonly StringHash32 LabModeClicked = "lab:lab-mode-clicked";
+    static public readonly StringHash32 SettingsViewClicked = "lab:settings-view-clicked";
     static public readonly StringHash32 TaskCompleted = "lab:task-completed";
     static public readonly StringHash32 SectionCompleted = "lab:section-completed";
     static public readonly StringHash32 LabCompleted = "lab:lab-completed";
@@ -83,8 +84,13 @@ static public class GameEvents
     static public readonly StringHash32 GraphBallReleased = "world:graph-ball-released";
     static public readonly StringHash32 HeadsetOn = "world:headset-on";
     static public readonly StringHash32 HeadsetOff = "world:headset-off";
+    static public readonly StringHash32 GazeEnd = "world:gaze-end";
 
-
+    static public readonly StringHash32 ToolTogglePressed = "sim:tool-toggle-pressed";
+    static public readonly StringHash32 ClickToolIncrease = "sim:click-tool-increase";
+    static public readonly StringHash32 ClickToolDecrease = "sim:click-tool-decrease";
+    static public readonly StringHash32 GrabToolSlider = "sim:grab-tool-slider";
+    static public readonly StringHash32 ReleaseToolSlider = "sim:release-tool-slider";
 }
 
 static public class ObjectIDs
