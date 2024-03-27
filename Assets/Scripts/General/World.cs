@@ -210,8 +210,9 @@ public class World : MonoBehaviour
             UpdateGrabVis();
         }
 
-
         ProcessErrors();
+
+        GameMgr.Events.Dispatch(GameEvents.StatePropertiesUpdated, thermo_present.get_properties_bundle());
     }
 
     #endregion // Callbacks

@@ -287,6 +287,11 @@ public class ThermoPresent : MonoBehaviour
         }
     }
 
+    public StateProperties get_properties_bundle()
+    {
+        return state.BundleStateProperties();
+    }
+
     void genMesh() {
         GameObject old_gm = GameObject.Find("graph_mesh");
         if (old_gm != null) Destroy(old_gm);

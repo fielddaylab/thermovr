@@ -49,6 +49,31 @@ namespace ThermoVR.State
         }
     }
 
+    [Serializable]
+    public struct StateProperties
+    {
+        public string Region;
+        public double P;
+        public double V;
+        public double T;
+        public double u;
+        public double s;
+        public double h;
+        public double x;
+
+        public StateProperties(string inRegion, double inP, double inV, double inT, double inU, double inS, double inH, double inX)
+        {
+            Region = inRegion;
+            P = inP;
+            V = inV;
+            T = inT;
+            u = inU;
+            s = inS;
+            h = inH;
+            x = inX;
+        }
+    }
+
     public class ThermoState : MonoBehaviour
     {
         public static ThermoState Instance;
@@ -156,11 +181,7 @@ namespace ThermoVR.State
 
             if (fromClick)
             {
-                AnalyticsService.StateProperties resetProperties = new AnalyticsService.StateProperties(
-                    ThermoPresent.region_to_name(region), pressure, volume, temperature, internalenergy, entropy, enthalpy, quality
-                    );
-
-                GameMgr.Events.Dispatch(GameEvents.ResetSimClicked, resetProperties);
+                GameMgr.Events.Dispatch(GameEvents.ResetSimClicked, BundleStateProperties());
             }
 
             GameMgr.Events.Dispatch(GameEvents.WarpPVT, new Tuple<double, double, double>(pressure, volume, temperature));
@@ -256,6 +277,20 @@ namespace ThermoVR.State
         }
 
         #endregion // Enforce State
+
+        public StateProperties BundleStateProperties()
+        {
+            return new StateProperties(
+                ThermoPresent.region_to_name(region),
+                pressure,
+                volume,
+                temperature,
+                internalenergy,
+                entropy,
+                enthalpy,
+                quality
+                );
+        }
 
         //assume starting/ending point consistent for whole API!
 

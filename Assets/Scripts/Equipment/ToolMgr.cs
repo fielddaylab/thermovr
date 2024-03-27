@@ -2,6 +2,7 @@ using BeauUtil;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using ThermoVR.Analytics;
 using ThermoVR.Dials;
 using ThermoVR.State;
 using UnityEngine;
@@ -56,6 +57,8 @@ namespace ThermoVR.Tools
         List<Halfable> halfables;
         [SerializeField] Pressable reset_button;
         // [SerializeField] Pressable halfer_button;
+
+        private AnalyticsService.SliderPanelLogData m_panelLogState;
 
         private void Awake() {
             if (Instance == null) {
@@ -136,6 +139,17 @@ namespace ThermoVR.Tools
 
             GameMgr.Events?.Register<GameObject>(GameEvents.ObjectGrabbed, HandleObjectGrabbed);
             GameMgr.Events?.Register<GameObject>(GameEvents.ObjectReleased, HandleObjectReleased);
+
+            m_panelLogState = new AnalyticsService.SliderPanelLogData();
+            m_panelLogState.Insulation = new AnalyticsService.SliderSettings();
+            m_panelLogState.LowerStop = new AnalyticsService.SliderSettings();
+            m_panelLogState.UpperStop = new AnalyticsService.SliderSettings();
+            m_panelLogState.Weight = new AnalyticsService.SliderSettings();
+            m_panelLogState.NegativeWeight = new AnalyticsService.SliderSettings();
+            m_panelLogState.Heat = new AnalyticsService.SliderSettings();
+            m_panelLogState.Cooling = new AnalyticsService.SliderSettings();
+            m_panelLogState.ChamberPressure = new AnalyticsService.SliderSettings();
+            m_panelLogState.ChamberTemperature = new AnalyticsService.SliderSettings();
         }
 
         #region Accessors
@@ -322,6 +336,8 @@ namespace ThermoVR.Tools
 
             Halfable h = o.GetComponent<Halfable>();
             if (h != null) h.setHalf(halfed); //conform to half-ness while engaged
+
+            RecordPanelUpdate();
         }
 
         public void DeactivateTool(Tool t) {
@@ -346,6 +362,8 @@ namespace ThermoVR.Tools
             GameMgr.Events?.Dispatch(GameEvents.ToolTogglePressed, new Tuple<ToolType, bool, bool, int>(t.tool_type, false, toolReset, uniqueStopID));
             GameMgr.Events?.Dispatch(GameEvents.DeactivateTool, t);
             UpdateApplyTool(t);
+
+            RecordPanelUpdate();
         }
 
         public void EngageTool(Tool t) {
@@ -370,6 +388,8 @@ namespace ThermoVR.Tools
             t.allowed = true;
 
             GameMgr.Events?.Dispatch(GameEvents.AllowTool, t);
+
+            RecordPanelUpdate();
         }
 
         public void DisallowTool(Tool t) {
@@ -379,6 +399,8 @@ namespace ThermoVR.Tools
             DeactivateTool(t);
 
             GameMgr.Events?.Dispatch(GameEvents.DisallowTool, t);
+
+            RecordPanelUpdate();
         }
 
         public void UpdateApplyTool(Tool t) //alters "applied_x"
@@ -428,6 +450,7 @@ namespace ThermoVR.Tools
                 else if (t == tool_negativeWeight) v += dial_negativeWeight.val;
             }
 
+            RecordPanelUpdate();
         }
 
         private void SetAllHalfed(bool h) {
@@ -480,6 +503,30 @@ namespace ThermoVR.Tools
             }
 
             return applied_weight;
+        }
+
+        private void RecordPanelUpdate()
+        {
+            m_panelLogState.Insulation.Enabled = tool_insulator.enabled;
+            m_panelLogState.Insulation.SliderVal = tool_insulator.GetVal();
+            m_panelLogState.LowerStop.Enabled = tool_stop2.enabled;
+            m_panelLogState.LowerStop.SliderVal = tool_stop2.GetVal();
+            m_panelLogState.UpperStop.Enabled = tool_stop1.enabled;
+            m_panelLogState.UpperStop.SliderVal = tool_stop1.GetVal();
+            m_panelLogState.Weight.Enabled = tool_weight.enabled;
+            m_panelLogState.Weight.SliderVal = tool_weight.GetVal();
+            m_panelLogState.NegativeWeight.Enabled = tool_negativeWeight.enabled;
+            m_panelLogState.NegativeWeight.SliderVal = tool_negativeWeight.GetVal();
+            m_panelLogState.Heat.Enabled = tool_burner.enabled;
+            m_panelLogState.Heat.SliderVal = tool_burner.GetVal();
+            m_panelLogState.Cooling.Enabled = tool_coil.enabled;
+            m_panelLogState.Cooling.SliderVal = tool_coil.GetVal();
+            m_panelLogState.ChamberPressure.Enabled = tool_surroundingPressure.enabled;
+            m_panelLogState.ChamberPressure.SliderVal = tool_surroundingPressure.GetVal();
+            m_panelLogState.ChamberTemperature.Enabled = tool_surroundingTemp.enabled;
+            m_panelLogState.ChamberTemperature.SliderVal = tool_surroundingTemp.GetVal();
+
+            GameMgr.Events.Dispatch(GameEvents.SliderPanelUpdated, m_panelLogState);
         }
 
         #region Handlers
