@@ -258,7 +258,7 @@ namespace ThermoVR.Analytics
                 },
                 new OGDLog.MemoryConfig
                 (
-                    OGDLog.MemoryConfig.Default.EventParameterBufferSize * 2,
+                    OGDLog.MemoryConfig.Default.EventParameterBufferSize * 4,
                     OGDLog.MemoryConfig.Default.GameStateBufferSize * 3,
                     OGDLog.MemoryConfig.Default.PlayerDataBufferSize * 2
                 )
@@ -339,23 +339,30 @@ namespace ThermoVR.Analytics
 
         private void UpdateAllGameState()
         {
-            using (var gs = m_Log.OpenGameState())
+            try
             {
-                gs.Param("seconds_from_launch", JsonConvert.SerializeObject(m_GSElapsedTime));
-                gs.Param("thermo_attributes", JsonConvert.SerializeObject(m_GSProperties));
-                gs.Param("headset", JsonConvert.SerializeObject(m_GSHeadset));
-                gs.Param("slider_insulation", JsonConvert.SerializeObject(m_GSPanel.Insulation));
-                gs.Param("slider_lower_stop", JsonConvert.SerializeObject(m_GSPanel.LowerStop));
-                gs.Param("slider_upper_stop", JsonConvert.SerializeObject(m_GSPanel.UpperStop));
-                gs.Param("slider_weight", JsonConvert.SerializeObject(m_GSPanel.Weight));
-                gs.Param("slider_negative_weight", JsonConvert.SerializeObject(m_GSPanel.NegativeWeight));
-                gs.Param("slider_heat", JsonConvert.SerializeObject(m_GSPanel.Heat));
-                gs.Param("slider_cooling", JsonConvert.SerializeObject(m_GSPanel.Cooling));
-                gs.Param("slider_chamber_pressure", JsonConvert.SerializeObject(m_GSPanel.ChamberPressure));
-                gs.Param("slider_chamber_temperature", JsonConvert.SerializeObject(m_GSPanel.ChamberTemperature));
-                gs.Param("current_lab", JsonConvert.SerializeObject(m_GSLab));
-                gs.Param("current_section", JsonConvert.SerializeObject(m_GSSection));
-                gs.Param("current_task", JsonConvert.SerializeObject(m_GSTask));
+                using (var gs = m_Log.OpenGameState())
+                {
+                    gs.Param("seconds_from_launch", JsonConvert.SerializeObject(m_GSElapsedTime));
+                    gs.Param("thermo_attributes", JsonConvert.SerializeObject(m_GSProperties));
+                    gs.Param("headset", JsonConvert.SerializeObject(m_GSHeadset));
+                    gs.Param("slider_insulation", JsonConvert.SerializeObject(m_GSPanel.Insulation));
+                    gs.Param("slider_lower_stop", JsonConvert.SerializeObject(m_GSPanel.LowerStop));
+                    gs.Param("slider_upper_stop", JsonConvert.SerializeObject(m_GSPanel.UpperStop));
+                    gs.Param("slider_weight", JsonConvert.SerializeObject(m_GSPanel.Weight));
+                    gs.Param("slider_negative_weight", JsonConvert.SerializeObject(m_GSPanel.NegativeWeight));
+                    gs.Param("slider_heat", JsonConvert.SerializeObject(m_GSPanel.Heat));
+                    gs.Param("slider_cooling", JsonConvert.SerializeObject(m_GSPanel.Cooling));
+                    gs.Param("slider_chamber_pressure", JsonConvert.SerializeObject(m_GSPanel.ChamberPressure));
+                    gs.Param("slider_chamber_temperature", JsonConvert.SerializeObject(m_GSPanel.ChamberTemperature));
+                    gs.Param("current_lab", JsonConvert.SerializeObject(m_GSLab));
+                    gs.Param("current_section", JsonConvert.SerializeObject(m_GSSection));
+                    gs.Param("current_task", JsonConvert.SerializeObject(m_GSTask));
+                }
+            }
+            catch
+            {
+                Debug.LogWarning("[Analytics] Unable to update Game State! This may occur when the buffer sizes are too small for the amount of data being transmitted.");
             }
         }
 
@@ -691,11 +698,27 @@ namespace ThermoVR.Analytics
         {
             Debug.Log("[Analytics] event: click_lab_mode");
 
-            using (var e = m_Log.NewEvent("click_lab_mode"))
+            if (m_ActiveLabInfo.ID.Equals(string.Empty))
             {
-                e.Param("initial_lab", JsonConvert.SerializeObject(m_ActiveLabInfo));
-                e.Param("hand", m_LastHandPress.ToString());
+                using (var e = m_Log.NewEvent("click_lab_mode"))
+                {
+                    e.Param("initial_lab", "null");
+                    e.Param("hand", m_LastHandPress.ToString());
+                }
             }
+            else
+            {
+                LabLogData newLab = LabInfoToLabLogData(m_ActiveLabInfo, m_ActiveLabIndex, true);
+
+                using (var e = m_Log.NewEvent("click_lab_mode"))
+                {
+                    e.Param("initial_lab", JsonConvert.SerializeObject(newLab));
+                    e.Param("hand", m_LastHandPress.ToString());
+                }
+            }
+
+
+
         }
 
         private void LogClickLabScrollUp()
@@ -1230,7 +1253,7 @@ namespace ThermoVR.Analytics
             labData.Index = labIndex;
             labData.LabName = info.Name;
             labData.LabAuthor = info.Author;
-            labData.PercentComplete = LabMgr.Instance.Stats.LabMap[info.ID].Progress.ToString();
+            labData.PercentComplete = LabMgr.Instance.Stats.LabMap.ContainsKey(info.ID) ? LabMgr.Instance.Stats.LabMap[info.ID].Progress.ToString() : "0";
             labData.IsActive = info.ID == m_ActiveLabInfo.ID;
             if (includeSections) {
                 List<SectionLogData> allSections = new List<SectionLogData>();
