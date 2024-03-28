@@ -618,5 +618,14 @@ namespace ThermoVR.Dials
         }
 
         #endregion // Handlers
+
+#if UNITY_EDITOR
+        [ContextMenu("Apply Desktop Collider Size")]
+        private void ApplyDesktopColliderSize()
+        {
+            sliderCollider.center = new Vector3(-0.0528612919f, 0.00999968406f, -1.02092174e-12f);
+            sliderCollider.size = new Vector3(0.207557321f, 0.0399999991f, 0.074000001f);
+        }
+#endif
     }
 }
