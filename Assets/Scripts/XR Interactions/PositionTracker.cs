@@ -10,6 +10,12 @@ namespace ThermoVR.Controls
     {
         public float[] pos;
         public float[] rot;
+
+        public void Init()
+        {
+            pos = new float[3];
+            rot = new float[4];
+        }
     }
 
     public class PositionTracker : MonoBehaviour
@@ -68,8 +74,7 @@ namespace ThermoVR.Controls
         {
             for (int i = 0; i < buffer.Length; i++)
             {
-                buffer[i].pos = new float[3];
-                buffer[i].rot = new float[4];
+                buffer[i].Init();
             }
         }
 

@@ -846,12 +846,20 @@ public class World : MonoBehaviour
 
     private void HandleWorkspaceHandleGrabbed(object sender, bool arg)
     {
-        GameMgr.Events?.Dispatch(GameEvents.WorkspaceHandleGrabbed, new Tuple<Transform, bool>(handle_workspace_touchable.transform, arg));
+        PositionDataFrame currPos = new PositionDataFrame();
+        currPos.pos = new float[] { handle_workspace_touchable.transform.position.x, handle_workspace_touchable.transform.position.y, handle_workspace_touchable.transform.position.z };
+        currPos.rot = new float[] { handle_workspace_touchable.transform.rotation.x, handle_workspace_touchable.transform.rotation.y, handle_workspace_touchable.transform.rotation.z, handle_workspace_touchable.transform.rotation.w };
+
+        GameMgr.Events?.Dispatch(GameEvents.WorkspaceHandleGrabbed, new Tuple<PositionDataFrame, bool>(currPos, arg));
     }
 
     private void HandleWorkspaceHandleReleased(object sender, bool arg)
     {
-        GameMgr.Events?.Dispatch(GameEvents.WorkspaceHandleReleased, new Tuple<Transform, bool>(handle_workspace_touchable.transform, arg));
+        PositionDataFrame currPos = new PositionDataFrame();
+        currPos.pos = new float[] { handle_workspace_touchable.transform.position.x, handle_workspace_touchable.transform.position.y, handle_workspace_touchable.transform.position.z };
+        currPos.rot = new float[] { handle_workspace_touchable.transform.rotation.x, handle_workspace_touchable.transform.rotation.y, handle_workspace_touchable.transform.rotation.z, handle_workspace_touchable.transform.rotation.w };
+
+        GameMgr.Events?.Dispatch(GameEvents.WorkspaceHandleReleased, new Tuple<PositionDataFrame, bool>(currPos, arg));
     }
 
     private void HandleGraphBallGrabbed(object sender, bool arg)

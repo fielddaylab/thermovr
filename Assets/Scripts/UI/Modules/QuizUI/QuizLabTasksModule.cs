@@ -535,6 +535,7 @@ namespace ThermoVR.Lab
             currStats = LabMgr.Instance.Stats.LabMap[m_currLab.ID];
             currStats.RefreshProgress();
             LabMgr.Instance.Stats.LabMap[m_currLab.ID] = currStats;
+            GameMgr.Events.Dispatch(GameEvents.LabProgressUpdated);
 
             if (!fromReset)
             {

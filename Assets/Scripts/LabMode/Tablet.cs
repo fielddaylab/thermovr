@@ -181,12 +181,20 @@ namespace ThermoVR
 
         private void HandleGrabbed(object sender, bool arg)
         {
-            GameMgr.Events?.Dispatch(GameEvents.TabletGrabbed, this.transform);
+            PositionDataFrame currPos = new PositionDataFrame();
+            currPos.pos = new float[] { this.transform.position.x, this.transform.position.y, this.transform.position.z };
+            currPos.rot = new float[] { this.transform.rotation.x, this.transform.rotation.y, this.transform.rotation.z, this.transform.rotation.w };
+
+            GameMgr.Events?.Dispatch(GameEvents.TabletGrabbed, new Tuple<PositionDataFrame, bool>(currPos, arg));
         }
 
         private void HandleReleased(object sender, bool arg)
         {
-            GameMgr.Events?.Dispatch(GameEvents.TabletReleased, this.transform);
+            PositionDataFrame currPos = new PositionDataFrame();
+            currPos.pos = new float[] { this.transform.position.x, this.transform.position.y, this.transform.position.z };
+            currPos.rot = new float[] { this.transform.rotation.x, this.transform.rotation.y, this.transform.rotation.z, this.transform.rotation.w };
+
+            GameMgr.Events?.Dispatch(GameEvents.TabletReleased, new Tuple<PositionDataFrame, bool>(currPos, arg));
         }
 
         #endregion // Handlers

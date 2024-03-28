@@ -61,7 +61,7 @@ namespace ThermoVR.Analytics
         public int Index; // task index
         public bool IsActive;
         public bool IsComplete;
-        public List<ToolType> AvailableTools;
+        public List<string> AvailableTools;
         public List<string> Prompts;
     }
 }

@@ -73,6 +73,7 @@ static public class GameEvents
     static public readonly StringHash32 TaskCompleted = "lab:task-completed";
     static public readonly StringHash32 SectionCompleted = "lab:section-completed";
     static public readonly StringHash32 LabCompleted = "lab:lab-completed";
+    static public readonly StringHash32 LabProgressUpdated = "lab:lab-progress-updated";
 
     static public readonly StringHash32 TabletGrabbed = "world:tablet-grabbed";
     static public readonly StringHash32 TabletReleased = "world:tablet-released";
@@ -88,6 +89,7 @@ static public class GameEvents
     static public readonly StringHash32 ViewportData = "world:viewport-data";
     static public readonly StringHash32 LeftHandData = "world:left-hand-data";
     static public readonly StringHash32 RightHandData = "world:right-hand-data";
+    static public readonly StringHash32 ElapsedTimeUpdated = "world:elapsed-time-updated";
 
     static public readonly StringHash32 ToolTogglePressed = "sim:tool-toggle-pressed";
     static public readonly StringHash32 ClickToolIncrease = "sim:click-tool-increase";
