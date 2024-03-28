@@ -271,12 +271,14 @@ namespace ThermoVR.Dials
             RecalibratePos();
         }
 
-        public void set_val(float new_val) {
+        public float set_val(float new_val) {
             val = new_val;
 
             forceMap();
 
             apply_change(map, val, prev_val);
+
+            return map;
         }
 
         public float get_val() {
@@ -327,38 +329,60 @@ namespace ThermoVR.Dials
 
         private void nudgeValUp()
         {
+            float newMap;
             if (val + nudgeAmt <= 1)
             {
-                set_val(val + nudgeAmt);
+                newMap = set_val(val + nudgeAmt);
             }
             else
             {
                 // clamp to top
-                set_val(1);
+                newMap = set_val(1);
             }
 
+            ToolType firstType = ToolType.Burner;
+            int uniqueStopID = 0;
             for (int t = 0; t < relevant_tools.Count; t++)
             {
+                firstType = relevant_tools[t].tool_type;
+                if (firstType == ToolType.Stops)
+                {
+                    uniqueStopID = ToolMgr.Instance.IdentifyStop(relevant_tools[t]);
+                }
                 World.Instance.ToolMgr.UpdateApplyTool(relevant_tools[t]);
             }
+
+            GameMgr.Events.Dispatch(GameEvents.ClickToolIncrease, new Tuple<ToolType, float, int>(firstType, newMap, uniqueStopID));
         }
 
         private void nudgeValDown()
         {
+            float newMap;
             if (val - nudgeAmt >= 0)
             {
-                set_val(val - nudgeAmt);
+                newMap = set_val(val - nudgeAmt);
             }
             else
             {
                 // clamp to bottom
-                set_val(0);
+                newMap = set_val(0);
             }
 
+
+            ToolType firstType = ToolType.Burner;
+            int uniqueStopID = 0;
             for (int t = 0; t < relevant_tools.Count; t++)
             {
+                firstType = relevant_tools[t].tool_type;
+                if (firstType == ToolType.Stops)
+                {
+                    uniqueStopID = ToolMgr.Instance.IdentifyStop(relevant_tools[t]);
+                }
                 World.Instance.ToolMgr.UpdateApplyTool(relevant_tools[t]);
             }
+
+            GameMgr.Events.Dispatch(GameEvents.ClickToolDecrease, new Tuple<ToolType, float, int>(firstType, newMap, uniqueStopID));
+
         }
 
         /// <summary>
@@ -412,9 +436,30 @@ namespace ThermoVR.Dials
             }
 
             new_val = Mathf.Clamp(new_val, Math.Max(min_constraint, min_override), max_constraint);
+
             //if this close to either end, assume user wants min/max
-            if (new_val < Math.Max(min_constraint, min_override) + 0.05) new_val = Math.Max(min_constraint, min_override);
-            if (new_val > max_constraint - 0.05) new_val = max_constraint;
+            if (Math.Max(min_constraint, min_override) == 0)
+            {
+                // allow snapping
+                if (new_val < Math.Max(min_constraint, min_override) + 0.05) new_val = Math.Max(min_constraint, min_override);
+            }
+            else
+            {
+                // disallow snapping
+                if (new_val < Math.Max(min_constraint, min_override)) new_val = Math.Max(min_constraint, min_override);
+
+            }
+
+            if (max_constraint == 1)
+            {
+                // allow snapping
+                if (new_val > max_constraint - 0.05) new_val = max_constraint;
+            }
+            else
+            {
+                // disallow snapping
+                if (new_val > max_constraint) new_val = max_constraint;
+            }
 
             set_val(new_val);
         }
@@ -573,5 +618,14 @@ namespace ThermoVR.Dials
         }
 
         #endregion // Handlers
+
+#if UNITY_EDITOR
+        [ContextMenu("Apply Desktop Collider Size")]
+        private void ApplyDesktopColliderSize()
+        {
+            sliderCollider.center = new Vector3(-0.0528612919f, 0.00999968406f, -1.02092174e-12f);
+            sliderCollider.size = new Vector3(0.207557321f, 0.0399999991f, 0.074000001f);
+        }
+#endif
     }
 }

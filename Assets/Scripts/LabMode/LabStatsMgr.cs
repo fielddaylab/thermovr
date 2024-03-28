@@ -8,6 +8,7 @@ namespace ThermoVR.Lab
     public struct LabStats
     {
         public bool[][] CompletionState; // an entry for each task, separated into topics. True if completed, false otherwise.
+        public List<string>[][] SelectedOptionsState;
         public float Progress;
 
         public void RefreshProgress()

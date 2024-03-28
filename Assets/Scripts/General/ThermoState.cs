@@ -11,6 +11,7 @@ using System.IO;
 using System.Collections.Generic;
 using UnityEngine;
 using ThermoVR.Tools;
+using ThermoVR.Analytics;
 
 namespace ThermoVR.State
 {
@@ -45,6 +46,31 @@ namespace ThermoVR.State
             NewText = newText;
             Units = units;
             Proportion = proportion;
+        }
+    }
+
+    [Serializable]
+    public struct StateProperties
+    {
+        public string Region;
+        public double P;
+        public double V;
+        public double T;
+        public double u;
+        public double s;
+        public double h;
+        public double x;
+
+        public StateProperties(string inRegion, double inP, double inV, double inT, double inU, double inS, double inH, double inX)
+        {
+            Region = inRegion;
+            P = inP;
+            V = inV;
+            T = inT;
+            u = inU;
+            s = inS;
+            h = inH;
+            x = inX;
         }
     }
 
@@ -110,7 +136,7 @@ namespace ThermoVR.State
             }
         }
 
-        public void reset() {
+        public void reset(bool fromClick = false) {
             // Lab case
             if (World.Instance && World.Instance.ModMgr.AreModsActive())
             {
@@ -152,6 +178,11 @@ namespace ThermoVR.State
             prev_enthalpy = -1;
             prev_quality = -1;
             prev_region = region;
+
+            if (fromClick)
+            {
+                GameMgr.Events.Dispatch(GameEvents.ResetSimClicked, BundleStateProperties());
+            }
 
             GameMgr.Events.Dispatch(GameEvents.WarpPVT, new Tuple<double, double, double>(pressure, volume, temperature));
         }
@@ -246,6 +277,20 @@ namespace ThermoVR.State
         }
 
         #endregion // Enforce State
+
+        public StateProperties BundleStateProperties()
+        {
+            return new StateProperties(
+                ThermoPresent.region_to_name(region),
+                pressure,
+                volume,
+                temperature,
+                internalenergy,
+                entropy,
+                enthalpy,
+                quality
+                );
+        }
 
         //assume starting/ending point consistent for whole API!
 
@@ -976,6 +1021,21 @@ namespace ThermoVR.State
                     double delta_h = delta_time / mass * (delta_t * insulation_coefficient);  // time eqtn 6a
                     new_h = enthalpy + delta_h;
 
+                    /*
+                    if (insulation_coefficient == 1)
+                    {
+                        // constant T at 0% insulation
+                        new_t = temperature;
+                        new_p = pressure;
+                    }
+                    else
+                    {
+                        new_t = ThermoMath.t_given_ph(new_p, new_h);
+                    }
+                    */
+
+                    new_t = ThermoMath.t_given_ph(new_p, new_h);
+
                     // from this point, we have enough internal state to derive the rest
 
                     new_x = ThermoMath.x_given_ph(new_p, new_h);
@@ -997,7 +1057,6 @@ namespace ThermoVR.State
 
                     pressure = new_p;
                     enthalpy = new_h;
-                    // enthalpy = ThermoMath.h_given_vt(new_v, new_t, region);
 
                     try {
                         enthalpy = ThermoMath.h_given_px(new_p, new_x, region);

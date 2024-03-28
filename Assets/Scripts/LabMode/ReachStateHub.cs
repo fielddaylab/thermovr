@@ -48,6 +48,8 @@ namespace ThermoVR.Lab
 
         private ReachStateDefinition m_definition;
 
+        private bool completionState = false;
+
         public void SetDefinition(ReachStateDefinition def) {
             m_definition = def;
 
@@ -59,10 +61,22 @@ namespace ThermoVR.Lab
             if (IsCorrect())
             {
                 m_completionState.sprite = GameDB.Instance.ReachStateComplete;
+
+                if (!completionState)
+                {
+                    GameMgr.Events.Dispatch(GameEvents.TargetStateReached);
+                    completionState = true;
+                }
             }
             else
             {
                 m_completionState.sprite = GameDB.Instance.ReachStateIncomplete;
+
+                if (completionState)
+                {
+                    GameMgr.Events.Dispatch(GameEvents.TargetStateLost, GetDiscrepancies());
+                    completionState = false;
+                }
             }
         }
 
@@ -96,7 +110,6 @@ namespace ThermoVR.Lab
                 SimStateTarget currTarget = m_definition.Targets[i];
 
                 if (currTarget.TargetID == VarID.VolumeStop) {
-                    bool eitherCorrect = false;
                     Tuple<double, double> stopVals = World.Instance.get_stop_vals();
                     bool stop1OutOfRange = (stopVals.Item1 < currTarget.TargetVal - currTarget.TargetRange || stopVals.Item1 > currTarget.TargetVal + currTarget.TargetRange);
                     bool stop2OutOfRange = (stopVals.Item2 < currTarget.TargetVal - currTarget.TargetRange || stopVals.Item2 > currTarget.TargetVal + currTarget.TargetRange);
@@ -120,6 +133,40 @@ namespace ThermoVR.Lab
         }
 
         #endregion // IEvaluable
+
+        private List<string> GetDiscrepancies()
+        {
+            List<string> discrepancies = new List<string>();
+
+            for (int i = 0; i < m_definition.Targets.Count; i++)
+            {
+                SimStateTarget currTarget = m_definition.Targets[i];
+
+                if (currTarget.TargetID == VarID.VolumeStop)
+                {
+                    Tuple<double, double> stopVals = World.Instance.get_stop_vals();
+                    bool stop1OutOfRange = (stopVals.Item1 < currTarget.TargetVal - currTarget.TargetRange || stopVals.Item1 > currTarget.TargetVal + currTarget.TargetRange);
+                    bool stop2OutOfRange = (stopVals.Item2 < currTarget.TargetVal - currTarget.TargetRange || stopVals.Item2 > currTarget.TargetVal + currTarget.TargetRange);
+                    if (stop1OutOfRange && stop2OutOfRange)
+                    {
+                        // both stops are outside of limits
+                        discrepancies.Add(currTarget.TargetID.ToString());
+                    }
+                }
+                else
+                {
+                    double varVal = World.Instance.get_state_var(currTarget.TargetID);
+
+                    if (varVal < currTarget.TargetVal - currTarget.TargetRange || varVal > currTarget.TargetVal + currTarget.TargetRange)
+                    {
+                        // is outside of limits
+                        discrepancies.Add(currTarget.TargetID.ToString());
+                    }
+                }
+            }
+
+            return discrepancies;
+        }
     }
 
 

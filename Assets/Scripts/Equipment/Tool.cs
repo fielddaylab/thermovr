@@ -69,6 +69,8 @@ namespace ThermoVR.Tools
 
         [HideInInspector] public UnityEvent ValUpdated;
 
+        public int unique_id; // used to distinguish tools of the same type
+
         #endregion // Inspector
 
         [SerializeField] protected float m_RoutineSpeed = 1; // one control for overall routine speeds

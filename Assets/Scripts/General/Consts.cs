@@ -28,12 +28,78 @@ static public class GameEvents
     static public readonly StringHash32 DisallowTool = "sim:disallow-tool"; // Tool
     static public readonly StringHash32 UpdateAllowedTools = "sim:update-allowed-tools"; // List<ToolType>
     static public readonly StringHash32 ResetPressed = "sim:reset-pressed";
+    static public readonly StringHash32 ResetSimClicked = "sim:reset-sim-clicked";
     static public readonly StringHash32 ResetToolRestrictions = "sim:reset-tool-restrictions";
     static public readonly StringHash32 UpdateVaporFlow = "sim:vapor-update-flow"; // double
     static public readonly StringHash32 UpdateVarText = "sim:update-var-text"; // VarUpdate
     static public readonly StringHash32 UpdateGraphSetting = "sim:update-graph-setting"; // GraphSettingUpdate
     static public readonly StringHash32 UISwitched = "sim:ui-switched"; // GraphSettingUpdate
 
+    static public readonly StringHash32 TryNewName = "game:new-name";
+    static public readonly StringHash32 NewNameGenerated = "game:new-name-generated";
+    static public readonly StringHash32 StartSession = "game:start-session";
+    static public readonly StringHash32 StartGame = "game:start-game";
+
+    static public readonly StringHash32 HandStartPress = "world:hand-start-press";
+    
+    static public readonly StringHash32 SelectLab = "lab:select-lab";
+    static public readonly StringHash32 ClickLabHome = "lab:click-lab-home";
+    static public readonly StringHash32 ClickSelectTask = "lab:click-select-task";
+    static public readonly StringHash32 ClickSelectSection = "lab:click-select-section";
+    static public readonly StringHash32 SectionSwitched = "lab:section-switched"; // int
+    static public readonly StringHash32 TaskSwitched = "lab:task-switched"; // int
+    static public readonly StringHash32 ClickTaskScrollLeft = "lab:task-scroll-left";
+    static public readonly StringHash32 ClickTaskScrollRight = "lab:task-scroll-right";
+    static public readonly StringHash32 ClickSectionScrollUp = "lab:section-scroll-up";
+    static public readonly StringHash32 ClickSectionScrollDown = "lab:section-scroll-down";
+    static public readonly StringHash32 ClickLabScrollUp = "lab:lab-scroll-up";
+    static public readonly StringHash32 ClickLabScrollDown = "lab:lab-scroll-down";
+    static public readonly StringHash32 TaskListDisplayed = "lab:task-list-displayed"; // List<IndexedTaskInfo>
+    static public readonly StringHash32 SectionListDisplayed = "lab:section-list-displayed"; // List<IndexedTopicInfo>
+    static public readonly StringHash32 LabMenuDisplayed = "lab:lab-menu-displayed"; // List<IndexedLabInfo>
+    static public readonly StringHash32 TaskChoiceSelected = "lab:task-choice-selected";
+    static public readonly StringHash32 TargetStateReached = "lab:target-state-reached";
+    static public readonly StringHash32 TargetStateLost = "lab:target-state-lost";
+    static public readonly StringHash32 ClickSelectAnswer = "lab:click-select-answer";
+    static public readonly StringHash32 ClickDeselectAnswer = "lab:click-deselect-answer";
+    static public readonly StringHash32 ClickSubmitAnswer = "lab:click-submit-answer";
+    static public readonly StringHash32 ClickResetQuiz = "lab:click-reset-quiz";
+    static public readonly StringHash32 ClickOpenWordBank = "lab:click-open-word-bank";
+    static public readonly StringHash32 WordBankDisplayed = "lab:word-bank-displayed";
+    static public readonly StringHash32 WordBankClosed = "lab:word-bank-closed";
+    static public readonly StringHash32 SandboxModeClicked = "lab:sandbox-mode-clicked";
+    static public readonly StringHash32 LabModeClicked = "lab:lab-mode-clicked";
+    static public readonly StringHash32 SettingsViewClicked = "lab:settings-view-clicked";
+    static public readonly StringHash32 TaskCompleted = "lab:task-completed";
+    static public readonly StringHash32 SectionCompleted = "lab:section-completed";
+    static public readonly StringHash32 LabCompleted = "lab:lab-completed";
+    static public readonly StringHash32 LabProgressUpdated = "lab:lab-progress-updated";
+
+    static public readonly StringHash32 TabletGrabbed = "world:tablet-grabbed";
+    static public readonly StringHash32 TabletReleased = "world:tablet-released";
+    static public readonly StringHash32 WorkspaceHandleGrabbed = "world:workspace-handle-grabbed";
+    static public readonly StringHash32 WorkspaceHandleReleased = "world:workspace-handle-released";
+    static public readonly StringHash32 RotateGraphClickedCW = "world:rotate-graph-clicked-cw";
+    static public readonly StringHash32 RotateGraphClickedCCW = "world:rotate-graph-clicked-ccw";
+    static public readonly StringHash32 GraphBallGrabbed = "world:graph-ball-grabbed";
+    static public readonly StringHash32 GraphBallReleased = "world:graph-ball-released";
+    static public readonly StringHash32 HeadsetOn = "world:headset-on";
+    static public readonly StringHash32 HeadsetOff = "world:headset-off";
+    static public readonly StringHash32 GazeEnd = "world:gaze-end";
+    static public readonly StringHash32 ViewportData = "world:viewport-data";
+    static public readonly StringHash32 LeftHandData = "world:left-hand-data";
+    static public readonly StringHash32 RightHandData = "world:right-hand-data";
+    static public readonly StringHash32 ElapsedTimeUpdated = "world:elapsed-time-updated";
+
+    static public readonly StringHash32 ToolTogglePressed = "sim:tool-toggle-pressed";
+    static public readonly StringHash32 ClickToolIncrease = "sim:click-tool-increase";
+    static public readonly StringHash32 ClickToolDecrease = "sim:click-tool-decrease";
+    static public readonly StringHash32 GrabToolSlider = "sim:grab-tool-slider";
+    static public readonly StringHash32 ReleaseToolSlider = "sim:release-tool-slider";
+
+    static public readonly StringHash32 StatePropertiesUpdated = "sim:state-properties-updated";
+    static public readonly StringHash32 HeadsetPosUpdated = "sim:headset-pos-updated";
+    static public readonly StringHash32 SliderPanelUpdated = "world:slider-panel-updated";
 }
 
 static public class ObjectIDs

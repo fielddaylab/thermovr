@@ -36,6 +36,10 @@ namespace ThermoVR
         [SerializeField] private GameObject m_pulloutReadoutModel;
         [SerializeField] private GameObject m_pulloutReadoutScreen;
 
+        [Space(5)]
+        [Header("Analytics")]
+        [SerializeField] private TMP_Text[] m_PlayerCodeDisplays;
+
         private List<Pressable> m_tabButtons;
 
         private UIID m_currID;
@@ -51,6 +55,9 @@ namespace ThermoVR
             {
                 return;
             }
+
+            touchable.OnGrab += HandleGrabbed;
+            touchable.OnRelease += HandleReleased;
 
             m_audioSource = this.GetComponent<AudioSource>();
 
@@ -68,7 +75,9 @@ namespace ThermoVR
             m_graphTabButton.OnPress += HandleGraphTabPress;
             m_resetButton.OnPress += HandleResetPress;
 
-            GameMgr.Events.Register(GameEvents.UISwitched, HandleUISwitched);
+            GameMgr.Events.Register(GameEvents.UISwitched, HandleUISwitched)
+                .Register<string>(GameEvents.NewNameGenerated, SetUserCode, this);
+
 
             if (!GameMgr.I.IsDesktop && OVRManager.display != null)
             {
@@ -101,6 +110,8 @@ namespace ThermoVR
             // Open Sandbox UI
             m_hub.OpenUI(UIID.Sandbox);
 
+            GameMgr.Events?.Dispatch(GameEvents.SandboxModeClicked);
+
             HidePullout();
         }
 
@@ -113,6 +124,8 @@ namespace ThermoVR
             // Open Quiz UI
             m_hub.OpenUI(UIID.Lab);
 
+            GameMgr.Events?.Dispatch(GameEvents.LabModeClicked);
+
             ShowPullout();
         }
 
@@ -124,6 +137,8 @@ namespace ThermoVR
 
             // Open Graph UI
             m_hub.OpenUI(UIID.Graph);
+
+            GameMgr.Events?.Dispatch(GameEvents.SettingsViewClicked);
 
             ShowPullout();
         }
@@ -138,17 +153,48 @@ namespace ThermoVR
             DisconnectGrab();
         }
 
+        private void SetUserCode(string userCode)
+        {
+            for (int i = 0; i < m_PlayerCodeDisplays.Length; i++)
+            {
+                if (m_PlayerCodeDisplays[i])
+                {
+                    m_PlayerCodeDisplays[i].SetText(userCode);
+                }
+            }
+        }
+
         private void DisconnectGrab()
         {
+            bool wasAny = touchable.ltouch || touchable.rtouch;
+            bool wasLeft = touchable.ltouch;
             touchable.rtouch = false;
             touchable.ltouch = false;
             touchable.touch = false;
-            touchable.grabbed = false;
+            if (wasAny) { touchable.SetGrabbed(false, wasLeft); }
         }
 
         private void PlayClick(Pressable pressable) {
             if (GameMgr.I.AudioEnabled) { pressable.ClickAudio.Play(); }
 
+        }
+
+        private void HandleGrabbed(object sender, bool arg)
+        {
+            PositionDataFrame currPos = new PositionDataFrame();
+            currPos.pos = new float[] { this.transform.position.x, this.transform.position.y, this.transform.position.z };
+            currPos.rot = new float[] { this.transform.rotation.x, this.transform.rotation.y, this.transform.rotation.z, this.transform.rotation.w };
+
+            GameMgr.Events?.Dispatch(GameEvents.TabletGrabbed, new Tuple<PositionDataFrame, bool>(currPos, arg));
+        }
+
+        private void HandleReleased(object sender, bool arg)
+        {
+            PositionDataFrame currPos = new PositionDataFrame();
+            currPos.pos = new float[] { this.transform.position.x, this.transform.position.y, this.transform.position.z };
+            currPos.rot = new float[] { this.transform.rotation.x, this.transform.rotation.y, this.transform.rotation.z, this.transform.rotation.w };
+
+            GameMgr.Events?.Dispatch(GameEvents.TabletReleased, new Tuple<PositionDataFrame, bool>(currPos, arg));
         }
 
         #endregion // Handlers

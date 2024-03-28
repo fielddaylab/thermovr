@@ -8,6 +8,7 @@ public class PhysicalToggle : MonoBehaviour
 {
     [SerializeField] private Pressable m_button;
     [SerializeField] private MeshRenderer m_renderer;
+    [SerializeField] private BoxCollider m_collider;
 
     public delegate bool IsActiveDelegate();
 
@@ -64,4 +65,13 @@ public class PhysicalToggle : MonoBehaviour
     }
 
     #endregion // Handlers
+
+#if UNITY_EDITOR
+    [ContextMenu("Apply Desktop Collider Size")]
+    private void ApplyDesktopColliderSize()
+    {
+        m_collider.center = Vector3.zero;
+        m_collider.size = new Vector3(0.05139474f, 0.016f, 0.07354519f);
+    }
+#endif
 }

@@ -42,6 +42,11 @@ namespace ThermoVR.UI
             m_text.text = text;
         }
 
+        public string GetText()
+        {
+            return m_text.text;
+        }
+
         public void SetColor(Color color) {
             m_button.image.color = color;
         }

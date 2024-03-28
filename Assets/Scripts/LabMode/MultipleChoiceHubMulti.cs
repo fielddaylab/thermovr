@@ -8,6 +8,7 @@ using ThermoVR.UI;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem.LowLevel;
+using static ThermoVR.Analytics.AnalyticsService;
 
 namespace ThermoVR.Lab
 {
@@ -152,6 +153,11 @@ namespace ThermoVR.Lab
 
         #endregion // IEvaluable
 
+        private bool IsSingleAnswerCorrect(uint selectedID)
+        {
+            return m_definition.CorrectIDs.Contains(selectedID);
+        }
+
         private void SetOrder(bool random) {
             m_order = new uint[m_definition.OptionTexts.Length];
 
@@ -184,10 +190,26 @@ namespace ThermoVR.Lab
                 selectedState = true;
             }
 
+            List<string> selectedStrs = new List<string>();
+
             for (int i = 0; i < m_order.Length; i++) {
                 if (m_options[i].GetChoiceID() == args.ID) {
                     m_options[i].SetSelected(selectedState);
+                    selectedStrs.Add(m_options[i].GetOptionText());
                 }
+            }
+
+            GameMgr.Events.Dispatch(GameEvents.TaskChoiceSelected, selectedStrs);
+
+            bool isCorrect = IsSingleAnswerCorrect(args.ID);
+            uint index = args.ID;
+            if (selectedState)
+            {
+                GameMgr.Events.Dispatch(GameEvents.ClickSelectAnswer, new AnswerSelectLogData(index, isCorrect));
+            }
+            else
+            {
+                GameMgr.Events.Dispatch(GameEvents.ClickDeselectAnswer, new AnswerSelectLogData(index, isCorrect));
             }
         }
 

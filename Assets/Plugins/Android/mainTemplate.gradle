@@ -10,8 +10,10 @@
         maven {
             url "https://unity3ddist.jfrog.io/artifactory/unity-mediation-mvn-prod-local/" // Assets/Editor/MediationAdapterDependencies.xml:6
         }
+        maven {
+            url (unityProjectPath + "/Assets/GeneratedLocalRepo/Firebase/m2repository") // Assets/Firebase/Editor/AnalyticsDependencies.xml:18, Assets/Firebase/Editor/AppDependencies.xml:22
+        }
         mavenLocal()
-        jcenter()
         mavenCentral()
     }
 }
@@ -22,6 +24,11 @@ apply plugin: 'com.android.library'
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 // Android Resolver Dependencies Start
+    implementation 'com.google.android.gms:play-services-base:18.2.0' // Assets/Firebase/Editor/AppDependencies.xml:17
+    implementation 'com.google.firebase:firebase-analytics:21.3.0' // Assets/Firebase/Editor/AppDependencies.xml:15
+    implementation 'com.google.firebase:firebase-analytics-unity:11.6.0' // Assets/Firebase/Editor/AnalyticsDependencies.xml:18
+    implementation 'com.google.firebase:firebase-app-unity:11.6.0' // Assets/Firebase/Editor/AppDependencies.xml:22
+    implementation 'com.google.firebase:firebase-common:20.3.3' // Assets/Firebase/Editor/AppDependencies.xml:13
     implementation 'com.unity3d.mediation:mediation-sdk:[1.0,2.0[' // Assets/Editor/MediationAdapterDependencies.xml:8
     implementation 'com.unity3d.mediation:unityads-adapter:[1.0,2.0[' // Assets/Editor/MediationAdapterDependencies.xml:10
 // Android Resolver Dependencies End

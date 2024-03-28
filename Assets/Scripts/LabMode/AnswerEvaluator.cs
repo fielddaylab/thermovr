@@ -14,13 +14,25 @@ namespace ThermoVR.Lab
         }
     }
 
+    public class EvalUpdateEventArgs : EventArgs
+    {
+        public bool IsCorrect;
+        public bool FromPlayerAction;
+
+        public EvalUpdateEventArgs(bool isCorrect, bool fromPlayerAction)
+        {
+            IsCorrect = isCorrect;
+            FromPlayerAction = fromPlayerAction;
+        }
+    }
+
     public class AnswerEvaluator : MonoBehaviour
     {
         [SerializeField] private Evaluable[] m_toEvaluate;
         [SerializeField] private bool m_constantCheck = false;
         [SerializeField] private ThermoButton m_submitButton;
 
-        public EventHandler<BoolEventArgs> OnEvaluationUpdated;
+        public EventHandler<EvalUpdateEventArgs> OnEvaluationUpdated;
 
         private void OnEnable() {
             if (!m_constantCheck) {
@@ -51,7 +63,7 @@ namespace ThermoVR.Lab
                     // Only update result when requirements have been met
                     // if (m_toEvaluate[i].IsCorrect()) {
                         m_toEvaluate[i].HandleEvaluation(m_toEvaluate[i].IsCorrect());
-                        OnEvaluationUpdated?.Invoke(this, new BoolEventArgs(m_toEvaluate[i].IsCorrect()));
+                        OnEvaluationUpdated?.Invoke(this, new EvalUpdateEventArgs(m_toEvaluate[i].IsCorrect(), false));
                     // }
                 }
             }
@@ -84,7 +96,7 @@ namespace ThermoVR.Lab
                 }
 
                 m_toEvaluate[i].HandleEvaluation(m_toEvaluate[i].IsCorrect());
-                OnEvaluationUpdated?.Invoke(this, new BoolEventArgs(m_toEvaluate[i].IsCorrect()));
+                OnEvaluationUpdated?.Invoke(this, new EvalUpdateEventArgs(m_toEvaluate[i].IsCorrect(), true));
             }
 
             if (allCorrect) {

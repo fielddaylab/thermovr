@@ -59,8 +59,9 @@ namespace ThermoVR
         /// Triggers the button press
         /// </summary>
         /// <param name="cooldown">Cooldown if in VR, none if in desktop</param>
-        public void Press(bool cooldown) {
+        public void Press(bool cooldown, bool fromMouse, bool fromPointer, bool left_hand = false) {
             if (m_touchTimer <= 0) {
+                GameMgr.Events.Dispatch(GameEvents.HandStartPress, left_hand);
                 OnPress?.Invoke(this, EventArgs.Empty);
                 PressCompleted?.Invoke(this, EventArgs.Empty);
                 if (cooldown) {
@@ -109,8 +110,11 @@ namespace ThermoVR
                 if ((left_hand && m_fingerToggleable.lfinger)
                     || (!left_hand && m_fingerToggleable.rfinger)) {
                     // trigger button effect
+                    bool isLeft = left_hand && m_fingerToggleable.lfinger;
                     if (m_fingerToggleable.on) {
-                        Press(true);
+                        Press(true, false, false, isLeft);
+                        if (isLeft) { m_fingerToggleable.lfinger = false; }
+                        else { m_fingerToggleable.rfinger = false; }
                     }
                 }
             }

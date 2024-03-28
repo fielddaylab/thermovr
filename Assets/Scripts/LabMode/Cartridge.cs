@@ -48,13 +48,13 @@ namespace ThermoVR.Lab
             bool grabChange = false;
 
             if (m_beingGrabbed) {
-                if (!m_touchable.grabbed) {
+                if (!m_touchable.IsGrabbed()) {
                     m_beingGrabbed = false;
                     grabChange = true;
                 }
             }
             else {
-                if (m_touchable.grabbed) {
+                if (m_touchable.IsGrabbed()) {
                     m_beingGrabbed = true;
                     grabChange = true;
                 }

@@ -24,6 +24,8 @@ namespace ThermoVR.UI
             if (m_loadComplete && m_minTimer <= 0)
             {
                 this.gameObject.SetActive(false);
+
+                GameMgr.Events.Dispatch(GameEvents.TryNewName);
             }
             else
             {

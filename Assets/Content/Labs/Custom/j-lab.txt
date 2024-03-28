@@ -103,13 +103,14 @@
 || TASK // Q 2
 
 |Type: [reach-state]
-|ToolInfo: [Weight, NegativeWeight]
+|ToolInfo: [Weight, NegativeWeight, Insulator, SurroundingTemperature]
 |SetInfo: [(p:192), (v:0.00102), (t:343)]
 |LimitInfo:
 |TargetInfo (property, value, valid-range):
 |QuizInfo: 
 	Initial Conditions: "Initial temperature is 3.43e2 K."
 	--Questions:
+	Question: "Set the insulation value to 0%."
 	Question: "Add/remove pressure until you are inside the vapor dome."
 	Questions-->
 	Requirements: [(Region:1:0)]
@@ -119,7 +120,7 @@
 
 
 |Type:  [multiple-choice]
-|ToolInfo: [Weight, NegativeWeight]
+|ToolInfo: [Weight, NegativeWeight, Insulator, SurroundingTemperature]
 |SetInfo: 
 |LimitInfo:
 |TargetInfo (property, value, valid-range):
@@ -134,7 +135,7 @@
 || TASK
 
 |Type: [reach-state]
-|ToolInfo: [Weight, NegativeWeight]
+|ToolInfo: [Weight, NegativeWeight, Insulator, SurroundingTemperature]
 |SetInfo:
 |LimitInfo:
 |TargetInfo (property, value, valid-range):
@@ -148,7 +149,7 @@
 || TASK
 
 |Type: [multiple-choice]
-|ToolInfo:  [Weight, NegativeWeight]
+|ToolInfo:  [Weight, NegativeWeight, Insulator, SurroundingTemperature]
 |SetInfo: 
 |LimitInfo:
 |TargetInfo:
@@ -162,21 +163,21 @@
 || TASK
 
 |Type: [reach-state]
-|ToolInfo: [Weight, NegativeWeight]
+|ToolInfo: [Weight, NegativeWeight, Insulator, SurroundingTemperature]
 |SetInfo: 
 |LimitInfo:
 |TargetInfo (property, value, valid-range):
 |QuizInfo: 
 	--Questions:
-	Question: "Add/remove pressure until P is approximately 3.35e1 kPa."
+	Question: "Slowly decrease the pressure until P is approximately 1.11e1 kPa."
 	Questions-->
-	Requirements: [(Region:1:0)]
+	Requirements: [(Region:2:0)]
 |EfficiencyInfo:
 
 || TASK
 
 |Type: [multiple-choice]
-|ToolInfo:  [Weight, NegativeWeight]
+|ToolInfo:  [Weight, NegativeWeight, Insulator, SurroundingTemperature]
 |SetInfo: 
 |LimitInfo:
 |TargetInfo:
@@ -184,14 +185,14 @@
 	--Questions:
 	Question: "In which region are you?"
 	Questions-->
-	Answers: ["Subcooled Liquid", "Two-phase"(c), "Superheated Vapor"]
+	Answers: ["Subcooled Liquid", "Two-phase", "Superheated Vapor"(c)]
 |EfficiencyInfo: 
 
 || TOPIC
 
 |Header: "What kind of process is this? (What remains constant?)"
 
-|| TASK // Q 3a
+|| TASK // Q 3
 
 |Type: [reach-state]
 |ToolInfo:  [Weight, NegativeWeight, Insulator]
@@ -240,7 +241,7 @@
 
 |Header: "What kind of process is this? (What remains constant?)"
 
-|| TASK // Q 3b
+|| TASK // Q 4
 
 |Type: [reach-state]
 |ToolInfo:  [Weight, NegativeWeight, Burner, Coil, Insulator]
@@ -249,6 +250,7 @@
 |TargetInfo:
 |QuizInfo:
 	--Questions:
+	Question: "Set the insulation value to 100%."
 	Question: "Bring the pressure to 1.01e2 kPa and temperature to 4.50e2 K."
 	Questions-->
 	Requirements: [(Pressure:101:10), (Temperature:450:10)]
@@ -303,7 +305,7 @@
 
 |Header: "Combined processes: constant P, constant V"
 
-|| TASK // Q 4b
+|| TASK // Q 5
 
 |Type:  [reach-state]
 |ToolInfo:  [Burner, Coil, Insulator, Stops]
