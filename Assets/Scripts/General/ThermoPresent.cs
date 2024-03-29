@@ -36,6 +36,8 @@ class GRAPHPTCMP : IComparer<int>
 [RequireComponent(typeof(ThermoState))]
 public class ThermoPresent : MonoBehaviour
 {
+    public static ThermoPresent Instance;
+
     public static float max_height_log = 15; // log of max real-world height given 1 kg water and radius 0.15 m or 0.05 m
 
     bool debug_write = false;
@@ -60,6 +62,8 @@ public class ThermoPresent : MonoBehaviour
     public Material graph_material;
     public Material graph_material_lit;
 
+    [SerializeField] private PlacementDotInteractions pd_interactions;
+
     public Flasher error_flasher;
     public TextMeshProUGUI error_message;
 
@@ -74,6 +78,16 @@ public class ThermoPresent : MonoBehaviour
     private double quality_range;
 
     void Awake() {
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else if (Instance != this)
+        {
+            Destroy(this.gameObject);
+            return;
+        }
+
         ThermoMath.Init();
         state = this.GetComponent<ThermoState>();
         state.reset();
@@ -160,7 +174,10 @@ public class ThermoPresent : MonoBehaviour
     private void NotifyError() {
         if (ThermoMath.got_error) {
             error_flasher.Flash();
-            error_message.enabled = true;
+            if (error_message)
+            {
+                error_message.enabled = true;
+            }
         }
         else {
             Debug.Log("ThermoState was signaled to notify of a math state instability, but ThermoMath does not indicate an error occurred.");
@@ -615,6 +632,8 @@ public class ThermoPresent : MonoBehaviour
         lightable.use_custom_mats = true;
         lightable.base_mat = graph_material;
         lightable.lit_mat = graph_material_lit;
+
+        pd_interactions.AssignMesh(mesh);
 
 
         /*

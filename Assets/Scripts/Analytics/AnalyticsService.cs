@@ -19,7 +19,6 @@ using ThermoVR.State;
 
 namespace ThermoVR.Analytics
 {
-
     public partial class AnalyticsService : MonoBehaviour
     {
         #region Inspector
@@ -36,12 +35,6 @@ namespace ThermoVR.Analytics
         {
             VR,
             WEB
-        }
-
-        public enum Hand {
-            LEFT,
-            RIGHT,
-            MOUSE // desktop
         }
 
         private enum GraphElement
@@ -181,7 +174,7 @@ namespace ThermoVR.Analytics
         {
             // General Events
             GameMgr.Events.Register<string>(GameEvents.NewNameGenerated, SetUserCode, this)
-                .Register<bool>(GameEvents.HandStartPress, OnHandStartPress, this)
+                .Register<Hand>(GameEvents.HandStartPress, OnHandStartPress, this)
                 .Register<Tuple<LabInfo, int>>(GameEvents.PreActivateLab, OnPreActivateLab, this)
                 .Register<int>(GameEvents.SectionSwitched, OnSectionSwitched, this)
                 .Register<int>(GameEvents.TaskSwitched, OnTaskSwitched, this)
@@ -219,14 +212,14 @@ namespace ThermoVR.Analytics
                 .Register<List<IndexedTopicInfo>>(GameEvents.SectionListDisplayed, LogSectionListDisplayed, this)
                 .Register<List<IndexedLabInfo>>(GameEvents.LabMenuDisplayed, LogLabMenuDisplayed, this)
                 .Register<StateProperties>(GameEvents.ResetSimClicked, LogClickResetSim, this)
-                .Register<Tuple<PositionDataFrame, bool>>(GameEvents.TabletGrabbed, LogGrabTablet, this)
-                .Register<Tuple<PositionDataFrame, bool>>(GameEvents.TabletReleased, LogReleaseTablet, this)
-                .Register<Tuple<PositionDataFrame, bool>>(GameEvents.WorkspaceHandleGrabbed, LogGrabWorkstationHandle, this)
-                .Register<Tuple<PositionDataFrame, bool>>(GameEvents.WorkspaceHandleReleased, LogReleaseWorkstationHandle, this)
+                .Register<Tuple<PositionDataFrame, Hand>>(GameEvents.TabletGrabbed, LogGrabTablet, this)
+                .Register<Tuple<PositionDataFrame, Hand>>(GameEvents.TabletReleased, LogReleaseTablet, this)
+                .Register<Tuple<PositionDataFrame, Hand>>(GameEvents.WorkspaceHandleGrabbed, LogGrabWorkstationHandle, this)
+                .Register<Tuple<PositionDataFrame, Hand>>(GameEvents.WorkspaceHandleReleased, LogReleaseWorkstationHandle, this)
                 .Register<Tuple<float, float>>(GameEvents.RotateGraphClickedCW, LogClickRotateGraphCW, this)
                 .Register<Tuple<float, float>>(GameEvents.RotateGraphClickedCCW, LogClickRotateGraphCCW, this)
-                .Register<bool>(GameEvents.GraphBallGrabbed, LogGrabGraphBall, this)
-                .Register<bool>(GameEvents.GraphBallReleased, LogReleaseGraphBall, this)
+                .Register<Hand>(GameEvents.GraphBallGrabbed, LogGrabGraphBall, this)
+                .Register<Hand>(GameEvents.GraphBallReleased, LogReleaseGraphBall, this)
                 .Register(GameEvents.SandboxModeClicked, LogClickSandboxMode, this)
                 .Register(GameEvents.LabModeClicked, LogClickLabMode, this)
                 .Register(GameEvents.TaskCompleted, LogCompleteTask, this)
@@ -237,8 +230,8 @@ namespace ThermoVR.Analytics
                 .Register<Tuple<ToolType, bool, bool, int>>(GameEvents.ToolTogglePressed, LogClickToolToggle, this)
                 .Register<Tuple<ToolType, float, int>>(GameEvents.ClickToolIncrease, LogClickToolIncrease, this)
                 .Register<Tuple<ToolType, float, int>>(GameEvents.ClickToolDecrease, LogClickToolDecrease, this)
-                .Register<Tuple<ToolType, float, bool, bool, int>>(GameEvents.ReleaseToolSlider, LogReleaseToolSlider, this)
-                .Register<Tuple<ToolType, float, bool, int>>(GameEvents.GrabToolSlider, LogGrabToolSlider, this)
+                .Register<Tuple<ToolType, float, Hand, bool, int>>(GameEvents.ReleaseToolSlider, LogReleaseToolSlider, this)
+                .Register<Tuple<ToolType, float, Hand, int>>(GameEvents.GrabToolSlider, LogGrabToolSlider, this)
                 .Register<Tool>(GameEvents.AllowTool, LogToolUnlocked, this)
                 .Register<Tool>(GameEvents.DisallowTool, LogToolLocked, this)
                 .Register(GameEvents.SettingsViewClicked, LogClickViewSettings, this)
@@ -461,7 +454,7 @@ namespace ThermoVR.Analytics
             }
         }
 
-        private void LogGrabTablet(Tuple<PositionDataFrame, bool> args)
+        private void LogGrabTablet(Tuple<PositionDataFrame, Hand> args)
         {
             Debug.Log("[Analytics] event: grab_tablet");
 
@@ -469,11 +462,11 @@ namespace ThermoVR.Analytics
             {
                 e.Param("start_pos", JsonConvert.SerializeObject(args.Item1.pos));
                 e.Param("start_rot", JsonConvert.SerializeObject(args.Item1.rot));
-                e.Param("hand", (args.Item2 ? Hand.LEFT : Hand.RIGHT).ToString());
+                e.Param("hand", args.Item2.ToString());
             }
         }
 
-        private void LogReleaseTablet(Tuple<PositionDataFrame, bool> args)
+        private void LogReleaseTablet(Tuple<PositionDataFrame, Hand> args)
         {
             Debug.Log("[Analytics] event: release_tablet");
 
@@ -481,11 +474,11 @@ namespace ThermoVR.Analytics
             {
                 e.Param("end_pos", JsonConvert.SerializeObject(args.Item1.pos));
                 e.Param("end_rot", JsonConvert.SerializeObject(args.Item1.rot));
-                e.Param("hand", (args.Item2 ? Hand.LEFT : Hand.RIGHT).ToString());
+                e.Param("hand", args.Item2.ToString());
             }
         }
 
-        private void LogGrabWorkstationHandle(Tuple<PositionDataFrame, bool> args)
+        private void LogGrabWorkstationHandle(Tuple<PositionDataFrame, Hand> args)
         {
             Debug.Log("[Analytics] event: grab_workstation_handle");
 
@@ -493,11 +486,11 @@ namespace ThermoVR.Analytics
             {
                 e.Param("start_pos", JsonConvert.SerializeObject(args.Item1.pos));
                 e.Param("start_rot", JsonConvert.SerializeObject(args.Item1.rot));
-                e.Param("hand", (args.Item2 ? Hand.LEFT : Hand.RIGHT).ToString());
+                e.Param("hand", args.Item2.ToString());
             }
         }
 
-        private void LogReleaseWorkstationHandle(Tuple<PositionDataFrame, bool> args)
+        private void LogReleaseWorkstationHandle(Tuple<PositionDataFrame, Hand> args)
         {
             Debug.Log("[Analytics] event: release_workstation_handle");
 
@@ -505,7 +498,7 @@ namespace ThermoVR.Analytics
             {
                 e.Param("end_pos", JsonConvert.SerializeObject(args.Item1.pos));
                 e.Param("end_rot", JsonConvert.SerializeObject(args.Item1.rot));
-                e.Param("hand", (args.Item2 ? Hand.LEFT : Hand.RIGHT).ToString());
+                e.Param("hand", args.Item2.ToString());
             }
         }
 
@@ -533,23 +526,23 @@ namespace ThermoVR.Analytics
             }
         }
 
-        private void LogGrabGraphBall(bool leftHand)
+        private void LogGrabGraphBall(Hand handType)
         {
             Debug.Log("[Analytics] event: grab_graph_ball");
 
             using (var e = m_Log.NewEvent("grab_graph_ball"))
             {
-                e.Param("hand", (leftHand ? Hand.LEFT : Hand.RIGHT).ToString());
+                e.Param("hand", handType.ToString());
             }
         }
 
-        private void LogReleaseGraphBall(bool leftHand)
+        private void LogReleaseGraphBall(Hand handType)
         {
             Debug.Log("[Analytics] event: release_graph_ball");
 
             using (var e = m_Log.NewEvent("release_graph_ball"))
             {
-                e.Param("hand", (leftHand ? Hand.LEFT : Hand.RIGHT).ToString());
+                e.Param("hand", handType.ToString());
             }
         }
 
@@ -596,7 +589,7 @@ namespace ThermoVR.Analytics
             }
         }
 
-        private void LogGrabToolSlider(Tuple<ToolType, float, bool, int> args)
+        private void LogGrabToolSlider(Tuple<ToolType, float, Hand, int> args)
         {
             LogToolType type = ToolTypeToLogToolType(args.Item1, args.Item4);
 
@@ -606,12 +599,12 @@ namespace ThermoVR.Analytics
             {
                 e.Param("tool_name", type.ToString());
                 e.Param("start_val", args.Item2);
-                e.Param("hand", (args.Item3 ? Hand.LEFT : Hand.RIGHT).ToString());
+                e.Param("hand", args.Item3.ToString());
             }
         }
 
         // release_tool_slider { tool_name, end_value // in physical units, not 0-1, hand : enum(LEFT, RIGHT), auto_release : bool // true if slider was automatically released due to hand getting to far away, or sim was reset }
-        private void LogReleaseToolSlider(Tuple<ToolType, float, bool, bool, int> args)
+        private void LogReleaseToolSlider(Tuple<ToolType, float, Hand, bool, int> args)
         {
             LogToolType type = ToolTypeToLogToolType(args.Item1, args.Item5);
 
@@ -621,7 +614,7 @@ namespace ThermoVR.Analytics
             {
                 e.Param("tool_name", type.ToString());
                 e.Param("end_value", args.Item2);
-                e.Param("hand", (args.Item3 ? Hand.LEFT : Hand.RIGHT).ToString());
+                e.Param("hand", args.Item3.ToString());
                 e.Param("auto_release", args.Item4);
             }
         }
@@ -1072,9 +1065,9 @@ namespace ThermoVR.Analytics
             UpdateGameStateLab(newLabData, newSectionData, newTaskData);
         }
 
-        private void OnHandStartPress(bool leftHand)
+        private void OnHandStartPress(Hand handType)
         {
-            m_LastHandPress = leftHand ? Hand.LEFT : Hand.RIGHT;
+            m_LastHandPress = handType;
         }
 
         private void OnSectionSwitched(int newSectionIndex)

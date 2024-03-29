@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using ThermoVR.Controls;
 
 namespace ThermoVR
 {
@@ -59,9 +60,9 @@ namespace ThermoVR
         /// Triggers the button press
         /// </summary>
         /// <param name="cooldown">Cooldown if in VR, none if in desktop</param>
-        public void Press(bool cooldown, bool fromMouse, bool fromPointer, bool left_hand = false) {
+        public void Press(bool cooldown, Hand inputType) {
             if (m_touchTimer <= 0) {
-                GameMgr.Events.Dispatch(GameEvents.HandStartPress, left_hand);
+                GameMgr.Events.Dispatch(GameEvents.HandStartPress, inputType);
                 OnPress?.Invoke(this, EventArgs.Empty);
                 PressCompleted?.Invoke(this, EventArgs.Empty);
                 if (cooldown) {
@@ -112,7 +113,8 @@ namespace ThermoVR
                     // trigger button effect
                     bool isLeft = left_hand && m_fingerToggleable.lfinger;
                     if (m_fingerToggleable.on) {
-                        Press(true, false, false, isLeft);
+                        Hand pressType = isLeft ? Hand.LEFT : Hand.RIGHT;
+                        Press(true, pressType);
                         if (isLeft) { m_fingerToggleable.lfinger = false; }
                         else { m_fingerToggleable.rfinger = false; }
                     }

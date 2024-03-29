@@ -8,7 +8,7 @@ using ThermoVR.UI;
 using TMPro;
 using UnityEngine;
 using static OVRInput;
-using static UnityEngine.InputSystem.HID.HID;
+using Hand = ThermoVR.Controls.Hand;
 
 namespace ThermoVR
 {
@@ -171,7 +171,8 @@ namespace ThermoVR
             touchable.rtouch = false;
             touchable.ltouch = false;
             touchable.touch = false;
-            if (wasAny) { touchable.SetGrabbed(false, wasLeft); }
+            Hand handType = wasLeft ? Hand.LEFT : Hand.RIGHT;
+            if (wasAny) { touchable.SetGrabbed(false, handType); }
         }
 
         private void PlayClick(Pressable pressable) {
@@ -179,22 +180,22 @@ namespace ThermoVR
 
         }
 
-        private void HandleGrabbed(object sender, bool arg)
+        private void HandleGrabbed(object sender, Hand arg)
         {
             PositionDataFrame currPos = new PositionDataFrame();
             currPos.pos = new float[] { this.transform.position.x, this.transform.position.y, this.transform.position.z };
             currPos.rot = new float[] { this.transform.rotation.x, this.transform.rotation.y, this.transform.rotation.z, this.transform.rotation.w };
 
-            GameMgr.Events?.Dispatch(GameEvents.TabletGrabbed, new Tuple<PositionDataFrame, bool>(currPos, arg));
+            GameMgr.Events?.Dispatch(GameEvents.TabletGrabbed, new Tuple<PositionDataFrame, Hand>(currPos, arg));
         }
 
-        private void HandleReleased(object sender, bool arg)
+        private void HandleReleased(object sender, Hand arg)
         {
             PositionDataFrame currPos = new PositionDataFrame();
             currPos.pos = new float[] { this.transform.position.x, this.transform.position.y, this.transform.position.z };
             currPos.rot = new float[] { this.transform.rotation.x, this.transform.rotation.y, this.transform.rotation.z, this.transform.rotation.w };
 
-            GameMgr.Events?.Dispatch(GameEvents.TabletReleased, new Tuple<PositionDataFrame, bool>(currPos, arg));
+            GameMgr.Events?.Dispatch(GameEvents.TabletReleased, new Tuple<PositionDataFrame, Hand>(currPos, arg));
         }
 
         #endregion // Handlers
