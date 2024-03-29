@@ -1,0 +1,54 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &8582203174615537435
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8582203174615537433}
+  - component: {fileID: 8582203174615537432}
+  m_Layer: 0
+  m_Name: DesktopTabletController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8582203174615537433
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8582203174615537435}
+  m_LocalRotation: {x: -0, y: -0, z: 0.0000000018626449, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1.0000005, y: 1, z: 1.0000005}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8582203174615537432
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8582203174615537435}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: edbe01a2cf05d9a4e9bb861a02180b58, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_tablet: {fileID: 0}
+  m_transitionTime: 0.25
+  m_toggleButton: {fileID: 0}
+  m_toggleArrow: {fileID: 0}
+  m_visiblePos: {x: -0.292, y: 2.011, z: -1.0010004}
+  m_visibleRot: {x: -0.030626236, y: 0.98610705, z: 0.010306861, w: 0.16293818}
+  m_hiddenPos: {x: -0.171, y: 2.022, z: -1.3590004}
+  m_hiddenRot: {x: -0.030626236, y: 0.98610705, z: 0.010306861, w: 0.16293818}
