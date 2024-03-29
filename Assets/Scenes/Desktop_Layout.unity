@@ -5580,6 +5580,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2423173608412668976, guid: fd9e7f31046f39c46a3fb1d9fd9683d9,
         type: 3}
+      propertyPath: pd_interactions
+      value: 
+      objectReference: {fileID: 888884780}
+    - target: {fileID: 2423173608412668976, guid: fd9e7f31046f39c46a3fb1d9fd9683d9,
+        type: 3}
       propertyPath: handle_workspace
       value: 
       objectReference: {fileID: 862255426}
@@ -5640,9 +5645,9 @@ PrefabInstance:
       objectReference: {fileID: 2128225955}
     - target: {fileID: 2423173608412668977, guid: fd9e7f31046f39c46a3fb1d9fd9683d9,
         type: 3}
-      propertyPath: error_message
+      propertyPath: pd_interactions
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 888884780}
     - target: {fileID: 2423173608412668979, guid: fd9e7f31046f39c46a3fb1d9fd9683d9,
         type: 3}
       propertyPath: m_RootOrder
@@ -7989,6 +7994,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 293971936820879982, guid: f2d088568b61e9849ac1cf4d8d3816e2,
+        type: 3}
+      propertyPath: pdInteractions
+      value: 
+      objectReference: {fileID: 888884780}
     - target: {fileID: 1620540461210818394, guid: f2d088568b61e9849ac1cf4d8d3816e2,
         type: 3}
       propertyPath: m_RootOrder
@@ -9929,6 +9939,18 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 878060152}
   m_Mesh: {fileID: -6986214474173132936, guid: 701f8c4ca09422c4ba233bf14964491c, type: 3}
+--- !u!114 &888884780 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 746985551234395812, guid: 276bbdcb8ff79af45aec063946bb5829,
+    type: 3}
+  m_PrefabInstance: {fileID: 10738157}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 365b67b6eda801543949da5b30eddd15, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &892204438
 GameObject:
   m_ObjectHideFlags: 0

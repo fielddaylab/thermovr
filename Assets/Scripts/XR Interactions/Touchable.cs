@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.Scripting;
+using ThermoVR.Controls;
 
 /**
  * Class to detect when an object gets touched and/or grabbed by the hand controller,
@@ -25,8 +26,8 @@ public class Touchable : MonoBehaviour
     private bool l_grab;
     private bool r_grab;
 
-    public event EventHandler<bool> OnGrab;
-    public event EventHandler<bool> OnRelease;
+    public event EventHandler<Hand> OnGrab;
+    public event EventHandler<Hand> OnRelease;
 
     void Awake() {
         lhand = GameObject.Find("LeftControllerAnchor");
@@ -54,7 +55,7 @@ public class Touchable : MonoBehaviour
         rtouch = ltouch = false;
     }
 
-    public void SetGrabbed(bool isGrabbed, bool isLeftGrab)
+    public void SetGrabbed(bool isGrabbed, Hand grabType)
     {
         bool changeInGrab = grabbed != isGrabbed;
 
@@ -64,14 +65,14 @@ public class Touchable : MonoBehaviour
         {
             if (isGrabbed)
             {
-                l_grab = isLeftGrab;
-                r_grab = !isLeftGrab;
-                OnGrab?.Invoke(this, isLeftGrab);
+                l_grab = grabType == Hand.LEFT ? true : l_grab;
+                r_grab = grabType == Hand.RIGHT ? true : r_grab;
+                OnGrab?.Invoke(this, grabType);
             }
             else
             {
                 l_grab = r_grab = false;
-                OnRelease?.Invoke(this, isLeftGrab);
+                OnRelease?.Invoke(this, grabType);
             }
         }
     }

@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using ThermoVR.Controls;
 
 namespace ThermoVR.UI
 {
@@ -33,8 +34,8 @@ namespace ThermoVR.UI
 
         private void HandlePointerClick()
         {
-            // TODO: handle pointer clicks
-            Pressable.Press(false, true, false);
+            // TODO: distinguish between pointer and mouse
+            Pressable.Press(false, Hand.MOUSE);
         }
 
         #endregion // Handlers
