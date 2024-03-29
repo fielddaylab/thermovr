@@ -112,7 +112,7 @@ static public class Units
     static public readonly string Weight = "kg";
     static public readonly string Heat = "kJ/s";
     static public readonly string TemperatureK = "K";
-    static public readonly string TemperatureC = "°C";
+    static public readonly string TemperatureC = "\u00B0" + "C";
     static public readonly string Percent = "%";
 
     static public readonly string Pressure = "kPa";
