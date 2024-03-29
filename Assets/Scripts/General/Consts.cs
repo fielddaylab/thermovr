@@ -117,7 +117,7 @@ static public class Units
 
     static public readonly string Pressure = "kPa";
     static public readonly string AmbientPressure = "kPa";
-    static public readonly string Volume = "m³/kg";
+    static public readonly string Volume = "m<sup>3</sup>/kg";
     static public readonly string InternalEnergy = "kJ/kg";
     static public readonly string Entropy = "kJ/kgK";
     static public readonly string Enthalpy = "kJ/kg";
