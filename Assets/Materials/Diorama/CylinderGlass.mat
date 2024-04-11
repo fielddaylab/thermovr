@@ -7,21 +7,25 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Insulation
+  m_Name: CylinderGlass
   m_Shader: {fileID: 34, guid: 0000000000000000f000000000000000, type: 0}
   m_ValidKeywords: []
   m_InvalidKeywords:
   - _ALPHABLEND_ON
-  m_LightmapFlags: 4
+  m_LightmapFlags: 0
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: -1
+  m_CustomRenderQueue: 4000
   stringTagMap: {}
   disabledShaderPasses: []
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
     - _BumpMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Cube:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -41,9 +45,17 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _Illum:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _LightMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: 67caf6e3bcb7fc34d90e194e418a560a, type: 3}
-        m_Scale: {x: -4.23, y: 6.68}
+        m_Texture: {fileID: 2800000, guid: 3ed3a847a73782f4599be5c0dbf93958, type: 3}
+        m_Scale: {x: -5.67, y: 6.68}
         m_Offset: {x: 1.22, y: -1.15}
     - _MetallicGlossMap:
         m_Texture: {fileID: 0}
@@ -57,28 +69,49 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _WetBumpMap:
+        m_Texture: {fileID: 2800000, guid: 06aafc7fcb186454893618a0b137089b, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _WetMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
     - _BumpScale: 1
-    - _Cutoff: 0
+    - _Cutoff: 0.607
     - _DetailNormalMapScale: 1
     - _DstBlend: 10
+    - _Emission: 1
+    - _Fade: 0.079
+    - _Gloss: 0
     - _GlossMapScale: 1
     - _Glossiness: 0
     - _GlossyReflections: 1
+    - _Highlight: 0.481
+    - _MainTexMMBias: 0
     - _Metallic: 0
     - _Mode: 2
     - _OcclusionStrength: 1
     - _Parallax: 0.02
-    - _Shininess: 1
+    - _RimPower: 3
+    - _Shininess: 0.305
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 5
     - _UVSec: 0
+    - _VertexColorLightmap: 0
+    - _VertexColorLightmapScale: 1
+    - _WetMapUV: 1
     - _ZWrite: 0
     m_Colors:
-    - _Color: {r: 1, g: 1, b: 1, a: 0.74509805}
+    - _Color: {r: 0.8726415, g: 0.97791976, b: 1, a: 0.31764707}
     - _Emission: {r: 0, g: 0, b: 0, a: 0}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _HighlightColor: {r: 1, g: 1, b: 1, a: 1}
+    - _InnerColor: {r: 1, g: 1, b: 1, a: 1}
+    - _ReflectColor: {r: 1, g: 1, b: 1, a: 0.5}
+    - _RimColor: {r: 0.25999996, g: 0.18999997, b: 0.15999997, a: 0}
     - _SpecColor: {r: 1, g: 1, b: 1, a: 0}
   m_BuildTextureStacks: []
