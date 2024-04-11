@@ -131,6 +131,8 @@ namespace ThermoVR.Dials
 
         private bool preserve_during_locked;
 
+        private DialValProcessor processor;
+
         [HideInInspector] public UnityEvent DialMoved;
 
         /// <summary>
@@ -151,6 +153,8 @@ namespace ThermoVR.Dials
             else {
                 orientation_dir = (max_pos.position - min_pos.position).normalized;
             }
+
+            processor = this.GetComponent<DialValProcessor>();
 
             SetConstraint(0f, ConstrainType.Min);
             SetConstraint(1f, ConstrainType.Max);
@@ -462,7 +466,6 @@ namespace ThermoVR.Dials
             {
                 // disallow snapping
                 if (new_val < Math.Max(min_constraint, min_override)) new_val = Math.Max(min_constraint, min_override);
-
             }
 
             if (max_constraint == 1)
@@ -474,6 +477,11 @@ namespace ThermoVR.Dials
             {
                 // disallow snapping
                 if (new_val > max_constraint) new_val = max_constraint;
+            }
+
+            if (processor)
+            {
+                processor.ProcessVal(ref new_val);
             }
 
             set_val(new_val);
