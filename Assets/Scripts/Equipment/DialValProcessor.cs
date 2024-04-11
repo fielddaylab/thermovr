@@ -12,19 +12,31 @@ namespace ThermoVR.Dials
         private int m_numDivisions;
         private float m_step;
 
+        private int m_mostRecentIndex;
+
         private void Start()
         {
+            m_mostRecentIndex = 0;
             m_numDivisions = m_dials.Length - 1;
             m_step = 1.0f / m_numDivisions;
         }
 
         public void ProcessVal(ref float toProcess)
         {
-            float nearestSnap = Mathf.Round(toProcess / m_step) * m_step;
+            int nearestIndex = (int)Mathf.Round(toProcess / m_step);
+            float nearestSnap = nearestIndex * m_step;
 
             if (Mathf.Abs(toProcess - nearestSnap) < 0.05f)
             {
                 toProcess = nearestSnap;
+
+                if (nearestIndex != m_mostRecentIndex)
+                {
+                    m_mostRecentIndex = nearestIndex;
+
+                    // dial order is reversed
+                    GameMgr.Events.Dispatch(GameEvents.SelectNewDial, m_numDivisions - nearestIndex);
+                }
             }
         }
     }

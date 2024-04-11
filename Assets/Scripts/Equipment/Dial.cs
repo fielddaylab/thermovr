@@ -330,7 +330,7 @@ namespace ThermoVR.Dials
             }
 
             float dist = Vector3.Distance(obj.transform.position, meter.transform.position);
-            return dist <= .1f * boundsMultiplier;
+            return dist <= .1f * (boundsMultiplier == 0 ? 1 : boundsMultiplier);
         }
 
         /*
@@ -625,7 +625,7 @@ namespace ThermoVR.Dials
             }
         }
 
-        private void HandleNudgeUpPressed(object sender, EventArgs args)
+        public void NudgeUp()
         {
             if (!AnyToolsActive())
             {
@@ -635,7 +635,7 @@ namespace ThermoVR.Dials
             nudgeValUp();
         }
 
-        private void HandleNudgeDownPressed(object sender, EventArgs args)
+        public void NudgeDown()
         {
             if (!AnyToolsActive())
             {
@@ -643,6 +643,16 @@ namespace ThermoVR.Dials
             }
 
             nudgeValDown();
+        }
+
+        private void HandleNudgeUpPressed(object sender, EventArgs args)
+        {
+            NudgeUp();
+        }
+
+        private void HandleNudgeDownPressed(object sender, EventArgs args)
+        {
+            NudgeDown();
         }
 
         #endregion // Handlers

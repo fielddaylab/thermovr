@@ -99,16 +99,17 @@ namespace ThermoVR.Tools
             // TODO: make explicit assignment
             flame = GameObject.Find("Flame").GetComponent<ParticleSystem>();
 
+            // keep in same order as dial dashboard
             Dials = new List<Dial> {
-                dial_stop1,
+                dial_percentInsulation,
                 dial_stop2,
-                dial_burner,
-                dial_coil,
+                dial_stop1,
                 dial_weight,
                 dial_negativeWeight,
-                dial_surroundingPressure,
+                dial_burner,
+                dial_coil,
                 dial_surroundingTemp,
-                dial_percentInsulation,
+                dial_surroundingPressure,
                 dial_selector
             };
 
@@ -142,6 +143,9 @@ namespace ThermoVR.Tools
 
             GameMgr.Events?.Register<GameObject>(GameEvents.ObjectGrabbed, HandleObjectGrabbed);
             GameMgr.Events?.Register<GameObject>(GameEvents.ObjectReleased, HandleObjectReleased);
+
+            GameMgr.Events?.Register<int>(GameEvents.NudgeUpClicked, HandleNudgeUpClicked);
+            GameMgr.Events?.Register<int>(GameEvents.NudgeDownClicked, HandleNudgeDownClicked);
 
             m_panelLogState = new AnalyticsService.SliderPanelLogData();
             m_panelLogState.Insulation = new AnalyticsService.SliderSettings();
@@ -655,6 +659,16 @@ namespace ThermoVR.Tools
                     EndAdjustTool(tool);
                 }
             }
+        }
+
+        private void HandleNudgeUpClicked(int dialIndex)
+        {
+            Dials[dialIndex].NudgeUp();
+        }
+
+        private void HandleNudgeDownClicked(int dialIndex)
+        {
+            Dials[dialIndex].NudgeDown();
         }
 
         #endregion // Handlers
