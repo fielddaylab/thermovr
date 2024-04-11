@@ -84,6 +84,7 @@ namespace ThermoVR.Dials
 
         [SerializeField] private bool overrideOffset;
         [SerializeField] private float boundsMultiplier;
+        [SerializeField] private bool isSelector;
         // [SerializeField] private CollisionRange interactableRange;
 
         [System.NonSerialized]
@@ -225,7 +226,6 @@ namespace ThermoVR.Dials
             // lp.x = total_dist / 2 - val * total_dist - initial_offset.x * 2;
             meter.transform.localPosition = lp;
 
-            Debug.Log("[Slider] val is " + val);
             forceMap();
 
             DialMoved?.Invoke();
@@ -415,8 +415,6 @@ namespace ThermoVR.Dials
                 return;
             }
 
-            // TODO: check hand pos relative to max/min
-
             float dx = r_hand_pos.x - prev_hand_pos.x;
             float dy = r_hand_pos.y - prev_hand_pos.y;
             float dz = r_hand_pos.z - prev_hand_pos.z;
@@ -432,6 +430,7 @@ namespace ThermoVR.Dials
             float new_val;
             if (GameMgr.I.IsDesktop) {
                 movement_vector *= -10f;
+
                 // float dx = (r_hand_pos.x - hand_pos.x) * -10f;
                 // constrain vector to relative orientation
                 float magnitude = movement_vector.magnitude;
@@ -448,7 +447,21 @@ namespace ThermoVR.Dials
                 prev_val = val;
                 // float prev_map = map;
 
-                new_val = prev_val - magnitude;
+                if (isSelector)
+                {
+                    var screenWorldPoint = Camera.main.ScreenToWorldPoint(Input.mousePosition + new Vector3(0, 0, Vector3.Distance(Camera.main.transform.position, sliderCollider.transform.position)));
+                    Debug.Log("[Orient] screen world point: " + screenWorldPoint);
+                    var closest = sliderCollider.ClosestPoint(screenWorldPoint);
+                    Debug.Log("[Orient] closest: " + closest);
+                    var local = this.transform.InverseTransformPoint(closest);
+                    Debug.Log("[Orient] local: " + local);
+                    local.y = 0;
+                    new_val = Vector3.Distance(min_pos.localPosition, local) / total_dist;
+                }
+                else
+                {
+                    new_val = prev_val - magnitude;
+                }
             }
             else
             {
@@ -664,8 +677,8 @@ namespace ThermoVR.Dials
         [ContextMenu("Apply Desktop Collider Size")]
         private void ApplyDesktopColliderSize()
         {
-            sliderCollider.center = new Vector3(-0.0528612919f, 0.00999968406f, -1.02092174e-12f);
-            sliderCollider.size = new Vector3(0.207557321f, 0.0399999991f, 0.074000001f);
+            sliderCollider.center = new Vector3(-0.00625290023f, 0.00999968313f, -1.19058084e-12f);
+            sliderCollider.size = new Vector3(0.300774544f, 0.0399998054f, 0.0739998221f);
         }
 #endif
     }
