@@ -44,6 +44,7 @@ namespace ThermoVR.Tools
         [SerializeField] private Dial dial_surroundingPressure;
         [SerializeField] private Dial dial_surroundingTemp;
         [SerializeField] private Dial dial_percentInsulation;
+        [SerializeField] private Dial dial_selector;
 
         [SerializeField] private PhysicalToggle toggle_heatTransfer;
 
@@ -107,7 +108,8 @@ namespace ThermoVR.Tools
                 dial_negativeWeight,
                 dial_surroundingPressure,
                 dial_surroundingTemp,
-                dial_percentInsulation
+                dial_percentInsulation,
+                dial_selector
             };
 
             double kg_corresponding_to_10mpa = ThermoState.surfacearea_insqr * (10 * 1453.8/*MPa->psi*/) * 0.453592/*lb->kg*/;
@@ -122,6 +124,7 @@ namespace ThermoVR.Tools
             dial_surroundingPressure.Init((float)ThermoMath.p_min, (float)ThermoMath.p_max, DigitFormat.AmbientPressure);
             dial_surroundingTemp.Init(273, (float)ThermoMath.t_max, DigitFormat.TemperatureK);
             dial_percentInsulation.Init(0f, 100, DigitFormat.Percent);
+            dial_selector.Init(0, 1, DigitFormat.Percent);
 
             toggle_heatTransfer.IsActiveImpl = () => { return tool_surroundingTemp.allowed; };
 

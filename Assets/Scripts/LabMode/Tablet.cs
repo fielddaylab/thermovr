@@ -86,7 +86,7 @@ namespace ThermoVR
 
             m_currID = UIID.Sandbox;
 
-            HidePullout();
+            // HidePullout();
         }
 
         #region World Interactions
@@ -112,7 +112,7 @@ namespace ThermoVR
 
             GameMgr.Events?.Dispatch(GameEvents.SandboxModeClicked);
 
-            HidePullout();
+            // HidePullout();
         }
 
         private void HandleQuizTabPress(object sender, EventArgs args) {

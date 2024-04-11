@@ -82,6 +82,8 @@ namespace ThermoVR.Dials
         [Space(5)]
         [Header("Other")]
 
+        [SerializeField] private bool overrideOffset;
+        [SerializeField] private float boundsMultiplier;
         // [SerializeField] private CollisionRange interactableRange;
 
         [System.NonSerialized]
@@ -173,14 +175,23 @@ namespace ThermoVR.Dials
                 activator_button.SetTools(relevant_tools);
             }
 
-            nudgeUpBtn.OnPress += HandleNudgeUpPressed;
-            nudgeDownBtn.OnPress += HandleNudgeDownPressed;
+            if (nudgeUpBtn)
+            {
+                nudgeUpBtn.OnPress += HandleNudgeUpPressed;
+            }
+            if (nudgeDownBtn)
+            {
+                nudgeDownBtn.OnPress += HandleNudgeDownPressed;
+            }
 
             total_dist = Vector3.Distance(max_pos.localPosition, min_pos.localPosition);
             initial_offset = meter.transform.localPosition;
 
             touchable = this.GetComponent<Touchable>();
-            textv_tmpro = textv.GetComponent<TextMeshPro>();
+            if (textv)
+            {
+                textv_tmpro = textv.GetComponent<TextMeshPro>();
+            }
 
             GameMgr.Events?.Register<Tool>(GameEvents.ActivateTool, HandleActivateTool, this)
                 .Register<Tool>(GameEvents.DeactivateTool, HandleDeactivateTool, this)
@@ -204,15 +215,19 @@ namespace ThermoVR.Dials
         }
 
         private void RecalibratePos() {
+            if (overrideOffset) { initial_offset = Vector3.zero; }
             Vector3 lp = meter.transform.localPosition;
             lp.x = total_dist / 2 - val * total_dist - initial_offset.x * 2;
             meter.transform.localPosition = lp;
+
+            Debug.Log("[Slider] val is " + val);
             forceMap();
 
             DialMoved?.Invoke();
         }
 
         public void SetValText(float value) {
+            if (textv_tmpro == null) { return; }
             string updateText = string.Format(this.valFormat, value);
             textv_tmpro.SetText(updateText);
         }
@@ -223,7 +238,7 @@ namespace ThermoVR.Dials
         }
 
         private bool AnyToolsActive() {
-            if (relevant_tools == null) {
+            if (relevant_tools == null || relevant_tools.Count == 0) {
                 // vacuously true, I guess?
                 return true;
             }
@@ -311,7 +326,7 @@ namespace ThermoVR.Dials
             }
 
             float dist = Vector3.Distance(obj.transform.position, meter.transform.position);
-            return dist <= .1f;
+            return dist <= .1f * boundsMultiplier;
         }
 
         /*
@@ -543,14 +558,19 @@ namespace ThermoVR.Dials
                 materials[KNOB_MAT_INDEX] = knobMat;
                 knob_renderers[i].materials = materials;
             }
+            if (nudge_up_renderer)
+            {
+                materials = nudge_up_renderer.materials;
+                materials[NUDGE_MAT_INDEX] = nudgeMat;
+                nudge_up_renderer.materials = materials;
+            }
 
-            materials = nudge_up_renderer.materials;
-            materials[NUDGE_MAT_INDEX] = nudgeMat;
-            nudge_up_renderer.materials = materials;
-
-            materials = nudge_down_renderer.materials;
-            materials[NUDGE_MAT_INDEX] = nudgeMat;
-            nudge_down_renderer.materials = materials;
+            if (nudge_down_renderer)
+            {
+                materials = nudge_down_renderer.materials;
+                materials[NUDGE_MAT_INDEX] = nudgeMat;
+                nudge_down_renderer.materials = materials;
+            }
         }
 
         #region Handlers
