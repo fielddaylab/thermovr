@@ -28,7 +28,10 @@ namespace ThermoVR.Dials
 
             if (Mathf.Abs(toProcess - nearestSnap) < 0.05f)
             {
-                toProcess = nearestSnap;
+                if (!GameMgr.I.IsDesktop)
+                {
+                    toProcess = nearestSnap;
+                }
 
                 if (nearestIndex != m_mostRecentIndex)
                 {
