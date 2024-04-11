@@ -16,7 +16,8 @@ public class PhysicalToggle : MonoBehaviour
 
     private bool m_isOn;
 
-    private void Awake() {
+    private void Awake()
+    {
         m_isOn = false;
 
         m_button.OnPress += HandleTogglePressed;
@@ -24,16 +25,33 @@ public class PhysicalToggle : MonoBehaviour
         IsActiveImpl = () => { return true; };
     }
 
-    public bool IsOn() {
+    public bool IsOn()
+    {
         return m_isOn;
     }
 
-    public void ResetToggle() {
+    public void ResetToggle()
+    {
         m_isOn = false;
         UpdateActiveMaterial();
     }
 
-    private void UpdateActiveMaterial() {
+    private void UpdateActiveMaterial()
+    {
+        if (m_isOn)
+        {
+            var mats = m_renderer.materials;
+            mats[0] = GameDB.Instance.KnobActive;
+            m_renderer.materials = mats;
+        }
+        else
+        {
+            var mats = m_renderer.materials;
+            mats[0] = GameDB.Instance.KnobInactive;
+            m_renderer.materials = mats;
+        }
+
+        /*
         if (m_isOn) {
             if (m_renderer != null && m_renderer.materials.Length > 1) {
                 var mats = m_renderer.materials;
@@ -48,11 +66,13 @@ public class PhysicalToggle : MonoBehaviour
                 m_renderer.materials = mats;
             }
         }
+        */
     }
 
     #region Handlers
 
-    private void HandleTogglePressed(object sender, EventArgs args) {
+    private void HandleTogglePressed(object sender, EventArgs args)
+    {
         if (!IsActiveImpl())
         {
             return;
