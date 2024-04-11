@@ -189,7 +189,7 @@ namespace ThermoVR.Dials
             }
 
             total_dist = Vector3.Distance(max_pos.localPosition, min_pos.localPosition);
-            initial_offset = meter.transform.localPosition;
+            initial_offset = Vector3.zero; // min_pos.localPosition - meter.transform.localPosition;
 
             touchable = this.GetComponent<Touchable>();
             if (textv)
@@ -221,7 +221,8 @@ namespace ThermoVR.Dials
         private void RecalibratePos() {
             if (overrideOffset) { initial_offset = Vector3.zero; }
             Vector3 lp = meter.transform.localPosition;
-            lp.x = total_dist / 2 - val * total_dist - initial_offset.x * 2;
+            lp.x = min_pos.localPosition.x + ((-val) * total_dist) + initial_offset.x;
+            // lp.x = total_dist / 2 - val * total_dist - initial_offset.x * 2;
             meter.transform.localPosition = lp;
 
             Debug.Log("[Slider] val is " + val);
@@ -451,7 +452,9 @@ namespace ThermoVR.Dials
             }
             else
             {
-                new_val = Vector3.Distance(min_pos.position, sliderCollider.ClosestPoint(r_hand_pos)) / total_dist;
+                var local = this.transform.InverseTransformPoint(sliderCollider.ClosestPoint(r_hand_pos));
+                local.y = 0;
+                new_val = Vector3.Distance(min_pos.localPosition, local) / total_dist;
             }
 
             new_val = Mathf.Clamp(new_val, Math.Max(min_constraint, min_override), max_constraint);
