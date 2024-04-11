@@ -40,6 +40,7 @@ public class FingerToggleable : MonoBehaviour
     if(OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger)   > 0f && OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger)   == 0f && c == lfinger_c) { lfinger = true; on = !on; }
     if(OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger) > 0f && OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger) == 0f && c == rfinger_c) { rfinger = true; on = !on; }
     finger = (lfinger || rfinger);
+    var name = this.gameObject.name;
   }
 
   void OnTriggerExit(Collider c)
@@ -48,6 +49,7 @@ public class FingerToggleable : MonoBehaviour
     if(OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger)   == 0f || OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger)   > 0f || c == lfinger_c) lfinger = false;
     if(OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger) == 0f || OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger) > 0f || c == rfinger_c) rfinger = false;
     finger = (lfinger || rfinger);
+    var name = this.gameObject.name;
   }
 
 }

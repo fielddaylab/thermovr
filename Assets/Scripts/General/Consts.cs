@@ -35,6 +35,10 @@ static public class GameEvents
     static public readonly StringHash32 UpdateGraphSetting = "sim:update-graph-setting"; // GraphSettingUpdate
     static public readonly StringHash32 UISwitched = "sim:ui-switched"; // GraphSettingUpdate
 
+    static public readonly StringHash32 NudgeUpClicked = "world:nudge-up-clicked"; // int
+    static public readonly StringHash32 NudgeDownClicked = "world:nudge-down-clicked"; // int
+    static public readonly StringHash32 SelectNewDial = "world:select-new-dial"; // int
+
     static public readonly StringHash32 TryNewName = "game:new-name";
     static public readonly StringHash32 NewNameGenerated = "game:new-name-generated";
     static public readonly StringHash32 StartSession = "game:start-session";

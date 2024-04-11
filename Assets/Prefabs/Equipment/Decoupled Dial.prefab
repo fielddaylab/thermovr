@@ -103,7 +103,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2136752545258839447}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.024, y: 0.0236, z: -0}
+  m_LocalPosition: {x: 0.094, y: 0.024, z: -0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -199,7 +199,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2598771837921138655}
   m_LocalRotation: {x: -0, y: -0, z: 0.11112201, w: 0.99380684}
-  m_LocalPosition: {x: -0.139, y: -0.002, z: -0}
+  m_LocalPosition: {x: -0.139, y: 0, z: -0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -230,7 +230,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2787332236449371758}
   m_LocalRotation: {x: -0, y: -0, z: 0.11112201, w: 0.99380684}
-  m_LocalPosition: {x: 0.024, y: 0.0236, z: 0}
+  m_LocalPosition: {x: 0.1053, y: 0.0057, z: 0}
   m_LocalScale: {x: 1.0000001, y: 1.0000001, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -835,8 +835,8 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 0.18114911, y: 0.04, z: 0.010000149}
-  m_Center: {x: -0.0660655, y: 0.009999849, z: -5.9244285e-12}
+  m_Size: {x: 0.261468, y: 0.039999805, z: 0.010000149}
+  m_Center: {x: -0.025905978, y: 0.009999621, z: -4.1227351e-13}
 --- !u!54 &6030497066997557905
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -893,7 +893,10 @@ MonoBehaviour:
   - {fileID: 3317261218618807632}
   nudge_up_renderer: {fileID: 8373637421563490065}
   nudge_down_renderer: {fileID: 2298914956271297274}
+  overrideOffset: 0
+  boundsMultiplier: 0
   response_power: 1
+  val: 0
   default_val: 0
   m_effect_map: []
   activator_button: {fileID: 0}
@@ -1209,6 +1212,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 6030497066997557909}
     m_Modifications:
+    - target: {fileID: 1117929216234329429, guid: 214a02dd1b6efa843bcc350f79f9c5d7,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4606747726023777907, guid: 214a02dd1b6efa843bcc350f79f9c5d7,
         type: 3}
       propertyPath: m_LocalPosition.x

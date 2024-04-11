@@ -82,6 +82,9 @@ namespace ThermoVR.Dials
         [Space(5)]
         [Header("Other")]
 
+        [SerializeField] private bool overrideOffset;
+        [SerializeField] private float boundsMultiplier;
+        [SerializeField] private bool isSelector;
         // [SerializeField] private CollisionRange interactableRange;
 
         [System.NonSerialized]
@@ -129,6 +132,8 @@ namespace ThermoVR.Dials
 
         private bool preserve_during_locked;
 
+        private DialValProcessor processor;
+
         [HideInInspector] public UnityEvent DialMoved;
 
         /// <summary>
@@ -149,6 +154,8 @@ namespace ThermoVR.Dials
             else {
                 orientation_dir = (max_pos.position - min_pos.position).normalized;
             }
+
+            processor = this.GetComponent<DialValProcessor>();
 
             SetConstraint(0f, ConstrainType.Min);
             SetConstraint(1f, ConstrainType.Max);
@@ -173,14 +180,23 @@ namespace ThermoVR.Dials
                 activator_button.SetTools(relevant_tools);
             }
 
-            nudgeUpBtn.OnPress += HandleNudgeUpPressed;
-            nudgeDownBtn.OnPress += HandleNudgeDownPressed;
+            if (nudgeUpBtn)
+            {
+                nudgeUpBtn.OnPress += HandleNudgeUpPressed;
+            }
+            if (nudgeDownBtn)
+            {
+                nudgeDownBtn.OnPress += HandleNudgeDownPressed;
+            }
 
             total_dist = Vector3.Distance(max_pos.localPosition, min_pos.localPosition);
-            initial_offset = meter.transform.localPosition;
+            initial_offset = Vector3.zero; // min_pos.localPosition - meter.transform.localPosition;
 
             touchable = this.GetComponent<Touchable>();
-            textv_tmpro = textv.GetComponent<TextMeshPro>();
+            if (textv)
+            {
+                textv_tmpro = textv.GetComponent<TextMeshPro>();
+            }
 
             GameMgr.Events?.Register<Tool>(GameEvents.ActivateTool, HandleActivateTool, this)
                 .Register<Tool>(GameEvents.DeactivateTool, HandleDeactivateTool, this)
@@ -204,15 +220,19 @@ namespace ThermoVR.Dials
         }
 
         private void RecalibratePos() {
+            if (overrideOffset) { initial_offset = Vector3.zero; }
             Vector3 lp = meter.transform.localPosition;
-            lp.x = total_dist / 2 - val * total_dist - initial_offset.x * 2;
+            lp.x = min_pos.localPosition.x + ((-val) * total_dist) + initial_offset.x;
+            // lp.x = total_dist / 2 - val * total_dist - initial_offset.x * 2;
             meter.transform.localPosition = lp;
+
             forceMap();
 
             DialMoved?.Invoke();
         }
 
         public void SetValText(float value) {
+            if (textv_tmpro == null) { return; }
             string updateText = string.Format(this.valFormat, value);
             textv_tmpro.SetText(updateText);
         }
@@ -223,7 +243,7 @@ namespace ThermoVR.Dials
         }
 
         private bool AnyToolsActive() {
-            if (relevant_tools == null) {
+            if (relevant_tools == null || relevant_tools.Count == 0) {
                 // vacuously true, I guess?
                 return true;
             }
@@ -311,7 +331,7 @@ namespace ThermoVR.Dials
             }
 
             float dist = Vector3.Distance(obj.transform.position, meter.transform.position);
-            return dist <= .1f;
+            return dist <= .1f * (boundsMultiplier == 0 ? 1 : boundsMultiplier);
         }
 
         /*
@@ -395,8 +415,6 @@ namespace ThermoVR.Dials
                 return;
             }
 
-            // TODO: check hand pos relative to max/min
-
             float dx = r_hand_pos.x - prev_hand_pos.x;
             float dy = r_hand_pos.y - prev_hand_pos.y;
             float dz = r_hand_pos.z - prev_hand_pos.z;
@@ -412,6 +430,7 @@ namespace ThermoVR.Dials
             float new_val;
             if (GameMgr.I.IsDesktop) {
                 movement_vector *= -10f;
+
                 // float dx = (r_hand_pos.x - hand_pos.x) * -10f;
                 // constrain vector to relative orientation
                 float magnitude = movement_vector.magnitude;
@@ -428,11 +447,27 @@ namespace ThermoVR.Dials
                 prev_val = val;
                 // float prev_map = map;
 
-                new_val = prev_val - magnitude;
+                if (isSelector)
+                {
+                    var screenWorldPoint = Camera.main.ScreenToWorldPoint(Input.mousePosition + new Vector3(0, 0, Vector3.Distance(Camera.main.transform.position, sliderCollider.transform.position)));
+                    Debug.Log("[Orient] screen world point: " + screenWorldPoint);
+                    var closest = sliderCollider.ClosestPoint(screenWorldPoint);
+                    Debug.Log("[Orient] closest: " + closest);
+                    var local = this.transform.InverseTransformPoint(closest);
+                    Debug.Log("[Orient] local: " + local);
+                    local.y = 0;
+                    new_val = Vector3.Distance(min_pos.localPosition, local) / total_dist;
+                }
+                else
+                {
+                    new_val = prev_val - magnitude;
+                }
             }
             else
             {
-                new_val = Vector3.Distance(min_pos.position, sliderCollider.ClosestPoint(r_hand_pos)) / total_dist;
+                var local = this.transform.InverseTransformPoint(sliderCollider.ClosestPoint(r_hand_pos));
+                local.y = 0;
+                new_val = Vector3.Distance(min_pos.localPosition, local) / total_dist;
             }
 
             new_val = Mathf.Clamp(new_val, Math.Max(min_constraint, min_override), max_constraint);
@@ -447,7 +482,6 @@ namespace ThermoVR.Dials
             {
                 // disallow snapping
                 if (new_val < Math.Max(min_constraint, min_override)) new_val = Math.Max(min_constraint, min_override);
-
             }
 
             if (max_constraint == 1)
@@ -459,6 +493,11 @@ namespace ThermoVR.Dials
             {
                 // disallow snapping
                 if (new_val > max_constraint) new_val = max_constraint;
+            }
+
+            if (processor)
+            {
+                processor.ProcessVal(ref new_val);
             }
 
             set_val(new_val);
@@ -543,14 +582,19 @@ namespace ThermoVR.Dials
                 materials[KNOB_MAT_INDEX] = knobMat;
                 knob_renderers[i].materials = materials;
             }
+            if (nudge_up_renderer)
+            {
+                materials = nudge_up_renderer.materials;
+                materials[NUDGE_MAT_INDEX] = nudgeMat;
+                nudge_up_renderer.materials = materials;
+            }
 
-            materials = nudge_up_renderer.materials;
-            materials[NUDGE_MAT_INDEX] = nudgeMat;
-            nudge_up_renderer.materials = materials;
-
-            materials = nudge_down_renderer.materials;
-            materials[NUDGE_MAT_INDEX] = nudgeMat;
-            nudge_down_renderer.materials = materials;
+            if (nudge_down_renderer)
+            {
+                materials = nudge_down_renderer.materials;
+                materials[NUDGE_MAT_INDEX] = nudgeMat;
+                nudge_down_renderer.materials = materials;
+            }
         }
 
         #region Handlers
@@ -597,7 +641,7 @@ namespace ThermoVR.Dials
             }
         }
 
-        private void HandleNudgeUpPressed(object sender, EventArgs args)
+        public void NudgeUp()
         {
             if (!AnyToolsActive())
             {
@@ -607,7 +651,7 @@ namespace ThermoVR.Dials
             nudgeValUp();
         }
 
-        private void HandleNudgeDownPressed(object sender, EventArgs args)
+        public void NudgeDown()
         {
             if (!AnyToolsActive())
             {
@@ -617,14 +661,24 @@ namespace ThermoVR.Dials
             nudgeValDown();
         }
 
+        private void HandleNudgeUpPressed(object sender, EventArgs args)
+        {
+            NudgeUp();
+        }
+
+        private void HandleNudgeDownPressed(object sender, EventArgs args)
+        {
+            NudgeDown();
+        }
+
         #endregion // Handlers
 
 #if UNITY_EDITOR
         [ContextMenu("Apply Desktop Collider Size")]
         private void ApplyDesktopColliderSize()
         {
-            sliderCollider.center = new Vector3(-0.0528612919f, 0.00999968406f, -1.02092174e-12f);
-            sliderCollider.size = new Vector3(0.207557321f, 0.0399999991f, 0.074000001f);
+            sliderCollider.center = new Vector3(-0.00625290023f, 0.00999968313f, -1.19058084e-12f);
+            sliderCollider.size = new Vector3(0.300774544f, 0.0399998054f, 0.0739998221f);
         }
 #endif
     }
