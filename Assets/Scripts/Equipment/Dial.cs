@@ -450,11 +450,8 @@ namespace ThermoVR.Dials
                 if (isSelector)
                 {
                     var screenWorldPoint = Camera.main.ScreenToWorldPoint(Input.mousePosition + new Vector3(0, 0, Vector3.Distance(Camera.main.transform.position, sliderCollider.transform.position)));
-                    Debug.Log("[Orient] screen world point: " + screenWorldPoint);
                     var closest = sliderCollider.ClosestPoint(screenWorldPoint);
-                    Debug.Log("[Orient] closest: " + closest);
                     var local = this.transform.InverseTransformPoint(closest);
-                    Debug.Log("[Orient] local: " + local);
                     local.y = 0;
                     new_val = Vector3.Distance(min_pos.localPosition, local) / total_dist;
                 }
@@ -476,18 +473,24 @@ namespace ThermoVR.Dials
             if (Math.Max(min_constraint, min_override) == 0)
             {
                 // allow snapping
-                if (new_val < Math.Max(min_constraint, min_override) + 0.05) new_val = Math.Max(min_constraint, min_override);
+                if (!GameMgr.I.IsDesktop)
+                {
+                    if (new_val < Math.Max(min_constraint, min_override) + 0.05) { new_val = Math.Max(min_constraint, min_override); }
+                }
             }
             else
             {
                 // disallow snapping
-                if (new_val < Math.Max(min_constraint, min_override)) new_val = Math.Max(min_constraint, min_override);
+                if (new_val < Math.Max(min_constraint, min_override)) { new_val = Math.Max(min_constraint, min_override); }
             }
 
             if (max_constraint == 1)
             {
                 // allow snapping
-                if (new_val > max_constraint - 0.05) new_val = max_constraint;
+                if (!GameMgr.I.IsDesktop)
+                {
+                    if (new_val > max_constraint - 0.05) new_val = max_constraint;
+                }
             }
             else
             {
