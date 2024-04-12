@@ -1,4 +1,6 @@
+using BeauRoutine;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using ThermoVR.Analytics;
 using ThermoVR.UI;
@@ -67,6 +69,8 @@ namespace ThermoVR.Lab
         private List<IndexedTaskInfo> m_visibleTasks;
         private List<IndexedTopicInfo> m_visibleSections;
 
+        private Routine m_wordBankRoutine;
+
         #region IUIModule
 
         public override void Init() {
@@ -76,6 +80,10 @@ namespace ThermoVR.Lab
             GameMgr.Events?.Register(GameEvents.DeactivateLab, HandleDeactivateLab);
 
             GameMgr.Events?.Register(GameEvents.TaskResetPressed, HandleTaskResetPressed);
+
+            GameMgr.Events?.Register(GameEvents.ClickOpenWordBank, HandleWordBankOpened);
+            GameMgr.Events?.Register<string>(GameEvents.WordBankClosed, HandleWordBankClosed);
+
 
             m_homeButton.OnButtonPressed += HandleHomeButtonPressed;
 
@@ -204,6 +212,8 @@ namespace ThermoVR.Lab
 
         public override void Close() {
             this.gameObject.SetActive(false);
+
+            m_wordBankRoutine.Stop();
 
             // Remove button listeners
             m_ScrollUpBtn.OnButtonPressed -= HandleScrollUp;
@@ -410,6 +420,16 @@ namespace ThermoVR.Lab
         }
 
         private void HandleLabTopicTabPressed(int newTopicIndex, bool fromPlayerAction) {
+            
+            if (m_activeTopicIndex != -1)
+            {
+                foreach (var tab in m_tabs[m_activeTopicIndex].TaskTabs)
+                {
+                    tab.EnableCollider();
+                    tab.UIButton.interactable = true;
+                }
+            }
+
             if (m_activeTopicIndex == -1) {
                 // no tab activated yet; activate new tab
                 ActivateTopicTab(newTopicIndex, fromPlayerAction);
@@ -435,6 +455,33 @@ namespace ThermoVR.Lab
 
         private void HandleTaskResetPressed() {
             ApplyWorldMods(m_currLab.Topics[m_activeTopicIndex].Tasks[m_activeTabIndex]);
+        }
+
+        private void HandleWordBankOpened()
+        {
+            foreach (var tab in m_tabs[m_activeTopicIndex].TaskTabs)
+            {
+                tab.DisableCollider();
+                tab.UIButton.interactable = false;
+            }
+        }
+
+        private void HandleWordBankClosed(string str)
+        {
+            // wait for seconds
+            m_wordBankRoutine.Replace(OnCloseWordBankRoutine());
+        }
+
+        private IEnumerator OnCloseWordBankRoutine()
+        {
+            // wait a beat
+            yield return 0.75f;
+
+            foreach (var tab in m_tabs[m_activeTopicIndex].TaskTabs)
+            {
+                tab.EnableCollider();
+                tab.UIButton.interactable = true;
+            }
         }
 
 

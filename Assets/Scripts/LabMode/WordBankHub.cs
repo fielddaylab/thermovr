@@ -39,6 +39,7 @@ namespace ThermoVR.Lab
         [SerializeField] private ThermoButton m_choicePanelCloseButton;
         [SerializeField] private WordBankOption[] m_options; // option "slots"; not all questions will use all slots // TODO: make pools
 
+        [SerializeField] private Color m_defaultColor;
 
         private uint m_selectedID;
 
@@ -48,10 +49,12 @@ namespace ThermoVR.Lab
 
         private void OnEnable() {
             m_chooseButton.OnButtonPressed += HandleChoosePressed;
+            m_choicePanelCloseButton.OnButtonPressed += HandleChoicePanelClosePressed;
         }
 
         private void OnDisable() {
             m_chooseButton.OnButtonPressed -= HandleChoosePressed;
+            m_choicePanelCloseButton.OnButtonPressed -= HandleChoicePanelClosePressed;
         }
 
         #region IEvaluable
@@ -93,7 +96,7 @@ namespace ThermoVR.Lab
 
             UpdateOptions(m_order);
             m_selectedID = uint.MaxValue;
-            m_answerBG.color = Color.white;
+            m_answerBG.color = m_defaultColor;
             m_choicePanel.SetActive(false);
         }
 
@@ -211,17 +214,24 @@ namespace ThermoVR.Lab
             GameMgr.Events.Dispatch(GameEvents.WordBankDisplayed, displayedWords);
         }
 
-        /*
         private void HandleChoicePanelClosePressed(object sender, EventArgs args) {
             ClosePanel();
         }
-        */
 
         private void ClosePanel()
         {
             m_choicePanel.SetActive(false);
 
-            GameMgr.Events.Dispatch(GameEvents.WordBankClosed, m_definition.OptionTexts[m_selectedID]);
+            string sendStr;
+            if (m_selectedID == uint.MaxValue)
+            {
+                sendStr = "";
+            }
+            else
+            {
+                sendStr = m_definition.OptionTexts[m_selectedID];
+            }
+            GameMgr.Events.Dispatch(GameEvents.WordBankClosed, sendStr);
         }
 
         #endregion // Handlers
