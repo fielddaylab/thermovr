@@ -561,6 +561,34 @@ public class World : MonoBehaviour
 
             GameMgr.Events.Dispatch(GameEvents.CheckForPress, left_hand);
         }
+
+        if (ref_grabbed != null && ref_grabbed == tablet.touchable.gameObject)
+        {
+            if (!tablet.IsObjWithinBounds(ref_hand))
+            {
+                // force release
+                if (left_hand)
+                {
+                    tablet.touchable.ltouch = false;
+                    tablet.touchable.SetGrabbed(false, Hand.LEFT);
+
+                    lgrabbed.GetComponent<Touchable>().SetGrabbed(false, Hand.LEFT);
+                    lgrabbed.transform.SetParent(lgrabbed.GetComponent<Touchable>().og_parent);
+
+                    lgrabbed = null;
+                }
+                else
+                {
+                    tablet.touchable.rtouch = false;
+                    tablet.touchable.SetGrabbed(false, Hand.RIGHT);
+
+                    rgrabbed.GetComponent<Touchable>().SetGrabbed(false, Hand.RIGHT);
+                    rgrabbed.transform.SetParent(rgrabbed.GetComponent<Touchable>().og_parent);
+
+                    rgrabbed = null;
+                }
+            }
+        }
     }
 
     /*                 
