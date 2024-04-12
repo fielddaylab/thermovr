@@ -20,6 +20,7 @@ namespace ThermoVR
         public Touchable touchable;
 
         [SerializeField] private UIHub m_hub;
+        [SerializeField] private BoxCollider m_failsafeBounds; // prevent bug where player hand gets stuck grabbing tablet
 
         [Space(5)]
         [Header("Tabs")]
@@ -87,6 +88,23 @@ namespace ThermoVR
             m_currID = UIID.Sandbox;
 
             // HidePullout();
+        }
+
+        public bool IsObjWithinBounds(GameObject obj)
+        {
+            if (obj == null)
+            {
+                return true;
+            }
+
+            if (m_failsafeBounds.bounds.Contains(obj.transform.position))
+            {
+                return true;
+            }
+
+            var point = m_failsafeBounds.ClosestPoint(obj.transform.position);
+            float dist = Vector3.Distance(obj.transform.position, point);
+            return dist <= 0.03f;
         }
 
         #region World Interactions

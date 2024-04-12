@@ -17,6 +17,7 @@ namespace ThermoVR.Lab
 
         public Image ButtonImage;
         public RectTransform ButtonRect;
+        public Button UIButton;
 
         private LabTaskFrame m_taskFrame;
 

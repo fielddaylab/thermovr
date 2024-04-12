@@ -763,15 +763,15 @@ public class ThermoPresent : MonoBehaviour
         visualize_state();
     }
 
-    public void add_pressure_uninsulated_per_delta_time(double p, double delta_time, double insulation_coefficient, double p_outside, double temperature_gradient) {
-        state.add_pressure_uninsulated_per_delta_time(p, delta_time, insulation_coefficient, p_outside, temperature_gradient, out bool tryIterate);
+    public void add_pressure_uninsulated_per_delta_time(double p, double delta_time, double insulation_coefficient, double p_outside, double temperature_gradient, bool heat_transfer_active) {
+        state.add_pressure_uninsulated_per_delta_time(p, delta_time, insulation_coefficient, p_outside, temperature_gradient, out bool tryIterate, heat_transfer_active);
         if (tryIterate)
         {
             // pressure change was too extreme to handle in one go
             int numIters = 4;
             for (int i = 0; i < numIters; i++)
             {
-                state.add_pressure_uninsulated_per_delta_time(p / numIters, delta_time, insulation_coefficient, p_outside, temperature_gradient, out tryIterate);
+                state.add_pressure_uninsulated_per_delta_time(p / numIters, delta_time, insulation_coefficient, p_outside, temperature_gradient, out tryIterate, heat_transfer_active);
                 if (tryIterate)
                 {
                     // give up on iteration
@@ -818,6 +818,9 @@ public class ThermoPresent : MonoBehaviour
         double lheight = 0; // liquid height
         double total_height = 0; // combined height
 
+        calc_vliq_vvap(out lheight, out vheight);
+
+        /*
         switch (state.region) {
             case ThermoMath.region_liquid:
                 lheight = Math.Log(state.volume / ThermoState.piston_area) + ThermoState.log_offset_volume;
@@ -846,6 +849,7 @@ public class ThermoPresent : MonoBehaviour
             default:
                 break;
         }
+        */
 
         total_height = vheight + lheight;
 
@@ -872,6 +876,57 @@ public class ThermoPresent : MonoBehaviour
 
         contents.Water.transform.localScale = new_liquid_scale;
         contents.Steam.transform.localScale = new_vapor_scale;
+    }
+
+    public void calc_vliq_vvap(out double lheight, out double vheight)
+    {
+        double q = state.quality;
+        lheight = 0; // vapor height
+        vheight = 0; // liquid height
+
+        switch (state.region)
+        {
+            case ThermoMath.region_liquid:
+                lheight = Math.Log(state.volume / ThermoState.piston_area) + ThermoState.log_offset_volume;
+                vheight = 0;
+                break;
+            case ThermoMath.region_twophase:
+                if (q == 0)
+                {
+                    lheight = Math.Log(state.volume / ThermoState.piston_area) + ThermoState.log_offset_volume;
+                    vheight = 0;
+                    break;
+                }
+                if (q == 1)
+                {
+                    lheight = 0;
+                    vheight = Math.Log(state.volume / ThermoState.piston_area) + ThermoState.log_offset_volume;
+                    break;
+                }
+
+                // TODO: under constant volume, applying heat/cooling results in changing overall volume presentation
+                double vliq = ThermoMath.vliq_given_p(state.pressure, state.region);
+                double vvap = ThermoMath.vvap_given_p(state.pressure, state.region);
+                vheight = Math.Log(q * vvap / ThermoState.piston_area) + ThermoState.log_offset_volume;
+                lheight = Math.Log((1 - q) * vliq / ThermoState.piston_area) + ThermoState.log_offset_volume;
+                if (lheight < 0)
+                {
+                    // turns out log offset works for overall volume... but individual pieces like liquid height
+                    // can still be much smaller than the minimum overall state volume. But at these values,
+                    // we're talking about slivers smaller than the player can even see. So we can ignore them.
+                    lheight = 0;
+                }
+                // round out to current overall volume (take out from vapor)
+                double dif = (vheight + lheight) - (Math.Log(state.volume / ThermoState.piston_area) + ThermoState.log_offset_volume);
+                vheight -= dif;
+                break;
+            case ThermoMath.region_vapor:
+                lheight = 0;
+                vheight = Math.Log(state.volume / ThermoState.piston_area) + ThermoState.log_offset_volume;
+                break;
+            default:
+                break;
+        }
     }
 
     private void update_tracker_pos() {

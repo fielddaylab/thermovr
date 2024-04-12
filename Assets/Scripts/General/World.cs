@@ -263,8 +263,10 @@ public class World : MonoBehaviour
                 thermo_present.add_pressure_insulated_per_delta_time(delta_weight, delta_time, weight_pressure, temperature_gradient); // Pressure Constrained -> Insulated ->  delta pressure
             }
             else {
+                bool heat_transfer_active = ToolMgr.IsHeatToggleOn();
+
                 // insulation is inversely proportional to the rate of weight application
-                thermo_present.add_pressure_uninsulated_per_delta_time(delta_weight, delta_time, insulation_coefficient, weight_pressure, temperature_gradient); // Pressure Constrained -> Uninsulated ->  delta pressure
+                thermo_present.add_pressure_uninsulated_per_delta_time(delta_weight, delta_time, insulation_coefficient, weight_pressure, temperature_gradient, heat_transfer_active); // Pressure Constrained -> Uninsulated ->  delta pressure
             }
         }
 
@@ -275,10 +277,10 @@ public class World : MonoBehaviour
             double heat_transfer_delta =
                 (room_temp - thermo_present.get_temperature()) // total temperature difference
                 * insulation_coefficient // what percentage of that difference is shielded by insulation
-                * (SPECIFIC_HEAT_CAPACITY_LIQ) // how much heat is required to raise 1 kg of water 1 Kelvin
+                * (calc_specific_heat_given_q()) // how much heat is required to raise 1 kg of water 1 Kelvin
                                                // TODO: Replace this specific heat with a function calculating based on quality parameter
                                                // for all processes not constant pressure, use c_v (vs c_p -- to be used in constant pressure)
-                / delta_time * 0.5; // halve the immediacy effect so that simulation can handle the change
+                / delta_time * 0.75f; // halve the immediacy effect so that simulation can handle the change
             // if you have some state, and know r, can calculate heat exchange (based on eqtn 2), 
 
             if (heat_transfer_delta != 0) {
@@ -296,6 +298,24 @@ public class World : MonoBehaviour
         }
 
         // Debug.Log("[warp] current temp: " + thermo_present.get_temperature()); // useful for determining exact temp needed for set values in labs
+    }
+
+    private double calc_specific_heat_given_q()
+    {
+        return SPECIFIC_HEAT_CAPACITY_LIQ;
+
+        /*
+
+        thermo_present.calc_vliq_vvap(out double lheight, out double vheight);
+
+        double totalHeight = lheight + vheight;
+
+        double lratio = lheight / totalHeight;
+        double vratio = vheight / totalHeight;
+
+        return ((1-lratio) * SPECIFIC_HEAT_CAPACITY_LIQ)
+            + ((1-vratio) * SPECIFIC_HEAT_CAPACITY_VAP);
+        */
     }
 
     private void ProcessInputs() {
@@ -560,6 +580,34 @@ public class World : MonoBehaviour
             // Check if pressing buttons
 
             GameMgr.Events.Dispatch(GameEvents.CheckForPress, left_hand);
+        }
+
+        if (ref_grabbed != null && ref_grabbed == tablet.touchable.gameObject)
+        {
+            if (!tablet.IsObjWithinBounds(ref_hand))
+            {
+                // force release
+                if (left_hand)
+                {
+                    tablet.touchable.ltouch = false;
+                    tablet.touchable.SetGrabbed(false, Hand.LEFT);
+
+                    lgrabbed.GetComponent<Touchable>().SetGrabbed(false, Hand.LEFT);
+                    lgrabbed.transform.SetParent(lgrabbed.GetComponent<Touchable>().og_parent);
+
+                    lgrabbed = null;
+                }
+                else
+                {
+                    tablet.touchable.rtouch = false;
+                    tablet.touchable.SetGrabbed(false, Hand.RIGHT);
+
+                    rgrabbed.GetComponent<Touchable>().SetGrabbed(false, Hand.RIGHT);
+                    rgrabbed.transform.SetParent(rgrabbed.GetComponent<Touchable>().og_parent);
+
+                    rgrabbed = null;
+                }
+            }
         }
     }
 

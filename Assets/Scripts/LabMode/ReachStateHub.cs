@@ -38,44 +38,79 @@ namespace ThermoVR.Lab
         }
     }
 
+    public enum ReachStateState
+    {
+        Incomplete,
+        Countdown,
+        Complete
+    }
+
     public class ReachStateHub : Evaluable
     {
         [SerializeField] private TMP_Text m_initText;
         // [SerializeField] private TMP_Text m_questionText;
-        [SerializeField] private Image m_completionState;
+        [SerializeField] private Image m_completionStateImg;
 
         [SerializeField] private InstructionLineGenerator m_lineGenerator;
 
         private ReachStateDefinition m_definition;
 
-        private bool completionState = false;
+        private ReachStateState m_completionState;
+
+        private float m_completionTime;
+        private float m_completionTimer;
 
         public void SetDefinition(ReachStateDefinition def) {
             m_definition = def;
+
+            m_completionTime = 4f;
 
             ResetState();
         }
 
         private void Update()
         {
-            if (IsCorrect())
+            if (IsWithinRange())
             {
-                m_completionState.sprite = GameDB.Instance.ReachStateComplete;
-
-                if (!completionState)
+                if (m_completionState == ReachStateState.Incomplete)
                 {
+                    // start timer
+                    m_completionTimer = m_completionTime;
+                    m_completionStateImg.fillAmount = 0;
+
+                    m_completionState = ReachStateState.Countdown;
+                }
+                else if (m_completionState == ReachStateState.Countdown)
+                {
+                    // continue timer
+                    m_completionTimer -= Time.deltaTime;
+                    m_completionStateImg.fillAmount = 1 - (m_completionTimer / m_completionTime);
+
+                    if (m_completionTimer <= 0)
+                    {
+                        m_completionState = ReachStateState.Complete;
+                        m_completionStateImg.fillAmount = 1;
+                    }
+                }
+                else
+                {
+                    // complete timer
+                    m_completionStateImg.sprite = GameDB.Instance.ReachStateComplete;
+                    m_completionStateImg.fillAmount = 1;
+
                     GameMgr.Events.Dispatch(GameEvents.TargetStateReached);
-                    completionState = true;
+                    m_completionState = ReachStateState.Complete;
                 }
             }
             else
             {
-                m_completionState.sprite = GameDB.Instance.ReachStateIncomplete;
+                m_completionStateImg.sprite = GameDB.Instance.ReachStateIncomplete;
+                m_completionStateImg.fillAmount = 1;
 
-                if (completionState)
+                if (m_completionState != ReachStateState.Incomplete)
                 {
                     GameMgr.Events.Dispatch(GameEvents.TargetStateLost, GetDiscrepancies());
-                    completionState = false;
+                    m_completionState = ReachStateState.Incomplete;
                 }
             }
         }
@@ -89,7 +124,10 @@ namespace ThermoVR.Lab
 
             m_lineGenerator.GenerateLines(m_definition.QuestionTexts);
 
-            m_completionState.sprite = GameDB.Instance.ReachStateIncomplete;
+            m_completionStateImg.sprite = GameDB.Instance.ReachStateIncomplete;
+            m_completionState = ReachStateState.Incomplete;
+
+            m_completionTimer = m_completionTime;
         }
 
         public override bool AnswerSelected() {
@@ -106,22 +144,34 @@ namespace ThermoVR.Lab
         }
 
         public override bool IsCorrect() {
-            for (int i = 0; i < m_definition.Targets.Count; i++) {
+            return m_completionState == ReachStateState.Complete;
+        }
+
+        #endregion // IEvaluable
+
+        private bool IsWithinRange()
+        {
+            for (int i = 0; i < m_definition.Targets.Count; i++)
+            {
                 SimStateTarget currTarget = m_definition.Targets[i];
 
-                if (currTarget.TargetID == VarID.VolumeStop) {
+                if (currTarget.TargetID == VarID.VolumeStop)
+                {
                     Tuple<double, double> stopVals = World.Instance.get_stop_vals();
                     bool stop1OutOfRange = (stopVals.Item1 < currTarget.TargetVal - currTarget.TargetRange || stopVals.Item1 > currTarget.TargetVal + currTarget.TargetRange);
                     bool stop2OutOfRange = (stopVals.Item2 < currTarget.TargetVal - currTarget.TargetRange || stopVals.Item2 > currTarget.TargetVal + currTarget.TargetRange);
-                    if (stop1OutOfRange && stop2OutOfRange) {
+                    if (stop1OutOfRange && stop2OutOfRange)
+                    {
                         // both stops are outside of limits
                         return false;
                     }
                 }
-                else {
+                else
+                {
                     double varVal = World.Instance.get_state_var(currTarget.TargetID);
 
-                    if (varVal < currTarget.TargetVal - currTarget.TargetRange || varVal > currTarget.TargetVal + currTarget.TargetRange) {
+                    if (varVal < currTarget.TargetVal - currTarget.TargetRange || varVal > currTarget.TargetVal + currTarget.TargetRange)
+                    {
                         // is outside of limits
                         return false;
                     }
@@ -131,8 +181,6 @@ namespace ThermoVR.Lab
             // return true if no reqs were outside of limits
             return true;
         }
-
-        #endregion // IEvaluable
 
         private List<string> GetDiscrepancies()
         {

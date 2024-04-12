@@ -32,7 +32,7 @@ public class PhysicalToggle : MonoBehaviour
 
     public void ResetToggle()
     {
-        m_isOn = false;
+        m_isOn = true;
         UpdateActiveMaterial();
     }
 
