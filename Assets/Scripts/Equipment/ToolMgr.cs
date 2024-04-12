@@ -16,7 +16,7 @@ namespace ThermoVR.Tools
         public const float BURNER_MAX = 100000;
         public const float COIL_MAX = -100000;
         private const float DEFAULT_CHAMBER_PRESSURE = 101325;
-        private const float DEFAULT_CHAMBER_TEMPERATURE = 320;
+        private const float DEFAULT_CHAMBER_TEMPERATURE = 273;
 
         [Space(5)]
         [Header("Tools")]
@@ -553,13 +553,18 @@ namespace ThermoVR.Tools
 
             float targetMap = (float)((DEFAULT_CHAMBER_PRESSURE - ThermoMath.p_min) / (ThermoMath.p_max - ThermoMath.p_min));
             dial_surroundingPressure.set_mapped_val(targetMap);
-            targetMap = (float)((DEFAULT_CHAMBER_TEMPERATURE - 273) / (ThermoMath.t_max - 273));
-            dial_surroundingTemp.set_mapped_val(targetMap);
+            SetChamberTemp(DEFAULT_CHAMBER_TEMPERATURE);
 
             // Insulator starts engaged
             ActivateTool(tool_insulator);
 
             toggle_heatTransfer.ResetToggle();
+        }
+
+        public void SetChamberTemp(float targetVal)
+        {
+            float targetMap = (float)((targetVal - 273) / (ThermoMath.t_max - 273));
+            dial_surroundingTemp.set_mapped_val(targetMap);
         }
 
         private void HandleHalferPressed(object sender, System.EventArgs args) {
@@ -577,7 +582,8 @@ namespace ThermoVR.Tools
             // Insulator starts engaged
             ActivateTool(tool_insulator);
 
-            toggle_heatTransfer.ResetToggle();
+            // TODO: activate toggle on a task by task basis
+            // toggle_heatTransfer.ResetToggle();
         }
 
         private void HandleToolTogglePressed(Tool t) {

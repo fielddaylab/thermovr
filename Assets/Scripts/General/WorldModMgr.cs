@@ -164,6 +164,10 @@ namespace ThermoVR
             if (validCount >= 2)
             {
                 World.Instance.WarpPVTPartial(m_lastKnownSets.P, m_lastKnownSets.V, m_lastKnownSets.T);
+                if (m_lastKnownSets.T != -1)
+                {
+                    ToolMgr.Instance.SetChamberTemp((float)m_lastKnownSets.T);
+                }
             }
         }
     }

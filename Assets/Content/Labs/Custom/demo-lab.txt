@@ -16,7 +16,7 @@
 |QuizInfo:
 	Initial Conditions: "Initial pressure is 1.01e2 kPa, temperature is 293 K."
 	--Questions:
-	Question: "Set the insulation value to anything greater than 50%."
+	Question: "Set the insulation value to 100%."
 	Question: "Apply heat using the Bunsen Burner until T ≈ 320 K."
 	Questions-->
 	Requirements: [(Temperature:320:5)]
@@ -67,7 +67,7 @@
 |QuizInfo:
 	Initial Conditions: "Initial pressure is 1.01e2 kPa, temperature is 350 K."
 	--Questions:
-	Question: "Set the insulation value to anything greater than 50%."
+	Question: "Set the insulation value to 100%."
 	Question: "Apply the cooling coil until T ≈ 300 K."
 	Questions-->
 	Requirements: [(Temperature:300:5)]
@@ -120,7 +120,7 @@
 	Question: "Set the insulation value to 0%."
 	Question: "Apply the weight until P ≈ 400 kPa."
 	Questions-->
-	Requirements: [(Pressure:400:5)]
+	Requirements: [(Pressure:400:20)]
 |EfficiencyInfo:
 
 || TASK
@@ -219,7 +219,7 @@
 |QuizInfo: 
 	Initial Conditions: "Initial pressure is 1.01e2 kPa, temperature is 293 K."
 	--Questions:
-	Question: "Set the insulation value to anything greater than 50%."
+	Question: "Set the insulation value to 100%."
 	Question: "Apply the upper stop in the two-phase region, near V = 0.08 m³/kg."
 	Questions-->
 	Requirements: [(VolumeStop:0.08:0.02)]
