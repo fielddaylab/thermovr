@@ -31,6 +31,10 @@ public class GameDB : MonoBehaviour
     public Material KnobLocked;
     public Material NudgeActive, NudgeInactive, NudgeLocked;
 
+    [Space(5)]
+    [Header("Audio")]
+    public AudioClip TaskCompleteClip;
+
     private void Awake() {
         Instance = this;
     }

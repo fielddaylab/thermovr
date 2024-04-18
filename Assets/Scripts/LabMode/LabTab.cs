@@ -95,7 +95,10 @@ namespace ThermoVR.Lab
             bool wasCorrect = CompletedAndCorrect;
             if (args.IsCorrect) {
                 ShowCompletionSprite();
-                if (!CompletedAndCorrect) { GameMgr.Events.Dispatch(GameEvents.TaskCompleted); }
+                if (!CompletedAndCorrect) {
+                    GameMgr.Events.Dispatch(GameEvents.TaskCompleted);
+                    Tablet.Instance.PlayUIAudio(GameDB.Instance.TaskCompleteClip);
+                }
                 CompletedAndCorrect = true;
             }
             else {
