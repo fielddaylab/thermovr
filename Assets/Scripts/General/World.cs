@@ -65,6 +65,10 @@ public class World : MonoBehaviour
     [SerializeField] private ControllerAnchor rhand;
     [SerializeField] private GameObject origin;
 
+    [Space(5)]
+    [Header("Controls")]
+    [SerializeField] private AudioSource general_audio;
+
     /*
     GameObject vrcenter;
     FingerToggleable vrcenter_fingertoggleable;
@@ -828,6 +832,8 @@ public class World : MonoBehaviour
 
     private void HandleResetPressed() {
         thermo_present.Reset(true);
+
+        general_audio.PlayOneShot(GameDB.Instance.SimResetClip);
     }
 
     private void HandleRegisterPressable(Pressable pressable) {

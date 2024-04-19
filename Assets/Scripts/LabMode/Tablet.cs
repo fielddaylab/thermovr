@@ -164,6 +164,8 @@ namespace ThermoVR
         private void HandleResetPress(object sender, EventArgs args)
         {
             PlayClick(m_graphTabButton);
+
+            GameMgr.Events.Dispatch(GameEvents.ResetPressed);
         }
 
         private void HandleUISwitched()

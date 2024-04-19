@@ -34,6 +34,7 @@ public class GameDB : MonoBehaviour
     [Space(5)]
     [Header("Audio")]
     public AudioClip TaskCompleteClip;
+    public AudioClip SimResetClip;
 
     private void Awake() {
         Instance = this;

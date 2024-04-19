@@ -2310,7 +2310,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Volume
+  m_text: 'Specific Volume
 
 '
   m_isRightToLeft: 0
@@ -2811,7 +2811,6 @@ MonoBehaviour:
   placement_thermo: {x: 0, y: 0, z: 0}
   placement_thermo_reasonable: 0
   collider: {fileID: 5083857440769308443}
-  preview_obj: {fileID: 0}
   graph: {fileID: 658143357692841119}
 --- !u!64 &5083857440769308443
 MeshCollider:
@@ -3097,7 +3096,9 @@ PrefabInstance:
     - target: {fileID: 2364956551644914416, guid: f218bf25bf9cca041a0e05b3ce230e05,
         type: 3}
       propertyPath: m_text
-      value: Vapor
+      value: 'Superheated
+
+        Vapor'
       objectReference: {fileID: 0}
     - target: {fileID: 4789593256773358592, guid: f218bf25bf9cca041a0e05b3ce230e05,
         type: 3}

@@ -1631,6 +1631,87 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9e51bfea116f32e48b1f8cef1806f825, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1001 &172798396
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 1873530414}
+    m_Modifications:
+    - target: {fileID: 6459244301537213756, guid: 071e20b4b2c9e2447a360ab5576a2992,
+        type: 3}
+      propertyPath: m_Name
+      value: General Audio
+      objectReference: {fileID: 0}
+    - target: {fileID: 6459244301537213758, guid: 071e20b4b2c9e2447a360ab5576a2992,
+        type: 3}
+      propertyPath: m_RootOrder
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6459244301537213758, guid: 071e20b4b2c9e2447a360ab5576a2992,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6459244301537213758, guid: 071e20b4b2c9e2447a360ab5576a2992,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6459244301537213758, guid: 071e20b4b2c9e2447a360ab5576a2992,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6459244301537213758, guid: 071e20b4b2c9e2447a360ab5576a2992,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.69129825
+      objectReference: {fileID: 0}
+    - target: {fileID: 6459244301537213758, guid: 071e20b4b2c9e2447a360ab5576a2992,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.14868337
+      objectReference: {fileID: 0}
+    - target: {fileID: 6459244301537213758, guid: 071e20b4b2c9e2447a360ab5576a2992,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.69129825
+      objectReference: {fileID: 0}
+    - target: {fileID: 6459244301537213758, guid: 071e20b4b2c9e2447a360ab5576a2992,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.14868337
+      objectReference: {fileID: 0}
+    - target: {fileID: 6459244301537213758, guid: 071e20b4b2c9e2447a360ab5576a2992,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6459244301537213758, guid: 071e20b4b2c9e2447a360ab5576a2992,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6459244301537213758, guid: 071e20b4b2c9e2447a360ab5576a2992,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 071e20b4b2c9e2447a360ab5576a2992, type: 3}
+--- !u!82 &172798397 stripped
+AudioSource:
+  m_CorrespondingSourceObject: {fileID: 6459244301537213759, guid: 071e20b4b2c9e2447a360ab5576a2992,
+    type: 3}
+  m_PrefabInstance: {fileID: 172798396}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &172798398 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6459244301537213758, guid: 071e20b4b2c9e2447a360ab5576a2992,
+    type: 3}
+  m_PrefabInstance: {fileID: 172798396}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &200083442
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2706,6 +2787,11 @@ PrefabInstance:
       propertyPath: dial_roomTemp
       value: 
       objectReference: {fileID: 127512807}
+    - target: {fileID: 2423173608412668976, guid: fd9e7f31046f39c46a3fb1d9fd9683d9,
+        type: 3}
+      propertyPath: general_audio
+      value: 
+      objectReference: {fileID: 172798397}
     - target: {fileID: 2423173608412668976, guid: fd9e7f31046f39c46a3fb1d9fd9683d9,
         type: 3}
       propertyPath: halfer_button
@@ -5851,7 +5937,8 @@ Transform:
   m_LocalPosition: {x: 0.927, y: 2.34, z: -0.56}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 172798398}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 24.276, y: -90, z: 0}
