@@ -282,7 +282,7 @@ public class World : MonoBehaviour
             Debug.Log("[Math] Heat dif: " + heatDif);
 
             double heat_transfer_delta;
-            if (thermo_present.get_region() == 0 || thermo_present.get_region() == 2 || thermo_present.get_quality() > 0.92f)
+            if (thermo_present.get_region() == 0 || thermo_present.get_region() == 2 || thermo_present.get_quality() > 0.99f)
             {
                 // material thermal conductivity
                heat_transfer_delta =
@@ -292,7 +292,7 @@ public class World : MonoBehaviour
                                                      // TODO: Replace this specific heat with a function calculating based on quality parameter
                                                      // for all processes not constant pressure, use c_v (vs c_p -- to be used in constant pressure)
                     / delta_time
-                    * 0.5f; // mod the immediacy effect so that simulation can handle the change
+                    * 0.75f; // mod the immediacy effect so that simulation can handle the change
                              // if you have some state, and know r, can calculate heat exchange (based on eqtn 2), 
             }
             else
@@ -302,7 +302,7 @@ public class World : MonoBehaviour
                     // * Math.Clamp((Math.Sign(heatDif) > 0 ? 1 - thermo_present.get_quality() : thermo_present.get_quality()), 0.1, 0.9)    // how much left to travel
                     * insulation_coefficient
                     / delta_time                 // what percentage of that difference is shielded by insulation     
-                    * 0.5f;                    // mod the immediacy effect so that simulation can handle the change
+                    * 0.75f;                    // mod the immediacy effect so that simulation can handle the change
                                                 // * Time.deltaTime;
                                                 //kJ/s
             }

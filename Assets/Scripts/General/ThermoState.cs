@@ -1084,6 +1084,11 @@ namespace ThermoVR.State
 
                 if (region == ThermoMath.region_twophase) //two-phase region, either newly or all along
                 {
+                    if (insulation_coefficient == 1 && quality > 0.01f && quality < 0.99f)
+                    {
+                        return;
+                    }
+
                     /* 
                      * A starting point in the 2-phase region must be in terms of P (or T) and some other parameter, such as v, h, u, or s.
                      * The starting point in the 2 phase region cannot be defined by P and T alone.
