@@ -123,7 +123,6 @@ namespace ThermoVR.Lab
             m_ScrollLeftBtn.OnButtonPressed += HandleScrollLeft;
             m_ScrollRightBtn.OnButtonPressed += HandleScrollRight;
 
-
             for (int topicIndex = 0; topicIndex < m_currLab.Topics.Count; topicIndex++) {
                 m_frames.Add(new List<LabTaskFrame>());
 
@@ -207,7 +206,16 @@ namespace ThermoVR.Lab
                 HandleLabTopicTabPressed(0, false);
             }
 
-            // Disable placement ball
+            m_ScrollVerticalValidVisibleIndex = 0;
+            m_ScrollHorizontalValidVisibleIndex = 0;
+
+            Vector3 newVertPos = m_ScrollVerticalContainer.transform.localPosition;
+            newVertPos.y = m_VerticalScrollOrigin;
+            m_ScrollVerticalContainer.transform.localPosition = newVertPos;
+
+            Vector3 newHorizPos = m_ScrollHorizontalContainer.transform.localPosition;
+            newHorizPos.x = m_HorizontalScrollOrigin;
+            m_ScrollHorizontalContainer.transform.localPosition = newHorizPos;
         }
 
         public override void Close() {
@@ -719,6 +727,60 @@ namespace ThermoVR.Lab
                 {
                     m_tabs[m_activeTopicIndex].TaskTabs[i].DisableCollider();
                 }
+            }
+
+            // show/hide relevant buttons
+            if (m_currLab.Topics[m_activeTopicIndex].Tasks.Count > SCROLL_HORIZONTAL_NUM) {
+                if (m_ScrollHorizontalValidVisibleIndex > 0)
+                {
+                    // tasks to the left
+                    m_ScrollLeftBtn.gameObject.SetActive(true);
+                }
+                else
+                {
+                    m_ScrollLeftBtn.gameObject.SetActive(false);
+                }
+
+                if (m_ScrollHorizontalValidVisibleIndex + SCROLL_HORIZONTAL_NUM < m_currLab.Topics[m_activeTopicIndex].Tasks.Count)
+                {
+                    m_ScrollRightBtn.gameObject.SetActive(true);
+                }
+                else
+                {
+                    m_ScrollRightBtn.gameObject.SetActive(false);
+                }
+            }
+            else
+            {
+                m_ScrollLeftBtn.gameObject.SetActive(false);
+                m_ScrollRightBtn.gameObject.SetActive(false);
+            }
+
+            if (m_currLab.Topics.Count > SCROLL_VERTICAL_NUM)
+            {
+                if (m_ScrollVerticalValidVisibleIndex > 0)
+                {
+                    // tasks above
+                    m_ScrollUpBtn.gameObject.SetActive(true);
+                }
+                else
+                {
+                    m_ScrollUpBtn.gameObject.SetActive(false);
+                }
+
+                if (m_ScrollVerticalValidVisibleIndex + SCROLL_VERTICAL_NUM < m_currLab.Topics.Count)
+                {
+                    m_ScrollDownBtn.gameObject.SetActive(true);
+                }
+                else
+                {
+                    m_ScrollDownBtn.gameObject.SetActive(false);
+                }
+            }
+            else
+            {
+                m_ScrollDownBtn.gameObject.SetActive(false);
+                m_ScrollUpBtn.gameObject.SetActive(false);
             }
 
             GameMgr.Events.Dispatch(GameEvents.TaskListDisplayed, m_visibleTasks);

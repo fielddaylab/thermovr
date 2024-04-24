@@ -279,7 +279,6 @@ public class World : MonoBehaviour
         // heat leak
         if (ToolMgr.IsHeatToggleOn()) {
             double heatDif = room_temp - thermo_present.get_temperature();
-            Debug.Log("[Math] Heat dif: " + heatDif);
 
             double heat_transfer_delta;
             if (thermo_present.get_region() == 0 || thermo_present.get_region() == 2 || thermo_present.get_quality() > 0.99f)
@@ -306,10 +305,6 @@ public class World : MonoBehaviour
                                                 // * Time.deltaTime;
                                                 //kJ/s
             }
-
-
-            Debug.Log("[Math] Heat transfer delta: " + heat_transfer_delta);
-
 
             if (heat_transfer_delta != 0) {
                 // insulation is inversely proportional to the rate of heat transfer (outside insulation)
