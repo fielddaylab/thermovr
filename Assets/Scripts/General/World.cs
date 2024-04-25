@@ -28,6 +28,7 @@ public class World : MonoBehaviour
     public const double DELTA_PRESSURE_CUTOFF = 100.0;
     const double PSI_TO_PASCAL = 6894.76;
     const double SPECIFIC_HEAT_CAPACITY_LIQ = 4184; // how many J it takes to heat 1 kg of water liquid 1 Kelvin
+    const double LIQ_EVAP = 260000; // how many J it takes to evaporate 1 kg of water
     const double SPECIFIC_HEAT_CAPACITY_VAP = 1.996; // how many J it takes to heat 1 kg of water vapor 1 Kelvin
 
     #endregion // Consts
@@ -64,6 +65,10 @@ public class World : MonoBehaviour
     [SerializeField] private ControllerAnchor lhand;
     [SerializeField] private ControllerAnchor rhand;
     [SerializeField] private GameObject origin;
+
+    [Space(5)]
+    [Header("Controls")]
+    [SerializeField] private AudioSource general_audio;
 
     /*
     GameObject vrcenter;
@@ -273,15 +278,33 @@ public class World : MonoBehaviour
 
         // heat leak
         if (ToolMgr.IsHeatToggleOn()) {
-            // material thermal conductivity
-            double heat_transfer_delta =
-                (room_temp - thermo_present.get_temperature()) // total temperature difference
-                * insulation_coefficient // what percentage of that difference is shielded by insulation
-                * (calc_specific_heat_given_q()) // how much heat is required to raise 1 kg of water 1 Kelvin
-                                               // TODO: Replace this specific heat with a function calculating based on quality parameter
-                                               // for all processes not constant pressure, use c_v (vs c_p -- to be used in constant pressure)
-                / delta_time * 0.75f; // halve the immediacy effect so that simulation can handle the change
-            // if you have some state, and know r, can calculate heat exchange (based on eqtn 2), 
+            double heatDif = room_temp - thermo_present.get_temperature();
+
+            double heat_transfer_delta;
+            if (thermo_present.get_region() == 0 || thermo_present.get_region() == 2 || thermo_present.get_quality() > 0.99f)
+            {
+                // material thermal conductivity
+               heat_transfer_delta =
+                    (heatDif) // total temperature difference
+                    * insulation_coefficient // what percentage of that difference is shielded by insulation
+                    * (calc_specific_heat_given_q()) // how much heat is required to raise 1 kg of water 1 Kelvin
+                                                     // TODO: Replace this specific heat with a function calculating based on quality parameter
+                                                     // for all processes not constant pressure, use c_v (vs c_p -- to be used in constant pressure)
+                    / delta_time
+                    * 0.75f; // mod the immediacy effect so that simulation can handle the change
+                             // if you have some state, and know r, can calculate heat exchange (based on eqtn 2), 
+            }
+            else
+            {
+                heat_transfer_delta =
+                    LIQ_EVAP * Math.Sign(heatDif)     // total energy required to jump across two-phase (J)
+                    // * Math.Clamp((Math.Sign(heatDif) > 0 ? 1 - thermo_present.get_quality() : thermo_present.get_quality()), 0.1, 0.9)    // how much left to travel
+                    * insulation_coefficient
+                    / delta_time                 // what percentage of that difference is shielded by insulation     
+                    * 0.75f;                    // mod the immediacy effect so that simulation can handle the change
+                                                // * Time.deltaTime;
+                                                //kJ/s
+            }
 
             if (heat_transfer_delta != 0) {
                 // insulation is inversely proportional to the rate of heat transfer (outside insulation)
@@ -302,7 +325,15 @@ public class World : MonoBehaviour
 
     private double calc_specific_heat_given_q()
     {
-        return SPECIFIC_HEAT_CAPACITY_LIQ;
+        if (thermo_present.get_region() < 2)
+        {
+            return SPECIFIC_HEAT_CAPACITY_LIQ;
+        }
+        else
+        {
+           return SPECIFIC_HEAT_CAPACITY_LIQ;
+            // return SPECIFIC_HEAT_CAPACITY_VAP * 200;
+        }
 
         /*
 
@@ -828,6 +859,8 @@ public class World : MonoBehaviour
 
     private void HandleResetPressed() {
         thermo_present.Reset(true);
+
+        general_audio.PlayOneShot(GameDB.Instance.SimResetClip);
     }
 
     private void HandleRegisterPressable(Pressable pressable) {

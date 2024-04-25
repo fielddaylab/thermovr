@@ -17,6 +17,10 @@ namespace ThermoVR.Tools
         [SerializeField] private Material m_LitMat;
         [SerializeField] private Material m_UnlitMat;
 
+        [Space(5)]
+        [Header("Audio")]
+        [SerializeField] private AudioSource m_audioSrc;
+
         #endregion // Inspector
 
         #region Tool
@@ -36,6 +40,11 @@ namespace ThermoVR.Tools
 
             gameObject.SetActive(true);
 
+            if (!m_audioSrc.isPlaying)
+            {
+                m_audioSrc.Play();
+            }
+
             yield return transform.MoveTo(m_ActivatedBasePos, ENTRY_TIME / m_RoutineSpeed, Axis.Y, Space.Self);
 
             m_HydraulicPressAnchor.enabled = true;
@@ -45,6 +54,8 @@ namespace ThermoVR.Tools
         protected override IEnumerator DeactivationRoutine() {
             // disable anchor until deactivation completed
             m_HydraulicPressAnchor.enabled = false;
+
+            m_audioSrc.Stop();
 
             yield return transform.MoveTo(m_DeactivatedBasePos, ENTRY_TIME / m_RoutineSpeed, Axis.Y, Space.Self);
 

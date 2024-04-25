@@ -10,6 +10,10 @@ namespace ThermoVR.Tools
     {
         private static float ENTRY_TIME = 0.2f;
 
+        [Space(5)]
+        [Header("Audio")]
+        [SerializeField] private AudioSource m_audioSrc;
+
 
         #region Inspector
 
@@ -33,6 +37,11 @@ namespace ThermoVR.Tools
 
             gameObject.SetActive(true);
 
+            if (!m_audioSrc.isPlaying)
+            {
+                m_audioSrc.Play();
+            }
+
             yield return transform.MoveTo(m_ActivatedBasePos, ENTRY_TIME / m_RoutineSpeed, Axis.Y, Space.Self);
 
             m_ElasticAnchor.enabled = true;
@@ -47,6 +56,9 @@ namespace ThermoVR.Tools
 
             gameObject.SetActive(false);
             m_ElasticAnchor.enabled = true;
+
+            m_audioSrc.Stop();
+
             yield return null;
         }
 

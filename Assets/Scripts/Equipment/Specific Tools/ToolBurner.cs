@@ -6,8 +6,11 @@ namespace ThermoVR.Tools
 {
     public class ToolBurner : Tool
     {
-        #region Tool
+        [Space(5)]
+        [Header("Audio")]
+        [SerializeField] private AudioSource m_audioSrc;
 
+        #region Tool
 
         protected override void InitializeRoutines_Impl() {
 
@@ -22,6 +25,8 @@ namespace ThermoVR.Tools
 
         protected override IEnumerator DeactivationRoutine() {
             Debug.Log("[Triggers] Burner deactivated!");
+
+            m_audioSrc.Stop();
 
             gameObject.SetActive(false);
             yield return null;
@@ -39,11 +44,19 @@ namespace ThermoVR.Tools
 
         protected override IEnumerator EngageRoutine() {
             Debug.Log("[Triggers] Burner engaged!");
+            if (!m_audioSrc.isPlaying)
+            {
+                m_audioSrc.Play();
+            }
+
             yield return null;
         }
 
         protected override IEnumerator DisengageRoutine() {
             Debug.Log("[Triggers] Burner disengaged!");
+
+            m_audioSrc.Stop();
+
             yield return null;
         }
 

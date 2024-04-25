@@ -135,8 +135,34 @@ namespace ThermoVR.Lab
                 }
             }
 
-            GameMgr.Events.Dispatch(GameEvents.LabMenuDisplayed, m_visibleLabs);
+            if (m_ActiveOptions.Count > SCROLL_VERTICAL_NUM)
+            {
+                if (m_ScrollVerticalValidVisibleIndex > 0)
+                {
+                    // tasks above
+                    m_ScrollUpBtn.gameObject.SetActive(true);
+                }
+                else
+                {
+                    m_ScrollUpBtn.gameObject.SetActive(false);
+                }
 
+                if (m_ScrollVerticalValidVisibleIndex + SCROLL_VERTICAL_NUM < m_ActiveOptions.Count)
+                {
+                    m_ScrollDownBtn.gameObject.SetActive(true);
+                }
+                else
+                {
+                    m_ScrollDownBtn.gameObject.SetActive(false);
+                }
+            }
+            else
+            {
+                m_ScrollDownBtn.gameObject.SetActive(false);
+                m_ScrollUpBtn.gameObject.SetActive(false);
+            }
+
+            GameMgr.Events.Dispatch(GameEvents.LabMenuDisplayed, m_visibleLabs);
         }
     }
 

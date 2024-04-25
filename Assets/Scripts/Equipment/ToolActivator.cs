@@ -12,6 +12,7 @@ public class ToolActivator : MonoBehaviour
     [SerializeField] private Pressable m_button;
     [SerializeField] private MeshRenderer m_mesh;
     [SerializeField] private BoxCollider m_collider;
+    [SerializeField] private ButtonPressMovement m_buttonMovement;
 
     private List<Tool> m_tools;
 
@@ -24,10 +25,12 @@ public class ToolActivator : MonoBehaviour
     }
 
     public void UpdateActiveMaterial() {
+        bool active = false;
         Material toSet = GameDB.Instance.InactiveButtonMaterial; // default
 
         foreach (var tool in m_tools) {
             if (tool.engaged) {
+                active = true;
                 toSet = GameDB.Instance.ActiveButtonMaterial; // default
                 break;
             }
@@ -36,6 +39,19 @@ public class ToolActivator : MonoBehaviour
         Material[] materials = m_mesh.materials;
         materials[BASE_MAT_INDEX] = toSet;
         m_mesh.materials = materials;
+
+        // update button indentation
+        if (m_buttonMovement)
+        {
+            if (active)
+            {
+                m_buttonMovement.Indent();
+            }
+            else
+            {
+                m_buttonMovement.ResetPosition();
+            }
+        }
     }
 
     #region Handlers
