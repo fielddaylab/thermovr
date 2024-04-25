@@ -28,9 +28,14 @@ namespace ThermoVR
         [SerializeField] private Pressable m_labModeButton;
         [SerializeField] private Pressable m_graphTabButton;
 
+        [SerializeField] private ButtonPressMovement m_sandboxTabMovement;
+        [SerializeField] private ButtonPressMovement m_labModeMovement;
+        [SerializeField] private ButtonPressMovement m_graphTabMovement;
+
         [Space(5)]
         [Header("Functions")]
         [SerializeField] private Pressable m_resetButton;
+        [SerializeField] private ButtonPressMovement m_resetButtonMovement;
 
         [Space(5)]
         [Header("Pullout Readout")]
@@ -131,6 +136,10 @@ namespace ThermoVR
             GameMgr.Events?.Dispatch(GameEvents.SandboxModeClicked);
 
             // HidePullout();
+
+            m_graphTabMovement.ResetPosition();
+            m_labModeMovement.ResetPosition();
+            m_sandboxTabMovement.Indent();
         }
 
         private void HandleQuizTabPress(object sender, EventArgs args) {
@@ -145,6 +154,10 @@ namespace ThermoVR
             GameMgr.Events?.Dispatch(GameEvents.LabModeClicked);
 
             ShowPullout();
+
+            m_graphTabMovement.ResetPosition();
+            m_labModeMovement.Indent();
+            m_sandboxTabMovement.ResetPosition();
         }
 
         private void HandleGraphTabPress(object sender, EventArgs args) {
@@ -159,6 +172,10 @@ namespace ThermoVR
             GameMgr.Events?.Dispatch(GameEvents.SettingsViewClicked);
 
             ShowPullout();
+
+            m_graphTabMovement.Indent();
+            m_labModeMovement.ResetPosition();
+            m_sandboxTabMovement.ResetPosition();
         }
 
         private void HandleResetPress(object sender, EventArgs args)
