@@ -17,6 +17,7 @@ using ThermoVR.UI.GraphElements;
 using ThermoVR.Lab;
 using ThermoVR.State;
 using System;
+using ThermoVR.Audio;
 
 public class World : MonoBehaviour
 {
@@ -67,8 +68,9 @@ public class World : MonoBehaviour
     [SerializeField] private GameObject origin;
 
     [Space(5)]
-    [Header("Controls")]
+    [Header("Audio")]
     [SerializeField] private AudioSource general_audio;
+    [SerializeField] private SimInternalsAudio sim_audio;
 
     /*
     GameObject vrcenter;
@@ -107,6 +109,9 @@ public class World : MonoBehaviour
     double ambient_pressure = 0;
 
     private List<Pressable> m_pressables; // pressables register themselves with this on event
+
+    private double starting_p;
+    private double p_change;
 
     #endregion // Inspector
 
@@ -227,6 +232,7 @@ public class World : MonoBehaviour
     }
 
     private void ApplyTools() {
+        starting_p = thermo_present.get_pressure();
         double delta_time = (double)Time.fixedDeltaTime;
 
         //apply thermo
@@ -321,6 +327,10 @@ public class World : MonoBehaviour
         }
 
         // Debug.Log("[warp] current temp: " + thermo_present.get_temperature()); // useful for determining exact temp needed for set values in labs
+
+        p_change = thermo_present.get_pressure() - starting_p;
+        // play pressure release sound effect if drop is significant
+        sim_audio.ProcessPressureAudio((float)p_change);
     }
 
     private double calc_specific_heat_given_q()
