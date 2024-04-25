@@ -12,6 +12,8 @@ namespace ThermoVR.Tools
 
         [Space(5)]
         [Header("Audio")]
+        [SerializeField] private AudioClip m_enterClip;
+        [SerializeField] private AudioClip m_adjustClip;
         [SerializeField] private AudioSource m_audioSrc;
 
 
@@ -39,6 +41,7 @@ namespace ThermoVR.Tools
 
             if (!m_audioSrc.isPlaying)
             {
+                m_audioSrc.clip = m_enterClip;
                 m_audioSrc.Play();
             }
 
@@ -63,10 +66,15 @@ namespace ThermoVR.Tools
         }
 
         protected override IEnumerator BeginAdjustRoutine() {
+            m_audioSrc.clip = m_adjustClip;
+            m_audioSrc.Play();
+
             yield return null;
         }
 
         protected override IEnumerator EndAdjustRoutine() {
+            m_audioSrc.Stop();
+
             yield return null;
         }
 
