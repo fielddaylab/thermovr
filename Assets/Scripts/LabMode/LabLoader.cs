@@ -70,6 +70,14 @@ namespace ThermoVR.Lab
     }
 
     [Serializable]
+    public struct TrailGroup
+    {
+        public bool IsEnabled; // whether the trail can appear in this lab task
+        public bool ClearExisting; // whether any existing trail resets when this task loads
+        public int MaxLength; // Max length of trail (-1 is infinity)
+    }
+
+    [Serializable]
     public struct LimitBounds
     {
         public double Ceiling;
@@ -99,6 +107,7 @@ namespace ThermoVR.Lab
         public bool GrabAllowed;
         public SetGroup Sets; // p, v, and t values to set
         public LimitsGroup Limits; // stores limits for simulation variables
+        public TrailGroup TrailSettings; // settings for tracer trail
 
         // Multiple choice, word bank, multi-select
         public List<string> SecondaryTexts;
@@ -125,11 +134,12 @@ namespace ThermoVR.Lab
         private static uint TOOL_INDEX = 2;
         private static uint SET_INDEX = 3;
         private static uint LIMIT_INDEX = 4;
-        private static uint TARGET_INDEX = 5;
-        private static uint QUIZ_INDEX = 6;
-        private static uint EFFICIENCY_INDEX = 7;
+        private static uint TRAIL_INDEX = 5;
+        private static uint TARGET_INDEX = 6;
+        private static uint QUIZ_INDEX = 7;
+        private static uint EFFICIENCY_INDEX = 8;
 
-        private static uint NUM_TASK_SECTIONS = 8; // 7 + 1 leading delim
+        private static uint NUM_TASK_SECTIONS = 9; // 8 + 1 leading delim
 
         private static uint TOPIC_HEADER_INDEX = 1;
 
@@ -147,6 +157,7 @@ namespace ThermoVR.Lab
         private static string SET_CHUNK_DELIM = ":";
         private static string LIMIT_GROUP_DELIM = ",";
         private static string LIMIT_CHUNK_DELIM = ":";
+        private static string TRAIL_GROUP_DELIM = ",";
 
 
         private static string MC_KEY = "multiple-choice";
@@ -158,6 +169,11 @@ namespace ThermoVR.Lab
         private static string QUESTIONS_END_KEY = "Questions-->";
 
         private static string QUESTION_START_KEY = "Question:";
+
+        private static string TRAIL_ENABLED_KEY = "enabled";
+        private static string TRAIL_DISABLED_KEY = "disabled";
+        private static string TRAIL_CLEAR_KEY = "clear-previous";
+        private static string TRAIL_PRESERVE_KEY = "preserve-previous";
 
         #endregion // Consts
 
@@ -387,6 +403,11 @@ namespace ThermoVR.Lab
             string limitInfo = sections[LIMIT_INDEX].Trim();
             ParseTaskLimits(ref limitInfo, ref newTaskInfo);
             if (m_verboseDebug) { Debug.Log("[LabLoad] Limit Info: " + limitInfo); }
+
+            // Trail
+            string trailInfo = sections[TRAIL_INDEX].Trim();
+            ParseTaskTrail(ref trailInfo, ref newTaskInfo);
+            if (m_verboseDebug) { Debug.Log("[LabLoad] Trail Info: " + trailInfo); }
 
             // TODO: move quiz Requirements section to the target into block, and rearrange
             // Target
@@ -640,6 +661,81 @@ namespace ThermoVR.Lab
                 default:
                     break;
             }
+        }
+
+        private void ParseTaskTrail(ref string trailInfo, ref TaskInfo newTaskInfo)
+        {
+            // Example format is [enabled, clear-previous, 30], or [disabled, preserve-previous, -1]
+
+            TrailGroup newTrail = new TrailGroup();
+            // by default, trail is not enabled, does not clear previous, and length of 30
+            newTrail.IsEnabled = false;
+            newTrail.ClearExisting = false;
+            newTrail.MaxLength = 30;
+            newTaskInfo.TrailSettings = newTrail;
+
+            int startIndex = trailInfo.IndexOf('[') + 1;
+            if (startIndex == 0)
+            {
+                Debug.Log("[LabLoad] TrailInfo definition is invalid");
+                return;
+            }
+            string iterateTrailInfo = trailInfo.Substring(startIndex);
+            int endIndex = iterateTrailInfo.IndexOf(']');
+            if (endIndex == -1)
+            {
+                Debug.Log("[LabLoad] TrailInfo definition is invalid");
+                return;
+            }
+            int length = endIndex;
+            iterateTrailInfo = iterateTrailInfo.Substring(0, length);
+            string[] trailGroups = iterateTrailInfo.Split(TRAIL_GROUP_DELIM);
+
+            for (int i = 0; i < trailGroups.Length; i++)
+            {
+                string group = trailGroups[i];
+
+                group = group.Trim();
+
+                bool isNum = true;
+
+                // enabled or disabled
+                if (group.Contains(TRAIL_ENABLED_KEY))
+                {
+                    newTrail.IsEnabled = true;
+                    isNum = false;
+                }
+                else if (group.Contains(TRAIL_DISABLED_KEY))
+                {
+                    newTrail.IsEnabled = false;
+                    isNum = false;
+                }
+
+                // clear or preserve
+                if (group.Contains(TRAIL_CLEAR_KEY))
+                {
+                    newTrail.ClearExisting = true;
+                    isNum = false;
+
+                }
+                else if (group.Contains(TRAIL_PRESERVE_KEY))
+                {
+                    newTrail.ClearExisting = false;
+                    isNum = false;
+                }
+
+                if (isNum)
+                {
+                    bool successfulParse = int.TryParse(group, out int val);
+                    if (successfulParse)
+                    {
+                        newTrail.MaxLength = val;
+                    }
+                }
+            }
+
+            newTaskInfo.TrailSettings = newTrail;
+            if (m_verboseDebug) { Debug.Log("[LabLoad] Trail Settings: " + newTaskInfo.TrailSettings); }
         }
 
         private void ParseTaskInitConditions(ref string quizInfo, ref string iterateQuizInfo, ref TaskInfo newTaskInfo)

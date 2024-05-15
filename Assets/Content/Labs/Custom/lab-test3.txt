@@ -1,0 +1,28 @@
+﻿|| LAB-NAME: Lab Test 3
+|| LAB-AUTHOR: Field Day
+
+|| TOPIC // 1
+
+|Header: "First, well try out each feature of the simulator. Determine which property is being held constant and which one(s) are changing.
+	a. Bunsen Burner"
+
+|| TASK
+
+|Type: [reach-state]
+|ToolInfo: [all]
+|SetInfo: [(p:101), (v:0.001), (t:293)]
+|LimitInfo:
+|TrailInfo:
+|TargetInfo:
+|QuizInfo:
+	Initial Conditions: "Initial pressure is 1.01e2 kPa, temperature is 293 K."
+	--Questions:
+	Question: "Set the insulation value to 100%."
+	Question: "Apply heat using the Bunsen Burner until T ≈ 320 K."
+	Questions-->
+	Requirements: [(Temperature:320:5)]
+	
+|EfficiencyInfo:
+
+
+|| END
