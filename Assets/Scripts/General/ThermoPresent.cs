@@ -133,7 +133,12 @@ public class ThermoPresent : MonoBehaviour
     [Range(0.001f, 10)]
     public double plot_lbase = 10f;
     double plot_lbase_prev = 0f;
-    public float plot_dimension(double min, double max, double val) { double lval = Math.Log(val, plot_lbase); double lmax = Math.Log(max, plot_lbase); double lmin = Math.Log(min, plot_lbase); return (float)((lval - lmin) / (lmax - lmin)); }
+    public float plot_dimension(double min, double max, double val) {
+        double lval = Math.Log(val, plot_lbase);
+        double lmax = Math.Log(max, plot_lbase);
+        double lmin = Math.Log(min, plot_lbase);
+        return (float)((lval - lmin) / (lmax - lmin));
+    }
     public float invplot_dimension(double min, double max, double res) {
         double lmax = Math.Log(max, plot_lbase);
         double lmin = Math.Log(min, plot_lbase);
