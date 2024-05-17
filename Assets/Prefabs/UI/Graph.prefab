@@ -2942,8 +2942,11 @@ MonoBehaviour:
     type: 3}
   graph: {fileID: 658143357692841119}
   m_pressureSpacing: 250
-  m_volumeSpacing: 50
-  m_temperatureSpacing: 100
+  m_volumeSpacing: 0.005
+  m_temperatureSpacing: 2
+  m_pLineMat: {fileID: 2100000, guid: e2ddc47416c6c0f47a2bccf6abfa9f46, type: 2}
+  m_vLineMat: {fileID: 2100000, guid: 09ddf902e03bcf042ba56746cca539e4, type: 2}
+  m_tLineMat: {fileID: 2100000, guid: 989ca8f94659e2145b69014798ca46c7, type: 2}
   m_pressureLinesContainer: {fileID: 1637126964422958943}
   m_volumeLinesContainer: {fileID: 7659210363217743170}
   m_temperatureLinesContainer: {fileID: 4067632019295834114}

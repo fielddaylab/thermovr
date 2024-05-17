@@ -17,8 +17,12 @@ namespace ThermoVR
         public GameObject graph;
 
         [SerializeField] private int m_pressureSpacing;
-        [SerializeField] private int m_volumeSpacing;
+        [SerializeField] private float m_volumeSpacing;
         [SerializeField] private int m_temperatureSpacing;
+
+        [SerializeField] private Material m_pLineMat;
+        [SerializeField] private Material m_vLineMat;
+        [SerializeField] private Material m_tLineMat;
 
         [SerializeField] private Transform m_pressureLinesContainer;
         [SerializeField] private Transform m_volumeLinesContainer;
@@ -136,9 +140,9 @@ namespace ThermoVR
                     {
                         spacingMult *= 4;
                     }
-                    m_permanentLines.Add(PopulatePLine(currPLine + m_pressureSpacing * spacingMult * pStepIndex));
-                    pStepIndex++;
                     currPLine += m_pressureSpacing * spacingMult * pStepIndex;
+                    m_permanentLines.Add(PopulatePLine(currPLine));
+                    pStepIndex++;
                 }
             }
 
@@ -156,8 +160,29 @@ namespace ThermoVR
             m_generationInProgress = true;
 
             // Const V varies T
-            int currVLine = 0;
+            double currVLine = ThermoMath.v_effective_min + 0.001;
+            int spacingMult = 1;
+            int vStepIndex = 0;
 
+            if (isPermanent)
+            {
+                // for each interval
+                while (currVLine < ThermoMath.v_max)
+                {
+                    if (vStepIndex % 6 == 0 && vStepIndex != 0)
+                    {
+                        spacingMult *= 4;
+                    }
+                    currVLine += m_volumeSpacing * spacingMult * vStepIndex;
+                    m_permanentLines.Add(PopulateVLine(currVLine));
+                    vStepIndex++;
+                }
+            }
+
+            else
+            {
+                m_tempLines.Add(PopulatePLine(currVLine));
+            }
 
             m_generationInProgress = false;
             yield return null;
@@ -169,7 +194,24 @@ namespace ThermoVR
 
             // Const T varies P
             int currTLine = 0;
+            int spacingMult = 1;
+            int tStepIndex = 0;
 
+            if (isPermanent)
+            {
+                // for each interval
+                while (currTLine < ThermoMath.t_max)
+                {
+                    currTLine += m_temperatureSpacing * spacingMult * tStepIndex;
+                    m_permanentLines.Add(PopulateTLine(currTLine));
+                    tStepIndex++;
+                }
+            }
+
+            else
+            {
+                m_tempLines.Add(PopulatePLine(currTLine));
+            }
 
             m_generationInProgress = false;
             yield return null;
@@ -182,23 +224,36 @@ namespace ThermoVR
         private LineRenderer PopulatePLine(double constP)
         {
             LineRenderer newLine = Instantiate(m_linePrefab, m_pressureLinesContainer).GetComponent<LineRenderer>();
+            newLine.material = m_pLineMat;
             newLine.transform.position = m_pressureLinesContainer.position;
             int currPosIndex = 0;
             Vector3 samplePos = Vector3.zero;
 
-            double p;
+            double p = constP;
             double v;
             double t = ThermoMath.t_min;
             int stepIndex = 0;
-
+            bool firstIter = true;
+            
             // run down T line
             while (t < ThermoMath.t_max)
             {
-                p = constP;
-                t += 2;
+                if (!firstIter)
+                {
+                    t += 2;
+                }
+
+                firstIter = false;
+
                 v = ThermoMath.v_given_pt(p, t);
 
                 samplePos = ThermoPresent.Instance.plot(p, v, t);
+
+                if (p < ThermoMath.p_min || v < ThermoMath.v_min || t < ThermoMath.t_min
+                    || p > ThermoMath.p_max || v > ThermoMath.v_max || t > ThermoMath.t_max)
+                {
+                    continue;
+                }
 
                 newLine.positionCount++;
                 newLine.SetPosition(stepIndex, samplePos);
@@ -208,31 +263,109 @@ namespace ThermoVR
             return newLine;
         }
 
-        private LineRenderer PopulateVLine()
+        private LineRenderer PopulateVLine(double constV)
         {
             LineRenderer newLine = Instantiate(m_linePrefab, m_volumeLinesContainer).GetComponent<LineRenderer>();
-
+            newLine.material = m_vLineMat;
+            newLine.transform.position = m_volumeLinesContainer.position;
             int currPosIndex = 0;
             Vector3 samplePos = Vector3.zero;
 
+            double p;
+            double v = constV;
+            double t = ThermoMath.t_min;
+            int stepIndex = 0;
+            bool firstIter = true;
+
             // run down T line
+            while (t < ThermoMath.t_max)
             {
-                newLine.SetPosition(currPosIndex, samplePos);
+                if (!firstIter)
+                {
+                    if (t <= ThermoMath.t_crit)
+                    {
+                        t += 0.05;
+                    }
+                    else
+                    {
+                        t += 2;
+                    }
+                }
+
+                firstIter = false;
+
+                p = ThermoMath.p_given_vt(v, t);
+
+                samplePos = ThermoPresent.Instance.plot(p, v, t);
+
+                if (p < ThermoMath.p_min || v < ThermoMath.v_min || t < ThermoMath.t_min
+                    || p > ThermoMath.p_max || v > ThermoMath.v_max || t > ThermoMath.t_max)
+                {
+                    continue;
+                }
+
+                newLine.positionCount++;
+                newLine.SetPosition(stepIndex, samplePos);
+                stepIndex++;
             }
 
             return newLine;
         }
 
-        private LineRenderer PopulateTLine()
+        private LineRenderer PopulateTLine(double constT)
         {
             LineRenderer newLine = Instantiate(m_linePrefab, m_temperatureLinesContainer).GetComponent<LineRenderer>();
-
+            newLine.material = m_tLineMat;
+            newLine.transform.position = m_temperatureLinesContainer.position;
             int currPosIndex = 0;
             Vector3 samplePos = Vector3.zero;
 
+            double p = ThermoMath.p_min;
+            double v;
+            double t = constT;
+            int stepIndex = 0;
+            bool firstIter = true;
+            int iterIndex = 0;
+            int spacingMult = 1;
+            bool jumpedTwoPhase = false;
+
             // run down P line
+            while (t < ThermoMath.t_max)
             {
-                newLine.SetPosition(currPosIndex, samplePos);
+                if (iterIndex != 0)
+                {
+                    if (iterIndex % 6 == 0)
+                    {
+                        spacingMult *= 4;
+                    }
+
+                    p += 1 * spacingMult;
+                }
+                iterIndex++;
+
+                if (iterIndex > 100) { break; }
+
+                v = ThermoMath.v_given_pt(p, t);
+
+                samplePos = ThermoPresent.Instance.plot(p, v, t);
+
+                // straighten the line across 2-phase
+                if (!jumpedTwoPhase && samplePos.x < 0.12 && newLine.positionCount > 0)
+                {
+                    jumpedTwoPhase = true;
+                    var old = newLine.GetPosition(newLine.positionCount - 1);
+                    samplePos.y = old.y;
+                }
+
+                if (p < ThermoMath.p_min || v < ThermoMath.v_min || t < ThermoMath.t_min
+                    || p > ThermoMath.p_max || v > ThermoMath.v_max || t > ThermoMath.t_max)
+                {
+                    continue;
+                }
+
+                newLine.positionCount++;
+                newLine.SetPosition(stepIndex, samplePos);
+                stepIndex++;
             }
 
             return newLine;
