@@ -1,5 +1,6 @@
 using BeauRoutine;
 using Oculus.Interaction;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using ThermoVR.State;
@@ -181,7 +182,7 @@ namespace ThermoVR
 
             else
             {
-                m_tempLines.Add(PopulatePLine(currVLine));
+                m_tempLines.Add(PopulateVLine(currVLine));
             }
 
             m_generationInProgress = false;
@@ -210,7 +211,7 @@ namespace ThermoVR
 
             else
             {
-                m_tempLines.Add(PopulatePLine(currTLine));
+                m_tempLines.Add(PopulateTLine(currTLine));
             }
 
             m_generationInProgress = false;
@@ -271,24 +272,27 @@ namespace ThermoVR
             int currPosIndex = 0;
             Vector3 samplePos = Vector3.zero;
 
+            #region First Half
+
             double p;
             double v = constV;
-            double t = ThermoMath.t_min;
+            double t = ThermoMath.t_max;
             int stepIndex = 0;
             bool firstIter = true;
+            double prev_y = -1;
 
             // run down T line
-            while (t < ThermoMath.t_max)
+            while (t > ThermoMath.t_min)
             {
                 if (!firstIter)
                 {
-                    if (t <= ThermoMath.t_crit)
+                    if (t > ThermoMath.t_crit)
                     {
-                        t += 0.05;
+                        t -= 2;
                     }
                     else
                     {
-                        t += 2;
+                        t -= 0.05;
                     }
                 }
 
@@ -296,7 +300,30 @@ namespace ThermoVR
 
                 p = ThermoMath.p_given_vt(v, t);
 
+                try
+                {
+                    var region = ThermoMath.region_given_pvt(p, v, t);
+                    if (region <= ThermoMath.region_twophase)
+                    {
+                        continue;
+                    }
+                }
+                catch
+                {
+                    /*
+                    if (p < ThermoMath.psat_max)
+                    {
+                        continue;
+                    }
+                    */
+                }
+
                 samplePos = ThermoPresent.Instance.plot(p, v, t);
+
+                if (Math.Abs(prev_y - samplePos.y) > 0.02 && prev_y != -1)
+                {
+                    continue;
+                }
 
                 if (p < ThermoMath.p_min || v < ThermoMath.v_min || t < ThermoMath.t_min
                     || p > ThermoMath.p_max || v > ThermoMath.v_max || t > ThermoMath.t_max)
@@ -307,7 +334,90 @@ namespace ThermoVR
                 newLine.positionCount++;
                 newLine.SetPosition(stepIndex, samplePos);
                 stepIndex++;
+                prev_y = samplePos.y;
             }
+
+            #endregion // First Half
+
+            #region Second half
+            
+            currPosIndex = 0;
+            samplePos = Vector3.zero;
+
+            p = ThermoMath.p_min;
+            v = constV;
+            firstIter = true;
+            int iterIndex = 0;
+            int spacingMult = 1;
+            prev_y = -1;
+            bool in_two_phase = true;
+
+            int second_half_start_pos = stepIndex;
+            List<Vector3> new_positions = new List<Vector3>();
+
+            // run down P line
+            while (p < ThermoMath.p_max)
+            {
+                if (iterIndex != 0)
+                {
+                    if (iterIndex % 6 == 0)
+                    {
+                        spacingMult *= 4;
+                    }
+
+                    p += 1 * spacingMult;
+                }
+                iterIndex++;
+
+                if (iterIndex > 100) { break; }
+
+                if (in_two_phase)
+                {
+                    try
+                    {
+                        var x = ThermoMath.x_given_pv(p, v);
+                        var h = ThermoMath.h_given_px(p, x);
+                        t = ThermoMath.t_given_ph(p, h);
+                    }
+                    catch
+                    {
+                        if (p > ThermoMath.p_min + 500) {
+                            in_two_phase = false;
+                        }
+                        continue;
+                    }
+                }
+                else
+                {
+                    continue;
+                }
+
+                samplePos = ThermoPresent.Instance.plot(p, v, t);
+
+                if (samplePos.y - prev_y > 0.02 && prev_y != -1)
+                {
+                    // continue;
+                }
+
+                if (p < ThermoMath.p_min || v < ThermoMath.v_min || t < ThermoMath.t_min
+                    || p > ThermoMath.p_max || v > ThermoMath.v_max || t > ThermoMath.t_max)
+                {
+                    continue;
+                }
+
+                newLine.positionCount++;
+                new_positions.Add(samplePos);
+                stepIndex++;
+                prev_y = samplePos.y;
+            }
+
+            new_positions.Reverse();
+            for (int i = 0; i < new_positions.Count; i++)
+            {
+                newLine.SetPosition(second_half_start_pos + i, new_positions[i]);
+            }
+
+            #endregion // Second Half
 
             return newLine;
         }

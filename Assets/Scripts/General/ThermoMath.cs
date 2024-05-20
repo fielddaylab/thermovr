@@ -524,7 +524,7 @@ public static class ThermoMath
         }
         catch (Exception ex) {
             Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, s_neutral[fallback_region]));
-            Debug.Log("[Error] " + ex.Message);
+            Debug.Log("[Error] " + ex.Message + "\np: " + p + "\nx: " + x);
             throw ex;
             // got_error = true;
             // return s_neutral[fallback_region];
