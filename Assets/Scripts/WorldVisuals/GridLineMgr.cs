@@ -14,12 +14,10 @@ namespace ThermoVR
     {
         #region Inspector
 
+        [SerializeField] private bool m_generateOnStart;
+
         [SerializeField] private GameObject m_linePrefab;
         public GameObject graph;
-
-        [SerializeField] private int m_pressureSpacing;
-        [SerializeField] private float m_volumeSpacing;
-        [SerializeField] private int m_temperatureSpacing;
 
         [SerializeField] private Material m_pLineMat;
         [SerializeField] private Material m_vLineMat;
@@ -28,6 +26,36 @@ namespace ThermoVR
         [SerializeField] private Transform m_pressureLinesContainer;
         [SerializeField] private Transform m_volumeLinesContainer;
         [SerializeField] private Transform m_temperatureLinesContainer;
+
+        [Space(5)]
+        [Header("Intervals")]
+
+        [Header("Origins")]
+        [SerializeField] private int m_pressureOriginSpacing;
+        [SerializeField] private float m_volumeOriginSpacing;
+        [SerializeField] private int m_temperatureOriginSpacing;
+
+        [Header("Steps")]
+        [SerializeField] private float m_pStepSpacing;
+        [SerializeField] private float m_vStepSpacing;
+        [SerializeField] private float m_vStepDomeSpacing;
+        [SerializeField] private float m_tStepSpacing;
+
+
+        [Header("Spacing Multiplier")]
+        [SerializeField] private int m_stepsBetweenSpacing;
+        [SerializeField] private int m_spacingMult;
+
+        [Header("Significance Thresholds")]
+        [SerializeField] private float m_sigYThreshold;
+
+        [Header("Processing")]
+        [SerializeField] private float m_processPThreshold;
+        [SerializeField] private float m_processVThreshold;
+        [SerializeField] private float m_processTThreshold;
+
+        // [SerializeField] private float m_volumeOriginSpacing;
+
 
         #endregion // Inspector
 
@@ -40,10 +68,13 @@ namespace ThermoVR
 
         private void Start()
         {
-            m_permanentLines = new List<LineRenderer>();
-            m_tempLines = new List<LineRenderer>();
+            if (m_generateOnStart)
+            {
+                m_permanentLines = new List<LineRenderer>();
+                m_tempLines = new List<LineRenderer>();
 
-            m_initRoutine.Replace(InitRoutine());
+                m_initRoutine.Replace(InitRoutine());
+            }
         }
 
         public void GenerateLines(VarID axis, bool isPermanent)
@@ -137,11 +168,11 @@ namespace ThermoVR
                 // for each interval
                 while (currPLine < ThermoMath.p_max)
                 {
-                    if (pStepIndex % 6 == 0 && pStepIndex != 0)
+                    if (pStepIndex % m_stepsBetweenSpacing == 0 && pStepIndex != 0)
                     {
-                        spacingMult *= 4;
+                        spacingMult *= m_spacingMult;
                     }
-                    currPLine += m_pressureSpacing * spacingMult * pStepIndex;
+                    currPLine += m_pressureOriginSpacing * spacingMult * pStepIndex;
                     m_permanentLines.Add(PopulatePLine(currPLine));
                     pStepIndex++;
                 }
@@ -170,11 +201,11 @@ namespace ThermoVR
                 // for each interval
                 while (currVLine < ThermoMath.v_max)
                 {
-                    if (vStepIndex % 6 == 0 && vStepIndex != 0)
+                    if (vStepIndex % m_stepsBetweenSpacing == 0 && vStepIndex != 0)
                     {
-                        spacingMult *= 4;
+                        spacingMult *= m_spacingMult;
                     }
-                    currVLine += m_volumeSpacing * spacingMult * vStepIndex;
+                    currVLine += m_volumeOriginSpacing * spacingMult * vStepIndex;
                     m_permanentLines.Add(PopulateVLine(currVLine));
                     vStepIndex++;
                 }
@@ -194,7 +225,7 @@ namespace ThermoVR
             m_generationInProgress = true;
 
             // Const T varies P
-            int currTLine = 0;
+            int currTLine = (int)ThermoMath.t_min;
             int spacingMult = 1;
             int tStepIndex = 0;
 
@@ -203,7 +234,7 @@ namespace ThermoVR
                 // for each interval
                 while (currTLine < ThermoMath.t_max)
                 {
-                    currTLine += m_temperatureSpacing * spacingMult * tStepIndex;
+                    currTLine += m_temperatureOriginSpacing * spacingMult * tStepIndex;
                     m_permanentLines.Add(PopulateTLine(currTLine));
                     tStepIndex++;
                 }
@@ -229,6 +260,7 @@ namespace ThermoVR
             newLine.transform.position = m_pressureLinesContainer.position;
             int currPosIndex = 0;
             Vector3 samplePos = Vector3.zero;
+            List<Vector3> allPositions = new List<Vector3>();
 
             double p = constP;
             double v;
@@ -241,7 +273,7 @@ namespace ThermoVR
             {
                 if (!firstIter)
                 {
-                    t += 2;
+                    t += m_pStepSpacing;
                 }
 
                 firstIter = false;
@@ -256,10 +288,11 @@ namespace ThermoVR
                     continue;
                 }
 
-                newLine.positionCount++;
-                newLine.SetPosition(stepIndex, samplePos);
+                allPositions.Add(samplePos);
                 stepIndex++;
             }
+
+            ProcessPLine(ref newLine, allPositions);
 
             return newLine;
         }
@@ -271,6 +304,7 @@ namespace ThermoVR
             newLine.transform.position = m_volumeLinesContainer.position;
             int currPosIndex = 0;
             Vector3 samplePos = Vector3.zero;
+            List<Vector3> allPositions = new List<Vector3>();
 
             #region First Half
 
@@ -288,11 +322,11 @@ namespace ThermoVR
                 {
                     if (t > ThermoMath.t_crit)
                     {
-                        t -= 2;
+                        t -= m_vStepSpacing;
                     }
                     else
                     {
-                        t -= 0.05;
+                        t -= m_vStepDomeSpacing;
                     }
                 }
 
@@ -310,17 +344,12 @@ namespace ThermoVR
                 }
                 catch
                 {
-                    /*
-                    if (p < ThermoMath.psat_max)
-                    {
-                        continue;
-                    }
-                    */
+
                 }
 
                 samplePos = ThermoPresent.Instance.plot(p, v, t);
 
-                if (Math.Abs(prev_y - samplePos.y) > 0.02 && prev_y != -1)
+                if (Math.Abs(prev_y - samplePos.y) > m_sigYThreshold && prev_y != -1)
                 {
                     continue;
                 }
@@ -331,8 +360,7 @@ namespace ThermoVR
                     continue;
                 }
 
-                newLine.positionCount++;
-                newLine.SetPosition(stepIndex, samplePos);
+                allPositions.Add(samplePos);
                 stepIndex++;
                 prev_y = samplePos.y;
             }
@@ -360,12 +388,12 @@ namespace ThermoVR
             {
                 if (iterIndex != 0)
                 {
-                    if (iterIndex % 6 == 0)
+                    if (iterIndex % m_stepsBetweenSpacing == 0)
                     {
-                        spacingMult *= 4;
+                        spacingMult *= m_spacingMult;
                     }
 
-                    p += 1 * spacingMult;
+                    p += m_tStepSpacing * spacingMult;
                 }
                 iterIndex++;
 
@@ -394,7 +422,7 @@ namespace ThermoVR
 
                 samplePos = ThermoPresent.Instance.plot(p, v, t);
 
-                if (samplePos.y - prev_y > 0.02 && prev_y != -1)
+                if (samplePos.y - prev_y > m_sigYThreshold && prev_y != -1)
                 {
                     // continue;
                 }
@@ -405,7 +433,7 @@ namespace ThermoVR
                     continue;
                 }
 
-                newLine.positionCount++;
+                // newLine.positionCount++;
                 new_positions.Add(samplePos);
                 stepIndex++;
                 prev_y = samplePos.y;
@@ -414,10 +442,12 @@ namespace ThermoVR
             new_positions.Reverse();
             for (int i = 0; i < new_positions.Count; i++)
             {
-                newLine.SetPosition(second_half_start_pos + i, new_positions[i]);
+                allPositions.Add(new_positions[i]);
             }
 
             #endregion // Second Half
+
+            ProcessVLine(ref newLine, allPositions);
 
             return newLine;
         }
@@ -429,6 +459,7 @@ namespace ThermoVR
             newLine.transform.position = m_temperatureLinesContainer.position;
             int currPosIndex = 0;
             Vector3 samplePos = Vector3.zero;
+            List<Vector3> allPositions = new List<Vector3>();
 
             double p = ThermoMath.p_min;
             double v;
@@ -444,9 +475,9 @@ namespace ThermoVR
             {
                 if (iterIndex != 0)
                 {
-                    if (iterIndex % 6 == 0)
+                    if (iterIndex % m_stepsBetweenSpacing == 0)
                     {
-                        spacingMult *= 4;
+                        spacingMult *= m_spacingMult;
                     }
 
                     p += 1 * spacingMult;
@@ -460,10 +491,10 @@ namespace ThermoVR
                 samplePos = ThermoPresent.Instance.plot(p, v, t);
 
                 // straighten the line across 2-phase
-                if (!jumpedTwoPhase && samplePos.x < 0.12 && newLine.positionCount > 0)
+                if (!jumpedTwoPhase && samplePos.x < 0.15 && allPositions.Count > 0 && t < ThermoMath.t_crit)
                 {
                     jumpedTwoPhase = true;
-                    var old = newLine.GetPosition(newLine.positionCount - 1);
+                    var old = allPositions[allPositions.Count - 1];
                     samplePos.y = old.y;
                 }
 
@@ -473,12 +504,144 @@ namespace ThermoVR
                     continue;
                 }
 
-                newLine.positionCount++;
-                newLine.SetPosition(stepIndex, samplePos);
+                allPositions.Add(samplePos);
                 stepIndex++;
             }
 
+            ProcessTLine(ref newLine, allPositions);
+
             return newLine;
+        }
+
+        private void ProcessPLine(ref LineRenderer line, List<Vector3> allPositions)
+        {
+            // look for significant change in x
+            float lastKnownX = 0;
+            int numPruned = 0;
+            for (int i = 0; i < allPositions.Count; i++)
+            {
+                if (i == 0)
+                {
+                    // first index always stays
+                    lastKnownX = allPositions[i].x;
+                    continue;
+                }
+                else if (i == allPositions.Count - 1)
+                {
+                    // last index always stays
+                    continue;
+                }
+                else
+                {
+                    // prune if not significant change in x && next point is not across two-phase
+                    if (Math.Abs(allPositions[i].x - lastKnownX) < m_processPThreshold && Math.Abs(allPositions[i + 1].x - allPositions[i].x) < 0.1)
+                    {
+                        allPositions.RemoveAt(i);
+                        i--;
+                        numPruned++;
+                    }
+                    else
+                    {
+                        lastKnownX = allPositions[i].x;
+                    }
+                }
+            }
+
+            Debug.Log("[Line Processing] Pruned " + numPruned + " points from P line.");
+
+            line.positionCount = allPositions.Count;
+            for (int i = 0; i < allPositions.Count; i++)
+            {
+                line.SetPosition(i, allPositions[i]);
+            }
+        }
+
+        private void ProcessVLine(ref LineRenderer line, List<Vector3> allPositions)
+        {
+            // look for significant change in y
+            float lastKnownY = 0;
+            int numPruned = 0;
+            for (int i = 0; i < allPositions.Count; i++)
+            {
+                if (i == 0)
+                {
+                    // first index always stays
+                    lastKnownY = allPositions[i].y;
+                    continue;
+                }
+                else if (i == allPositions.Count - 1)
+                {
+                    // last index always stays
+                    continue;
+                }
+                else
+                {
+                    // prune if not significant change in y
+                    if (Math.Abs(allPositions[i].y - lastKnownY) < m_processVThreshold)
+                    {
+                        allPositions.RemoveAt(i);
+                        i--;
+                        numPruned++;
+                    }
+                    else
+                    {
+                        lastKnownY = allPositions[i].y;
+                    }
+                }
+            }
+
+            Debug.Log("[Line Processing] Pruned " + numPruned + " points from V line.");
+
+            // Add positions to line
+            line.positionCount = allPositions.Count;
+            for (int i = 0; i < allPositions.Count; i++)
+            {
+                line.SetPosition(i, allPositions[i]);
+            }
+        }
+
+        private void ProcessTLine(ref LineRenderer line, List<Vector3> allPositions)
+        {
+            // look for significant change in x
+            float lastKnownX = 0;
+            int numPruned = 0;
+            for (int i = 0; i < allPositions.Count; i++)
+            {
+                if (i == 0)
+                {
+                    // first index always stays
+                    lastKnownX = allPositions[i].x;
+                    continue;
+                }
+                else if (i == allPositions.Count - 1)
+                {
+                    // last index always stays
+                    continue;
+                }
+                else
+                {
+                    // prune if not significant change in x && next point is not across two-phase
+                    if (Math.Abs(allPositions[i].x - lastKnownX) < m_processTThreshold && Math.Abs(allPositions[i + 1].x - allPositions[i].x) < 0.05)
+                    {
+                        allPositions.RemoveAt(i);
+                        i--;
+                        numPruned++;
+                    }
+                    else
+                    {
+                        lastKnownX = allPositions[i].x;
+                    }
+                }
+            }
+
+            Debug.Log("[Line Processing] Pruned " + numPruned + " points from T line.");
+
+
+            line.positionCount = allPositions.Count;
+            for (int i = 0; i < allPositions.Count; i++)
+            {
+                line.SetPosition(i, allPositions[i]);
+            }
         }
 
         #endregion // Helpers
