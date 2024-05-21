@@ -20,6 +20,7 @@ namespace ThermoVR
         private List<ToolType> m_allTools = new List<ToolType>();
 
         private SetGroup m_lastKnownSets;
+        private TrailGroup m_trailSettings;
         private bool m_modsActive;
 
         private void Awake() {
@@ -30,6 +31,16 @@ namespace ThermoVR
             m_limitsEnabled = false;
 
             m_graphBallInteractable = true;
+        }
+
+        private void Start()
+        {
+            // load default trail settings
+            TrailGroup defaultTrail = new TrailGroup();
+            defaultTrail.IsEnabled = false;
+            defaultTrail.ClearExisting = true;
+            defaultTrail.MaxLength = 30;
+            SetTrail(defaultTrail);
         }
 
         #region Tools
@@ -168,6 +179,31 @@ namespace ThermoVR
                 {
                     ToolMgr.Instance.SetChamberTemp((float)m_lastKnownSets.T);
                 }
+            }
+        }
+
+        public void SetTrail(TrailGroup trail)
+        {
+            m_trailSettings = trail;
+
+            TracerManager.Instance.LoadSettings(m_trailSettings);
+
+            // clear previous renderer
+            if (m_trailSettings.ClearExisting)
+            {
+                TracerManager.Instance.EndTrace();
+            }
+
+            // enable / disable line
+            if (m_trailSettings.IsEnabled)
+            {
+                TracerManager.Instance.StartTrace();
+                TracerManager.Instance.ShowTrace();
+            }
+            else
+            {
+                TracerManager.Instance.HideTrace();
+                TracerManager.Instance.EndTrace();
             }
         }
     }

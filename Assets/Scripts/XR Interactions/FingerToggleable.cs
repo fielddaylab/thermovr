@@ -37,8 +37,8 @@ public class FingerToggleable : MonoBehaviour
   void OnTriggerEnter(Collider c)
   {
     // grip squeezed                                           and finger extended                                         and collision enter //ie "the player is pointing and touched the button"
-    if(OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger)   > 0f && OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger)   == 0f && c == lfinger_c) { lfinger = true; on = !on; }
-    if(OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger) > 0f && OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger) == 0f && c == rfinger_c) { rfinger = true; on = !on; }
+    if(/*OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger)   > 0f && */ OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger)   == 0f && c == lfinger_c) { lfinger = true; on = !on; }
+    if(/*OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger) > 0f && */ OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger) == 0f && c == rfinger_c) { rfinger = true; on = !on; }
     finger = (lfinger || rfinger);
     var name = this.gameObject.name;
   }
@@ -46,8 +46,8 @@ public class FingerToggleable : MonoBehaviour
   void OnTriggerExit(Collider c)
   {
     // grip released                                            or finger squeezed                                          or collision exit //ie "the player isn't pointing or isn't touching the button"
-    if(OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger)   == 0f || OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger)   > 0f || c == lfinger_c) lfinger = false;
-    if(OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger) == 0f || OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger) > 0f || c == rfinger_c) rfinger = false;
+    if(/*OVRInput.Get(OVRInput.Axis1D.PrimaryHandTrigger)   == 0f || */ OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger)   > 0f || c == lfinger_c) lfinger = false;
+    if(/*OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger) == 0f || */ OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger) > 0f || c == rfinger_c) rfinger = false;
     finger = (lfinger || rfinger);
     var name = this.gameObject.name;
   }

@@ -365,6 +365,9 @@ namespace ThermoVR.Lab
             // Limits
             World.Instance.ModMgr.SetLimits(mods.Limits);
 
+            // Trail
+            World.Instance.ModMgr.SetTrail(mods.TrailSettings);
+
             // prevent move ball functionality
             if (mods.GrabAllowed)
             {
