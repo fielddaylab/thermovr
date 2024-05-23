@@ -85,6 +85,7 @@ static public class GameEvents
     static public readonly StringHash32 WorkspaceHandleReleased = "world:workspace-handle-released";
     static public readonly StringHash32 RotateGraphClickedCW = "world:rotate-graph-clicked-cw";
     static public readonly StringHash32 RotateGraphClickedCCW = "world:rotate-graph-clicked-ccw";
+    static public readonly StringHash32 RotateGraphCompleted = "world:rotate-graph-completed";
     static public readonly StringHash32 GraphBallGrabbed = "world:graph-ball-grabbed";
     static public readonly StringHash32 GraphBallReleased = "world:graph-ball-released";
     static public readonly StringHash32 HeadsetOn = "world:headset-on";
