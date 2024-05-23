@@ -306,19 +306,22 @@ public static class ThermoMath
 
     //rule of naming for consistency: prefer lexical ordering "p < v < t < u < s < h < q", ie "p_given_vt" rather than "p_given_tv"
 
-    public static double p_given_vt(double v, double t, int fallback_region = 0) //experimentally only valid in the superheated vapor region
+    public static double p_given_vt(double v, double t, int fallback_region = 0, bool bypass_error = false) //experimentally only valid in the superheated vapor region
     {
         try {
             return IAPWS95.IAPWS95_pressure(1.0 / v, t) * 1000.0; //expects:kg/M³,K returns kPa
         }
         catch (Exception ex) {
-            Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, p_neutral[fallback_region]));
-            Debug.Log("[Error] " + ex.Message);
-            display_error();
+            if (!bypass_error)
+            {
+                Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, p_neutral[fallback_region]));
+                Debug.Log("[Error] " + ex.Message);
+                display_error();
+            }
             return p_neutral[fallback_region];
         }
     }
-    public static double v_given_pt(double p, double t, int fallback_region = 0, bool projecting = false) //DO NOT USE IN VAPOR DOME
+    public static double v_given_pt(double p, double t, int fallback_region = 0, bool projecting = false, bool bypass_error = false) //DO NOT USE IN VAPOR DOME
     {
         try {
             return 1.0 / IF97.rhomass_Tp(t, p / 1000000.0); //expects:K,MPa returns kg/M³
@@ -328,9 +331,11 @@ public static class ThermoMath
                 throw ex;
             }
             else {
-                Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, v_neutral[fallback_region]));
-                Debug.Log("[Error] " + ex.Message);
-                display_error();
+                if (!bypass_error) {
+                    Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, v_neutral[fallback_region]));
+                    Debug.Log("[Error] " + ex.Message);
+                    display_error();
+                }
                 return v_neutral[fallback_region];
             }
         }
@@ -389,14 +394,18 @@ public static class ThermoMath
         }
     }
 
-    public static double t_given_ph(double p, double h, int fallback_region = 0) {
+    public static double t_given_ph(double p, double h, int fallback_region = 0, bool bypass_error = false) {
         try {
             return IF97.T_phmass(p / 1000000.0, h / 1000.0);
         }
         catch (Exception ex) {
-            Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, t_neutral[fallback_region]));
-            Debug.Log("[Error] " + ex.Message);
-            display_error();
+            if (!bypass_error)
+            {
+                Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, t_neutral[fallback_region]));
+                Debug.Log("[Error] " + ex.Message);
+                display_error();
+            }
+
             return t_neutral[fallback_region];
         }
     }
@@ -531,7 +540,7 @@ public static class ThermoMath
         }
     }
 
-    public static double x_given_pv(double p, double v, int fallback_region = 0) //ONLY USE IN VAPOR DOME
+    public static double x_given_pv(double p, double v, int fallback_region = 0, bool bypass_error = false) //ONLY USE IN VAPOR DOME
     {
         try {
             //f means saturated liquid,
@@ -541,9 +550,12 @@ public static class ThermoMath
             return (v - vf) / (vg - vf);
         }
         catch (Exception ex) {
-            Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, x_neutral[fallback_region]));
-            Debug.Log("[Error] " + ex.Message);
-            display_error();
+            if (!bypass_error)
+            {
+                Debug.Log(String.Format("Got an exception: {0}\nReturning {1}", ex.Message, x_neutral[fallback_region]));
+                Debug.Log("[Error] " + ex.Message);
+                display_error();
+            }
             return x_neutral[fallback_region];
         }
     }
