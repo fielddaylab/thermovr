@@ -56,7 +56,7 @@ public class RotatorButton : MonoBehaviour
         
         yield return targetTransform.RotateTo(targetRotation, 0.5f, Axis.Y);
 
-        yield return null;
+        GameMgr.Events.Dispatch(GameEvents.RotateGraphCompleted);
     }
 
     #endregion // Routines

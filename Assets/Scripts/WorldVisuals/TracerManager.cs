@@ -57,6 +57,10 @@ namespace ThermoVR
 
             GameMgr.Events.Register<Hand>(GameEvents.GraphBallGrabbed, HandleGraphBallGrabbed, this);
             GameMgr.Events?.Register<Tuple<double, double, double>>(GameEvents.WarpPVT, HandleWarpPVT);
+
+            GameMgr.Events?.Register<Tuple<float, float>>(GameEvents.RotateGraphClickedCCW, HandleRotateGraph, this);
+            GameMgr.Events?.Register<Tuple<float, float>>(GameEvents.RotateGraphClickedCW, HandleRotateGraph, this);
+            GameMgr.Events?.Register(GameEvents.RotateGraphCompleted, HandleRotateGraphCompleted, this);
         }
 
         private void Update()
@@ -137,6 +141,29 @@ namespace ThermoVR
         }
 
         private void HandleWarpPVT(Tuple<double, double, double> args)
+        {
+            EndTrace();
+
+            // enable / disable line
+            if (m_isEnabled)
+            {
+                StartTrace();
+                ShowTrace();
+            }
+            else
+            {
+                HideTrace();
+                EndTrace();
+            }
+        }
+
+        private void HandleRotateGraph(Tuple<float, float> args)
+        {
+            EndTrace();
+            HideTrace();
+        }
+
+        private void HandleRotateGraphCompleted()
         {
             EndTrace();
 
