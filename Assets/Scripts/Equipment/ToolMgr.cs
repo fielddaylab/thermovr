@@ -16,7 +16,7 @@ namespace ThermoVR.Tools
         public const float BURNER_MAX = 100000;
         public const float COIL_MAX = -100000;
         private const float DEFAULT_CHAMBER_PRESSURE = 101325;
-        private const float DEFAULT_CHAMBER_TEMPERATURE = 273;
+        private const float DEFAULT_CHAMBER_TEMPERATURE = 300;
 
         [Space(5)]
         [Header("Tools")]

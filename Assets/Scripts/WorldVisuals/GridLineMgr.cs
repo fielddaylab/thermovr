@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using ThermoVR.State;
+using ThermoVR.UI.GraphElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 using static IF97.Region3Backwards;
@@ -89,6 +90,8 @@ namespace ThermoVR
             }
 
             m_lastKnownPos = m_graphBall.transform.position;
+
+            GameMgr.Events?.Register<GraphSettingUpdate>(GameEvents.UpdateGraphSetting, HandleUpdateGraphSetting);
         }
 
         private void Update()
@@ -674,5 +677,21 @@ namespace ThermoVR
         }
 
         #endregion // Helpers
+
+        #region Handlers
+
+        private void HandleUpdateGraphSetting(GraphSettingUpdate update)
+        {
+            if (update.GraphElementID == GraphElementID.GridLines)
+            {
+                m_realTimeGeneration = update.ToggleVal;
+
+                m_pressureLinesContainer.gameObject.SetActive(update.ToggleVal);
+                m_volumeLinesContainer.gameObject.SetActive(update.ToggleVal);
+                m_temperatureLinesContainer.gameObject.SetActive(update.ToggleVal);
+            }
+        }
+
+        #endregion // Handlers
     }
 }
