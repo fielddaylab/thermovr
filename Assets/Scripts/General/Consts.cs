@@ -107,6 +107,8 @@ static public class GameEvents
     static public readonly StringHash32 StatePropertiesUpdated = "sim:state-properties-updated";
     static public readonly StringHash32 HeadsetPosUpdated = "sim:headset-pos-updated";
     static public readonly StringHash32 SliderPanelUpdated = "world:slider-panel-updated";
+
+    static public readonly StringHash32 DialTextUpdated = "world:dial-text-updated"; // Tuple<string, string>
 }
 
 static public class ObjectIDs

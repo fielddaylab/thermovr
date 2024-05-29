@@ -235,6 +235,8 @@ namespace ThermoVR.Dials
             if (textv_tmpro == null) { return; }
             string updateText = string.Format(this.valFormat, value);
             textv_tmpro.SetText(updateText);
+
+            GameMgr.Events.Dispatch(GameEvents.DialTextUpdated);
         }
 
         public List<Tool> GetRelevantTools()
