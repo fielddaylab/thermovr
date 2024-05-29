@@ -80,6 +80,7 @@ GameObject:
   - component: {fileID: 7665829753213464275}
   - component: {fileID: 8379691479582670345}
   - component: {fileID: 2306071389294812080}
+  - component: {fileID: 546355435105011815}
   m_Layer: 0
   m_Name: Custom XR Origin
   m_TagString: Untagged
@@ -205,6 +206,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ddda5aab37a762f4087b34f488e38777, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &546355435105011815
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8596095803994565698}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dc8f3e136e52d864abf9e311c0d823b6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_hapticsClip: {fileID: 8300000, guid: 9a752d3328516a44384df0f171c8a5ca, type: 3}
 --- !u!1001 &7202434019138529601
 PrefabInstance:
   m_ObjectHideFlags: 0
