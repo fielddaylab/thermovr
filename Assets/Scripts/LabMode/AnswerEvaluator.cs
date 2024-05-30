@@ -31,23 +31,31 @@ namespace ThermoVR.Lab
         [SerializeField] private Evaluable[] m_toEvaluate;
         [SerializeField] private bool m_constantCheck = false;
         [SerializeField] private ThermoButton m_submitButton;
+        [SerializeField] private bool m_autoSuccess = false;
 
         public EventHandler<EvalUpdateEventArgs> OnEvaluationUpdated;
 
         private void OnEnable() {
-            if (!m_constantCheck) {
+            if (!m_constantCheck && !m_autoSuccess) {
                 m_submitButton.OnButtonPressed += HandleSubmitPressed;
                 m_submitButton.SetInteractable(false);
+            }
+
+            if (m_autoSuccess)
+            {
+                OnEvaluationUpdated?.Invoke(this, new EvalUpdateEventArgs(true, false));
             }
         }
 
         private void OnDisable() {
-            if (!m_constantCheck) {
+            if (!m_constantCheck && !m_autoSuccess) {
                 m_submitButton.OnButtonPressed -= HandleSubmitPressed;
             }
         }
 
         private void Update() {
+            if (m_autoSuccess) { return; }
+
             if (m_constantCheck) {
                 bool allCorrect = true;
 
