@@ -959,6 +959,9 @@ public class ThermoPresent : MonoBehaviour
     }
 
     private void Start() {
+
+        GameMgr.Events.Register(GameEvents.RestoreLastSimState, HandleRestoreLastSimState);
+
         string update_text = "";
         update_text = "region: " + region_to_name(state.region); DispatchText(update_text, "", state.region / 2.0f, VarID.Region);
         if (state.region == 1) { update_text = string.Format("x: {0:0.000}", (float)(state.quality * 100f)); DispatchText(update_text, Units.Quality, state.quality / quality_range, VarID.Quality); }
@@ -966,8 +969,7 @@ public class ThermoPresent : MonoBehaviour
         else { update_text = "x: Undefined"; DispatchText(update_text, "", 1, VarID.Quality); }
     }
 
-    // Update is called once per frame
-    void Update() {
+    void LateUpdate() {
         //detect editor graphgen modifications
         bool modified = false;
         modified = ((plot_lbase != plot_lbase_prev) || (sample_lbase != sample_lbase_prev));
@@ -995,6 +997,15 @@ public class ThermoPresent : MonoBehaviour
 
     private void DispatchText(string update_text, string units, double proportion, VarID varId) {
         GameMgr.Events.Dispatch(GameEvents.UpdateVarText, new VarUpdate(varId, update_text, units, (float)proportion));
+    }
+
+    private void HandleRestoreLastSimState()
+    {
+        state.revert_state();
+
+        Debug.Log("[CritBarrier] Reverted state");
+
+        visualize_state();
     }
 
 }

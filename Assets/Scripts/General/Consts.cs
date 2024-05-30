@@ -109,6 +109,7 @@ static public class GameEvents
     static public readonly StringHash32 SliderPanelUpdated = "world:slider-panel-updated";
 
     static public readonly StringHash32 DialTextUpdated = "world:dial-text-updated"; // Tuple<string, string>
+    static public readonly StringHash32 RestoreLastSimState = "world:restore-last-sim-state";
 }
 
 static public class ObjectIDs

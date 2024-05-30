@@ -503,7 +503,7 @@ namespace ThermoVR.State
             }
         }
 
-        private void revert_state()
+        public void revert_state()
         {
             temperature = prev_temperature;
             pressure = prev_pressure;
