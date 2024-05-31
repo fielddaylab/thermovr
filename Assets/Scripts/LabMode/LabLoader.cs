@@ -34,15 +34,18 @@ namespace ThermoVR.Lab
         public double V;
         public double T;
 
-        public SetGroup(double p, double v, double t) {
+        public double Insulation;
+
+        public SetGroup(double p, double v, double t, double insulation) {
             P = p;
             V = v;
             T = t;
+            Insulation = insulation;
         }
 
         public bool IsEmpty()
         {
-            return P == -1 && V == -1 && T == -1;
+            return P == -1 && V == -1 && T == -1 && Insulation != -1;
         }
     }
 
@@ -507,7 +510,7 @@ namespace ThermoVR.Lab
 
         private void ParseTaskSets(ref string setInfo, ref TaskInfo newTaskInfo) {
             // Example format is [(p:5), (v:5), (t:5)]
-            SetGroup newSets = new SetGroup(-1, -1, -1);
+            SetGroup newSets = new SetGroup(-1, -1, -1, -1);
             newTaskInfo.Sets = newSets;
 
             int startIndex = setInfo.IndexOf('[') + 1;
@@ -524,8 +527,8 @@ namespace ThermoVR.Lab
             int length = endIndex;
             iterateSetInfo = iterateSetInfo.Substring(0, length);
             string[] setGroups = iterateSetInfo.Split(SET_GROUP_DELIM);
-            double p, v, t;
-            p = v = t = -1;
+            double p, v, t, insulation;
+            p = v = t = insulation = -1;
 
             foreach (string group in setGroups) {
                 if (group.Contains('p')) {
@@ -555,11 +558,24 @@ namespace ThermoVR.Lab
                         continue;
                     }
                 }
+                else if (group.Contains("i"))
+                {
+                    if (TryExtractSetVal(group, out double val))
+                    {
+                        insulation = val;
+                    }
+                    else
+                    {
+                        Debug.Log("[LabLoad] SetInfo for insulation is invalid");
+                        continue;
+                    }
+                }
             }
 
             newSets.P = p;
             newSets.V = v;
             newSets.T = t;
+            newSets.Insulation = insulation;
             newTaskInfo.Sets = newSets;
             if (m_verboseDebug) { Debug.Log("[LabLoad] Task Sets: " + newTaskInfo.Sets); }
         }

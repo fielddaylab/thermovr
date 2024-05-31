@@ -567,6 +567,17 @@ namespace ThermoVR.Tools
             dial_surroundingTemp.set_mapped_val(targetMap);
         }
 
+        public void SetInsulation(float targetVal)
+        {
+            if (targetVal > 1)
+            {
+                // convert to decimal if given as percent 
+                targetVal /= 100;
+            }
+
+            dial_percentInsulation.set_mapped_val(targetVal);
+        }
+
         private void HandleHalferPressed(object sender, System.EventArgs args) {
             SetAllHalfed(!halfed);
         }
