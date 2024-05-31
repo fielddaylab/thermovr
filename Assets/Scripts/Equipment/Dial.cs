@@ -611,8 +611,9 @@ namespace ThermoVR.Dials
         #region Handlers
 
         private void HandleActivateTool(Tool tool) {
+
             if (relevant_tools.Contains(tool)) {
-                Reset(true);
+                if (!tool.was_engaged) { Reset(true); }
 
                 UpdateSliderMaterials(tool.engaged, tool.allowed);
             }

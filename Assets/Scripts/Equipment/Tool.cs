@@ -51,6 +51,7 @@ namespace ThermoVR.Tools
     {
         [System.NonSerialized]
         public bool engaged = false;
+        public bool was_engaged = false;
 
         [HideInInspector] public bool allowed; // whether the player can use this tool
 

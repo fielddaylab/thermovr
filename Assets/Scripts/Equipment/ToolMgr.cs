@@ -327,6 +327,7 @@ namespace ThermoVR.Tools
             t.TriggerActivation();
 
             GameObject o = t.gameObject;
+            t.was_engaged = t.engaged;
             t.engaged = true;
             int uniqueStopID = 0;
             if (t == tool_stop1) {
