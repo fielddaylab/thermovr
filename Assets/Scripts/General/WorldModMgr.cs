@@ -153,13 +153,7 @@ namespace ThermoVR
             {
                 m_lastKnownSets = newMods.Sets;
             }
-            else
-            {
-                if (newMods.Sets.Insulation != -1)
-                {
-                    m_lastKnownSets.Insulation = newMods.Sets.Insulation;
-                }
-            }
+
             m_modsActive = true;
         }
 
@@ -173,7 +167,7 @@ namespace ThermoVR
             return m_modsActive;
         }
 
-        public void ApplyPVTSets()
+        public void ApplySets()
         {
             int validCount = 0;
             if (m_lastKnownSets.P != -1) { validCount++; }
@@ -187,10 +181,7 @@ namespace ThermoVR
                     ToolMgr.Instance.SetChamberTemp((float)m_lastKnownSets.T);
                 }
             }
-        }
 
-        public void ApplyInsulationSets()
-        {
             if (m_lastKnownSets.Insulation != -1)
             {
                 ToolMgr.Instance.SetInsulation((float)m_lastKnownSets.Insulation);

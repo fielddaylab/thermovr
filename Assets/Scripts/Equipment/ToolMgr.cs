@@ -124,7 +124,7 @@ namespace ThermoVR.Tools
             dial_negativeWeight.Init(0f, -(float)kg_corresponding_to_10mpa / 5.0f, DigitFormat.Weight); // 500.0f
             dial_surroundingPressure.Init((float)ThermoMath.p_min, (float)ThermoMath.p_max, DigitFormat.AmbientPressure);
             dial_surroundingTemp.Init(273, (float)ThermoMath.t_max, DigitFormat.TemperatureK);
-            dial_percentInsulation.Init(0f, 100, DigitFormat.Percent);
+            dial_percentInsulation.Init(0f, 100, DigitFormat.Percent, preserveDuringLockedOverride: true);
             dial_selector.Init(0, 1, DigitFormat.Percent);
 
             toggle_heatTransfer.IsActiveImpl = () => { return tool_surroundingTemp.allowed; };

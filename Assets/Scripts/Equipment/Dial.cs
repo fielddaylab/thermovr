@@ -143,7 +143,7 @@ namespace ThermoVR.Dials
         /// <param name="max_map"></param>
         /// <param name="valFormat"></param>
         /// <param name="min_override_real">The mapped value of the min override</param>
-        public void Init(float min_map, float max_map, string valFormat, float min_override_real = 0) {
+        public void Init(float min_map, float max_map, string valFormat, float min_override_real = 0, bool preserveDuringLockedOverride = false) {
             this.min_map = min_map;
             this.max_map = max_map;
             this.min_override = MapToDialVal(min_override_real);
@@ -174,6 +174,11 @@ namespace ThermoVR.Dials
                         preserve_during_locked = true;
                     }
                 }
+            }
+
+            if (preserveDuringLockedOverride)
+            {
+                preserve_during_locked = true;
             }
 
             if (activator_button != null) {
@@ -294,6 +299,7 @@ namespace ThermoVR.Dials
         }
 
         public float set_val(float new_val) {
+            var name = this.gameObject.name;
             val = new_val;
 
             forceMap();
