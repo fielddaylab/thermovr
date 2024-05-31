@@ -45,7 +45,7 @@ namespace ThermoVR.Lab
 
         public bool IsEmpty()
         {
-            return P == -1 && V == -1 && T == -1 && Insulation != -1;
+            return P == -1 && V == -1 && T == -1;
         }
     }
 

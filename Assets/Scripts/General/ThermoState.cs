@@ -142,7 +142,8 @@ namespace ThermoVR.State
             // Lab case
             if (World.Instance && World.Instance.ModMgr.AreModsActive())
             {
-                World.Instance.ModMgr.ApplySets();
+                World.Instance.ModMgr.ApplyPVTSets();
+                World.Instance.ModMgr.ApplyInsulationSets();
                 return;
             }
 

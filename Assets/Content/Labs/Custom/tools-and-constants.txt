@@ -3,7 +3,7 @@
 
 || TOPIC // 1
 
-|Header: "Tools and Constants"
+|Header: "Default Condition"
 
 || TASK
 
@@ -16,6 +16,208 @@
 |QuizInfo:
 	Text: "Certain thermodynamic properties can be held constant in the cylinder."
 |EfficiencyInfo:
+
+|| TASK
+
+|Type: [multiple-choice]
+|ToolInfo: [Burner, Coil]
+|SetInfo: [(p:158), (v:1.8), (t:616), (i:1)]
+|LimitInfo:
+|TrailInfo: [enabled, clear-previous, 30]
+|TargetInfo:
+|QuizInfo:
+	--Questions:
+	Question: "Use the heater or cooler to change the cylinder temperature. Which property remains constant?"
+	Questions-->
+	Answers: ["Pressure"(c), "Volume", "Temperature"]
+|EfficiencyInfo:
+
+|| TASK
+
+|Type: [text]
+|ToolInfo: [Burner, Coil]
+|SetInfo: [(i:1)]
+|LimitInfo:
+|TrailInfo:
+|TargetInfo:
+|QuizInfo:
+	Text: "Pressure:
+	Pressure remains constant. There was room for the volume of water to expand."
+|EfficiencyInfo:
+
+|| TASK
+
+|Type: [text]
+|ToolInfo: [Burner, Coil]
+|SetInfo: [(i:1)]
+|LimitInfo:
+|TrailInfo:
+|TargetInfo:
+|QuizInfo:
+	Text: "Volume:
+	Note the volume label of the 'System Properties' panel or the 3D plot."
+|EfficiencyInfo:
+
+|| TASK
+
+|Type: [text]
+|ToolInfo: [Burner, Coil]
+|SetInfo: [(i:1)]
+|LimitInfo:
+|TrailInfo:
+|TargetInfo:
+|QuizInfo:
+	Text: "Temperature:
+	Note the temperature label of the 'System Properties' panel or the 3D plot."
+|EfficiencyInfo:
+
+
+|| TOPIC // 2
+
+|Header: "Clamps"
+
+|| TASK
+
+|Type: [text]
+|ToolInfo: [Burner, Coil, Stops]
+|SetInfo: [(p:101), (v:1.75), (t:390), (i:1)]
+|LimitInfo:
+|TrailInfo: [enabled, clear-previous, 30]
+|TargetInfo:
+|QuizInfo:
+	Text: "Next you'll enable the Clamps in order to increase cylinder temperature."
+|EfficiencyInfo:
+
+|| TASK
+
+|Type: [reach-state]
+|ToolInfo: [Burner, Coil, Stops]
+|SetInfo: [(p:101), (v:1.75), (t:390), (i:1)]
+|LimitInfo:
+|TrailInfo:
+|TargetInfo:
+|QuizInfo: 
+	--Questions:
+	Question: "Enable the top clamp (volume stop) and move it right above the current volume"
+	Questions-->
+	Requirements: [(VolumeStop:1.81:0.05)]
+|EfficiencyInfo:
+
+
+|| TASK
+
+|Type: [multiple-choice]
+|ToolInfo: [Burner, Coil, Stops]
+|SetInfo: [(p:101), (v:1.75), (t:390), (i:1)]
+|LimitInfo:
+|TrailInfo: [enabled, clear-previous, 30]
+|TargetInfo:
+|QuizInfo:
+	--Questions:
+	Question: "Add heat. As you do so, which property remains constant?"
+	Questions-->
+	Answers: ["Pressure", "Volume"(c), "Temperature"]
+|EfficiencyInfo:
+
+|| TASK
+
+|Type: [text]
+|ToolInfo: [Burner, Coil, Stops]
+|SetInfo: [(i:1)]
+|LimitInfo:
+|TrailInfo:
+|TargetInfo:
+|QuizInfo:
+	Text: "Clamps:
+	Clamps constrain the Volume of the water. Pressure cannot equilibrate by increasing volume, so it increases with temperature."
+|EfficiencyInfo:
+
+
+|| TOPIC // 3
+
+|Header: "Insulation"
+
+|| TASK
+
+|Type: [text]
+|ToolInfo: [Burner, Coil, Insulator]
+|SetInfo: [(p:256), (v:1.16), (t:643), (i:1)]
+|LimitInfo:
+|TrailInfo: [enabled, clear-previous, 30]
+|TargetInfo:
+|QuizInfo:
+	Text: "Next you'll disable Insulation and increase Pressure in the cylinder."
+|EfficiencyInfo:
+
+|| TASK
+
+|Type: [text]
+|ToolInfo: [Burner, Coil, Insulator]
+|SetInfo: [(p:256), (v:1.16), (t:643), (i:1)]
+|LimitInfo:
+|TrailInfo: [enabled, clear-previous, 30]
+|TargetInfo:
+|QuizInfo:
+	Text: "Set the Insulation to 0%"
+|EfficiencyInfo:
+
+|| TASK
+
+|Type: [multiple-choice]
+|ToolInfo: [Burner, Coil]
+|SetInfo: [(p:256), (v:1.16), (t:643), (i:0)]
+|LimitInfo:
+|TrailInfo: [enabled, clear-previous, 30]
+|TargetInfo:
+|QuizInfo:
+	--Questions:
+	Question: "Add heat or cooling. What changes?"
+	Questions-->
+	Answers: ["Temperature", "Volume", "Nothing"(c)]
+|EfficiencyInfo:
+
+
+|| TASK
+
+|Type: [text]
+|ToolInfo: [Burner, Coil]
+|SetInfo: [(p:256), (v:1.16), (t:643), (i:0)]
+|LimitInfo:
+|TrailInfo: [enabled, clear-previous, 30]
+|TargetInfo:
+|QuizInfo:
+	Text: "If insulation is 0%, any addition or removal of heat is instantly equilibrated to the exterior world, keeping T constant at the exterior temperature.
+	This is impossible in the real world!"
+|EfficiencyInfo:
+
+|| TASK
+
+|Type: [multiple-choice]
+|ToolInfo: [Weight, NegativeWeight]
+|SetInfo: [(p:256), (v:1.16), (t:643), (i:0)]
+|LimitInfo:
+|TrailInfo: [enabled, clear-previous, 30]
+|TargetInfo:
+|QuizInfo:
+	--Questions:
+	Question: "Use the weight tool to add pressure to the system. As you do so, which property remains constant?"
+	Questions-->
+	Answers: ["Pressure", "Volume", "Temperature"(c)]
+|EfficiencyInfo:
+
+
+|| TASK
+
+|Type: [text]
+|ToolInfo: [Weight, NegativeWeight]
+|SetInfo: [(i:0)]
+|LimitInfo:
+|TrailInfo: [enabled, clear-previous, 30]
+|TargetInfo:
+|QuizInfo:
+	Text: "By increasing the pressure, we were adding work energy to the system. This energy is lost to the environment in the form of heat."
+|EfficiencyInfo:
+
 
 
 || END

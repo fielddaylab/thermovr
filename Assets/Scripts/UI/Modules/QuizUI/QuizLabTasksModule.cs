@@ -376,8 +376,9 @@ namespace ThermoVR.Lab
             // only override the previous state if this task explicitly sets a new state
             if (!mods.Sets.IsEmpty())
             {
-                World.Instance.ModMgr.ApplySets();
+                World.Instance.ModMgr.ApplyPVTSets();
             }
+            World.Instance.ModMgr.ApplyInsulationSets();
 
             // Limits
             World.Instance.ModMgr.SetLimits(mods.Limits);
