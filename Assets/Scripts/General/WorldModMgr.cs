@@ -153,6 +153,7 @@ namespace ThermoVR
             {
                 m_lastKnownSets = newMods.Sets;
             }
+
             m_modsActive = true;
         }
 
@@ -179,6 +180,11 @@ namespace ThermoVR
                 {
                     ToolMgr.Instance.SetChamberTemp((float)m_lastKnownSets.T);
                 }
+            }
+
+            if (m_lastKnownSets.Insulation != -1)
+            {
+                ToolMgr.Instance.SetInsulation((float)m_lastKnownSets.Insulation);
             }
         }
 

@@ -63,6 +63,8 @@ static public class GameEvents
     static public readonly StringHash32 LabMenuDisplayed = "lab:lab-menu-displayed"; // List<IndexedLabInfo>
     static public readonly StringHash32 TaskChoiceSelected = "lab:task-choice-selected";
     static public readonly StringHash32 TargetStateReached = "lab:target-state-reached";
+    static public readonly StringHash32 TargetZoneUpdated = "world:target-zone-updated"; // Tuple<Vector3, Vector3>
+    static public readonly StringHash32 ClearTargetZone = "world:clear-target-zone";
     static public readonly StringHash32 TargetStateLost = "lab:target-state-lost";
     static public readonly StringHash32 ClickSelectAnswer = "lab:click-select-answer";
     static public readonly StringHash32 ClickDeselectAnswer = "lab:click-deselect-answer";
@@ -105,6 +107,9 @@ static public class GameEvents
     static public readonly StringHash32 StatePropertiesUpdated = "sim:state-properties-updated";
     static public readonly StringHash32 HeadsetPosUpdated = "sim:headset-pos-updated";
     static public readonly StringHash32 SliderPanelUpdated = "world:slider-panel-updated";
+
+    static public readonly StringHash32 DialTextUpdated = "world:dial-text-updated"; // Tuple<string, string>
+    static public readonly StringHash32 RestoreLastSimState = "world:restore-last-sim-state";
 }
 
 static public class ObjectIDs

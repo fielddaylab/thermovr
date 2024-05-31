@@ -22,6 +22,7 @@ namespace ThermoVR.Lab
         [SerializeField] private RectTransform m_topicTabContainer;
         [SerializeField] private GameObject m_topicTabPrefab;
         [SerializeField] private GameObject m_taskFramePrefabMC;
+        [SerializeField] private GameObject m_taskFramePrefabText;
         [SerializeField] private GameObject m_taskFramePrefabMCMulti;
         [SerializeField] private GameObject m_taskFramePrefabWordBank;
         [SerializeField] private GameObject m_taskFramePrefabReachState;
@@ -332,6 +333,22 @@ namespace ThermoVR.Lab
                         reachStateHub.SetDefinition(newDef);
                     }
 
+
+                    break;
+                case TaskType.Text:
+                    // populate text
+                    newFrameObj = Instantiate(m_taskFramePrefabText, this.transform);
+                    newFrame = newFrameObj.GetComponent<LabTaskFrame>();
+                    evaluables = newFrame.GetEvaluables();
+                    for (int i = 0; i < evaluables.Length; i++)
+                    {
+                        TextHub textHub = evaluables[i].GetComponent<TextHub>();
+
+                        TextTaskDefinition newDef = new TextTaskDefinition();
+                        newDef.MainText = taskInfo.TextOnly;
+
+                        textHub.SetDefinition(newDef);
+                    }
 
                     break;
                 default:

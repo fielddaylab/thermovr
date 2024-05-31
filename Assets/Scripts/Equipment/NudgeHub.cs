@@ -1,13 +1,17 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using ThermoVR.Tools;
 using ThermoVR.UI;
+using TMPro;
 using UnityEngine;
 
 namespace ThermoVR.Dials
 {
     public class NudgeHub : MonoBehaviour
     {
+        [SerializeField] private TextMeshPro m_currDialValText;
+        [SerializeField] private UnitText m_currDialUnits;
         [SerializeField] private Material[] m_dialIconMats;
 
         [SerializeField] private MeshRenderer m_dialIconRenderer;
@@ -25,6 +29,8 @@ namespace ThermoVR.Dials
 
             m_NudgeUpButton.OnPress += HandleNudgeUpPressed;
             m_NudgeDownButton.OnPress += HandleNudgeDownPressed;
+
+            GameMgr.Events.Register(GameEvents.DialTextUpdated, HandleDialTextUpdated);
         }
 
         #region Handlers
@@ -36,6 +42,18 @@ namespace ThermoVR.Dials
             var mats = m_dialIconRenderer.sharedMaterials;
             mats[0] = m_dialIconMats[dialIndex];
             m_dialIconRenderer.sharedMaterials = mats;
+
+            var tools = ToolMgr.Instance.Dials[m_currDialIndex].GetRelevantTools();
+            m_currDialValText.SetText(ToolMgr.Instance.Dials[m_currDialIndex].textv.text);
+            if (tools.Count > 0)
+            {
+                m_currDialUnits.UpdateToolType(tools[0].tool_type);
+            }
+        }
+
+        private void HandleDialTextUpdated()
+        {
+            m_currDialValText.SetText(ToolMgr.Instance.Dials[m_currDialIndex].textv.text);
         }
 
 

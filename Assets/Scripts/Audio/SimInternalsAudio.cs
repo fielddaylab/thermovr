@@ -39,8 +39,6 @@ namespace ThermoVR.Audio
 
         public void ProcessPressureAudio(float delta_p)
         {
-            Debug.Log("[P drop] delta p: " + delta_p);
-
             if (Mathf.Abs(delta_p) >= m_pressureDropThreshold && Mathf.Sign(delta_p) < 0)
             {
                 if (m_pressurePlaybackState == PressurePlaybackState.Playing)

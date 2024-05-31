@@ -14,8 +14,21 @@ namespace ThermoVR.Tools
 
 
         private void Awake() {
+            RefreshUnitText();
+        }
+
+        public void UpdateToolType(ToolType newType)
+        {
+            m_ToolType = newType;
+
+            RefreshUnitText();
+        }
+
+        private void RefreshUnitText()
+        {
             string toSet = "";
-            switch (m_ToolType) {
+            switch (m_ToolType)
+            {
                 case ToolType.Burner:
                 case ToolType.Coil:
                     toSet = Units.Heat;

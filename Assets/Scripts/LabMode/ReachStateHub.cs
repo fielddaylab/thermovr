@@ -68,6 +68,16 @@ namespace ThermoVR.Lab
             ResetState();
         }
 
+        private void OnEnable()
+        {
+            PlaceTargetZone();
+        }
+
+        private void OnDisable()
+        {
+            GameMgr.Events?.Dispatch(GameEvents.ClearTargetZone);
+        }
+
         private void Update()
         {
             if (IsWithinRange())
@@ -113,6 +123,87 @@ namespace ThermoVR.Lab
                     m_completionState = ReachStateState.Incomplete;
                 }
             }
+        }
+
+        private void PlaceTargetZone()
+        {
+            // try construct p, v, t
+            double p, v, t;
+            double pRange, vRange, tRange;
+            p = v = t = -1;
+            pRange = vRange = tRange = Mathf.Infinity;
+
+            if (m_definition.Targets == null) { return; }
+
+            for (int i = 0; i < m_definition.Targets.Count; i++)
+            {
+                SimStateTarget currTarget = m_definition.Targets[i];
+
+                if (currTarget.TargetID == VarID.Pressure)
+                {
+                    // convert from kPa to Pa
+                    p = currTarget.TargetVal * 1000;
+                    pRange = currTarget.TargetRange * 1000;
+                }
+                else if (currTarget.TargetID == VarID.Volume)
+                {
+                    v = currTarget.TargetVal;
+                    vRange = currTarget.TargetRange;
+                }
+                else if (currTarget.TargetID == VarID.Temperature)
+                {
+                    t = currTarget.TargetVal;
+                    tRange = currTarget.TargetRange;
+                }
+            }
+
+            if (p == -1 || v == -1 || t == -1)
+            {
+                // p and v, calc t
+                if (p != -1 && v != -1)
+                {
+                    // TODO: improve this estimate
+                    t = ThermoMath.iterate_t_given_pv(p, v, t);
+                }
+
+                // p and t, calc v
+                else if (p != -1 && t != -1)
+                {
+                    v = ThermoMath.v_given_pt(p, t);
+                }
+
+                // v and t, calc p
+                else if (v != -1 && t != -1)
+                {
+                    p = ThermoMath.p_given_vt(v, t);
+                }
+            }
+
+            if (p < ThermoMath.p_min || v < ThermoMath.v_min || t < ThermoMath.t_min
+                || p > ThermoMath.p_max || v > ThermoMath.v_max || t > ThermoMath.t_max)
+            {
+                Debug.Log("[ReachStateHub] No Target Zone generated. Insufficient valid dimension points.");
+                GameMgr.Events.Dispatch(GameEvents.ClearTargetZone);
+                return;
+            }
+
+            Vector3 targetZoneMaxPos = ThermoPresent.Instance.plot(
+                Math.Clamp(p + pRange, ThermoMath.p_min, ThermoMath.p_max),
+                Math.Clamp(v + vRange, ThermoMath.v_min, ThermoMath.v_max),
+                Math.Clamp(t + tRange, ThermoMath.t_min, ThermoMath.t_max)
+                );
+            Vector3 targetZoneMinPos = ThermoPresent.Instance.plot(
+                Math.Clamp(p - pRange, ThermoMath.p_min, ThermoMath.p_max),
+                Math.Clamp(v - vRange, ThermoMath.v_min, ThermoMath.v_max),
+                Math.Clamp(t - tRange, ThermoMath.t_min, ThermoMath.t_max)
+                );
+            Vector3 targetZoneCenterPos = (targetZoneMaxPos + targetZoneMinPos) / 2.0f;
+            Vector3 targetZoneDims = new Vector3(
+                    (float)(targetZoneMaxPos.x - targetZoneMinPos.x),
+                    (float)(targetZoneMaxPos.y - targetZoneMinPos.y),
+                    (float)(targetZoneMaxPos.z - targetZoneMinPos.z)
+                );
+            GameMgr.Events.Dispatch(GameEvents.TargetZoneUpdated, new Tuple<Vector3, Vector3>(targetZoneCenterPos, targetZoneDims));
         }
 
         #region IEvaluable
