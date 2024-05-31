@@ -63,7 +63,9 @@ public class World : MonoBehaviour
     [Header("Controls")]
     [SerializeField] private GameObject cam_offset;
     [SerializeField] private GameObject ceye;
+    [SerializeField] private GameObject lhand_obj;
     [SerializeField] private ControllerAnchor lhand;
+    [SerializeField] private GameObject rhand_obj;
     [SerializeField] private ControllerAnchor rhand;
     [SerializeField] private GameObject origin;
 
@@ -408,9 +410,25 @@ public class World : MonoBehaviour
     public void TryInteractable(ref GameObject actable, Vector3 hand_pos, ref Vector3 r_hand_pos, GameObject hand_obj, Hand handType) {
         //grabbing handle
         if (actable == handle_workspace) {
-            float dy = (r_hand_pos.y - hand_pos.y);
-            workspace.transform.position = new Vector3(workspace.transform.position.x, workspace.transform.position.y - dy, workspace.transform.position.z);
-            // origin.transform.Translate(new Vector3(0, dy, 0));
+            if (origin)
+            {
+                float dy = (r_hand_pos.y - hand_pos.y);
+                // workspace.transform.position = new Vector3(workspace.transform.position.x, workspace.transform.position.y - dy, workspace.transform.position.z);
+                // workspace.transform.position = new Vector3(workspace.transform.position.x, workspace.transform.position.y - dy, workspace.transform.position.z);
+                origin.transform.Translate(new Vector3(0, dy, 0));
+                if (handType == Hand.LEFT)
+                {
+                    var newPos = lhand_obj.transform.localPosition;
+                    newPos.y -= dy / 2;
+                    lhand_obj.transform.localPosition = newPos;
+                }
+                else if (handType == Hand.RIGHT)
+                {
+                    var newPos = rhand_obj.transform.localPosition;
+                    newPos.y -= dy / 2;
+                    rhand_obj.transform.localPosition = newPos;
+                }
+            }
         }
         else if (actable == graph) {
             if (!ModMgr.GraphBallInteractable())

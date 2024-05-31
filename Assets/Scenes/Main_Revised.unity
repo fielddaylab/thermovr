@@ -6570,6 +6570,12 @@ Mesh:
     offset: 0
     size: 0
     path: 
+--- !u!1 &1618016816 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8596095802523384802, guid: 82a063789f5492a4881e22d450e47a1b,
+    type: 3}
+  m_PrefabInstance: {fileID: 8596095802245781792}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1645535339
 GameObject:
   m_ObjectHideFlags: 0
@@ -7713,6 +7719,12 @@ Mesh:
     offset: 0
     size: 0
     path: 
+--- !u!1 &1784853806 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8596095802523381110, guid: 82a063789f5492a4881e22d450e47a1b,
+    type: 3}
+  m_PrefabInstance: {fileID: 8596095802245781792}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &1790449734 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3241422059159555545, guid: 82a063789f5492a4881e22d450e47a1b,
@@ -10069,6 +10081,16 @@ PrefabInstance:
       propertyPath: dial_coil
       value: 
       objectReference: {fileID: 8646620364713073625}
+    - target: {fileID: 2423173608412668976, guid: fd9e7f31046f39c46a3fb1d9fd9683d9,
+        type: 3}
+      propertyPath: lhand_obj
+      value: 
+      objectReference: {fileID: 1618016816}
+    - target: {fileID: 2423173608412668976, guid: fd9e7f31046f39c46a3fb1d9fd9683d9,
+        type: 3}
+      propertyPath: rhand_obj
+      value: 
+      objectReference: {fileID: 1784853806}
     - target: {fileID: 2423173608412668976, guid: fd9e7f31046f39c46a3fb1d9fd9683d9,
         type: 3}
       propertyPath: sim_audio
