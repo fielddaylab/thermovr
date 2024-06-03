@@ -323,11 +323,22 @@ namespace ThermoVR.Dials
         public void SetConstraint(float constraint, ConstrainType constrainType, float margin = 0) {
             if (constrainType == ConstrainType.Min) {
                 min_constraint = constraint + margin;
+
+                if (min_constraint < 0)
+                {
+                    min_constraint = 0;
+                }
             }
             else {
                 // max
                 max_constraint = constraint + margin;
+                if (max_constraint > 1)
+                {
+                    max_constraint = 1;
+                }
             }
+
+            // TODO: prioritize constraints
 
             // Clamp
             if (val < min_constraint || val > max_constraint)
@@ -337,16 +348,25 @@ namespace ThermoVR.Dials
                 if (constrainType == ConstrainType.Min)
                 {
                     minOffset = margin;
+                    if (min_constraint + minOffset < 0)
+                    {
+                        minOffset = -min_constraint;
+                    }
                 }
                 else
                 {
                     maxOffset = margin;
+
+                    if (max_constraint + maxOffset > 1)
+                    {
+                        maxOffset = 1 - max_constraint;
+                    }
                 }
 
                 if (AnyToolsActive())
                 {
                     var prevVal = val;
-                    var newVal = Math.Clamp(val, min_constraint + minOffset, max_constraint + maxOffset);
+                    var newVal = Mathf.Clamp(val, min_constraint + minOffset, max_constraint + maxOffset);
                     if (prevVal != val)
                     {
                         set_val(val + margin);
