@@ -326,7 +326,7 @@ namespace ThermoVR.Dials
             }
             else {
                 // max
-                max_constraint = constraint - margin;
+                max_constraint = constraint + margin;
             }
 
             // Clamp
@@ -336,7 +336,7 @@ namespace ThermoVR.Dials
                 float maxOffset = 0;
                 if (constrainType == ConstrainType.Min)
                 {
-                    minOffset = -margin;
+                    minOffset = margin;
                 }
                 else
                 {
@@ -345,7 +345,12 @@ namespace ThermoVR.Dials
 
                 if (AnyToolsActive())
                 {
-                    set_val(Math.Clamp(val, min_constraint + minOffset, max_constraint + maxOffset));
+                    var prevVal = val;
+                    var newVal = Math.Clamp(val, min_constraint + minOffset, max_constraint + maxOffset);
+                    if (prevVal != val)
+                    {
+                        set_val(val + margin);
+                    }
                 }
             }
         }
