@@ -50,7 +50,7 @@ namespace ThermoVR.Dials
                 if (m_ConstrainType == ConstrainType.Max) { margin *= -1; }
 
                 var currVal = (float)ThermoPresent.Instance.get_state_var(m_ConstrainingVar);
-                var adjustedVal = Mathf.Clamp(currVal + margin, (float)ThermoMath.v_min + 0.00001f, 1);
+                var adjustedVal = Mathf.Clamp(currVal + margin, (float)ThermoMath.v_min + 0.00001f, (float)ThermoMath.v_max);
                 float targetMap = (float)((currVal - ThermoMath.v_min) / (ThermoMath.v_max - ThermoMath.v_min));
                 float marginMap = (float)((adjustedVal - ThermoMath.v_min) / (ThermoMath.v_max - ThermoMath.v_min));
                 float targetVal = m_Dial.MapToDialVal(targetMap);
