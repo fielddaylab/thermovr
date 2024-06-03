@@ -17,7 +17,14 @@ namespace ThermoVR.Controls
             {
                 samples[i] = 50; // out of 255
             }
-            m_hapticsClip = new OVRHapticsClip(samples, samples.Length);
+
+            if (OVRHaptics.Config.SampleSizeInBytes != 0) {
+                m_hapticsClip = new OVRHapticsClip(samples, samples.Length);
+            }
+            else
+            {
+                m_hapticsClip = null;
+            }
         }
 
         private void OnHandStartPress(Hand inHand)
