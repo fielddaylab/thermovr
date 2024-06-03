@@ -388,6 +388,24 @@ namespace ThermoVR.Tools
 
         public void EndAdjustTool(Tool t) {
             t.TriggerEndAdjust();
+
+            if (t == tool_stop1)
+            {
+                ReleaseVStop(t);
+            }
+            else if (t == tool_stop2)
+            {
+                ReleaseVStop(t);
+            }
+
+            if (t == tool_stop1)
+            {
+                AddVStop(tool_stop1.GetVal(), t);
+            }
+            else if (t == tool_stop2)
+            {
+                AddVStop(tool_stop2.GetVal(), t);
+            }
         }
 
 

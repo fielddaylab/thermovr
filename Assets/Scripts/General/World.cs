@@ -703,6 +703,7 @@ public class World : MonoBehaviour
         }
 
         GameMgr.Events.Dispatch(GameEvents.ReleaseToolSlider, new Tuple<ToolType, float, Hand, bool, int>(firstType, dd.map, handType, autoRelease, uniqueStopID));
+        GameMgr.Events.Dispatch(GameEvents.ObjectReleased, dd.gameObject);
     }
 
     public void GrabDial(Dial dd, Hand handType)

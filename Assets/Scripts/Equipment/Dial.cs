@@ -98,6 +98,7 @@ namespace ThermoVR.Dials
         [System.NonSerialized]
         public float prev_val = 0.0f;
         public float default_val = 0;
+        public float default_inactive_val = 0;
         [System.NonSerialized]
         public Vector3 orientation_dir;
         [System.NonSerialized]
@@ -286,7 +287,7 @@ namespace ThermoVR.Dials
                 }
                 else
                 {
-                    set_val(0);
+                    set_val(default_inactive_val);
                 }
             }
 
@@ -319,16 +320,34 @@ namespace ThermoVR.Dials
             set_val(newVal);
         }
 
-        public void SetConstraint(float constraint, ConstrainType constrainType) {
+        public void SetConstraint(float constraint, ConstrainType constrainType, float margin = 0) {
             if (constrainType == ConstrainType.Min) {
-                min_constraint = constraint;
+                min_constraint = constraint + margin;
             }
             else {
                 // max
-                max_constraint = constraint;
+                max_constraint = constraint - margin;
             }
 
-            // Clamp necessary?
+            // Clamp
+            if (val < min_constraint || val > max_constraint)
+            {
+                float minOffset = 0;
+                float maxOffset = 0;
+                if (constrainType == ConstrainType.Min)
+                {
+                    minOffset = -margin;
+                }
+                else
+                {
+                    maxOffset = margin;
+                }
+
+                if (AnyToolsActive())
+                {
+                    set_val(Math.Clamp(val, min_constraint + minOffset, max_constraint + maxOffset));
+                }
+            }
         }
 
         public bool IsObjWithinBounds(GameObject obj)
