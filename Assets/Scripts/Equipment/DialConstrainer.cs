@@ -23,6 +23,16 @@ namespace ThermoVR.Dials
 
             if (m_ConstrainingDial) {
                 m_ConstrainingDial.DialMoved.AddListener(HandleDialMoved);
+
+                m_Dial.SetConstraint(m_ConstrainingDial.get_val(), m_ConstrainType);
+            }
+        }
+
+        private void Start()
+        {
+            if (m_ConstrainingDial)
+            {
+                m_Dial.SetConstraint(m_ConstrainingDial.get_val(), m_ConstrainType);
             }
         }
 
@@ -40,8 +50,9 @@ namespace ThermoVR.Dials
                 if (m_ConstrainType == ConstrainType.Max) { margin *= -1; }
 
                 var currVal = (float)ThermoPresent.Instance.get_state_var(m_ConstrainingVar);
+                var adjustedVal = Mathf.Clamp(currVal + margin, (float)ThermoMath.v_min + 0.00001f, 1);
                 float targetMap = (float)((currVal - ThermoMath.v_min) / (ThermoMath.v_max - ThermoMath.v_min));
-                float marginMap = (float)((currVal + margin - ThermoMath.v_min) / (ThermoMath.v_max - ThermoMath.v_min));
+                float marginMap = (float)((adjustedVal - ThermoMath.v_min) / (ThermoMath.v_max - ThermoMath.v_min));
                 float targetVal = m_Dial.MapToDialVal(targetMap);
                 float marginVal = m_Dial.MapToDialVal(marginMap);
                 m_Dial.SetConstraint(targetVal, m_ConstrainType, marginVal - targetVal);
