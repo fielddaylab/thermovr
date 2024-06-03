@@ -239,7 +239,7 @@ PrefabInstance:
     - target: {fileID: 1469844742514000810, guid: 65b0020cd06dbeb4d8b64470f234f970,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.263
+      value: 0.175
       objectReference: {fileID: 0}
     - target: {fileID: 1469844742514000810, guid: 65b0020cd06dbeb4d8b64470f234f970,
         type: 3}
@@ -318,7 +318,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aacb888d85a9b0942911e934272b8fda, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_MaxPos: {x: 0, y: 0.3691, z: 0}
+  m_MaxPos: {x: 0, y: 0.175, z: 0}
   m_MinPos: {x: 0, y: -0.263, z: 0}
   m_PistonCapHeight: 0.063
   m_minOffsetVal: 0.2406678
@@ -335,6 +335,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 081dcfca00b592c4f99bf617b5ee5e04, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  was_engaged: 0
   allowed: 0
   always_engaged: 0
   tool_type: 7
