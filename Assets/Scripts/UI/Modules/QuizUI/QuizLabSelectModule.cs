@@ -61,6 +61,9 @@ namespace ThermoVR.Lab
                 m_ActiveOptions.Add(option);
             }
 
+            var resetPos = m_ScrollContainer.transform.localPosition;
+            resetPos.y = 0;
+            m_ScrollContainer.transform.localPosition = resetPos;
             m_ScrollVerticalValidVisibleIndex = 0;
             RefreshInteractableTabs();
         }
