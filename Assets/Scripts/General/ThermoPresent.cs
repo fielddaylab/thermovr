@@ -178,7 +178,10 @@ public class ThermoPresent : MonoBehaviour
 
     private void NotifyError() {
         if (ThermoMath.got_error) {
-            error_flasher.Flash();
+            if (error_flasher)
+            {
+                error_flasher.Flash();
+            }
             if (error_message)
             {
                 error_message.enabled = true;
@@ -191,7 +194,10 @@ public class ThermoPresent : MonoBehaviour
 
     private void HideError() {
         ThermoMath.got_error = false;
-        error_flasher.Stop();
+        if (error_flasher)
+        {
+            error_flasher.Stop();
+        }
         if (error_message)
         {
             error_message.enabled = false;
