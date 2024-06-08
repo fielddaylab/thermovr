@@ -49,7 +49,7 @@ public class World : MonoBehaviour
     public Material tab_hi;
     public Material tab_sel;
     public Material tab_hisel;
-    public DirectionalIndicator arrows;
+    // public DirectionalIndicator arrows;
 
     // ThermoState thermo;
     [Space(5)]
@@ -200,7 +200,7 @@ public class World : MonoBehaviour
      * as far as I can tell.
      */
     public void ManualFixedUpdate() {
-        arrows.ManualFixedUpdate(); // reset arrows for next instruction
+        // arrows.ManualFixedUpdate(); // reset arrows for next instruction
 
         if (lhand != null && rhand != null) {
             StabilizeHands();
