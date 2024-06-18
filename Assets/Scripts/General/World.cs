@@ -381,19 +381,12 @@ public class World : MonoBehaviour
         float rhandt = OVRInput.Get(OVRInput.RawAxis1D.RHandTrigger);
         float rindext = OVRInput.Get(OVRInput.RawAxis1D.RIndexTrigger);
 
-        bool rhandraytoggle = OVRInput.GetDown(OVRInput.Button.One);
-        bool lhandraytoggle = OVRInput.GetDown(OVRInput.Button.Three);
-
-        if (rhandraytoggle) {
-            rhand.ray.enabled = !rhand.ray.enabled;
-        }
-        if (lhandraytoggle) {
-            lhand.ray.enabled = !lhand.ray.enabled;
-        }
+        bool rhand_nudge_activate = OVRInput.Get(OVRInput.Button.One);
+        bool lhand_nudge_activate = OVRInput.Get(OVRInput.Button.Three);
 
         //test effect of hands one at a time ("true" == "left hand", "false" == "right hand")
-        TryHand(true, lhandt, lindext, lhand.transform.position, lhand.vel, ref lhtrigger, ref litrigger, ref lhtrigger_delta, ref litrigger_delta, ref lpos, ref lhand.obj, ref lgrabbed, ref rhand.obj, ref rgrabbed); //left hand
-        TryHand(false, rhandt, rindext, rhand.transform.position, rhand.vel, ref rhtrigger, ref ritrigger, ref rhtrigger_delta, ref ritrigger_delta, ref rpos, ref rhand.obj, ref rgrabbed, ref lhand.obj, ref lgrabbed); //right hand
+        TryHand(true, lhandt, lindext, lhand.transform.position, lhand.vel, ref lhtrigger, ref litrigger, ref lhtrigger_delta, ref litrigger_delta, ref lpos, ref lhand.obj, ref lgrabbed, ref rhand.obj, ref rgrabbed, ref lhand_nudge_activate); //left hand
+        TryHand(false, rhandt, rindext, rhand.transform.position, rhand.vel, ref rhtrigger, ref ritrigger, ref rhtrigger_delta, ref ritrigger_delta, ref rpos, ref rhand.obj, ref rgrabbed, ref lhand.obj, ref lgrabbed, ref rhand_nudge_activate); //right hand
 
     }
 
@@ -407,7 +400,7 @@ public class World : MonoBehaviour
     /// <param name="actable"></param>
     /// <param name="hand_pos">prev hand position</param>
     /// <param name="r_hand_pos">ref to curr hand position</param>
-    public void TryInteractable(ref GameObject actable, Vector3 hand_pos, ref Vector3 r_hand_pos, GameObject hand_obj, Hand handType) {
+    public void TryInteractable(ref GameObject actable, Vector3 hand_pos, ref Vector3 r_hand_pos, GameObject hand_obj, Hand handType, bool nudge_active) {
         //grabbing handle
         if (actable == handle_workspace) {
             if (origin)
@@ -448,7 +441,7 @@ public class World : MonoBehaviour
 
             if (dd != null) {
                 // ensure hand is within range of dial
-                if (dd.IsObjWithinBounds(hand_obj))
+                if (dd.IsObjWithinBounds(hand_obj, nudge_active))
                 {
                     dd.update_val_grab(hand_pos, r_hand_pos);
 
@@ -475,7 +468,7 @@ public class World : MonoBehaviour
      * Honestly, I haven't quite got a full understanding of this ~200-line behemoth.
      */
     //"left_hand": true -> left, false -> right
-    void TryHand(bool left_hand, float htrigger_val, float itrigger_val, Vector3 hand_pos, Vector3 hand_vel, ref bool ref_htrigger, ref bool ref_itrigger, ref int ref_htrigger_delta, ref int ref_itrigger_delta, ref Vector3 ref_hand_pos, ref GameObject ref_hand, ref GameObject ref_grabbed, ref GameObject ref_ohand, ref GameObject ref_ograbbed) {
+    void TryHand(bool left_hand, float htrigger_val, float itrigger_val, Vector3 hand_pos, Vector3 hand_vel, ref bool ref_htrigger, ref bool ref_itrigger, ref int ref_htrigger_delta, ref int ref_itrigger_delta, ref Vector3 ref_hand_pos, ref GameObject ref_hand, ref GameObject ref_grabbed, ref GameObject ref_ohand, ref GameObject ref_ograbbed, ref bool nudge_active) {
         float htrigger_threshhold = 0.1f;
         float itrigger_threshhold = 0.1f;
 
@@ -629,7 +622,7 @@ public class World : MonoBehaviour
         if (ref_grabbed)
         {
             Hand handType = left_hand ? Hand.LEFT : Hand.RIGHT;
-            TryInteractable(ref ref_grabbed, hand_pos, ref ref_hand_pos, ref_hand, handType);
+            TryInteractable(ref ref_grabbed, hand_pos, ref ref_hand_pos, ref_hand, handType, nudge_active);
         }
 
         ref_hand_pos = hand_pos;

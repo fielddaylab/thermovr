@@ -375,9 +375,14 @@ namespace ThermoVR.Dials
             }
         }
 
-        public bool IsObjWithinBounds(GameObject obj)
+        public bool IsObjWithinBounds(GameObject obj, bool nudgeMode)
         {
             if (obj == null)
+            {
+                return true;
+            }
+
+            if (nudgeMode)
             {
                 return true;
             }
