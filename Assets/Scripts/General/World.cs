@@ -455,7 +455,7 @@ public class World : MonoBehaviour
                     else
                     {
                         dd.UpdateNudgeState(nudge_active);
-                        dd.update_val_grab(hand_pos, r_hand_pos);
+                        dd.update_val_grab(hand_pos, r_hand_pos, handType);
 
                         List<Tool> relevant_tools = dd.get_relevant_tools();
                         for (int t = 0; t < relevant_tools.Count; t++)

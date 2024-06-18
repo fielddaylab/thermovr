@@ -48,6 +48,8 @@ namespace ThermoVR.Tools
 
         [SerializeField] private PhysicalToggle toggle_heatTransfer;
 
+        public float DetentStep = 0.05f;
+
         [HideInInspector] public List<Dial> Dials;
         public List<VolumeStop> VStops { get; private set; }
 

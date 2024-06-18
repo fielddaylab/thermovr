@@ -44,8 +44,9 @@ static public class GameEvents
     static public readonly StringHash32 StartSession = "game:start-session";
     static public readonly StringHash32 StartGame = "game:start-game";
 
-    static public readonly StringHash32 HandStartPress = "world:hand-start-press";
-    
+    static public readonly StringHash32 HandStartPress = "world:hand-start-press"; // Hand
+    static public readonly StringHash32 DetentHit = "world:detent-hit"; // Hand
+
     static public readonly StringHash32 SelectLab = "lab:select-lab";
     static public readonly StringHash32 ClickLabHome = "lab:click-lab-home";
     static public readonly StringHash32 ClickSelectTask = "lab:click-select-task";

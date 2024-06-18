@@ -470,7 +470,7 @@ namespace ThermoVR.Dials
         /// </summary>
         /// <param name="hand_pos"></param>
         /// <param name="r_hand_pos"></param>
-        public void update_val_grab(Vector3 prev_hand_pos, Vector3 r_hand_pos) {
+        public void update_val_grab(Vector3 prev_hand_pos, Vector3 r_hand_pos, Hand inHand) {
             if (!AnyToolsActive()) {
                 return;
             }
@@ -570,6 +570,8 @@ namespace ThermoVR.Dials
                 processor.ProcessVal(ref new_val);
             }
 
+            float pre_set_val = val;
+
             if (GameMgr.I.IsDesktop)
             {
                 set_val(new_val);
@@ -578,7 +580,6 @@ namespace ThermoVR.Dials
             {
                 if (m_nudging)
                 {
-                    float adjustedNudgeVal = 0;
                     float nudgeBufferDist = 1;
                     int dir = 1;
                     if (m_lastKnownNudgeHandPos != Vector3.zero)
@@ -587,14 +588,35 @@ namespace ThermoVR.Dials
                         dir = Vector3.Distance(max_pos.position, r_hand_pos) >= Vector3.Distance(max_pos.position, m_lastKnownNudgeHandPos) ? 1 : -1;
                     }
 
-                    adjustedNudgeVal = val + (new_val - val) * nudgeMult * nudgeBufferDist * dir;
-                    set_val(adjustedNudgeVal);
+                    new_val = val + (new_val - val) * nudgeMult * nudgeBufferDist * dir;
+                    set_val(new_val);
                     m_lastKnownNudgeHandPos = r_hand_pos;
                 }
                 else
                 {
                     set_val(new_val);
                 }
+            }
+
+            int intMult = 1000000;
+
+            int intPrev = (int)(pre_set_val * intMult);
+            int intNew = (int)(new_val * intMult);
+            int intDetent = (int)(ToolMgr.Instance.DetentStep * intMult);
+
+            bool hapticsThresholdCrossed = false;
+
+            if (((intPrev % intDetent) > (intDetent / 2) && (intNew % intDetent) < (intDetent / 2))
+                || ((intPrev % intDetent) < (intDetent / 2) && (intNew % intDetent) > (intDetent / 2))
+                )
+            {
+                hapticsThresholdCrossed = true;
+            }
+
+            if (hapticsThresholdCrossed)
+            {
+                // Add Haptics
+                GameMgr.Events.Dispatch(GameEvents.DetentHit, inHand);
             }
         }
 
