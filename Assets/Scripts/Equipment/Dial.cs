@@ -76,8 +76,6 @@ namespace ThermoVR.Dials
         [Header("Activation")]
 
         [SerializeField] private MeshRenderer[] knob_renderers;
-        [SerializeField] private MeshRenderer nudge_up_renderer;
-        [SerializeField] private MeshRenderer nudge_down_renderer;
 
         [Space(5)]
         [Header("Other")]
@@ -135,6 +133,9 @@ namespace ThermoVR.Dials
 
         private DialValProcessor processor;
 
+        private bool m_nudging;
+        private Vector3 m_lastKnownNudgeHandPos;
+
         [HideInInspector] public UnityEvent DialMoved;
 
         /// <summary>
@@ -157,6 +158,8 @@ namespace ThermoVR.Dials
             }
 
             processor = this.GetComponent<DialValProcessor>();
+
+            m_nudging = false;
 
             SetConstraint(0f, ConstrainType.Min);
             SetConstraint(1f, ConstrainType.Max);
@@ -484,6 +487,13 @@ namespace ThermoVR.Dials
                 (dz) * orientation_dir.z
                 );
 
+            float nudgeMult = 1;
+            if (m_nudging)
+            {
+                nudgeMult = GameMgr.I.IsDesktop ? 0.01f : 0.1f;
+            }
+
+
             float new_val;
             if (GameMgr.I.IsDesktop) {
                 movement_vector *= -10f;
@@ -514,7 +524,7 @@ namespace ThermoVR.Dials
                 }
                 else
                 {
-                    new_val = prev_val - magnitude;
+                    new_val = prev_val - magnitude * nudgeMult;
                 }
             }
             else
@@ -560,7 +570,32 @@ namespace ThermoVR.Dials
                 processor.ProcessVal(ref new_val);
             }
 
-            set_val(new_val);
+            if (GameMgr.I.IsDesktop)
+            {
+                set_val(new_val);
+            }
+            else
+            {
+                if (m_nudging)
+                {
+                    float adjustedNudgeVal = 0;
+                    float nudgeBufferDist = 1;
+                    int dir = 1;
+                    if (m_lastKnownNudgeHandPos != Vector3.zero)
+                    {
+                        nudgeBufferDist = Vector3.Distance(m_lastKnownNudgeHandPos, r_hand_pos);
+                        dir = Vector3.Distance(max_pos.position, r_hand_pos) >= Vector3.Distance(max_pos.position, m_lastKnownNudgeHandPos) ? 1 : -1;
+                    }
+
+                    adjustedNudgeVal = val + (new_val - val) * nudgeMult * nudgeBufferDist * dir;
+                    set_val(adjustedNudgeVal);
+                    m_lastKnownNudgeHandPos = r_hand_pos;
+                }
+                else
+                {
+                    set_val(new_val);
+                }
+            }
         }
 
         public List<Tool> get_relevant_tools() {
@@ -574,6 +609,37 @@ namespace ThermoVR.Dials
         /// <returns></returns>
         public bool IsKnob(GameObject compare) {
             return compare == meter;
+        }
+
+        public void UpdateNudgeState(bool nudgeActive)
+        {
+            if (!m_nudging && nudgeActive)
+            {
+                ActivateNudge();
+            }
+            else if (m_nudging && !nudgeActive)
+            {
+                DeactivateNudge();
+            }
+        }
+
+        public bool IsNudgeActive()
+        {
+            return m_nudging;
+        }
+
+        public void ActivateNudge()
+        {
+            m_nudging = true;
+            m_lastKnownNudgeHandPos = Vector3.zero;
+            UpdateSliderMaterials(relevant_tools[0].engaged, relevant_tools[0].allowed);
+        }
+
+        public void DeactivateNudge()
+        {
+            m_nudging = false;
+            m_lastKnownNudgeHandPos = Vector3.zero;
+            UpdateSliderMaterials(relevant_tools[0].engaged, relevant_tools[0].allowed);
         }
 
         private void apply_change(float map, float new_val, float prev_val) {
@@ -619,19 +685,24 @@ namespace ThermoVR.Dials
         private void UpdateSliderMaterials(bool engaged, bool allowed)
         {
             Material knobMat = GameDB.Instance.KnobInactive; // default
-            Material nudgeMat = GameDB.Instance.NudgeInactive; // default
 
             if (!allowed)
             {
                 // locked
                 knobMat = GameDB.Instance.KnobLocked;
-                nudgeMat = GameDB.Instance.NudgeLocked;
             }
             else if (engaged)
             {
-                // active
-                knobMat = GameDB.Instance.KnobActive;
-                nudgeMat = GameDB.Instance.NudgeActive;
+                if (m_nudging)
+                {
+                    // nudging
+                    knobMat = GameDB.Instance.KnobNudge;
+                }
+                else
+                {
+                    // active
+                    knobMat = GameDB.Instance.KnobActive;
+                }
             }
 
             Material[] materials;
@@ -642,6 +713,8 @@ namespace ThermoVR.Dials
                 materials[KNOB_MAT_INDEX] = knobMat;
                 knob_renderers[i].materials = materials;
             }
+
+            /*
             if (nudge_up_renderer)
             {
                 materials = nudge_up_renderer.materials;
@@ -655,6 +728,7 @@ namespace ThermoVR.Dials
                 materials[NUDGE_MAT_INDEX] = nudgeMat;
                 nudge_down_renderer.materials = materials;
             }
+            */
         }
 
         #region Handlers

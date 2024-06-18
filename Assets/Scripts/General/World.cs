@@ -443,12 +443,25 @@ public class World : MonoBehaviour
                 // ensure hand is within range of dial
                 if (dd.IsObjWithinBounds(hand_obj, nudge_active))
                 {
-                    dd.update_val_grab(hand_pos, r_hand_pos);
-
-                    List<Tool> relevant_tools = dd.get_relevant_tools();
-                    for (int t = 0; t < relevant_tools.Count; t++)
+                    if (dd.IsNudgeActive() && !nudge_active)
                     {
-                        ToolMgr.UpdateApplyTool(relevant_tools[t]);
+                        // auto-release
+                        ReleaseDial(dd, handType, true);
+
+                        // stop grabbing
+                        actable.GetComponent<Touchable>().SetGrabbed(false, handType);
+                        actable = null;
+                    }
+                    else
+                    {
+                        dd.UpdateNudgeState(nudge_active);
+                        dd.update_val_grab(hand_pos, r_hand_pos);
+
+                        List<Tool> relevant_tools = dd.get_relevant_tools();
+                        for (int t = 0; t < relevant_tools.Count; t++)
+                        {
+                            ToolMgr.UpdateApplyTool(relevant_tools[t]);
+                        }
                     }
                 }
                 else
