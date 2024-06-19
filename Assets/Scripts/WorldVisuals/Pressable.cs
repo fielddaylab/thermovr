@@ -35,7 +35,6 @@ namespace ThermoVR
         private void Start() {
             GameMgr.Events?.Register(GameEvents.GatherPressables, HandleGatherPressables);
             GameMgr.Events?.Register<bool>(GameEvents.CheckForPress, HandleCheckForPress);
-
         }
 
         private void FixedUpdate() {

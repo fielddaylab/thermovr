@@ -4098,6 +4098,11 @@ PrefabInstance:
       objectReference: {fileID: 251577673}
     - target: {fileID: 5943454709359365371, guid: fd9e7f31046f39c46a3fb1d9fd9683d9,
         type: 3}
+      propertyPath: tare_heat_button
+      value: 
+      objectReference: {fileID: 856060316}
+    - target: {fileID: 5943454709359365371, guid: fd9e7f31046f39c46a3fb1d9fd9683d9,
+        type: 3}
       propertyPath: dial_negativeWeight
       value: 
       objectReference: {fileID: 127512812}
@@ -4739,6 +4744,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 4d1fb797a324bb54b8f6e97f5b61f39c, type: 3}
+--- !u!114 &856060316 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1363746380074904326, guid: 29c93134005f4e146888613d124d2592,
+    type: 3}
+  m_PrefabInstance: {fileID: 127512803}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: afd6f79acab78f847a707c9fa9d91272, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &862255426
 GameObject:
   m_ObjectHideFlags: 0

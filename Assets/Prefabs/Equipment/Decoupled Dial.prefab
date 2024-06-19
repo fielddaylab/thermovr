@@ -891,13 +891,13 @@ MonoBehaviour:
   sliderCollider: {fileID: 6030497066997557904}
   knob_renderers:
   - {fileID: 3317261218618807632}
-  nudge_up_renderer: {fileID: 8373637421563490065}
-  nudge_down_renderer: {fileID: 2298914956271297274}
   overrideOffset: 0
   boundsMultiplier: 0
+  isSelector: 0
   response_power: 1
   val: 0
   default_val: 0
+  default_inactive_val: 0
   m_effect_map: []
   activator_button: {fileID: 0}
   touchable: {fileID: 0}
@@ -1314,22 +1314,11 @@ PrefabInstance:
       objectReference: {fileID: 2100000, guid: 4623f92edd332b343978d6a461dccbf2, type: 2}
     - target: {fileID: 9067214787932594106, guid: 214a02dd1b6efa843bcc350f79f9c5d7,
         type: 3}
-      propertyPath: m_Materials.Array.data[1]
-      value: 
-      objectReference: {fileID: 2100000, guid: 09119e9d14013da47a65a5614678431d, type: 2}
-    - target: {fileID: 9067214787932594106, guid: 214a02dd1b6efa843bcc350f79f9c5d7,
-        type: 3}
       propertyPath: m_Materials.Array.data[3]
       value: 
       objectReference: {fileID: 2100000, guid: 614af8d83b4917d409a4cc79a499c59b, type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 214a02dd1b6efa843bcc350f79f9c5d7, type: 3}
---- !u!23 &2298914956271297274 stripped
-MeshRenderer:
-  m_CorrespondingSourceObject: {fileID: 1625622367941254051, guid: 214a02dd1b6efa843bcc350f79f9c5d7,
-    type: 3}
-  m_PrefabInstance: {fileID: 677857812284668249}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &4782439999084141159 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5419694855086727998, guid: 214a02dd1b6efa843bcc350f79f9c5d7,
@@ -1360,9 +1349,3 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: afd6f79acab78f847a707c9fa9d91272, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!23 &8373637421563490065 stripped
-MeshRenderer:
-  m_CorrespondingSourceObject: {fileID: 9033410272643438152, guid: 214a02dd1b6efa843bcc350f79f9c5d7,
-    type: 3}
-  m_PrefabInstance: {fileID: 677857812284668249}
-  m_PrefabAsset: {fileID: 0}

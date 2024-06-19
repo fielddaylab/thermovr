@@ -320,12 +320,14 @@ public class World : MonoBehaviour
             }
         }
 
-        double applied_heat = ToolMgr.GetAppliedHeat();
+        double applied_heat = ToolMgr.GetAppliedHeat() * Time.deltaTime;
 
         // tool heat
         if (applied_heat != 0) {
             // insulation is inversely proportional to the rate of heat transfer (within insulation)
             thermo_present.add_heat_per_delta_time(applied_heat, (1 - insulation_coefficient), delta_time, weight_pressure, true, temperature_gradient);
+
+            ToolMgr.Instance.RecordToAccumulatedHeatEnergy(applied_heat / 1000);
         }
 
         // Debug.Log("[warp] current temp: " + thermo_present.get_temperature()); // useful for determining exact temp needed for set values in labs
