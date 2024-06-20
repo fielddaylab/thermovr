@@ -24,7 +24,11 @@ namespace ThermoVR.Controls {
         private GameObject m_Dragging; // the object being grabbed
         private Vector3 m_PrevWorldPos; // previous mouse position
 
+        private bool m_nudgeMode;
+
         private void Update() {
+            m_nudgeMode = Input.GetKey(KeyCode.LeftShift);
+
             if (Input.GetMouseButtonDown(0)) {
                 // left button clicked
                 if (RaycastFromMouse(CLICKABLE_LAYER, out GameObject objHit)) {
@@ -47,6 +51,11 @@ namespace ThermoVR.Controls {
                             pdInteractions.BeginInteract(Hand.MOUSE);
                             m_Dragging = pdInteractions.graph;
                         }
+                    }
+                    else if (objHit.GetComponent<InputProxy>())
+                    {
+                        Debug.Log("[Interfacer] Input Proxy hit!");
+                        GameMgr.Events.Dispatch(GameEvents.InputProxySelected, objHit.GetComponent<InputProxy>());
                     }
                 }
             }
@@ -103,7 +112,7 @@ namespace ThermoVR.Controls {
                     currPos = Camera.main.ScreenToWorldPoint(Input.mousePosition + new Vector3(0, 0, Vector3.Distance(Camera.main.transform.position, m_Dragging.transform.position)));
                 }
 
-                World.Instance.TryInteractable(ref m_Dragging, m_PrevWorldPos, ref currPos, null, Hand.MOUSE);
+                World.Instance.TryInteractable(ref m_Dragging, m_PrevWorldPos, ref currPos, null, Hand.MOUSE, m_nudgeMode);
 
                 m_PrevWorldPos = currPos;
             }

@@ -27,9 +27,9 @@ public class GameDB : MonoBehaviour
     [Header("Tool Activation")]
 
     public Material KnobActive;
+    public Material KnobNudge;
     public Material KnobInactive;
     public Material KnobLocked;
-    public Material NudgeActive, NudgeInactive, NudgeLocked;
 
     [Space(5)]
     [Header("Audio")]

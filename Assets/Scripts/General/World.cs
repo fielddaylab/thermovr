@@ -320,12 +320,14 @@ public class World : MonoBehaviour
             }
         }
 
-        double applied_heat = ToolMgr.GetAppliedHeat();
+        double applied_heat = ToolMgr.GetAppliedHeat() * Time.deltaTime;
 
         // tool heat
         if (applied_heat != 0) {
             // insulation is inversely proportional to the rate of heat transfer (within insulation)
             thermo_present.add_heat_per_delta_time(applied_heat, (1 - insulation_coefficient), delta_time, weight_pressure, true, temperature_gradient);
+
+            ToolMgr.Instance.RecordToAccumulatedHeatEnergy(applied_heat / 1000);
         }
 
         // Debug.Log("[warp] current temp: " + thermo_present.get_temperature()); // useful for determining exact temp needed for set values in labs
@@ -381,19 +383,12 @@ public class World : MonoBehaviour
         float rhandt = OVRInput.Get(OVRInput.RawAxis1D.RHandTrigger);
         float rindext = OVRInput.Get(OVRInput.RawAxis1D.RIndexTrigger);
 
-        bool rhandraytoggle = OVRInput.GetDown(OVRInput.Button.One);
-        bool lhandraytoggle = OVRInput.GetDown(OVRInput.Button.Three);
-
-        if (rhandraytoggle) {
-            rhand.ray.enabled = !rhand.ray.enabled;
-        }
-        if (lhandraytoggle) {
-            lhand.ray.enabled = !lhand.ray.enabled;
-        }
+        bool rhand_nudge_activate = OVRInput.Get(OVRInput.Button.One);
+        bool lhand_nudge_activate = OVRInput.Get(OVRInput.Button.Three);
 
         //test effect of hands one at a time ("true" == "left hand", "false" == "right hand")
-        TryHand(true, lhandt, lindext, lhand.transform.position, lhand.vel, ref lhtrigger, ref litrigger, ref lhtrigger_delta, ref litrigger_delta, ref lpos, ref lhand.obj, ref lgrabbed, ref rhand.obj, ref rgrabbed); //left hand
-        TryHand(false, rhandt, rindext, rhand.transform.position, rhand.vel, ref rhtrigger, ref ritrigger, ref rhtrigger_delta, ref ritrigger_delta, ref rpos, ref rhand.obj, ref rgrabbed, ref lhand.obj, ref lgrabbed); //right hand
+        TryHand(true, lhandt, lindext, lhand.transform.position, lhand.vel, ref lhtrigger, ref litrigger, ref lhtrigger_delta, ref litrigger_delta, ref lpos, ref lhand.obj, ref lgrabbed, ref rhand.obj, ref rgrabbed, ref lhand_nudge_activate); //left hand
+        TryHand(false, rhandt, rindext, rhand.transform.position, rhand.vel, ref rhtrigger, ref ritrigger, ref rhtrigger_delta, ref ritrigger_delta, ref rpos, ref rhand.obj, ref rgrabbed, ref lhand.obj, ref lgrabbed, ref rhand_nudge_activate); //right hand
 
     }
 
@@ -407,7 +402,7 @@ public class World : MonoBehaviour
     /// <param name="actable"></param>
     /// <param name="hand_pos">prev hand position</param>
     /// <param name="r_hand_pos">ref to curr hand position</param>
-    public void TryInteractable(ref GameObject actable, Vector3 hand_pos, ref Vector3 r_hand_pos, GameObject hand_obj, Hand handType) {
+    public void TryInteractable(ref GameObject actable, Vector3 hand_pos, ref Vector3 r_hand_pos, GameObject hand_obj, Hand handType, bool nudge_active) {
         //grabbing handle
         if (actable == handle_workspace) {
             if (origin)
@@ -448,14 +443,27 @@ public class World : MonoBehaviour
 
             if (dd != null) {
                 // ensure hand is within range of dial
-                if (dd.IsObjWithinBounds(hand_obj))
+                if (dd.IsObjWithinBounds(hand_obj, nudge_active))
                 {
-                    dd.update_val_grab(hand_pos, r_hand_pos);
-
-                    List<Tool> relevant_tools = dd.get_relevant_tools();
-                    for (int t = 0; t < relevant_tools.Count; t++)
+                    if (dd.IsNudgeActive() && !nudge_active)
                     {
-                        ToolMgr.UpdateApplyTool(relevant_tools[t]);
+                        // auto-release
+                        ReleaseDial(dd, handType, true);
+
+                        // stop grabbing
+                        actable.GetComponent<Touchable>().SetGrabbed(false, handType);
+                        actable = null;
+                    }
+                    else
+                    {
+                        dd.UpdateNudgeState(nudge_active);
+                        dd.update_val_grab(hand_pos, r_hand_pos, handType);
+
+                        List<Tool> relevant_tools = dd.get_relevant_tools();
+                        for (int t = 0; t < relevant_tools.Count; t++)
+                        {
+                            ToolMgr.UpdateApplyTool(relevant_tools[t]);
+                        }
                     }
                 }
                 else
@@ -475,7 +483,7 @@ public class World : MonoBehaviour
      * Honestly, I haven't quite got a full understanding of this ~200-line behemoth.
      */
     //"left_hand": true -> left, false -> right
-    void TryHand(bool left_hand, float htrigger_val, float itrigger_val, Vector3 hand_pos, Vector3 hand_vel, ref bool ref_htrigger, ref bool ref_itrigger, ref int ref_htrigger_delta, ref int ref_itrigger_delta, ref Vector3 ref_hand_pos, ref GameObject ref_hand, ref GameObject ref_grabbed, ref GameObject ref_ohand, ref GameObject ref_ograbbed) {
+    void TryHand(bool left_hand, float htrigger_val, float itrigger_val, Vector3 hand_pos, Vector3 hand_vel, ref bool ref_htrigger, ref bool ref_itrigger, ref int ref_htrigger_delta, ref int ref_itrigger_delta, ref Vector3 ref_hand_pos, ref GameObject ref_hand, ref GameObject ref_grabbed, ref GameObject ref_ohand, ref GameObject ref_ograbbed, ref bool nudge_active) {
         float htrigger_threshhold = 0.1f;
         float itrigger_threshhold = 0.1f;
 
@@ -629,7 +637,7 @@ public class World : MonoBehaviour
         if (ref_grabbed)
         {
             Hand handType = left_hand ? Hand.LEFT : Hand.RIGHT;
-            TryInteractable(ref ref_grabbed, hand_pos, ref ref_hand_pos, ref_hand, handType);
+            TryInteractable(ref ref_grabbed, hand_pos, ref ref_hand_pos, ref_hand, handType, nudge_active);
         }
 
         ref_hand_pos = hand_pos;

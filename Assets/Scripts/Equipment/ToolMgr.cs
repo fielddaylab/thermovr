@@ -13,8 +13,8 @@ namespace ThermoVR.Tools
     {
         public static ToolMgr Instance;
 
-        public const float BURNER_MAX = 100000;
-        public const float COIL_MAX = -100000;
+        public const float BURNER_MAX = 100000 * 100;
+        public const float COIL_MAX = -100000 * 100;
         private const float DEFAULT_CHAMBER_PRESSURE = 101325;
         private const float DEFAULT_CHAMBER_TEMPERATURE = 300;
 
@@ -48,6 +48,8 @@ namespace ThermoVR.Tools
 
         [SerializeField] private PhysicalToggle toggle_heatTransfer;
 
+        public float DetentStep = 0.05f;
+
         [HideInInspector] public List<Dial> Dials;
         public List<VolumeStop> VStops { get; private set; }
 
@@ -58,6 +60,12 @@ namespace ThermoVR.Tools
         List<Halfable> halfables;
         [SerializeField] Pressable reset_button;
         // [SerializeField] Pressable halfer_button;
+
+        [Space(5)]
+        [Header("Other")]
+        [SerializeField] private Pressable tare_heat_button;
+
+        private double m_accumulatedHeatEnergy;
 
         private AnalyticsService.SliderPanelLogData m_panelLogState;
 
@@ -133,6 +141,8 @@ namespace ThermoVR.Tools
 
             // Initialize Buttons
             reset_button.OnPress += HandleResetPressed;
+            tare_heat_button.OnPress += HandleTareHeatPressed;
+
 
             GameMgr.Events?.Register<Tuple<double, double, double>>(GameEvents.WarpPVT, HandleWarpPVT);
 
@@ -519,6 +529,25 @@ namespace ThermoVR.Tools
             return applied_heat;
         }
 
+        public void RecordToAccumulatedHeatEnergy(double deltaHeat)
+        {
+            m_accumulatedHeatEnergy += deltaHeat;
+
+            GameMgr.Events.Dispatch(GameEvents.AccumHeatEnergyUpdated);
+        }
+
+        public void ResetAccumulatedHeatEnergy()
+        {
+            m_accumulatedHeatEnergy = 0;
+
+            GameMgr.Events.Dispatch(GameEvents.AccumHeatEnergyUpdated);
+        }
+
+        public double GetAccumulatedHeatEnergy()
+        {
+            return m_accumulatedHeatEnergy;
+        }
+
         public double GetAppliedWeight() {
             double applied_weight = 0;
             if (tool_weight.engaged) {
@@ -564,6 +593,13 @@ namespace ThermoVR.Tools
             GameMgr.Events.Dispatch(GameEvents.ResetPressed);
 
             ResetDefaults();
+        }
+
+        private void HandleTareHeatPressed(object sender, System.EventArgs args)
+        {
+            Debug.Log("[ToolMgr] Heat tare pressed!");
+
+            ResetAccumulatedHeatEnergy();
         }
 
         private void ResetDefaults() {
@@ -686,6 +722,7 @@ namespace ThermoVR.Tools
             foreach(var dial in Dials) {
                 if (dial.gameObject == obj) {
                     relevantTools = dial.get_relevant_tools();
+                    dial.DeactivateNudge();
                     break;
                 }
             }

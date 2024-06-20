@@ -6,12 +6,17 @@ namespace ThermoVR.Controls
 {
     public class HapticsController : MonoBehaviour
     {
-        private OVRHapticsClip m_hapticsClip;
+        private OVRHapticsClip m_pressHapticsClip;
+        private OVRHapticsClip m_detentHapticsClip;
 
         private void Start()
         {
+            if (GameMgr.I.IsDesktop) { return; }
+            
             GameMgr.Events.Register<Hand>(GameEvents.HandStartPress, OnHandStartPress, this);
+            GameMgr.Events.Register<Hand>(GameEvents.DetentHit, OnDetentHit, this);
 
+            // Press Haptics
             byte[] samples = new byte[50];
             for (int i = 0; i < samples.Length; i++)
             {
@@ -19,23 +24,49 @@ namespace ThermoVR.Controls
             }
 
             if (OVRHaptics.Config.SampleSizeInBytes != 0) {
-                m_hapticsClip = new OVRHapticsClip(samples, samples.Length);
+                m_pressHapticsClip = new OVRHapticsClip(samples, samples.Length);
             }
             else
             {
-                m_hapticsClip = null;
+                m_pressHapticsClip = null;
+            }
+
+            // Detent Haptics
+            samples = new byte[25];
+            for (int i = 0; i < samples.Length; i++)
+            {
+                samples[i] = 75; // out of 255
+            }
+
+            if (OVRHaptics.Config.SampleSizeInBytes != 0)
+            {
+                m_detentHapticsClip = new OVRHapticsClip(samples, samples.Length);
+            }
+            else
+            {
+                m_detentHapticsClip = null;
             }
         }
 
         private void OnHandStartPress(Hand inHand)
         {
+            PlayHaptics(inHand, m_pressHapticsClip);
+        }
+
+        private void OnDetentHit(Hand inHand)
+        {
+            PlayHaptics(inHand, m_detentHapticsClip);
+        }
+
+        private void PlayHaptics(Hand inHand, OVRHapticsClip clip)
+        {
             if (inHand == Hand.LEFT)
             {
-                OVRHaptics.Channels[0].Mix(m_hapticsClip);
+                OVRHaptics.Channels[0].Mix(clip);
             }
             else if (inHand == Hand.RIGHT)
             {
-                OVRHaptics.Channels[1].Mix(m_hapticsClip);
+                OVRHaptics.Channels[1].Mix(clip);
             }
         }
     }
