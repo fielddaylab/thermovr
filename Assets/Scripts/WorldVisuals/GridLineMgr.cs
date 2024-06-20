@@ -67,6 +67,10 @@ namespace ThermoVR
         [SerializeField] private bool m_realTimeGeneration;
         [SerializeField] private float m_refreshThreshold;
 
+        [SerializeField] private Transform m_pAxisTracker;
+        [SerializeField] private Transform m_vAxisTracker;
+        [SerializeField] private Transform m_tAxisTracker;
+
         private Vector3 m_lastKnownPos;
 
         // [SerializeField] private float m_volumeOriginSpacing;
