@@ -315,7 +315,14 @@ namespace ThermoVR.Dials
 
         public bool val_within_range(float map_val)
         {
-            return map_val >= min_map && map_val <= max_map;
+            if (min_map < max_map)
+            {
+                return map_val >= min_map && map_val <= max_map;
+            }
+            else
+            {
+                return map_val <= min_map && map_val >= max_map;
+            }
         }
 
         public float get_val() {
