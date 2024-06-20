@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using ThermoVR.Dials;
@@ -28,9 +29,21 @@ namespace ThermoVR
 
             try
             {
+                // simple input
                 newVal = float.Parse(newValStr);
             }
-            catch { return; }
+            catch 
+            { 
+                try
+                {
+                    decimal d = Decimal.Parse(newValStr, System.Globalization.NumberStyles.Float);
+                    newVal = (float)(d);
+                }
+                catch
+                {
+                    return;
+                }
+            }
 
             newVal *= m_mult;
 
