@@ -313,6 +313,11 @@ namespace ThermoVR.Dials
             return map;
         }
 
+        public bool val_within_range(float map_val)
+        {
+            return map_val >= min_map && map_val <= max_map;
+        }
+
         public float get_val() {
             return val;
         }
@@ -321,6 +326,12 @@ namespace ThermoVR.Dials
             float newVal = MapToDialVal(target_map);
 
             set_val(newVal);
+        }
+
+        public void convert_and_set_map(float target_map)
+        {
+            float new_map = (float)((target_map - min_map) / (max_map - min_map));
+            set_mapped_val(new_map);
         }
 
         public void SetConstraint(float constraint, ConstrainType constrainType, float margin = 0) {

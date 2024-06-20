@@ -113,6 +113,9 @@ static public class GameEvents
 
     static public readonly StringHash32 DialTextUpdated = "world:dial-text-updated"; // Tuple<string, string>
     static public readonly StringHash32 RestoreLastSimState = "world:restore-last-sim-state";
+
+    static public readonly StringHash32 InputProxySelected = "world:input-proxy-selected";
+    static public readonly StringHash32 ProxyInputSubmitted = "world:proxy-input-submitted";
 }
 
 static public class ObjectIDs

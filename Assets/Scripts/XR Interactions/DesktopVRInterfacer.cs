@@ -52,6 +52,11 @@ namespace ThermoVR.Controls {
                             m_Dragging = pdInteractions.graph;
                         }
                     }
+                    else if (objHit.GetComponent<InputProxy>())
+                    {
+                        Debug.Log("[Interfacer] Input Proxy hit!");
+                        GameMgr.Events.Dispatch(GameEvents.InputProxySelected, objHit.GetComponent<InputProxy>());
+                    }
                 }
             }
             else if (Input.GetMouseButtonUp(0)) {
