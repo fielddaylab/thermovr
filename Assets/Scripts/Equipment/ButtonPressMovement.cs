@@ -18,6 +18,13 @@ namespace ThermoVR
         [SerializeField] private float m_resetTime;
         private float m_resetTimer;
 
+        [Header("Materials")]
+        [SerializeField] private bool m_changesMat;
+        [SerializeField] private MeshRenderer m_meshRenderer;
+        [SerializeField] private Material m_changeToMat;
+        [SerializeField] private int m_matIndex;
+        private Material m_defaultMat;
+
         private bool m_indented;
 
         private Vector3 m_defaultLocalPos;
@@ -44,6 +51,11 @@ namespace ThermoVR
             }
 
             m_indentedLocalPos = newPos;
+
+            if (m_changesMat)
+            {
+                m_defaultMat = m_meshRenderer.sharedMaterials[m_matIndex];
+            }
         }
 
         private void OnDisable()
@@ -71,11 +83,25 @@ namespace ThermoVR
             this.transform.localPosition = m_defaultLocalPos;
 
             m_indented = false;
+
+            if (m_changesMat)
+            {
+                var mats = m_meshRenderer.sharedMaterials;
+                mats[m_matIndex] = m_defaultMat;
+                m_meshRenderer.sharedMaterials = mats;
+            }
         }
 
         public void Indent()
         {
             this.transform.localPosition = m_indentedLocalPos;
+
+            if (m_changesMat)
+            {
+                var mats = m_meshRenderer.sharedMaterials;
+                mats[m_matIndex] = m_changeToMat;
+                m_meshRenderer.sharedMaterials = mats;
+            }
         }
 
         private void HandlePress(object sender, EventArgs args)
@@ -83,7 +109,7 @@ namespace ThermoVR
             if (m_indented || m_explicitCalls) { return; }
 
             // move button in/out
-            this.transform.localPosition = m_indentedLocalPos;
+            Indent();
 
             if (m_hasTimer)
             {
