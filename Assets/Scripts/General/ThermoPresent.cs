@@ -812,6 +812,11 @@ public class ThermoPresent : MonoBehaviour
         visualize_state();
     }
 
+    public void stamp_prev()
+    {
+        state.stamp_prev();
+    }
+
     void visualize_state() {
         state_dot.transform.localPosition = plot(state.pressure, state.volume, state.temperature);
 
@@ -830,37 +835,6 @@ public class ThermoPresent : MonoBehaviour
         double total_height = 0; // combined height
 
         calc_vliq_vvap(out lheight, out vheight);
-
-        /*
-        switch (state.region) {
-            case ThermoMath.region_liquid:
-                lheight = Math.Log(state.volume / ThermoState.piston_area) + ThermoState.log_offset_volume;
-                vheight = 0;
-                break;
-            case ThermoMath.region_twophase:
-                // TODO: under constant volume, applying heat/cooling results in changing overall volume presentation
-                double vliq = ThermoMath.vliq_given_p(state.pressure, state.region);
-                double vvap = ThermoMath.vvap_given_p(state.pressure, state.region);
-                vheight = Math.Log(q * vvap / ThermoState.piston_area) + ThermoState.log_offset_volume;
-                lheight = Math.Log((1 - q) * vliq / ThermoState.piston_area) + ThermoState.log_offset_volume;
-                if (lheight < 0) {
-                    // turns out log offset works for overall volume... but individual pieces like liquid height
-                    // can still be much smaller than the minimum overall state volume. But at these values,
-                    // we're talking about slivers smaller than the player can even see. So we can ignore them.
-                    lheight = 0;
-                }
-                // round out to current overall volume (take out from vapor)
-                double dif = (vheight + lheight) - (Math.Log(state.volume / ThermoState.piston_area) + ThermoState.log_offset_volume);
-                vheight -= dif;
-                break;
-            case ThermoMath.region_vapor:
-                lheight = 0;
-                vheight = Math.Log(state.volume / ThermoState.piston_area) + ThermoState.log_offset_volume;
-                break;
-            default:
-                break;
-        }
-        */
 
         total_height = vheight + lheight;
 
@@ -887,6 +861,36 @@ public class ThermoPresent : MonoBehaviour
 
         contents.Water.transform.localScale = new_liquid_scale;
         contents.Steam.transform.localScale = new_vapor_scale;
+
+        var steamPos = contents.SteamCondensationParticles.transform.localPosition;
+        steamPos.y = contents.CondensationParticlesStartY - log_map * 2;
+        contents.SteamCondensationParticles.transform.localPosition = steamPos;
+
+        if (new_liquid_scale.y == 0 || new_liquid_scale.y == 1)
+        {
+            contents.SteamCondensationParticles.SetActive(false);
+            contents.WaterBoilParticles.SetActive(false);
+        }
+        else
+        {
+            if (state.volume > state.prev_volume)
+            {
+                // temperature increasing
+                contents.SteamCondensationParticles.SetActive(false);
+                contents.WaterBoilParticles.SetActive(true);
+            }
+            else if (state.volume < state.prev_volume)
+            {
+                // temperature decreasing
+                contents.SteamCondensationParticles.SetActive(true);
+                contents.WaterBoilParticles.SetActive(false);
+            }
+            else
+            {
+                contents.SteamCondensationParticles.SetActive(false);
+                contents.WaterBoilParticles.SetActive(false);
+            }
+        }
     }
 
     public void calc_vliq_vvap(out double lheight, out double vheight)
@@ -998,7 +1002,7 @@ public class ThermoPresent : MonoBehaviour
             else { update_text = "x: Undefined"; DispatchText(update_text, "", 1, VarID.Quality); }
         }
 
-        state.stamp_prev();
+        // state.stamp_prev();
     }
 
     private void DispatchText(string update_text, string units, double proportion, VarID varId) {
