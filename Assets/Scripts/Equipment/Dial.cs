@@ -76,6 +76,7 @@ namespace ThermoVR.Dials
         [Header("Activation")]
 
         [SerializeField] private MeshRenderer[] knob_renderers;
+        [SerializeField] private MeshRenderer lock_plane;
 
         [Space(5)]
         [Header("Other")]
@@ -134,6 +135,7 @@ namespace ThermoVR.Dials
         private DialValProcessor processor;
 
         private bool m_nudging;
+        private bool m_currentlyGrabbed;
         private Vector3 m_lastKnownNudgeHandPos;
 
         [HideInInspector] public UnityEvent DialMoved;
@@ -160,6 +162,7 @@ namespace ThermoVR.Dials
             processor = this.GetComponent<DialValProcessor>();
 
             m_nudging = false;
+            m_currentlyGrabbed = false;
 
             SetConstraint(0f, ConstrainType.Min);
             SetConstraint(1f, ConstrainType.Max);
@@ -682,6 +685,18 @@ namespace ThermoVR.Dials
             UpdateSliderMaterials(relevant_tools[0].engaged, relevant_tools[0].allowed);
         }
 
+
+        public void OnGrabbed()
+        {
+            m_currentlyGrabbed = true;
+            UpdateSliderMaterials(relevant_tools[0].engaged, relevant_tools[0].allowed);
+        }
+        public void OnReleased()
+        {
+            m_currentlyGrabbed = false;
+            UpdateSliderMaterials(relevant_tools[0].engaged, relevant_tools[0].allowed);
+        }
+
         private void apply_change(float map, float new_val, float prev_val) {
             // for each group
             for (int g = 0; g < m_effect_map.Count; g++) {
@@ -725,11 +740,13 @@ namespace ThermoVR.Dials
         private void UpdateSliderMaterials(bool engaged, bool allowed)
         {
             Material knobMat = GameDB.Instance.KnobInactive; // default
+            lock_plane.gameObject.SetActive(false);
 
             if (!allowed)
             {
                 // locked
-                knobMat = GameDB.Instance.KnobLocked;
+                knobMat = engaged ? GameDB.Instance.KnobLockedActive : GameDB.Instance.KnobLockedInactive;
+                lock_plane.gameObject.SetActive(true);
             }
             else if (engaged)
             {
@@ -737,6 +754,11 @@ namespace ThermoVR.Dials
                 {
                     // nudging
                     knobMat = GameDB.Instance.KnobNudge;
+                }
+                else if (m_currentlyGrabbed)
+                {
+                    // grabbing
+                    knobMat = GameDB.Instance.KnobGrabbed;
                 }
                 else
                 {

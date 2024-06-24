@@ -28,8 +28,10 @@ public class GameDB : MonoBehaviour
 
     public Material KnobActive;
     public Material KnobNudge;
+    public Material KnobGrabbed;
     public Material KnobInactive;
-    public Material KnobLocked;
+    public Material KnobLockedActive;
+    public Material KnobLockedInactive;
 
     [Space(5)]
     [Header("Audio")]

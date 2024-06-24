@@ -24,6 +24,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1703253035018548620, guid: c88177c188275f044a1eb03b4f18b830,
         type: 3}
+      propertyPath: lock_plane
+      value: 
+      objectReference: {fileID: 4989693943535784321}
+    - target: {fileID: 1703253035018548620, guid: c88177c188275f044a1eb03b4f18b830,
+        type: 3}
       propertyPath: response_power
       value: 3
       objectReference: {fileID: 0}
@@ -356,7 +361,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Mesh
       value: 
-      objectReference: {fileID: -5469725153938115826, guid: add780c284d82684782fb7be08ebaf31,
+      objectReference: {fileID: -2454671936416904827, guid: 570486715f8341345964e3ba87ff05bf,
         type: 3}
     - target: {fileID: 6516559620386899245, guid: 3c6e7a3c269e2e946a211ad467331063,
         type: 3}
@@ -382,3 +387,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0a8067e71d32a3240b5cbb22d667d3f3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!23 &4989693943535784321 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 3510367135178973143, guid: 3c6e7a3c269e2e946a211ad467331063,
+    type: 3}
+  m_PrefabInstance: {fileID: 8469477024553111126}
+  m_PrefabAsset: {fileID: 0}

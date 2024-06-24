@@ -193,6 +193,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 3c6e7a3c269e2e946a211ad467331063, type: 3}
+--- !u!23 &1494952505453053413 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 3510367135178973143, guid: 3c6e7a3c269e2e946a211ad467331063,
+    type: 3}
+  m_PrefabInstance: {fileID: 2596456222887533106}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &7566547350388355766 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 5551163266199349380, guid: 3c6e7a3c269e2e946a211ad467331063,
@@ -277,6 +283,11 @@ PrefabInstance:
       propertyPath: m_ToolType
       value: 7
       objectReference: {fileID: 0}
+    - target: {fileID: 1703253035018548620, guid: c88177c188275f044a1eb03b4f18b830,
+        type: 3}
+      propertyPath: lock_plane
+      value: 
+      objectReference: {fileID: 1494952505453053413}
     - target: {fileID: 1703253035018548620, guid: c88177c188275f044a1eb03b4f18b830,
         type: 3}
       propertyPath: response_power
