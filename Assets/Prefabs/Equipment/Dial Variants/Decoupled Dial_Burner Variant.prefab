@@ -101,7 +101,7 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Mesh
       value: 
-      objectReference: {fileID: 199300846231893529, guid: e6289963949fe6949807356d62102498,
+      objectReference: {fileID: -2454671936416904827, guid: 570486715f8341345964e3ba87ff05bf,
         type: 3}
     - target: {fileID: 6795817568386835774, guid: 3c6e7a3c269e2e946a211ad467331063,
         type: 3}
@@ -122,6 +122,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0a8067e71d32a3240b5cbb22d667d3f3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!23 &7648800695138367413 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 3510367135178973143, guid: 3c6e7a3c269e2e946a211ad467331063,
+    type: 3}
+  m_PrefabInstance: {fileID: 6526467902608500834}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &6526467902776140442
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -134,6 +140,11 @@ PrefabInstance:
       propertyPath: m_mult
       value: 1000
       objectReference: {fileID: 0}
+    - target: {fileID: 1703253035018548620, guid: c88177c188275f044a1eb03b4f18b830,
+        type: 3}
+      propertyPath: lock_plane
+      value: 
+      objectReference: {fileID: 7648800695138367413}
     - target: {fileID: 1703253035018548620, guid: c88177c188275f044a1eb03b4f18b830,
         type: 3}
       propertyPath: activator_button

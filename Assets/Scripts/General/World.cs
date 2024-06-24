@@ -219,6 +219,8 @@ public class World : MonoBehaviour
         ProcessErrors();
 
         GameMgr.Events.Dispatch(GameEvents.StatePropertiesUpdated, thermo_present.get_properties_bundle());
+
+        thermo_present.stamp_prev();
     }
 
     #endregion // Callbacks

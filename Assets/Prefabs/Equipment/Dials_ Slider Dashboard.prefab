@@ -1224,6 +1224,10 @@ MonoBehaviour:
   m_explicitCalls: 0
   m_hasTimer: 1
   m_resetTime: 0.5
+  m_changesMat: 0
+  m_meshRenderer: {fileID: 0}
+  m_changeToMat: {fileID: 0}
+  m_matIndex: 0
 --- !u!4 &3368615308864072043 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4608346533408481545, guid: 06b9e94301f4b664d8103168d4722295,
@@ -1459,12 +1463,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 8646620363006095184}
     m_Modifications:
-    - target: {fileID: 71445751488840096, guid: 304c17a6946febd4696e169cf05e17e4,
-        type: 3}
-      propertyPath: m_Mesh
-      value: 
-      objectReference: {fileID: -5469725153938115826, guid: add780c284d82684782fb7be08ebaf31,
-        type: 3}
     - target: {fileID: 71445751488840098, guid: 304c17a6946febd4696e169cf05e17e4,
         type: 3}
       propertyPath: m_LocalPosition.x

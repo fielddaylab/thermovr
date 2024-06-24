@@ -63,11 +63,15 @@ namespace ThermoVR {
 
         public GameObject Water;
         public GameObject Steam;
+        public GameObject WaterBoilParticles;
+        public GameObject SteamCondensationParticles;
 
         [SerializeField] private GameObject m_ContentsContainer;
         [SerializeField] private Vector3 m_MaxScale;
         [SerializeField] private Vector3 m_MinScale;
         [SerializeField] private Vector3 m_DefaultScale;
+
+        [HideInInspector] public float CondensationParticlesStartY;
 
         private float m_Span; // difference between min and max positions
 
@@ -77,6 +81,7 @@ namespace ThermoVR {
 
         private void Awake() {
             m_Span = m_MaxScale.y - m_MinScale.y;
+            CondensationParticlesStartY = SteamCondensationParticles.transform.localPosition.y;
         }
 
         #endregion // Unity Callbacks

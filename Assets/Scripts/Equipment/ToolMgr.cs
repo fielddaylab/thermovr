@@ -704,6 +704,7 @@ namespace ThermoVR.Tools
             foreach (var dial in Dials) {
                 if (dial.gameObject == obj) {
                     relevantTools = dial.get_relevant_tools();
+                    dial.OnGrabbed();
                     break;
                 }
             }
@@ -723,6 +724,7 @@ namespace ThermoVR.Tools
                 if (dial.gameObject == obj) {
                     relevantTools = dial.get_relevant_tools();
                     dial.DeactivateNudge();
+                    dial.OnReleased();
                     break;
                 }
             }
