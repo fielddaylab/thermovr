@@ -116,6 +116,10 @@ static public class GameEvents
 
     static public readonly StringHash32 InputProxySelected = "world:input-proxy-selected";
     static public readonly StringHash32 ProxyInputSubmitted = "world:proxy-input-submitted";
+
+    static public readonly StringHash32 CanvasPreUpdate = "game:canvas-pre-update";
+    static public readonly StringHash32 ApplicationPreRender = "game:application-pre-render";
+
 }
 
 static public class ObjectIDs

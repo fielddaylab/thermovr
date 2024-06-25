@@ -15,6 +15,8 @@ namespace ThermoVR
         public bool IsAlphaRelease = true; // temp solution to managing alpha release channel
         public bool IsDesktop = false;
 
+        static public RenderMgr RenderMgr { get; internal set; }
+
         private readonly EventDispatcher<object> m_EventDispatcher = new EventDispatcher<object>();
 
         [SerializeField] private World m_world;
@@ -25,6 +27,11 @@ namespace ThermoVR
 
         protected override void Awake() {
             base.Awake();
+            
+            RenderMgr = new RenderMgr();
+            RenderMgr.Initialize();
+
+            RenderMgr.EnableAspectClamping(1920, 1080);
         }
 
         private void Start() {
@@ -45,10 +52,15 @@ namespace ThermoVR
 
         private void FixedUpdate() {
             m_world.ManualFixedUpdate();
+
+            Events.Dispatch(GameEvents.CanvasPreUpdate);
+            Events.Dispatch(GameEvents.ApplicationPreRender);
         }
 
         private void LateUpdate() {
             m_EventDispatcher.FlushQueue();
+
+            RenderMgr.PollScreenSettings();
         }
 
         /// <summary>
