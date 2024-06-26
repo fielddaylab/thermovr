@@ -65,6 +65,7 @@ namespace ThermoVR.Tools
         #region Inspector
 
         public bool always_engaged = false;
+        public bool preserve_during_locked = false;
         public ToolType tool_type;
         [SerializeField] private GameObject ModelContainer;
 

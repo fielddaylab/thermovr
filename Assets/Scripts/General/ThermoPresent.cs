@@ -979,7 +979,8 @@ public class ThermoPresent : MonoBehaviour
         else { update_text = "x: Undefined"; DispatchText(update_text, "", 1, VarID.Quality); }
     }
 
-    void LateUpdate() {
+    public void UpdatePropertyReadouts()
+    {
         //detect editor graphgen modifications
         bool modified = false;
         modified = ((plot_lbase != plot_lbase_prev) || (sample_lbase != sample_lbase_prev));
@@ -990,19 +991,18 @@ public class ThermoPresent : MonoBehaviour
         string update_text = "";
         if (state.pressure != state.prev_pressure) { update_text = string.Format("P: " + DigitFormat.Pressure, (float)state.pressure / 1000f); DispatchText(update_text, Units.Pressure, (state.pressure - ThermoMath.p_min) / pressure_range, VarID.Pressure); }
         if (state.temperature != state.prev_temperature) { update_text = string.Format("T: " + DigitFormat.TemperatureK + "    " + Units.TemperatureK + "  ({1:0.00} " + Units.TemperatureC + ")", (float)state.temperature, (float)state.temperature - 273.15f); DispatchText(update_text, "", (state.temperature - ThermoMath.t_min) / temperature_range, VarID.Temperature); }
-        if (state.volume != state.prev_volume) { update_text = string.Format("v: " + DigitFormat.Volume, (float)state.volume); DispatchText(update_text, Units.Volume, (state.volume - ThermoMath.v_min) / volume_range, VarID.Volume); }
+        if (state.volume != state.prev_volume) { update_text = string.Format("v: " + DigitFormat.VolumeLong, (float)state.volume); DispatchText(update_text, Units.Volume, (state.volume - ThermoMath.v_min) / volume_range, VarID.Volume); }
         if (state.internalenergy != state.prev_internalenergy) { update_text = string.Format("u: " + DigitFormat.InternalEnergy, (float)state.internalenergy / 1000f); DispatchText(update_text, Units.InternalEnergy, state.internalenergy / internal_energy_range, VarID.InternalEnergy); }
         if (state.entropy != state.prev_entropy) { update_text = string.Format("s: " + DigitFormat.Entropy, (float)state.entropy / 1000f); DispatchText(update_text, Units.Entropy, state.entropy / entropy_range, VarID.Entropy); }
         if (state.enthalpy != state.prev_enthalpy) { update_text = string.Format("h: " + DigitFormat.Enthalpy, (float)state.enthalpy / 1000f); DispatchText(update_text, Units.Enthalpy, state.enthalpy / enthalpy_range, VarID.Enthalpy); }
         if (state.region == 1 && state.quality != state.prev_quality) { update_text = string.Format("x: " + DigitFormat.Quality, (float)(state.quality * 100f)); DispatchText(update_text, Units.Quality, state.quality / quality_range, VarID.Quality); }
-        if (true /*state.region != state.prev_region*/) {
+        if (true /*state.region != state.prev_region*/)
+        {
             update_text = "Region: " + region_to_name(state.region); DispatchText(update_text, "", state.region / 2.0f, VarID.Region);
             if (state.region == 1) { update_text = string.Format("x: " + DigitFormat.Quality, (float)(state.quality * 100f)); DispatchText(update_text, Units.Quality, state.quality / quality_range, VarID.Quality); }
             else if (state.region == 0) { update_text = "x: Undefined"; DispatchText(update_text, "", 0, VarID.Quality); }
             else { update_text = "x: Undefined"; DispatchText(update_text, "", 1, VarID.Quality); }
         }
-
-        // state.stamp_prev();
     }
 
     private void DispatchText(string update_text, string units, double proportion, VarID varId) {

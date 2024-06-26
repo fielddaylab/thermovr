@@ -133,7 +133,7 @@ namespace ThermoVR.Lab
 
     public class LabLoader : MonoBehaviour
     {
-        #region consts
+        #region Consts
 
         private static uint TYPE_INDEX = 1;
         private static uint TOOL_INDEX = 2;
@@ -163,6 +163,7 @@ namespace ThermoVR.Lab
         private static string LIMIT_GROUP_DELIM = ",";
         private static string LIMIT_CHUNK_DELIM = ":";
         private static string TRAIL_GROUP_DELIM = ",";
+        private static string TEXT_DELIM = "---";
 
 
         private static string TEXT_KEY = "text";
@@ -879,10 +880,11 @@ namespace ThermoVR.Lab
         {
             int preIndex = quizInfo.IndexOf("Text:");
             iterateQuizInfo = quizInfo.Substring(preIndex);
-            int startIndex = iterateQuizInfo.IndexOf('"') + 1;
+            int startIndex = iterateQuizInfo.IndexOf(TEXT_DELIM) + TEXT_DELIM.Length;
             iterateQuizInfo = iterateQuizInfo.Substring(startIndex);
-            int endIndex = iterateQuizInfo.IndexOf('"');
+            int endIndex = iterateQuizInfo.IndexOf(TEXT_DELIM);
             int length = endIndex;
+            if (length == -1) { return; }
             iterateQuizInfo = iterateQuizInfo.Substring(0, length);
             newTaskInfo.TextOnly = iterateQuizInfo;
 

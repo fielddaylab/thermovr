@@ -358,14 +358,17 @@ namespace ThermoVR.Tools
             RecordPanelUpdate();
         }
 
-        public void DeactivateTool(Tool t) {
+        public void DeactivateTool(Tool t, bool auto = true) {
             bool toolReset = false;
             if (!t.always_engaged) {
-                // Trigger tool's deactivation animations
-                t.TriggerDeactivation();
+                if (!(auto && t.preserve_during_locked))
+                {
+                    // Trigger tool's deactivation animations
+                    t.TriggerDeactivation();
 
-                t.engaged = false;
-                toolReset = true;
+                    t.engaged = false;
+                    toolReset = true;
+                }
             }
             int uniqueStopID = 0;
             if (t == tool_stop1) {
@@ -656,7 +659,7 @@ namespace ThermoVR.Tools
             for (int i = 0; i < tools.Count; i++) {
                 if (t == tools[i]) {
                     if (t.engaged) {
-                        DeactivateTool(t);
+                        DeactivateTool(t, false);
                         break;
                     }
                     else {

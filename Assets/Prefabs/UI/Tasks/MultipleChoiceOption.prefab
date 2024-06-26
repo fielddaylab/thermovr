@@ -38,7 +38,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0.125, y: -0.5}
-  m_SizeDelta: {x: 9.9, y: 0.7}
+  m_SizeDelta: {x: 4.95, y: 0.7}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &779675652765745298
 MonoBehaviour:
@@ -53,8 +53,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_collider: {fileID: 6790291170679286968}
-  m_ExemplaryMCOptionCenter: {x: -151.28319, y: 0.16197146, z: 0.43656906}
-  m_ExemplaryMCOptionSize: {x: 329.10095, y: 9.502272, z: 2.2596283}
+  m_ExemplaryMCOptionCenter: {x: -68.13851, y: 0.1607279, z: 0.4365691}
+  m_ExemplaryMCOptionSize: {x: 162.81154, y: 15.629074, z: 2.2596283}
   m_button: {fileID: 8549229943325951918}
   m_optionText: {fileID: 3766702380975639678}
   m_fill: {fileID: 374828003000231166}
@@ -355,6 +355,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: ThermoButton
       objectReference: {fileID: 0}
+    - target: {fileID: 135131718963872881, guid: 948c9d963642c6e478aa25174a356344,
+        type: 3}
+      propertyPath: m_Layer
+      value: 10
+      objectReference: {fileID: 0}
     - target: {fileID: 1258696447034240170, guid: 948c9d963642c6e478aa25174a356344,
         type: 3}
       propertyPath: m_Pivot.x
@@ -473,12 +478,12 @@ PrefabInstance:
     - target: {fileID: 2507816980937106892, guid: 948c9d963642c6e478aa25174a356344,
         type: 3}
       propertyPath: m_Size.x
-      value: 329.10095
+      value: 162.81154
       objectReference: {fileID: 0}
     - target: {fileID: 2507816980937106892, guid: 948c9d963642c6e478aa25174a356344,
         type: 3}
       propertyPath: m_Size.y
-      value: 9.502272
+      value: 15.629074
       objectReference: {fileID: 0}
     - target: {fileID: 2507816980937106892, guid: 948c9d963642c6e478aa25174a356344,
         type: 3}
@@ -488,17 +493,17 @@ PrefabInstance:
     - target: {fileID: 2507816980937106892, guid: 948c9d963642c6e478aa25174a356344,
         type: 3}
       propertyPath: m_Center.x
-      value: -151.28319
+      value: -68.13851
       objectReference: {fileID: 0}
     - target: {fileID: 2507816980937106892, guid: 948c9d963642c6e478aa25174a356344,
         type: 3}
       propertyPath: m_Center.y
-      value: 0.16197146
+      value: 0.1607279
       objectReference: {fileID: 0}
     - target: {fileID: 2507816980937106892, guid: 948c9d963642c6e478aa25174a356344,
         type: 3}
       propertyPath: m_Center.z
-      value: 0.43656906
+      value: 0.4365691
       objectReference: {fileID: 0}
     - target: {fileID: 8110500313337203388, guid: 948c9d963642c6e478aa25174a356344,
         type: 3}
