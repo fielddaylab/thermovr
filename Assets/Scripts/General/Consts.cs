@@ -155,6 +155,7 @@ static public class DigitFormat
 
     static public readonly string Pressure = "{0:#.00e+0}";
     static public readonly string AmbientPressure = "{0:#.00e+0}";
+    static public readonly string VolumeLong = "{0:#.0000e+0}";
     static public readonly string Volume = "{0:#.00e+0}";
     static public readonly string InternalEnergy = "{0:#.##e+0}";
     static public readonly string Entropy = "{0:#.##e+0}";

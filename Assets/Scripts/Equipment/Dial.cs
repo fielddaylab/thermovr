@@ -176,7 +176,7 @@ namespace ThermoVR.Dials
                     Tool tool = group.ToAffect[t];
                     relevant_tools.Add(tool);
 
-                    if (tool.always_engaged)
+                    if (tool.always_engaged || tool.preserve_during_locked)
                     {
                         preserve_during_locked = true;
                     }
@@ -185,7 +185,7 @@ namespace ThermoVR.Dials
 
             if (preserveDuringLockedOverride)
             {
-                preserve_during_locked = true;
+                preserve_during_locked = preserveDuringLockedOverride;
             }
 
             if (activator_button != null) {

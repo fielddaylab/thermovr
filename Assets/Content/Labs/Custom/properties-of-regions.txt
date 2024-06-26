@@ -81,7 +81,7 @@
 |TargetInfo:
 |QuizInfo:
 	--Questions:
-	Question: "Use the Burner and cooler to move back and forth. Stay in the liquid region."
+	Question: "Use the Burner and Cooler to move back and forth. Stay in the liquid region."
 	Question: "Which of these properties remains constant? (Watch System Properties)"
 	Questions-->
 	Answers: ["Pressure"(c), "Volume", "Temperature"]
@@ -98,7 +98,7 @@
 |TargetInfo:
 |QuizInfo:
 	--Questions:
-	Question: "Use the Burner and cooler to move back and forth. Stay in the liquid region."
+	Question: "Use the Burner and Cooler to move back and forth. Stay in the liquid region."
 	Question: "Which property changes very slightly? (Watch System Properties)"
 	Questions-->
 	Answers: ["Pressure", "Volume"(c), "Temperature"]
@@ -109,12 +109,59 @@
 
 |Type: [text]
 |ToolInfo: [Burner, Coil]
-|SetInfo: 
+|SetInfo:
 |LimitInfo:
 |TrailInfo:
 |TargetInfo:
 |QuizInfo:
 	Text: ---Volume remains relatively unchanged, only affected by the thermal expansion of water.---
+|EfficiencyInfo:
+
+
+|| TASK
+
+|Type: [multiple-choice]
+|ToolInfo: [Weight, NegativeWeight]
+|SetInfo: [(p:500), (v:0.00102), (t:346), (i:0)]
+|LimitInfo:
+|TrailInfo:
+|TargetInfo:
+|QuizInfo:
+	--Questions:
+	Question: "Activate weight and move the slider up and down while observing the pressure temperature and volume. Stay within the liquid region."
+	Question: "Which of these properties remains constant? (Watch System Properties)"
+	Questions-->
+	Answers: ["Pressure", "Volume", "Temperature"(c)]
+|EfficiencyInfo:
+
+
+|| TASK
+
+|Type: [multiple-choice]
+|ToolInfo: [Weight, NegativeWeight]
+|SetInfo:
+|LimitInfo:
+|TrailInfo:
+|TargetInfo:
+|QuizInfo:
+	--Questions:
+	Question: "Activate weight and move the slider up and down while observing the pressure temperature and volume. Stay within the liquid region."
+	Question: "Which property changes very slightly? (Watch System Properties)"
+	Questions-->
+	Answers: ["Pressure", "Volume"(c), "Temperature"]
+|EfficiencyInfo:
+
+
+|| TASK
+
+|Type: [text]
+|ToolInfo: [Weight, NegativeWeight]
+|SetInfo: 
+|LimitInfo:
+|TrailInfo:
+|TargetInfo:
+|QuizInfo:
+	Text: ---This means that even at extreme pressures, water is not very compressible.---
 |EfficiencyInfo:
 
 
