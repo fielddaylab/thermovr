@@ -418,5 +418,123 @@ When energy is added to the two-state system, the energy goes towards overcoming
 |EfficiencyInfo:
 
 
+|| TOPIC // 4
+
+|Header: "Vapor"
+
+|| TASK // 1
+
+|Type: [text]
+|ToolInfo: [None]
+|SetInfo: [(p:100), (v:2.8041), (t:609), (i:1)]
+|LimitInfo:
+|TrailInfo:
+|TargetInfo:
+|QuizInfo:
+	Text: ---The vapor state is sometimes called "superheated," as it has been heated beyond saturation.---
+|EfficiencyInfo:
+
+|| TASK // 2
+
+|Type: [multi-select-choice]
+|ToolInfo: [Burner, Coil]
+|SetInfo: [(p:100), (v:2.8041), (t:609), (i:1)]
+|LimitInfo:
+|TrailInfo:
+|TargetInfo:
+|QuizInfo:
+	--Questions:
+	Question: "Use the burner and cooler to add and remove heat. Stay within the superheated vapor region."
+	Question: "Which properties change? (Watch System Properties.) You may select multiple properties."
+	Questions-->
+	Answers: ["Pressure", "Volume"(c), "Temperature"(c)]
+|EfficiencyInfo:
+
+|| TASK // 3
+
+|Type: [multi-select-choice]
+|ToolInfo: [Burner, Coil]
+|SetInfo: [(p:100), (v:2.8041), (t:609), (i:1)]
+|LimitInfo:
+|TrailInfo:
+|TargetInfo:
+|QuizInfo:
+	--Questions:
+	Question: "Use the burner and cooler to add and remove heat. Stay within the superheated vapor region."
+	Question: "Which properties remain constant? (Watch System Properties.) You may select multiple properties."
+	Questions-->
+	Answers: ["Pressure"(c), "Volume", "Temperature"]
+|EfficiencyInfo:
+
+|| TASK // 4
+
+|Type: [text]
+|ToolInfo: [None]
+|SetInfo: [(p:100), (v:2.8041), (t:609), (i:1)]
+|LimitInfo:
+|TrailInfo:
+|TargetInfo:
+|QuizInfo:
+	Text: ---Notice how, unlike the two-phase region, temperature and pressure are independent in the superheated region.---
+|EfficiencyInfo:
+
+
+|| TASK // 5
+
+|Type: [multi-select-choice]
+|ToolInfo: [Weight, NegativeWeight]
+|SetInfo: [(p:100), (v:2.8041), (t:609), (i:0)]
+|LimitInfo:
+|TrailInfo:
+|TargetInfo:
+|QuizInfo:
+	--Questions:
+	Question: "Use the weight to increase and decrease pressure. Stay within the superheated vapor region."
+	Question: "Which properties change? (Watch System Properties.) You may select multiple properties."
+	Questions-->
+	Answers: ["Pressure"(c), "Volume"(c), "Temperature"]
+|EfficiencyInfo:
+
+|| TASK // 6
+
+|Type: [text]
+|ToolInfo: [Weight, NegativeWeight]
+|SetInfo: [(i:0)]
+|LimitInfo:
+|TrailInfo:
+|TargetInfo:
+|QuizInfo:
+	Text: ---Note that pressure and volume vary in opposite directions.---
+|EfficiencyInfo:
+
+|| TASK // 7
+
+|Type: [multi-select-choice]
+|ToolInfo: [Weight, NegativeWeight]
+|SetInfo: [(i:0)]
+|LimitInfo:
+|TrailInfo:
+|TargetInfo:
+|QuizInfo:
+	--Questions:
+	Question: "Use the weight to increase and decrease pressure. Stay within the superheated vapor region."
+	Question: "Which properties remain constant? (Watch System Properties.) You may select multiple properties."
+	Questions-->
+	Answers: ["Pressure", "Volume", "Temperature"(c)]
+|EfficiencyInfo:
+
+|| TASK // 8
+
+|Type: [text]
+|ToolInfo: [Weight, NegativeWeight]
+|SetInfo: [(i:0)]
+|LimitInfo:
+|TrailInfo:
+|TargetInfo:
+|QuizInfo:
+	Text: ---In the superheated region far away from the vapor dome, the fluid (water) behaves like an ideal gas, for which PV = nRT where n & R are constants.---
+|EfficiencyInfo:
+
+
 || END
 
