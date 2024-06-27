@@ -17,7 +17,7 @@ namespace ThermoVR.UI
         private void Awake()
         {
             GameMgr.Events?.Register(GameEvents.InitialLoadComplete, HandleLoadComplete);
-            this.gameObject.SetActive(false);
+            if (!m_loadComplete) { this.gameObject.SetActive(false); }
         }
 
         private void Update()
