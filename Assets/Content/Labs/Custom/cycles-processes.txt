@@ -5,18 +5,127 @@
 
 |Header: "Cycles & Processes"
 
-|| TASK
+|| TASK // 1
 
 |Type: [text]
+|ToolInfo:
+|SetInfo: [(p:116), (v:0.0010110), (t:321), (i:1)]
+|LimitInfo:
+|TrailInfo: [enabled, preserve-previous, 30]
+|TargetInfo:
+|QuizInfo:
+	Text: ---What does a "constant pressure line" look like crossing through the 3 regions of liquid, 2-phase, and superheated vapor?---
+|EfficiencyInfo:
+
+|| TASK // 2
+
+|Type: [multiple-choice]
 |ToolInfo: [Burner, Coil]
-|SetInfo: [(p:158), (v:1.8), (t:616), (i:1)]
+|SetInfo: [(p:116), (v:0.0010110), (t:321), (i:1)]
+|LimitInfo:
+|TrailInfo: [enabled, clear-previous, 30]
+|TargetInfo:
+|QuizInfo:
+	--Questions:
+	Question: "Add heat in the liquid region moving toward two-phase."
+	Question: "In the liquid region, as the temperature increases, the volume:"
+	Questions-->
+	Answers: ["Increases slightly"(c), "Increases", "Decreases slightly", "Decreases"]
+|EfficiencyInfo:
+
+|| TASK // 3
+
+|Type: [multiple-choice]
+|ToolInfo: [Burner, Coil]
+|SetInfo: [(i:1)]
+|LimitInfo:
+|TrailInfo: [enabled, clear-previous, 30]
+|TargetInfo:
+|QuizInfo:
+	--Questions:
+	Question: "Add heat in the two-phase region moving toward superheated vapor."
+	Question: "What happens to the temperature as the process goes through the two-phase region?"
+	Questions-->
+	Answers: ["Increases", "Stays constant"(c), "Decreases"]
+|EfficiencyInfo:
+
+
+|| TASK // 4
+
+|Type: [multiple-choice]
+|ToolInfo: [Burner, Coil]
+|SetInfo: [(i:1)]
+|LimitInfo:
+|TrailInfo: [enabled, clear-previous, 30]
+|TargetInfo:
+|QuizInfo:
+	--Questions:
+	Question: "Add heat in the superheated vapor region."
+	Question: "In the superheated vapor region, as the temperature increases, the volume:"
+	Questions-->
+	Answers: ["Increases slightly", "Increases"(c), "Decreases slightly", "Decreases"]
+|EfficiencyInfo:
+
+
+|| TASK // 5
+
+|Type: [text]
+|ToolInfo:
+|SetInfo: [(p:3990), (v:0.0011239), (t:452), (i:0)]
 |LimitInfo:
 |TrailInfo:
 |TargetInfo:
 |QuizInfo:
-	Text: ---Here is where we discuss cycles and processes.---
+	Text: ---What does a "constant temperature line" look like crossing through the 3 regions of liquid, 2-phase, and superheated vapor?---
 |EfficiencyInfo:
 
+|| TASK // 6
+
+|Type: [multiple-choice]
+|ToolInfo: [Weight, NegativeWeight]
+|SetInfo: [(p:3990), (v:0.0011239), (t:452), (i:0)]
+|LimitInfo:
+|TrailInfo:
+|TargetInfo:
+|QuizInfo:
+	--Questions:
+	Question: "Reduce pressure in the liquid region moving toward two-phase."
+	Question: "In the liquid region, as the pressure decreases, the volume:"
+	Questions-->
+	Answers: ["Increases slightly"(c), "Increases", "Decreases slightly", "Decreases"]
+|EfficiencyInfo:
+
+|| TASK // 7
+
+|Type: [multiple-choice]
+|ToolInfo: [Weight, NegativeWeight]
+|SetInfo: [(i:0)]
+|LimitInfo:
+|TrailInfo:
+|TargetInfo:
+|QuizInfo:
+	--Questions:
+	Question: "Reduce pressure in the two-phase region moving toward superheated vapor."
+	Question: "What happens to the pressure as the process (quickly) goes through the 2-phase region?"
+	Questions-->
+	Answers: ["Increases", "Stays constant"(c), "Decreases"]
+|EfficiencyInfo:
+
+|| TASK // 8
+
+|Type: [multiple-choice]
+|ToolInfo: [Weight, NegativeWeight]
+|SetInfo: [(i:0)]
+|LimitInfo:
+|TrailInfo:
+|TargetInfo:
+|QuizInfo:
+	--Questions:
+	Question: "Reduce pressure in the superheated vapor region."
+	Question: "In the superheated region, as the pressure decreases, the volume:"
+	Questions-->
+	Answers: ["Increases slightly", "Increases"(c), "Decreases slightly", "Decreases"]
+|EfficiencyInfo:
 
 || END
 
