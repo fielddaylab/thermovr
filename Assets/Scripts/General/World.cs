@@ -381,13 +381,13 @@ public class World : MonoBehaviour
         //float lindext = OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger);
         //float rhandt  = OVRInput.Get(OVRInput.Axis1D.SecondaryHandTrigger);
         //float rindext = OVRInput.Get(OVRInput.Axis1D.SecondaryIndexTrigger);
-        float lhandt = OVRInput.Get(OVRInput.RawAxis1D.LHandTrigger);
-        float lindext = OVRInput.Get(OVRInput.RawAxis1D.LIndexTrigger);
-        float rhandt = OVRInput.Get(OVRInput.RawAxis1D.RHandTrigger);
-        float rindext = OVRInput.Get(OVRInput.RawAxis1D.RIndexTrigger);
+        float lhandt = OVRInput.Get(OVRInput.RawAxis1D.LHandTrigger); // 4 fingers trigger
+        float lindext = OVRInput.Get(OVRInput.RawAxis1D.LIndexTrigger); // index finger trigger
+        float rhandt = OVRInput.Get(OVRInput.RawAxis1D.RHandTrigger); // 4 fingers trigger
+        float rindext = OVRInput.Get(OVRInput.RawAxis1D.RIndexTrigger); // index finger trigger
 
-        bool rhand_nudge_activate = OVRInput.Get(OVRInput.Button.One);
-        bool lhand_nudge_activate = OVRInput.Get(OVRInput.Button.Three);
+        bool rhand_nudge_activate = OVRInput.Get(OVRInput.Button.One); // A (right hand)
+        bool lhand_nudge_activate = OVRInput.Get(OVRInput.Button.Three); // X (left hand)
 
         //test effect of hands one at a time ("true" == "left hand", "false" == "right hand")
         TryHand(true, lhandt, lindext, lhand.transform.position, lhand.vel, ref lhtrigger, ref litrigger, ref lhtrigger_delta, ref litrigger_delta, ref lpos, ref lhand.obj, ref lgrabbed, ref rhand.obj, ref rgrabbed, ref lhand_nudge_activate); //left hand
@@ -519,7 +519,7 @@ public class World : MonoBehaviour
         }
 
         //find new grabs
-        if (ref_grabbed == null && ((ref_htrigger_delta == 1 && ref_itrigger) || (ref_htrigger && ref_itrigger_delta == 1))) {
+        if (ref_grabbed == null && ref_htrigger_delta == 1 /*&& ((ref_htrigger_delta == 1 && ref_itrigger) || (ref_htrigger && ref_itrigger_delta == 1))*/) {
             //first try movables
             for (int i = 0; ref_grabbed == null && i < movables.Count; i++) {
                 bool leftGrab = left_hand && movables[i].ltouch;
@@ -597,6 +597,32 @@ public class World : MonoBehaviour
             {
                 Halfable h = ref_grabbed.GetComponent<Halfable>();
                 if (h != null) h.setHalf(false); //nothing should be halfed while being grabbed
+            }
+
+            GameMgr.Events.Dispatch(GameEvents.ObjectGrabbed, ref_grabbed);
+        }
+        //find new pinch grabs
+        if (ref_grabbed == null && ((ref_itrigger_delta == 1 && !ref_htrigger)))
+        {
+            // dials
+            if (ref_grabbed == null)
+            {
+                for (int i = 0; i < ToolMgr.Dials.Count; i++)
+                {
+                    bool leftGrab = left_hand && ToolMgr.Dials[i].touchable.ltouch;
+                    bool rightGrab = !left_hand && ToolMgr.Dials[i].touchable.rtouch;
+                    //dial newly grabbed
+                    if (leftGrab || rightGrab)
+                    {
+                        ref_grabbed = ToolMgr.Dials[i].gameObject;
+                        Hand grabType = leftGrab ? Hand.LEFT : Hand.RIGHT;
+                        ToolMgr.Dials[i].touchable.SetGrabbed(true, grabType);
+                        if (ref_grabbed == ref_ograbbed) ref_ograbbed = null;
+
+                        Dial dd = ToolMgr.Dials[i];
+                        GrabDial(dd, grabType);
+                    }
+                }
             }
 
             GameMgr.Events.Dispatch(GameEvents.ObjectGrabbed, ref_grabbed);
