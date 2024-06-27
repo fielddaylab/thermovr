@@ -56,6 +56,9 @@ public class World : MonoBehaviour
     [Header("Thermo")]
     [SerializeField] private ThermoPresent thermo_present;
     [SerializeField] private Tablet tablet;
+    [SerializeField] private Touchable tablet_grabbable;
+    [SerializeField] private Collider tablet_handle_left;
+    [SerializeField] private Collider tablet_handle_right;
     // TODO: assign these
     [SerializeField] private GraphElement[] graph_elements; // visual aid overlays on graph (region labels, number lines, etc.)
 
@@ -599,6 +602,25 @@ public class World : MonoBehaviour
                 bool rightGrab = !left_hand && movables[i].rtouch;
                 //object newly grabbed
                 if (leftGrab || rightGrab) {
+                    // only grab handles of tablet
+                    if (movables[i] == tablet_grabbable)
+                    {
+                        bool found = false;
+                        Collider[] hitColliders = Physics.OverlapBox(hand_pos, new Vector3(0.05f, 0.05f, 0.05f), Quaternion.identity);
+                        for (int collider = 0; collider < hitColliders.Length; collider++)
+                        {
+                            if (hitColliders[collider] == tablet_handle_left || hitColliders[collider] == tablet_handle_right)
+                            {
+                                found = true;
+                            }
+                        }
+
+                        if (!found)
+                        {
+                            continue;
+                        }
+                    }
+
                     ref_grabbed = movables[i].gameObject;
                     ref_grabbed.transform.SetParent(ref_hand.transform);
                     if (ref_grabbed == ref_ograbbed) ref_ograbbed = null;
