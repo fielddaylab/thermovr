@@ -862,6 +862,8 @@ public class ThermoPresent : MonoBehaviour
         contents.Water.transform.localScale = new_liquid_scale;
         contents.Steam.transform.localScale = new_vapor_scale;
 
+        if (contents.SteamCondensationParticles.transform.localPosition.y == float.NaN) { return; }
+
         var steamPos = contents.SteamCondensationParticles.transform.localPosition;
         steamPos.y = contents.CondensationParticlesStartY - log_map * 2;
         contents.SteamCondensationParticles.transform.localPosition = steamPos;
@@ -998,7 +1000,11 @@ public class ThermoPresent : MonoBehaviour
         if (state.region == 1 && state.quality != state.prev_quality) { update_text = string.Format("x: " + DigitFormat.Quality, (float)(state.quality * 100f)); DispatchText(update_text, Units.Quality, state.quality / quality_range, VarID.Quality); }
         if (true /*state.region != state.prev_region*/)
         {
-            update_text = "Region: " + region_to_name(state.region); DispatchText(update_text, "", state.region / 2.0f, VarID.Region);
+            // region
+            update_text = "Region: " + (state.pressure > ThermoMath.psat_max ? "Supercritical Fluid" : region_to_name(state.region));
+            DispatchText(update_text, "", state.region / 2.0f, VarID.Region);
+            
+            // quality
             if (state.region == 1) { update_text = string.Format("x: " + DigitFormat.Quality, (float)(state.quality * 100f)); DispatchText(update_text, Units.Quality, state.quality / quality_range, VarID.Quality); }
             else if (state.region == 0) { update_text = "x: Undefined"; DispatchText(update_text, "", 0, VarID.Quality); }
             else { update_text = "x: Undefined"; DispatchText(update_text, "", 1, VarID.Quality); }

@@ -1179,7 +1179,9 @@ namespace ThermoVR.State
                     region = ThermoMath.region_given_pvt(pressure, volume, temperature);
                 }
             }
-            catch (Exception e) { }
+            catch (Exception e) { 
+                tryIterate = true; 
+            }
 
             clamp_state();
         }
