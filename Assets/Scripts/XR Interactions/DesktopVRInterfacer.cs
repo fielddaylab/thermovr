@@ -112,7 +112,7 @@ namespace ThermoVR.Controls {
                     currPos = Camera.main.ScreenToWorldPoint(Input.mousePosition + new Vector3(0, 0, Vector3.Distance(Camera.main.transform.position, m_Dragging.transform.position)));
                 }
 
-                World.Instance.TryInteractable(ref m_Dragging, m_PrevWorldPos, ref currPos, null, Hand.MOUSE, m_nudgeMode);
+                World.Instance.TryInteractable(ref m_Dragging, m_PrevWorldPos, ref currPos, null, Hand.MOUSE, m_nudgeMode, 0);
 
                 m_PrevWorldPos = currPos;
             }

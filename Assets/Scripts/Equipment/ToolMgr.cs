@@ -741,12 +741,12 @@ namespace ThermoVR.Tools
 
         private void HandleNudgeUpClicked(int dialIndex)
         {
-            Dials[dialIndex].NudgeUp();
+            Dials[dialIndex].NudgeUp(false, Vector3.zero);
         }
 
         private void HandleNudgeDownClicked(int dialIndex)
         {
-            Dials[dialIndex].NudgeDown();
+            Dials[dialIndex].NudgeDown(false, Vector3.zero);
         }
 
         #endregion // Handlers

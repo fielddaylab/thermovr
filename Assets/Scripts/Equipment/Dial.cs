@@ -428,7 +428,7 @@ namespace ThermoVR.Dials
          */
         private float mapSharp(float inVal) { return min_map + (max_map - min_map) * Mathf.Pow(inVal, response_power); }
 
-        private void nudgeValUp()
+        private void nudgeValUp(bool manual, Vector3 r_hand_pos)
         {
             float newMap;
             if (val + nudgeAmt <= 1)
@@ -453,10 +453,15 @@ namespace ThermoVR.Dials
                 World.Instance.ToolMgr.UpdateApplyTool(relevant_tools[t]);
             }
 
+            if (manual)
+            {
+                m_lastKnownNudgeHandPos = r_hand_pos;
+            }
+
             GameMgr.Events.Dispatch(GameEvents.ClickToolIncrease, new Tuple<ToolType, float, int>(firstType, newMap, uniqueStopID));
         }
 
-        private void nudgeValDown()
+        private void nudgeValDown(bool manual, Vector3 r_hand_pos)
         {
             float newMap;
             if (val - nudgeAmt >= 0)
@@ -480,6 +485,11 @@ namespace ThermoVR.Dials
                     uniqueStopID = ToolMgr.Instance.IdentifyStop(relevant_tools[t]);
                 }
                 World.Instance.ToolMgr.UpdateApplyTool(relevant_tools[t]);
+            }
+
+            if (manual)
+            {
+                m_lastKnownNudgeHandPos = r_hand_pos;
             }
 
             GameMgr.Events.Dispatch(GameEvents.ClickToolDecrease, new Tuple<ToolType, float, int>(firstType, newMap, uniqueStopID));
@@ -838,34 +848,34 @@ namespace ThermoVR.Dials
             }
         }
 
-        public void NudgeUp()
+        public void NudgeUp(bool manual, Vector3 r_hand_pos)
         {
             if (!AnyToolsActive())
             {
                 return;
             }
 
-            nudgeValUp();
+            nudgeValUp(manual, r_hand_pos);
         }
 
-        public void NudgeDown()
+        public void NudgeDown(bool manual, Vector3 r_hand_pos)
         {
             if (!AnyToolsActive())
             {
                 return;
             }
 
-            nudgeValDown();
+            nudgeValDown(manual, r_hand_pos);
         }
 
         private void HandleNudgeUpPressed(object sender, EventArgs args)
         {
-            NudgeUp();
+            NudgeUp(false, Vector3.zero);
         }
 
         private void HandleNudgeDownPressed(object sender, EventArgs args)
         {
-            NudgeDown();
+            NudgeDown(false, Vector3.zero);
         }
 
         #endregion // Handlers

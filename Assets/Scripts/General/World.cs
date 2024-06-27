@@ -92,8 +92,10 @@ public class World : MonoBehaviour
     GameObject rgrabbed = null;
     int lhtrigger_delta = 0;
     int litrigger_delta = 0;
+    int lstrigger_delta = 0;
     int rhtrigger_delta = 0;
     int ritrigger_delta = 0;
+    int rstrigger_delta = 0;
     Vector3 lpos = new Vector3(0f, 0f, 0f);
     Vector3 rpos = new Vector3(0f, 0f, 0f);
 
@@ -105,6 +107,8 @@ public class World : MonoBehaviour
     bool rhtrigger = false;
     bool litrigger = false;
     bool ritrigger = false;
+    bool lstrigger = false;
+    bool rstrigger = false;
 
     // sim variables
     double room_temp = 292; // in K
@@ -389,9 +393,15 @@ public class World : MonoBehaviour
         bool rhand_nudge_activate = OVRInput.Get(OVRInput.Button.One); // A (right hand)
         bool lhand_nudge_activate = OVRInput.Get(OVRInput.Button.Three); // X (left hand)
 
+        Vector2 rstickt = OVRInput.Get(OVRInput.RawAxis2D.RThumbstick); // A (right hand)
+        Vector2 lstickt = OVRInput.Get(OVRInput.RawAxis2D.LThumbstick); // X (left hand)
+
+        rstrigger_delta = 0;
+        lstrigger_delta = 0;
+
         //test effect of hands one at a time ("true" == "left hand", "false" == "right hand")
-        TryHand(true, lhandt, lindext, lhand.transform.position, lhand.vel, ref lhtrigger, ref litrigger, ref lhtrigger_delta, ref litrigger_delta, ref lpos, ref lhand.obj, ref lgrabbed, ref rhand.obj, ref rgrabbed, ref lhand_nudge_activate); //left hand
-        TryHand(false, rhandt, rindext, rhand.transform.position, rhand.vel, ref rhtrigger, ref ritrigger, ref rhtrigger_delta, ref ritrigger_delta, ref rpos, ref rhand.obj, ref rgrabbed, ref lhand.obj, ref lgrabbed, ref rhand_nudge_activate); //right hand
+        TryHand(true, lhandt, lindext, rstickt, lstickt, lhand.transform.position, lhand.vel, ref lhtrigger, ref litrigger, ref lstrigger, ref rstrigger, ref lhtrigger_delta, ref litrigger_delta, ref rstrigger_delta, ref lstrigger_delta, ref lpos, ref lhand.obj, ref lgrabbed, ref rhand.obj, ref rgrabbed, ref lhand_nudge_activate); //left hand
+        TryHand(false, rhandt, rindext, rstickt, lstickt, rhand.transform.position, rhand.vel, ref rhtrigger, ref ritrigger, ref lstrigger, ref rstrigger, ref rhtrigger_delta, ref ritrigger_delta, ref rstrigger_delta, ref lstrigger_delta, ref rpos, ref rhand.obj, ref rgrabbed, ref lhand.obj, ref lgrabbed, ref rhand_nudge_activate); //right hand
 
     }
 
@@ -405,7 +415,7 @@ public class World : MonoBehaviour
     /// <param name="actable"></param>
     /// <param name="hand_pos">prev hand position</param>
     /// <param name="r_hand_pos">ref to curr hand position</param>
-    public void TryInteractable(ref GameObject actable, Vector3 hand_pos, ref Vector3 r_hand_pos, GameObject hand_obj, Hand handType, bool nudge_active) {
+    public void TryInteractable(ref GameObject actable, Vector3 hand_pos, ref Vector3 r_hand_pos, GameObject hand_obj, Hand handType, bool nudge_active, int nudge_stick_delta) {
         //grabbing handle
         if (actable == handle_workspace) {
             if (origin)
@@ -462,6 +472,17 @@ public class World : MonoBehaviour
                         dd.UpdateNudgeState(nudge_active);
                         dd.update_val_grab(hand_pos, r_hand_pos, handType);
 
+                        if (nudge_stick_delta == 1)
+                        {
+                            dd.NudgeUp(true, r_hand_pos);
+                            Debug.Log("[Inputs] Stick trigger = 1");
+                        }
+                        else if (nudge_stick_delta == -1)
+                        {
+                            dd.NudgeDown(true, r_hand_pos);
+                            Debug.Log("[Inputs] Stick trigger = -1");
+                        }
+
                         List<Tool> relevant_tools = dd.get_relevant_tools();
                         for (int t = 0; t < relevant_tools.Count; t++)
                         {
@@ -486,11 +507,13 @@ public class World : MonoBehaviour
      * Honestly, I haven't quite got a full understanding of this ~200-line behemoth.
      */
     //"left_hand": true -> left, false -> right
-    void TryHand(bool left_hand, float htrigger_val, float itrigger_val, Vector3 hand_pos, Vector3 hand_vel, ref bool ref_htrigger, ref bool ref_itrigger, ref int ref_htrigger_delta, ref int ref_itrigger_delta, ref Vector3 ref_hand_pos, ref GameObject ref_hand, ref GameObject ref_grabbed, ref GameObject ref_ohand, ref GameObject ref_ograbbed, ref bool nudge_active) {
+    void TryHand(bool left_hand, float htrigger_val, float itrigger_val, Vector2 rsticktrigger_val, Vector2 lsticktrigger_val, Vector3 hand_pos, Vector3 hand_vel, ref bool ref_htrigger, ref bool ref_itrigger, ref bool ref_rstrigger, ref bool ref_lstrigger, ref int ref_htrigger_delta, ref int ref_itrigger_delta, ref int ref_rstrigger_delta, ref int ref_lstrigger_delta, ref Vector3 ref_hand_pos, ref GameObject ref_hand, ref GameObject ref_grabbed, ref GameObject ref_ohand, ref GameObject ref_ograbbed, ref bool nudge_active) {
         float htrigger_threshhold = 0.1f;
         float itrigger_threshhold = 0.1f;
+        float strigger_threshhold = 0.7f;
 
         //find deltas
+        // hand trigger
         ref_htrigger_delta = 0;
         if (!ref_htrigger && htrigger_val > htrigger_threshhold) {
             ref_htrigger_delta = 1;
@@ -500,7 +523,8 @@ public class World : MonoBehaviour
             ref_htrigger_delta = -1;
             ref_htrigger = false;
         }
-
+         
+        // index trigger
         ref_itrigger_delta = 0;
         if (!ref_itrigger && itrigger_val > itrigger_threshhold) {
             ref_itrigger_delta = 1;
@@ -511,6 +535,55 @@ public class World : MonoBehaviour
         else if (ref_itrigger && itrigger_val <= itrigger_threshhold) {
             ref_itrigger_delta = -1;
             ref_itrigger = false;
+        }
+
+        // left stick trigger
+        if (!ref_lstrigger && lsticktrigger_val.y > strigger_threshhold)
+        {
+            ref_lstrigger_delta = 1;
+            ref_lstrigger = true;
+        }
+        else if (!ref_lstrigger && lsticktrigger_val.y < -strigger_threshhold)
+        {
+            ref_lstrigger_delta = -1;
+            ref_lstrigger = true;
+        }
+        else if (ref_lstrigger
+            && (lsticktrigger_val.y <= strigger_threshhold)
+            && (lsticktrigger_val.y > -strigger_threshhold))
+        {
+            ref_lstrigger_delta = 0;
+            ref_lstrigger = false;
+        }
+
+
+        // right stick trigger
+        if (!ref_rstrigger && rsticktrigger_val.y > strigger_threshhold)
+        {
+            ref_rstrigger_delta = 1;
+            ref_rstrigger = true;
+        }
+        else if (!ref_rstrigger && rsticktrigger_val.y < -strigger_threshhold)
+        {
+            ref_rstrigger_delta = -1;
+            ref_rstrigger = true;
+        }
+        else if (ref_rstrigger
+            && (rsticktrigger_val.y <= strigger_threshhold)
+            && (rsticktrigger_val.y > -strigger_threshhold))
+        {
+            ref_rstrigger_delta = 0;
+            ref_rstrigger = false;
+        }
+
+        int stickTriggerDelta = 0;
+        if (ref_rstrigger_delta != 0 && ref_rstrigger)
+        {
+            stickTriggerDelta = ref_rstrigger_delta;
+        }
+        else if (ref_lstrigger_delta != 0 && ref_lstrigger)
+        {
+            stickTriggerDelta = ref_lstrigger_delta;
         }
 
         // fine-selection (used to extract data from UI)
@@ -562,7 +635,7 @@ public class World : MonoBehaviour
                 }
             }
 
-            //then extraaneous
+            //then extraneous
             if (ref_grabbed == null) //still not holding anything
             {
                 Touchable g = handle_workspace_touchable;
@@ -666,7 +739,8 @@ public class World : MonoBehaviour
         if (ref_grabbed)
         {
             Hand handType = left_hand ? Hand.LEFT : Hand.RIGHT;
-            TryInteractable(ref ref_grabbed, hand_pos, ref ref_hand_pos, ref_hand, handType, nudge_active);
+
+            TryInteractable(ref ref_grabbed, hand_pos, ref ref_hand_pos, ref_hand, handType, nudge_active, stickTriggerDelta);
         }
 
         ref_hand_pos = hand_pos;
