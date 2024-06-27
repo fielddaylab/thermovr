@@ -73,6 +73,8 @@ namespace ThermoVR
 
         private Vector3 m_lastKnownPos;
 
+        private Routine m_refreshRoutine;
+
         // [SerializeField] private float m_volumeOriginSpacing;
 
 
@@ -105,13 +107,7 @@ namespace ThermoVR
                 var dist = Vector3.Distance(m_graphBall.transform.position, m_lastKnownPos);
                 if (dist > m_refreshThreshold)
                 {
-                    m_tempLines[0].positionCount = 0;
-                    PopulatePLine(World.Instance.get_state_var(VarID.Pressure) * 1000, ref m_tempLines[0], false);
-                    m_tempLines[1].positionCount = 0;
-                    PopulateVLine(World.Instance.get_state_var(VarID.Volume), ref m_tempLines[1], false);
-                    m_tempLines[2].positionCount = 0;
-                    PopulateTLine(World.Instance.get_state_var(VarID.Temperature), ref m_tempLines[2], false);
-
+                    m_refreshRoutine.Replace(RefreshRoutine());
                     m_lastKnownPos = m_graphBall.transform.position;
                 }
             }
@@ -285,6 +281,19 @@ namespace ThermoVR
 
             m_generationInProgress = false;
             yield return null;
+        }
+
+        private IEnumerator RefreshRoutine()
+        {
+            // wait 1 frame for physics calculations to kick in
+            yield return null;
+
+            m_tempLines[0].positionCount = 0;
+            PopulatePLine(World.Instance.get_state_var(VarID.Pressure) * 1000, ref m_tempLines[0], false);
+            m_tempLines[1].positionCount = 0;
+            PopulateVLine(World.Instance.get_state_var(VarID.Volume), ref m_tempLines[1], false);
+            m_tempLines[2].positionCount = 0;
+            PopulateTLine(World.Instance.get_state_var(VarID.Temperature), ref m_tempLines[2], false);
         }
 
         #endregion // Routines
