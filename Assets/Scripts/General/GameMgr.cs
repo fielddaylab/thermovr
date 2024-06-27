@@ -4,6 +4,7 @@ using BeauUtil.Debugger;
 using BeauUtil.Extensions;
 using System.Collections;
 using System.Collections.Generic;
+using ThermoVR.UI;
 using UnityEngine;
 
 namespace ThermoVR
@@ -23,6 +24,7 @@ namespace ThermoVR
         [SerializeField] private ThermoPresent m_thermo_present;
 
         [SerializeField] private SaveSystem m_SaveSystem = null;
+        [SerializeField] private UILoading m_UILoading;
         private string m_ProfileName;
 
         protected override void Awake() {
@@ -48,6 +50,7 @@ namespace ThermoVR
             Events.Register(GameEvents.TryNewName, OnTryNewName, this);
 
             Events.Dispatch(GameEvents.InitialLoadComplete);
+            if (m_UILoading) { m_UILoading.OnLoadingComplete(); }
         }
 
         private void FixedUpdate() {

@@ -17,6 +17,7 @@ namespace ThermoVR.UI
         private void Awake()
         {
             GameMgr.Events?.Register(GameEvents.InitialLoadComplete, HandleLoadComplete);
+            this.gameObject.SetActive(false);
         }
 
         private void Update()
@@ -33,6 +34,12 @@ namespace ThermoVR.UI
 
                 m_loadIcon.transform.Rotate(-m_rotation * Time.deltaTime, Space.Self);
             }
+        }
+
+        public void OnLoadingComplete()
+        {
+            HandleLoadComplete();
+            this.gameObject.SetActive(true);
         }
 
         #region Handlers
