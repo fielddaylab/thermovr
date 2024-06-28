@@ -140,6 +140,7 @@ namespace ThermoVR.Analytics
         private int m_ActiveSectionIndex;
         private int m_ActiveTaskIndex;
         private Hand m_LastHandPress;
+        private LogToolType m_LastInputProxyType;
 
         private List<string> m_LastKnownWordBankStrs = new List<string>();
 
@@ -172,6 +173,8 @@ namespace ThermoVR.Analytics
 
         protected void Initialize()
         {
+            m_LastInputProxyType = LogToolType.UNKOWN;
+
             // General Events
             GameMgr.Events.Register<string>(GameEvents.NewNameGenerated, SetUserCode, this)
                 .Register<Hand>(GameEvents.HandStartPress, OnHandStartPress, this)
@@ -199,7 +202,10 @@ namespace ThermoVR.Analytics
                 .Register(GameEvents.ClickSectionScrollDown, LogClickSectionScrollDown, this)
                 .Register(GameEvents.ClickTaskScrollLeft, LogClickTaskScrollLeft, this)
                 .Register(GameEvents.ClickTaskScrollRight, LogClickTaskScrollRight, this)
-                .Register(GameEvents.TargetStateReached, LogTargetStateAchieved, this)
+                .Register(GameEvents.TargetStateTaskBegan, LogTargetStateTaskBegan, this)
+                .Register(GameEvents.TargetStateTaskEnded, LogTargetStateTaskEnded, this)
+                .Register(GameEvents.TargetStateEntered, LogTargetStateEntered, this)
+                .Register(GameEvents.TargetStateCompleted, LogTargetStateCompleted, this)
                 .Register<List<string>>(GameEvents.TargetStateLost, LogTargetStateLost, this)
                 .Register<AnswerSelectLogData>(GameEvents.ClickSelectAnswer, LogClickSelectAnswer, this)
                 .Register<AnswerSelectLogData>(GameEvents.ClickDeselectAnswer, LogClickDeselectAnswer, this)
@@ -240,6 +246,10 @@ namespace ThermoVR.Analytics
                 .Register<PositionDataFrame[]>(GameEvents.ViewportData, LogViewportData)
                 .Register<PositionDataFrame[]>(GameEvents.LeftHandData, LogLeftHandData)
                 .Register<PositionDataFrame[]>(GameEvents.RightHandData, LogRightHandData)
+                .Register<ToolType>(GameEvents.EditToolValStarted, LogClickEditToolVal, this)
+                .Register<float>(GameEvents.ProxyInputSubmitted, LogSetToolVal, this)
+                .Register<string>(GameEvents.SetInvalidToolVal, LogSetInvalidToolVal, this)
+                .Register(GameEvents.CancelEditToolVal, LogCancelEditToolVal, this)
                 ;
 
             m_Log = new OGDLog(
@@ -247,7 +257,7 @@ namespace ThermoVR.Analytics
                 {
                     AppId = m_AppId,
                     AppVersion = m_AppVersion,
-                    ClientLogVersion = 1
+                    ClientLogVersion = 2
                 },
                 new OGDLog.MemoryConfig
                 (
@@ -875,7 +885,27 @@ namespace ThermoVR.Analytics
             }
         }
 
-        private void LogTargetStateAchieved()
+        private void LogTargetStateTaskBegan()
+        {
+            Debug.Log("[Analytics] event: target_state_task_began");
+
+            using (var e = m_Log.NewEvent("target_state_task_began"))
+            {
+
+            }
+        }
+
+        private void LogTargetStateTaskEnded()
+        {
+            Debug.Log("[Analytics] event: target_state_task_ended");
+
+            using (var e = m_Log.NewEvent("target_state_task_ended"))
+            {
+
+            }
+        }
+
+        private void LogTargetStateEntered()
         {
             Dictionary<string, float> targetState = new Dictionary<string, float>();
             TaskInfo info = m_ActiveLabInfo.Topics[m_ActiveSectionIndex].Tasks[m_ActiveTaskIndex];
@@ -884,11 +914,31 @@ namespace ThermoVR.Analytics
                 targetState.Add(simTarget.TargetID.ToString(), simTarget.TargetVal);
             }
 
-            Debug.Log("[Analytics] event: target_state_achieved");
+            Debug.Log("[Analytics] event: target_state_entered");
 
-            using (var e = m_Log.NewEvent("target_state_achieved"))
+            using (var e = m_Log.NewEvent("target_state_entered"))
             {
                 e.Param("target_state", JsonConvert.SerializeObject(targetState));
+            }
+        }
+
+        private void LogTargetStateCompleted()
+        {
+            Dictionary<string, float> targetState = new Dictionary<string, float>();
+            Dictionary<string, float> targetTolerances = new Dictionary<string, float>();
+            TaskInfo info = m_ActiveLabInfo.Topics[m_ActiveSectionIndex].Tasks[m_ActiveTaskIndex];
+            foreach (var simTarget in info.Targets)
+            {
+                targetState.Add(simTarget.TargetID.ToString(), simTarget.TargetVal);
+                targetTolerances.Add(simTarget.TargetID.ToString(), simTarget.TargetRange);
+            }
+
+            Debug.Log("[Analytics] event: target_state_completed");
+
+            using (var e = m_Log.NewEvent("target_state_completed"))
+            {
+                e.Param("target_state", JsonConvert.SerializeObject(targetState));
+                e.Param("tolerances", JsonConvert.SerializeObject(targetTolerances));
             }
         }
 
@@ -1043,6 +1093,55 @@ namespace ThermoVR.Analytics
             using (var e = m_Log.NewEvent("complete_task"))
             {
                 e.Param("task", JsonConvert.SerializeObject(data));
+            }
+        }
+
+        private void LogClickEditToolVal(ToolType toolType)
+        {
+            Debug.Log("[Analytics] event: click_edit_tool_val");
+
+            m_LastInputProxyType = ToolTypeToLogToolType(toolType, 0);
+
+            using (var e = m_Log.NewEvent("click_edit_tool_val"))
+            {
+                e.Param("tool_name", m_LastInputProxyType.ToString());
+                e.Param("hand", Hand.MOUSE.ToString());
+            }
+        }
+
+        private void LogSetToolVal(float endVal)
+        {
+            Debug.Log("[Analytics] event: set_tool_val");
+
+            using (var e = m_Log.NewEvent("set_tool_val"))
+            {
+                e.Param("tool_name", m_LastInputProxyType.ToString());
+                e.Param("new_value", endVal);
+                e.Param("auto_release", false);
+                e.Param("hand", Hand.MOUSE.ToString());
+            }
+        }
+
+        private void LogSetInvalidToolVal(string badVal)
+        {
+            Debug.Log("[Analytics] event: set_invalid_tool_val");
+
+            using (var e = m_Log.NewEvent("set_invalid_tool_val"))
+            {
+                e.Param("tool_name", m_LastInputProxyType.ToString());
+                e.Param("bad_value", badVal);
+                e.Param("hand", Hand.MOUSE.ToString());
+            }
+        }
+
+        private void LogCancelEditToolVal()
+        {
+            Debug.Log("[Analytics] event: cancel_edit_tool_val");
+
+            using (var e = m_Log.NewEvent("cancel_edit_tool_val"))
+            {
+                e.Param("tool_name", m_LastInputProxyType.ToString());
+                e.Param("hand", Hand.MOUSE.ToString());
             }
         }
 
