@@ -43,7 +43,7 @@ namespace ThermoVR.Lab
 
             if (m_autoSuccess)
             {
-                OnEvaluationUpdated?.Invoke(this, new EvalUpdateEventArgs(true, false));
+                OnEvaluationUpdated?.Invoke(this, new EvalUpdateEventArgs(true, true));
             }
         }
 
@@ -71,7 +71,7 @@ namespace ThermoVR.Lab
                     // Only update result when requirements have been met
                     // if (m_toEvaluate[i].IsCorrect()) {
                         m_toEvaluate[i].HandleEvaluation(m_toEvaluate[i].IsCorrect());
-                        OnEvaluationUpdated?.Invoke(this, new EvalUpdateEventArgs(m_toEvaluate[i].IsCorrect(), false));
+                        OnEvaluationUpdated?.Invoke(this, new EvalUpdateEventArgs(m_toEvaluate[i].IsCorrect(), true));
                     // }
                 }
             }

@@ -19,18 +19,20 @@ public class GraphModule : UIModule
     [SerializeField] private ThermoToggle m_regionLabelsToggle;
     [SerializeField] private ThermoToggle m_constantLinesToggle;
     [SerializeField] private ThermoToggle m_axisTrackersToggle;
+    [SerializeField] private ThermoToggle m_musicToggle;
 
     private ThermoToggle[] m_toggles;
 
     public override void Init() {
         base.Init();
 
-        m_toggles = new ThermoToggle[5] {
+        m_toggles = new ThermoToggle[6] {
             m_axisNumbersToggle,
             m_gridLinesToggle,
             m_regionLabelsToggle,
             m_constantLinesToggle,
-            m_axisTrackersToggle
+            m_axisTrackersToggle,
+            m_musicToggle
         };
 
         for (int i = 0; i < m_toggles.Length; i++) {
@@ -68,6 +70,7 @@ public class GraphModule : UIModule
         m_regionLabelsToggle.Pressable.PressCompleted += HandleRegionLabelsToggle;
         m_constantLinesToggle.Pressable.PressCompleted += HandleConstantLinesToggle;
         m_axisTrackersToggle.Pressable.PressCompleted += HandleAxisTrackersToggle;
+        m_musicToggle.Pressable.PressCompleted += HandleMusicToggle;
     }
 
     private void RemoveListeners() {
@@ -76,6 +79,7 @@ public class GraphModule : UIModule
         m_regionLabelsToggle.Pressable.PressCompleted -= HandleRegionLabelsToggle;
         m_constantLinesToggle.Pressable.PressCompleted -= HandleConstantLinesToggle;
         m_axisTrackersToggle.Pressable.PressCompleted -= HandleAxisTrackersToggle;
+        m_musicToggle.Pressable.PressCompleted -= HandleMusicToggle;
     }
 
     private void DispatchSettingUpdate(GraphElementID id) {
@@ -96,6 +100,9 @@ public class GraphModule : UIModule
                 break;
             case GraphElementID.AxisTrackers:
                 toggle = m_axisTrackersToggle;
+                break;
+            case GraphElementID.Music:
+                toggle = m_musicToggle;
                 break;
             default:
                 return;
@@ -129,6 +136,11 @@ public class GraphModule : UIModule
 
     private void HandleAxisTrackersToggle(object sender, EventArgs args) {
         DispatchSettingUpdate(GraphElementID.AxisTrackers);
+    }
+
+    private void HandleMusicToggle(object sender, EventArgs args)
+    {
+        DispatchSettingUpdate(GraphElementID.Music);
     }
 
     #endregion // Handlers

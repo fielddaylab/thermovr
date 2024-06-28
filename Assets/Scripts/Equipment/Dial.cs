@@ -521,7 +521,7 @@ namespace ThermoVR.Dials
             float nudgeMult = 1;
             if (m_nudging)
             {
-                nudgeMult = GameMgr.I.IsDesktop ? 0.01f : 0.1f;
+                nudgeMult = GameMgr.I.IsDesktop ? 0.01f : 0.2f;
             }
 
 
