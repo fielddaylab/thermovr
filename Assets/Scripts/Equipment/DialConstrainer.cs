@@ -46,7 +46,18 @@ namespace ThermoVR.Dials
         {
             if (!m_ConstrainingDial)
             {
-                float margin = 0.05f;
+                float margin = 0;
+                if (m_ConstrainingVar == VarID.Volume)
+                { 
+                    if (ThermoPresent.Instance.get_state_var(m_ConstrainingVar) < 0.1f)
+                    {
+                        margin = Margins.VolumeStopMarginFine;
+                    }
+                    else
+                    {
+                        margin = Margins.VolumeStopMargin;
+                    }
+                }
                 if (m_ConstrainType == ConstrainType.Max) { margin *= -1; }
 
                 var currVal = (float)ThermoPresent.Instance.get_state_var(m_ConstrainingVar);

@@ -127,6 +127,12 @@ static public class ObjectIDs
     static public readonly string CenterEyeAnchor = "CenterEyeAnchor";
 }
 
+static public class Margins
+{
+    static public readonly float VolumeStopMargin = 0.05f;
+    static public readonly float VolumeStopMarginFine = 0.001f;
+}
+
 static public class Units
 {
     static public readonly string Weight = "kg";
