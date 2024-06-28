@@ -332,7 +332,7 @@ namespace ThermoVR.Tools
 
         #endregion // Volume Stops
 
-        public void ActivateTool(Tool t) {
+        public void ActivateTool(Tool t, bool auto = true) {
             // trigger tool's entry animations
             t.TriggerActivation();
 
@@ -348,7 +348,12 @@ namespace ThermoVR.Tools
                 AddVStop(tool_stop2.GetVal(), t);
                 uniqueStopID = 2;
             }
-            GameMgr.Events?.Dispatch(GameEvents.ToolTogglePressed, new Tuple<ToolType, bool, bool, int>(t.tool_type, true, false, uniqueStopID));
+
+            if (!auto)
+            {
+                GameMgr.Events?.Dispatch(GameEvents.ToolTogglePressed, new Tuple<ToolType, bool, bool, int>(t.tool_type, true, false, uniqueStopID));
+            }
+
             GameMgr.Events?.Dispatch(GameEvents.ActivateTool, t);
             UpdateApplyTool(t);
 
@@ -380,7 +385,11 @@ namespace ThermoVR.Tools
                 uniqueStopID = 2;
             }
 
-            GameMgr.Events?.Dispatch(GameEvents.ToolTogglePressed, new Tuple<ToolType, bool, bool, int>(t.tool_type, false, toolReset, uniqueStopID));
+            if (!auto)
+            {
+                GameMgr.Events?.Dispatch(GameEvents.ToolTogglePressed, new Tuple<ToolType, bool, bool, int>(t.tool_type, false, toolReset, uniqueStopID));
+            }
+
             GameMgr.Events?.Dispatch(GameEvents.DeactivateTool, t);
             UpdateApplyTool(t);
 
@@ -663,7 +672,7 @@ namespace ThermoVR.Tools
                         break;
                     }
                     else {
-                        ActivateTool(t);
+                        ActivateTool(t, false);
                         break;
                     }
                 }

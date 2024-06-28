@@ -43,6 +43,7 @@ namespace ThermoVR
         {
             m_mainGroup.alpha = 0;
             m_activeProxy = null;
+            GameMgr.Events.Dispatch(GameEvents.CancelEditToolVal);
         }
 
         private void HandleEnterClicked()

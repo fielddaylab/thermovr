@@ -60,6 +60,10 @@ namespace ThermoVR.Lab
         private float m_completionTime;
         private float m_completionTimer;
 
+        private bool m_completed;
+
+        private bool m_initialized;
+
         public void SetDefinition(ReachStateDefinition def) {
             m_definition = def;
 
@@ -71,11 +75,17 @@ namespace ThermoVR.Lab
         private void OnEnable()
         {
             PlaceTargetZone();
+            if (m_initialized)
+            {
+                GameMgr.Events?.Dispatch(GameEvents.TargetStateTaskBegan);
+            }
+            m_initialized = true;
         }
 
         private void OnDisable()
         {
             GameMgr.Events?.Dispatch(GameEvents.ClearTargetZone);
+            GameMgr.Events?.Dispatch(GameEvents.TargetStateTaskEnded);
         }
 
         private void Update()
@@ -89,6 +99,8 @@ namespace ThermoVR.Lab
                     m_completionStateImg.fillAmount = 0;
 
                     m_completionState = ReachStateState.Countdown;
+                    GameMgr.Events.Dispatch(GameEvents.TargetStateEntered);
+                    m_completed = false;
                 }
                 else if (m_completionState == ReachStateState.Countdown)
                 {
@@ -101,15 +113,20 @@ namespace ThermoVR.Lab
                         m_completionState = ReachStateState.Complete;
                         m_completionStateImg.fillAmount = 1;
                     }
+                    m_completed = false;
                 }
                 else
                 {
                     // complete timer
-                    m_completionStateImg.sprite = GameDB.Instance.ReachStateComplete;
-                    m_completionStateImg.fillAmount = 1;
+                    if (!m_completed)
+                    {
+                        m_completionStateImg.sprite = GameDB.Instance.ReachStateComplete;
+                        m_completionStateImg.fillAmount = 1;
 
-                    GameMgr.Events.Dispatch(GameEvents.TargetStateReached);
-                    m_completionState = ReachStateState.Complete;
+                        GameMgr.Events.Dispatch(GameEvents.TargetStateCompleted);
+                        m_completionState = ReachStateState.Complete;
+                    }
+                    m_completed = true;
                 }
             }
             else
@@ -122,6 +139,7 @@ namespace ThermoVR.Lab
                     GameMgr.Events.Dispatch(GameEvents.TargetStateLost, GetDiscrepancies());
                     m_completionState = ReachStateState.Incomplete;
                 }
+                m_completed = false;
             }
         }
 

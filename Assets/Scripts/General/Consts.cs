@@ -65,7 +65,10 @@ static public class GameEvents
     static public readonly StringHash32 SectionListDisplayed = "lab:section-list-displayed"; // List<IndexedTopicInfo>
     static public readonly StringHash32 LabMenuDisplayed = "lab:lab-menu-displayed"; // List<IndexedLabInfo>
     static public readonly StringHash32 TaskChoiceSelected = "lab:task-choice-selected";
-    static public readonly StringHash32 TargetStateReached = "lab:target-state-reached";
+    static public readonly StringHash32 TargetStateTaskBegan = "lab:target-state-began";
+    static public readonly StringHash32 TargetStateTaskEnded = "lab:target-state-ended";
+    static public readonly StringHash32 TargetStateEntered = "lab:target-state-entered";
+    static public readonly StringHash32 TargetStateCompleted = "lab:target-state-completed";
     static public readonly StringHash32 TargetZoneUpdated = "world:target-zone-updated"; // Tuple<Vector3, Vector3>
     static public readonly StringHash32 ClearTargetZone = "world:clear-target-zone";
     static public readonly StringHash32 TargetStateLost = "lab:target-state-lost";
@@ -115,7 +118,10 @@ static public class GameEvents
     static public readonly StringHash32 RestoreLastSimState = "world:restore-last-sim-state";
 
     static public readonly StringHash32 InputProxySelected = "world:input-proxy-selected";
+    static public readonly StringHash32 EditToolValStarted = "world:edit-tool-val-started";
     static public readonly StringHash32 ProxyInputSubmitted = "world:proxy-input-submitted";
+    static public readonly StringHash32 CancelEditToolVal = "world:cancel-edit-tool-val";
+    static public readonly StringHash32 SetInvalidToolVal = "world:set-invalid-tool-val";
 
     static public readonly StringHash32 CanvasPreUpdate = "game:canvas-pre-update";
     static public readonly StringHash32 ApplicationPreRender = "game:application-pre-render";

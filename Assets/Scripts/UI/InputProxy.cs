@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using ThermoVR.Dials;
+using ThermoVR.Tools;
 using TMPro;
 using UnityEngine;
 
@@ -23,6 +24,11 @@ namespace ThermoVR
             }
         }
 
+        public ToolType ToolType()
+        {
+            return m_dialToSet.get_relevant_tools()[0].tool_type;
+        }
+
         public void SetValue(string newValStr)
         {
             float newVal;
@@ -41,6 +47,7 @@ namespace ThermoVR
                 }
                 catch
                 {
+                    GameMgr.Events.Dispatch(GameEvents.SetInvalidToolVal, newValStr);
                     return;
                 }
             }
@@ -52,6 +59,11 @@ namespace ThermoVR
                 if (m_dialToSet.val_within_range(newVal))
                 {
                     m_dialToSet.convert_and_set_map(newVal);
+                    GameMgr.Events.Dispatch(GameEvents.ProxyInputSubmitted, newVal);
+                }
+                else
+                {
+                    GameMgr.Events.Dispatch(GameEvents.SetInvalidToolVal, newValStr);
                 }
             }
             else if (m_textToChange)

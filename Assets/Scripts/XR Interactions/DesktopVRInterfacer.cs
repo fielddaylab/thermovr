@@ -54,8 +54,9 @@ namespace ThermoVR.Controls {
                     }
                     else if (objHit.GetComponent<InputProxy>())
                     {
-                        Debug.Log("[Interfacer] Input Proxy hit!");
-                        GameMgr.Events.Dispatch(GameEvents.InputProxySelected, objHit.GetComponent<InputProxy>());
+                        var proxy = objHit.GetComponent<InputProxy>();
+                        GameMgr.Events.Dispatch(GameEvents.InputProxySelected, proxy);
+                        GameMgr.Events.Dispatch(GameEvents.EditToolValStarted, proxy.ToolType());
                     }
                 }
             }
