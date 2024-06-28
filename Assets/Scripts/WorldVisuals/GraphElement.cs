@@ -10,7 +10,8 @@ namespace ThermoVR.UI.GraphElements
         RegionLabels,
         GridLines,
         ConstantLines,
-        AxisTrackers
+        AxisTrackers,
+        Music
     }
 
     public struct GraphSettingUpdate
