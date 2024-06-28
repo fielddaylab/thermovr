@@ -12,6 +12,8 @@ namespace ThermoVR.Tools {
     [RequireComponent(typeof(Tool))]
     public class ToolPositionController : MonoBehaviour
     {
+        [SerializeField] private bool m_isLowerStop = false;
+
         private enum MapType
         {
             Linear,
@@ -110,6 +112,18 @@ namespace ThermoVR.Tools {
                 // NOTE: Specifically for volume implementation
                 newToolVal = m_Tool.GetVal();
 
+                if (m_Tool.tool_type == ToolType.Stops)
+                {
+                    if (m_isLowerStop)
+                    {
+                        // newToolVal += Margins.VolumeStopMargin;
+                    }
+                    else
+                    {
+                        // newToolVal -= Margins.VolumeStopMargin;
+                    }
+                }
+
                 double totalHeight = Math.Log(newToolVal / ThermoState.piston_area) + ThermoState.log_offset_volume;
 
                 float log_map = (float)(totalHeight / ThermoPresent.max_height_log); // map log height to range from 0 to 1
@@ -119,7 +133,7 @@ namespace ThermoVR.Tools {
                 new_tool_pos.y = GetMinPos().y + log_map * toolSpan;
 
                 // if above sim volume (and thus above piston), add piston height
-                if (newToolVal > ThermoState.Instance.volume)
+                if (!m_isLowerStop)
                 {
                     new_tool_pos.y += m_PistonCapHeight;
                 }
