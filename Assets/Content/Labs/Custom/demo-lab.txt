@@ -36,7 +36,7 @@
 	--Questions:
 	Question: "Which property/properties are held constant?"
 	Questions-->
-	Answers: ["Pressure"(c), "Volume"(c), "Temperature", "None of the above"]
+	Answers: ["Pressure"(c), "Volume", "Temperature", "None of the above"]
 |EfficiencyInfo:
 
 
@@ -52,7 +52,7 @@
 	--Questions:
 	Question: "Which property/properties are changing?"
 	Questions-->
-	Answers: ["Pressure", "Volume", "Temperature"(c), "None of the above"]
+	Answers: ["Pressure", "Volume"(c), "Temperature"(c), "None of the above"]
 |EfficiencyInfo:
 
 || TOPIC // 2
@@ -320,7 +320,7 @@
 	--Questions:
 	Question: "Now apply the negative weight, lowering the pressure to 85 kPa (ambient pressure in Denver)."
 	Questions-->
-	Requirements: [(Pressure:82.5:2.5)]
+	Requirements: [(Pressure:85:2.5)]
 |EfficiencyInfo:
 
 
@@ -337,7 +337,7 @@
 	Question: "Leave the negative weight in place."
 	Question: "Apply the insulation and cooling coil to bring the ball into the 2-phase region, maintaining P ≈ 85 kPa."
 	Questions-->
-	Requirements: [(Pressure:82.5:3), (Region:1:0)]
+	Requirements: [(Pressure:85:3), (Region:1:0)]
 |EfficiencyInfo:
 
 

@@ -19,6 +19,7 @@ static public class GameEvents
     static public readonly StringHash32 ActivateLab = "world:activate-lab"; // LabInfo
     static public readonly StringHash32 DeactivateLab = "world:deactivate-lab"; // LabInfo
     static public readonly StringHash32 TaskResetPressed = "world:task-reset-pressed";
+    static public readonly StringHash32 TaskNextPressed = "world:task-next-pressed";
     static public readonly StringHash32 BeginLab = "world:begin-lab";
     static public readonly StringHash32 PressedToolToggle = "world:pressed-tool-toggle";
     static public readonly StringHash32 WarpPVT = "sim:warp-pvt";

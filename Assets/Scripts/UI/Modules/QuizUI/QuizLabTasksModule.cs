@@ -81,6 +81,7 @@ namespace ThermoVR.Lab
             GameMgr.Events?.Register(GameEvents.DeactivateLab, HandleDeactivateLab);
 
             GameMgr.Events?.Register(GameEvents.TaskResetPressed, HandleTaskResetPressed);
+            GameMgr.Events?.Register(GameEvents.TaskNextPressed, HandleTaskNextPressed);
 
             GameMgr.Events?.Register(GameEvents.ClickOpenWordBank, HandleWordBankOpened);
             GameMgr.Events?.Register<string>(GameEvents.WordBankClosed, HandleWordBankClosed);
@@ -623,6 +624,26 @@ namespace ThermoVR.Lab
             }
         }
 
+        private void HandleTaskNextPressed()
+        {
+            if (m_activeTabIndex == m_tabs[m_activeTopicIndex].TaskTabs.Count - 1)
+            {
+                if (m_activeTopicIndex == m_tabs.Count - 1)
+                {
+                    // at end of lab; do nothing
+                }
+                else
+                {
+                    // at end of topic; move to next topic
+                    HandleLabTopicTabPressed(m_activeTopicIndex + 1, false);
+                }
+            }
+            else
+            {
+                HandleLabTabPressed(m_activeTopicIndex, m_activeTabIndex + 1);
+            }
+        }
+
         #endregion // Handlers
 
         private void ActivateTab(int topicIndex, int taskIndex)
@@ -651,7 +672,6 @@ namespace ThermoVR.Lab
 
             m_tabs[topicIndex].TaskTabs[taskIndex].ButtonImage.sprite = GameDB.Instance.LabTaskTabInactive;
             m_tabs[topicIndex].TaskTabs[taskIndex].ButtonRect.sizeDelta = new Vector2(m_tabs[topicIndex].TaskTabs[taskIndex].ButtonRect.sizeDelta.x, TAB_HEIGHT_INACTIVE);
-
         }
 
         private void ActivateTopicTab(int topicIndex, bool fromPlayerAction)
