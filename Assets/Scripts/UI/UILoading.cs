@@ -12,44 +12,20 @@ namespace ThermoVR.UI
         [SerializeField] private Vector3 m_rotation;
 
         [SerializeField] private float m_minTimer = 3;
-        private bool m_loadComplete = false;
-
-        private void Awake()
-        {
-            GameMgr.Events?.Register(GameEvents.InitialLoadComplete, HandleLoadComplete);
-            if (!m_loadComplete) { this.gameObject.SetActive(false); }
-        }
 
         private void Update()
         {
-            if (m_loadComplete && m_minTimer <= 0)
-            {
-                this.gameObject.SetActive(false);
-
-                GameMgr.Events.Dispatch(GameEvents.TryNewName);
-            }
-            else
+            if (m_minTimer > 0)
             {
                 m_minTimer -= Time.deltaTime;
-
-                m_loadIcon.transform.Rotate(-m_rotation * Time.deltaTime, Space.Self);
             }
+
+            m_loadIcon.transform.Rotate(-m_rotation * Time.deltaTime, Space.Self);
         }
 
-        public void OnLoadingComplete()
+        public bool MinLoadTimeCompleted()
         {
-            HandleLoadComplete();
-            this.gameObject.SetActive(true);
+            return m_minTimer <= 0;
         }
-
-        #region Handlers
-
-        private void HandleLoadComplete()
-        {
-            m_loadComplete = true;
-        }
-
-        #endregion // Handlers
-
     }
 }
