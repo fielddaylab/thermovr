@@ -47,7 +47,10 @@ namespace ThermoVR.Lab
         public void OnDisable() {
             if (m_taskFrame != null) {
                 m_taskFrame.AnswerEvaluator.OnEvaluationUpdated -= HandleEvalUpdate;
-                m_taskFrame.TaskResetButton.OnButtonPressed -= HandleFrameReset;
+                if (m_taskFrame.TaskResetButton)
+                {
+                    m_taskFrame.TaskResetButton.OnButtonPressed -= HandleFrameReset;
+                }
             }
         }
 
@@ -56,10 +59,17 @@ namespace ThermoVR.Lab
             if (m_taskFrame != null)
             {
                 m_taskFrame.AnswerEvaluator.OnEvaluationUpdated -= HandleEvalUpdate;
-                m_taskFrame.TaskResetButton.OnButtonPressed -= HandleFrameReset;
+                if (m_taskFrame.TaskResetButton)
+                {
+                    m_taskFrame.TaskResetButton.OnButtonPressed -= HandleFrameReset;
+                }
 
                 m_taskFrame.AnswerEvaluator.OnEvaluationUpdated += HandleEvalUpdate;
-                m_taskFrame.TaskResetButton.OnButtonPressed += HandleFrameReset;
+
+                if (m_taskFrame.TaskResetButton)
+                {
+                    m_taskFrame.TaskResetButton.OnButtonPressed += HandleFrameReset;
+                }
             }
         }
 
@@ -73,7 +83,10 @@ namespace ThermoVR.Lab
             m_taskFrame = frame;
 
             m_taskFrame.AnswerEvaluator.OnEvaluationUpdated += HandleEvalUpdate;
-            m_taskFrame.TaskResetButton.OnButtonPressed += HandleFrameReset;
+            if (m_taskFrame.TaskResetButton)
+            {
+                m_taskFrame.TaskResetButton.OnButtonPressed += HandleFrameReset;
+            }
         }
 
         public void ShowCompletionSprite()

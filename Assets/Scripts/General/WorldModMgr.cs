@@ -41,6 +41,8 @@ namespace ThermoVR
             defaultTrail.ClearExisting = true;
             defaultTrail.MaxLength = 30;
             SetTrail(defaultTrail);
+
+            GameMgr.Events.Register(GameEvents.UISwitched, HandleUISwitched);
         }
 
         #region Tools
@@ -211,6 +213,12 @@ namespace ThermoVR
                 TracerManager.Instance.HideTrace();
                 TracerManager.Instance.EndTrace();
             }
+        }
+
+        private void HandleUISwitched()
+        {
+            TracerManager.Instance.HideTrace();
+            TracerManager.Instance.EndTrace();
         }
     }
 }

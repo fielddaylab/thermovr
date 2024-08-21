@@ -42,6 +42,7 @@ namespace ThermoVR.Lab
             base.ResetState();
 
             m_mainText.SetText(m_definition.MainText);
+            m_evaluated = true;
         }
 
         public override bool AnswerSelected()

@@ -11,19 +11,36 @@ namespace ThermoVR.Lab
     {
         public AnswerEvaluator AnswerEvaluator;
         public ThermoButton TaskResetButton;
+        public ThermoButton NextButton;
 
         [SerializeField] AudioClip m_taskResetClip;
 
         [SerializeField] private Evaluable[] m_evaluables;
 
         private void OnEnable() {
-            TaskResetButton.OnButtonPressed += HandleResetPressed;
+            if (TaskResetButton)
+            {
+                TaskResetButton.OnButtonPressed += HandleResetPressed;
+            }
+            if (NextButton)
+            {
+                NextButton.OnButtonPressed += HandleNextPressed;
+            }
 
-            UpdateResetButtonState();
+            bool anyEvaluated = AnyEvaluated();
+
+            UpdateResetButtonState(anyEvaluated);
         }
 
         private void OnDisable() {
-            TaskResetButton.OnButtonPressed -= HandleResetPressed;
+            if (TaskResetButton)
+            {
+                TaskResetButton.OnButtonPressed -= HandleResetPressed;
+            }
+            if (NextButton)
+            {
+                NextButton.OnButtonPressed -= HandleNextPressed;
+            }
         }
 
         public void LoadCompleted(bool completed)
@@ -31,12 +48,7 @@ namespace ThermoVR.Lab
             AnswerEvaluator.LoadCompleted(completed);
         }
 
-        private void Update()
-        {
-            UpdateResetButtonState();
-        }
-
-        private void UpdateResetButtonState()
+        private bool AnyEvaluated()
         {
             bool anyEvaluated = false;
             foreach (var evaluable in m_evaluables)
@@ -47,7 +59,31 @@ namespace ThermoVR.Lab
                 }
             }
 
-            TaskResetButton.gameObject.SetActive(anyEvaluated);
+            return anyEvaluated;
+        }
+
+        private void Update()
+        {
+            bool anyEvaluated = AnyEvaluated();
+
+            UpdateResetButtonState(anyEvaluated);
+            UpdateNextButtonState(anyEvaluated);
+        }
+
+        private void UpdateResetButtonState(bool anyEvaluated)
+        {
+            if (TaskResetButton)
+            {
+                TaskResetButton.gameObject.SetActive(anyEvaluated);
+            }
+        }
+
+        private void UpdateNextButtonState(bool anyEvaluated)
+        {
+            if (NextButton)
+            {
+                NextButton.SetInteractable(anyEvaluated);
+            }
         }
 
         public Evaluable[] GetEvaluables() {
@@ -62,6 +98,11 @@ namespace ThermoVR.Lab
             if (GameMgr.I.AudioEnabled) { Tablet.Instance.PlayUIAudio(m_taskResetClip); }
 
             GameMgr.Events.Dispatch(GameEvents.TaskResetPressed);
+        }
+
+        private void HandleNextPressed(object sender, EventArgs args)
+        {
+            GameMgr.Events.Dispatch(GameEvents.TaskNextPressed);
         }
     }
 }

@@ -34,6 +34,8 @@ namespace ThermoVR
             RenderMgr.Initialize();
 
             RenderMgr.EnableAspectClamping(1920, 1080);
+
+            GameMgr.Events.Dispatch(GameEvents.TryNewName);
         }
 
         private void Start() {
@@ -50,7 +52,6 @@ namespace ThermoVR
             Events.Register(GameEvents.TryNewName, OnTryNewName, this);
 
             Events.Dispatch(GameEvents.InitialLoadComplete);
-            if (m_UILoading) { m_UILoading.OnLoadingComplete(); }
         }
 
         private void FixedUpdate() {
