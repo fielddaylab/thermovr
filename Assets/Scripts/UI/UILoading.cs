@@ -15,6 +15,7 @@ namespace ThermoVR.UI
         [SerializeField] private float m_minTimer = 3;
 
         [Header("Elements")]
+        [SerializeField] private RectTransform m_wrapperGroup;
         [SerializeField] private GameObject m_desktopGroup;
         [SerializeField] private GameObject m_vrGroup;
         [SerializeField] private RectTransform m_loadGroup;
@@ -22,6 +23,9 @@ namespace ThermoVR.UI
 
         [Header("VR layout")]
         [SerializeField] private Vector3 m_vrLoadPos;
+        [SerializeField] private Vector3 m_vrLoadScale;
+        [SerializeField] private Vector3 m_vrWrapperPos;
+        [SerializeField] private Vector3 m_vrWrapperScale;
 
         private void Awake()
         {
@@ -44,6 +48,9 @@ namespace ThermoVR.UI
                 m_vrGroup.SetActive(true);
 
                 m_loadGroup.anchoredPosition = m_vrLoadPos;
+                m_loadGroup.localScale = m_vrLoadScale;
+                m_wrapperGroup.anchoredPosition = m_vrWrapperPos;
+                m_wrapperGroup.localScale = m_vrWrapperScale;
             }
         }
 
@@ -54,7 +61,7 @@ namespace ThermoVR.UI
                 m_minTimer -= Time.deltaTime;
             }
 
-            if (m_startButton.interactable)
+            if (ModeMgr.Instance.IsDesktop && m_startButton.interactable)
             {
                 m_loadGroup.gameObject.SetActive(false);
             }
