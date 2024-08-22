@@ -8,6 +8,7 @@ namespace ThermoVR.UI
     [DefaultExecutionOrder(5)]
     public class UILoading : MonoBehaviour
     {
+        [SerializeField] private Canvas m_canvas;
         [SerializeField] private Image m_loadIcon;
         [SerializeField] private Vector3 m_rotation;
 
@@ -26,6 +27,8 @@ namespace ThermoVR.UI
         {
             if (ModeMgr.Instance.IsDesktop)
             {
+                m_canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+
                 m_desktopGroup.SetActive(true);
                 m_vrGroup.SetActive(false);
 
@@ -35,6 +38,8 @@ namespace ThermoVR.UI
             }
             else
             {
+                m_canvas.renderMode = RenderMode.ScreenSpaceCamera;
+
                 m_desktopGroup.SetActive(false);
                 m_vrGroup.SetActive(true);
 

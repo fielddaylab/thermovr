@@ -24,7 +24,7 @@ namespace ThermoVR {
 
         private IEnumerator LoadAsync()
         {
-            AsyncOperation m_asyncLoad = SceneManager.LoadSceneAsync(m_firstScene);
+            m_asyncLoad = SceneManager.LoadSceneAsync(m_firstScene);
             m_asyncLoad.allowSceneActivation = false;
 
             while (m_asyncLoad.progress < 0.9f)
