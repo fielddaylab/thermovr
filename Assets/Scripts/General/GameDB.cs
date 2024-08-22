@@ -38,6 +38,11 @@ public class GameDB : MonoBehaviour
     public AudioClip TaskCompleteClip;
     public AudioClip SimResetClip;
 
+    [Space(5)]
+    [Header("Tutorial")]
+    public Sprite TutorialNudgeDesktop;
+    public Sprite TutorialNudgeVR;
+
     private void Awake() {
         if (Instance == null)
         {

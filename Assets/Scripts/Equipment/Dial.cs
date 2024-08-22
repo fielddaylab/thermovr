@@ -6,6 +6,7 @@ using ThermoVR.Tools;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.UI;
 
 namespace ThermoVR.Dials
 {
@@ -75,6 +76,7 @@ namespace ThermoVR.Dials
         [Space(5)]
         [Header("Tutorail")]
         [SerializeField] private GameObject nudge_tutorial;
+        [SerializeField] private Image nudge_image;
 
         [Space(5)]
         [Header("Activation")]
@@ -220,6 +222,15 @@ namespace ThermoVR.Dials
                 .Register<Tool>(GameEvents.DisallowTool, HandleDisallowTool, this);
 
             nudge_tutorial.SetActive(false);
+
+            if (ModeMgr.Instance.IsDesktop)
+            {
+                nudge_image.sprite = GameDB.Instance.TutorialNudgeDesktop;
+            }
+            else
+            {
+                nudge_image.sprite = GameDB.Instance.TutorialNudgeVR;
+            }
 
             Reset(true);
         }

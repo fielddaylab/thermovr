@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace ThermoVR
 {
+    [DefaultExecutionOrder(-1000)]
     public class PersistentState : MonoBehaviour
     {
         public static PersistentState Instance;
