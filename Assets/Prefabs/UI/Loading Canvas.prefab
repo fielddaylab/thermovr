@@ -711,12 +711,16 @@ MonoBehaviour:
   m_canvas: {fileID: 2073748505312250931}
   m_loadIcon: {fileID: 4204669234536092819}
   m_rotation: {x: 0, y: 0, z: 150}
-  m_minTimer: 3
+  m_minTimer: 3.6
+  m_wrapperGroup: {fileID: 6061812290611911524}
   m_desktopGroup: {fileID: 1876192633681536897}
   m_vrGroup: {fileID: 4482507865203768554}
   m_loadGroup: {fileID: 7140275341344179595}
   m_startButton: {fileID: 8965213254807382992}
   m_vrLoadPos: {x: 0, y: -178.7, z: 0}
+  m_vrLoadScale: {x: 1, y: 1, z: 1}
+  m_vrWrapperPos: {x: 0, y: -70, z: 0}
+  m_vrWrapperScale: {x: 0.5, y: 0.5, z: 0.5}
 --- !u!1 &3668238074944838261
 GameObject:
   m_ObjectHideFlags: 0
@@ -1260,7 +1264,7 @@ RectTransform:
   m_GameObject: {fileID: 7309683722350323537}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.5, y: 1.5, z: 1}
+  m_LocalScale: {x: 1.5, y: 1.5, z: 1.5}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1962363149896689411}
