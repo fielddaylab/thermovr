@@ -132,6 +132,11 @@ static public class GameEvents
 
 }
 
+static public class PersistentVars
+{
+    static public readonly string MusicOnStart = "MusicOnStart";
+}
+
 static public class ObjectIDs
 {
     static public readonly string CenterEyeAnchor = "CenterEyeAnchor";

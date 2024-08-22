@@ -1,7 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
+using ThermoVR.Lab;
 using UnityEngine;
 using UnityEngine.UI;
+using static ThermoVR.Analytics.AnalyticsService;
 
 namespace ThermoVR.UI
 {
@@ -21,6 +23,14 @@ namespace ThermoVR.UI
         [SerializeField] private RectTransform m_loadGroup;
         [SerializeField] private Button m_startButton;
 
+        [Header("Settings")]
+        [SerializeField] private Button m_musicOption;
+        [SerializeField] private Image m_musicFill;
+        private bool m_musicSelected;
+        [SerializeField] private Button m_fullscreenOption;
+        [SerializeField] private Image m_fullscreenFill;
+        private bool m_fullscreenSelected;
+
         [Header("VR layout")]
         [SerializeField] private Vector3 m_vrLoadPos;
         [SerializeField] private Vector3 m_vrLoadScale;
@@ -39,6 +49,13 @@ namespace ThermoVR.UI
                 EventMgr.Events.Register(GameEvents.AsyncLoadComplete, HandleAsyncLoadComplete);
                 m_startButton.onClick.AddListener(HandleStartGameClicked);
                 m_startButton.interactable = false;
+
+                m_musicSelected = true;
+                m_musicOption.onClick.AddListener(HandleMusicOptionSelected);
+                m_musicFill.enabled = m_musicSelected;
+
+                m_fullscreenOption.onClick.AddListener(HandleFullscreenOptionSelected);
+                m_fullscreenFill.enabled = m_fullscreenSelected;
             }
             else
             {
@@ -75,6 +92,16 @@ namespace ThermoVR.UI
         {
             return m_minTimer <= 0;
         }
+        
+        public bool GetFullscreen()
+        {
+            return m_fullscreenSelected;
+        }
+
+        public bool GetMusic()
+        {
+            return m_musicSelected;
+        }
 
         #region Handlers
 
@@ -86,6 +113,18 @@ namespace ThermoVR.UI
         private void HandleStartGameClicked()
         {
             EventMgr.Events.Dispatch(GameEvents.StartGameClicked);
+        }
+
+        private void HandleMusicOptionSelected()
+        {
+            m_musicSelected = !m_musicSelected;
+            m_musicFill.enabled = m_musicSelected;
+        }
+
+        private void HandleFullscreenOptionSelected()
+        {
+            m_fullscreenSelected = !m_fullscreenSelected;
+            m_fullscreenFill.enabled = m_fullscreenSelected;
         }
 
         #endregion // Handlers

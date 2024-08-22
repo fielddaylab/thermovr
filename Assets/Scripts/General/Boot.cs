@@ -54,6 +54,24 @@ namespace ThermoVR {
         private void HandleStartGameClicked()
         {
             m_asyncLoad.allowSceneActivation = true;
+
+            if (m_loadingCanvas.GetFullscreen())
+            {
+                // trigger fullscreen
+                Screen.fullScreen = true;
+                #if UNITY_WEBGL && !UNITY_EDITOR
+                NativeFullscreen_SetFullscreen(fullscreen);
+                #endif // UNITY_WEBGL && !UNITY_EDITOR
+            }
+
+            if (PersistentState.Instance.Bools.ContainsKey(PersistentVars.MusicOnStart))
+            {
+                PersistentState.Instance.Bools.Add(PersistentVars.MusicOnStart, m_loadingCanvas.GetMusic());
+            }
+            else
+            {
+                PersistentState.Instance.Bools[PersistentVars.MusicOnStart] = m_loadingCanvas.GetMusic();
+            }
         }
 
         #endregion // Handlers
