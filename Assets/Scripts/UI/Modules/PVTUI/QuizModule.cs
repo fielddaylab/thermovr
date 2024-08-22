@@ -28,10 +28,10 @@ public class QuizModule : UIModule
 
         m_labIsActive = false;
 
-        GameMgr.Events?.Register<LabInfo>(GameEvents.ActivateLab, HandleActivateLab);
-        GameMgr.Events?.Register(GameEvents.DeactivateLab, HandleDeactivateLab);
+        EventMgr.Events?.Register<LabInfo>(GameEvents.ActivateLab, HandleActivateLab);
+        EventMgr.Events?.Register(GameEvents.DeactivateLab, HandleDeactivateLab);
 
-        GameMgr.Events?.Register(GameEvents.BeginLab, HandleBeginLab);
+        EventMgr.Events?.Register(GameEvents.BeginLab, HandleBeginLab);
 
         m_hub.InitializeRegistered();
     }

@@ -134,8 +134,8 @@ namespace ThermoVR.Tools
 
             engaged = always_engaged;
 
-            GameMgr.Events?.Register<Collider>(GameEvents.ColliderReleased, HandleColliderReleased);
-            GameMgr.Events?.Register<Collider>(GameEvents.ColliderGrabbed, HandleColliderGrabbed);
+            EventMgr.Events?.Register<Collider>(GameEvents.ColliderReleased, HandleColliderReleased);
+            EventMgr.Events?.Register<Collider>(GameEvents.ColliderGrabbed, HandleColliderGrabbed);
 
             m_Elements = new List<GameObject>();
 

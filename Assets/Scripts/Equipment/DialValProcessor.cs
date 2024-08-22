@@ -28,7 +28,7 @@ namespace ThermoVR.Dials
 
             if (Mathf.Abs(toProcess - nearestSnap) < 0.05f)
             {
-                if (!GameMgr.I.IsDesktop)
+                if (!ModeMgr.Instance.IsDesktop)
                 {
                     toProcess = nearestSnap;
                 }
@@ -38,7 +38,7 @@ namespace ThermoVR.Dials
                     m_mostRecentIndex = nearestIndex;
 
                     // dial order is reversed
-                    GameMgr.Events.Dispatch(GameEvents.SelectNewDial, m_numDivisions - nearestIndex);
+                    EventMgr.Events.Dispatch(GameEvents.SelectNewDial, m_numDivisions - nearestIndex);
                 }
             }
         }

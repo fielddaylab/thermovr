@@ -43,8 +43,8 @@ public class Ghost : MonoBehaviour
     }
 
     private void Start() {
-        GameMgr.Events?.Register<Collider>(GameEvents.ColliderReleased, HandleColliderReleased);
-        GameMgr.Events?.Register<Collider>(GameEvents.ColliderGrabbed, HandleColliderGrabbed);
+        EventMgr.Events?.Register<Collider>(GameEvents.ColliderReleased, HandleColliderReleased);
+        EventMgr.Events?.Register<Collider>(GameEvents.ColliderGrabbed, HandleColliderGrabbed);
     }
 
     public void set_tool(Tool tool) {
@@ -127,7 +127,7 @@ public class Ghost : MonoBehaviour
 
                             // Activate relevant lab
                             Cartridge cartridge = c.GetComponent<Cartridge>();
-                            // GameMgr.Events.Dispatch(GameEvents.ActivateCartridge, cartridge);
+                            // EventMgr.Events.Dispatch(GameEvents.ActivateCartridge, cartridge);
                         }
                         else {
                             // Hide this ghost
@@ -158,7 +158,7 @@ public class Ghost : MonoBehaviour
                             m_occupied = false;
 
                             Cartridge cartridge = c.GetComponent<Cartridge>();
-                            // GameMgr.Events.Dispatch(GameEvents.DeactivateLab, cartridge);
+                            // EventMgr.Events.Dispatch(GameEvents.DeactivateLab, cartridge);
                         }
                         else {
                             // Highlight active ghost if not occupied

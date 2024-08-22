@@ -11,7 +11,7 @@ namespace ThermoVR.Tools
 
         private void Start()
         {
-            GameMgr.Events.Register(GameEvents.AccumHeatEnergyUpdated, HandleAccumHeatEnergyUpdated);
+            EventMgr.Events.Register(GameEvents.AccumHeatEnergyUpdated, HandleAccumHeatEnergyUpdated);
         }
 
         private void HandleAccumHeatEnergyUpdated()

@@ -33,8 +33,8 @@ public sealed class RenderMgr
 
     internal void Initialize()
     {
-        GameMgr.Events.Register(GameEvents.CanvasPreUpdate, OnCanvasPreUpdate);
-        GameMgr.Events.Register(GameEvents.ApplicationPreRender, OnApplicationPreRender);
+        EventMgr.Events.Register(GameEvents.CanvasPreUpdate, OnCanvasPreUpdate);
+        EventMgr.Events.Register(GameEvents.ApplicationPreRender, OnApplicationPreRender);
     }
 
     internal void PollScreenSettings()
@@ -56,8 +56,8 @@ public sealed class RenderMgr
 
     internal void Shutdown()
     {
-        GameMgr.Events?.Deregister(GameEvents.CanvasPreUpdate, OnCanvasPreUpdate);
-        GameMgr.Events?.Deregister(GameEvents.ApplicationPreRender, OnApplicationPreRender);
+        EventMgr.Events?.Deregister(GameEvents.CanvasPreUpdate, OnCanvasPreUpdate);
+        EventMgr.Events?.Deregister(GameEvents.ApplicationPreRender, OnApplicationPreRender);
 
         OnResolutionChanged.Clear();
         OnFullscreenChanged.Clear();

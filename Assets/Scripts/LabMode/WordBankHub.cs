@@ -181,16 +181,16 @@ namespace ThermoVR.Lab
             ClosePanel();
 
             List<string> selectedStrs = new List<string> { m_definition.OptionTexts[m_selectedID] };
-            GameMgr.Events.Dispatch(GameEvents.TaskChoiceSelected, selectedStrs);
+            EventMgr.Events.Dispatch(GameEvents.TaskChoiceSelected, selectedStrs);
 
             if (deselectOld)
             {
-                GameMgr.Events.Dispatch(GameEvents.ClickDeselectAnswer, new AnswerSelectLogData(prevSelection, IsSingleAnswerCorrect(prevSelection)));
+                EventMgr.Events.Dispatch(GameEvents.ClickDeselectAnswer, new AnswerSelectLogData(prevSelection, IsSingleAnswerCorrect(prevSelection)));
             }
 
             bool isCorrect = IsSingleAnswerCorrect(args.ID);
             uint index = args.ID;
-            GameMgr.Events.Dispatch(GameEvents.ClickSelectAnswer, new AnswerSelectLogData(index, isCorrect));
+            EventMgr.Events.Dispatch(GameEvents.ClickSelectAnswer, new AnswerSelectLogData(index, isCorrect));
         }
 
         private void HandleChoosePressed(object sender, EventArgs args) {
@@ -203,7 +203,7 @@ namespace ThermoVR.Lab
             m_choicePanel.SetActive(true);
             // show option buttons
 
-            GameMgr.Events.Dispatch(GameEvents.ClickOpenWordBank);
+            EventMgr.Events.Dispatch(GameEvents.ClickOpenWordBank);
 
 
             List<string> displayedWords = new List<string>();
@@ -211,7 +211,7 @@ namespace ThermoVR.Lab
             {
                 displayedWords.Add(m_options[i].GetOptionText());
             }
-            GameMgr.Events.Dispatch(GameEvents.WordBankDisplayed, displayedWords);
+            EventMgr.Events.Dispatch(GameEvents.WordBankDisplayed, displayedWords);
         }
 
         private void HandleChoicePanelClosePressed(object sender, EventArgs args) {
@@ -231,7 +231,7 @@ namespace ThermoVR.Lab
             {
                 sendStr = m_definition.OptionTexts[m_selectedID];
             }
-            GameMgr.Events.Dispatch(GameEvents.WordBankClosed, sendStr);
+            EventMgr.Events.Dispatch(GameEvents.WordBankClosed, sendStr);
         }
 
         #endregion // Handlers

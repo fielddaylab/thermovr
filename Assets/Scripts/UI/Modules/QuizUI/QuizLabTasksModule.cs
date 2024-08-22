@@ -77,14 +77,14 @@ namespace ThermoVR.Lab
         public override void Init() {
             base.Init();
 
-            GameMgr.Events?.Register<Tuple<LabInfo, int>>(GameEvents.PreActivateLab, HandlePreActivateLab);
-            GameMgr.Events?.Register(GameEvents.DeactivateLab, HandleDeactivateLab);
+            EventMgr.Events?.Register<Tuple<LabInfo, int>>(GameEvents.PreActivateLab, HandlePreActivateLab);
+            EventMgr.Events?.Register(GameEvents.DeactivateLab, HandleDeactivateLab);
 
-            GameMgr.Events?.Register(GameEvents.TaskResetPressed, HandleTaskResetPressed);
-            GameMgr.Events?.Register(GameEvents.TaskNextPressed, HandleTaskNextPressed);
+            EventMgr.Events?.Register(GameEvents.TaskResetPressed, HandleTaskResetPressed);
+            EventMgr.Events?.Register(GameEvents.TaskNextPressed, HandleTaskNextPressed);
 
-            GameMgr.Events?.Register(GameEvents.ClickOpenWordBank, HandleWordBankOpened);
-            GameMgr.Events?.Register<string>(GameEvents.WordBankClosed, HandleWordBankClosed);
+            EventMgr.Events?.Register(GameEvents.ClickOpenWordBank, HandleWordBankOpened);
+            EventMgr.Events?.Register<string>(GameEvents.WordBankClosed, HandleWordBankClosed);
 
 
             m_homeButton.OnButtonPressed += HandleHomeButtonPressed;
@@ -521,8 +521,8 @@ namespace ThermoVR.Lab
                 Tablet.Instance.PlayUIAudio(m_homeAudioClip);
             }
 
-            GameMgr.Events?.Dispatch(GameEvents.DeactivateLab);
-            GameMgr.Events?.Dispatch(GameEvents.ClickLabHome);
+            EventMgr.Events?.Dispatch(GameEvents.DeactivateLab);
+            EventMgr.Events?.Dispatch(GameEvents.ClickLabHome);
         }
 
         private void HandleScrollUp(object sender, EventArgs args)
@@ -534,7 +534,7 @@ namespace ThermoVR.Lab
             RefreshInteractableTopicTabs();
             RefreshInteractableTaskTabs();
 
-            GameMgr.Events.Dispatch(GameEvents.ClickSectionScrollUp);
+            EventMgr.Events.Dispatch(GameEvents.ClickSectionScrollUp);
         }
 
         private void HandleScrollDown(object sender, EventArgs args)
@@ -547,7 +547,7 @@ namespace ThermoVR.Lab
             RefreshInteractableTopicTabs();
             RefreshInteractableTaskTabs();
 
-            GameMgr.Events.Dispatch(GameEvents.ClickSectionScrollDown);
+            EventMgr.Events.Dispatch(GameEvents.ClickSectionScrollDown);
         }
 
         private void HandleScrollLeft(object sender, EventArgs args)
@@ -558,7 +558,7 @@ namespace ThermoVR.Lab
 
             RefreshInteractableTaskTabs();
 
-            GameMgr.Events.Dispatch(GameEvents.ClickTaskScrollLeft);
+            EventMgr.Events.Dispatch(GameEvents.ClickTaskScrollLeft);
         }
 
         private void HandleScrollRight(object sender, EventArgs args)
@@ -570,7 +570,7 @@ namespace ThermoVR.Lab
 
             RefreshInteractableTaskTabs();
 
-            GameMgr.Events.Dispatch(GameEvents.ClickTaskScrollRight);
+            EventMgr.Events.Dispatch(GameEvents.ClickTaskScrollRight);
         }
 
         private void HandleLabTaskCompletionUpdated(int topicIndex, bool fromReset)
@@ -594,7 +594,7 @@ namespace ThermoVR.Lab
             {
                 // Display green checkmark
                 m_tabs[topicIndex].ShowCompletionSprite();
-                GameMgr.Events.Dispatch(GameEvents.SectionCompleted);
+                EventMgr.Events.Dispatch(GameEvents.SectionCompleted);
             }
             else
             {
@@ -604,23 +604,23 @@ namespace ThermoVR.Lab
 
             if (fromReset)
             {
-                GameMgr.Events.Dispatch(GameEvents.ClickResetQuiz);
+                EventMgr.Events.Dispatch(GameEvents.ClickResetQuiz);
             }
 
             // Refresh Player Progress
             currStats = LabMgr.Instance.Stats.LabMap[m_currLab.ID];
             currStats.RefreshProgress();
             LabMgr.Instance.Stats.LabMap[m_currLab.ID] = currStats;
-            GameMgr.Events.Dispatch(GameEvents.LabProgressUpdated);
+            EventMgr.Events.Dispatch(GameEvents.LabProgressUpdated);
 
             if (!fromReset)
             {
-                GameMgr.Events.Dispatch(GameEvents.ClickSubmitAnswer);
+                EventMgr.Events.Dispatch(GameEvents.ClickSubmitAnswer);
             }
 
             if (currStats.Progress == 1)
             {
-                GameMgr.Events.Dispatch(GameEvents.LabCompleted);
+                EventMgr.Events.Dispatch(GameEvents.LabCompleted);
             }
         }
 
@@ -655,8 +655,8 @@ namespace ThermoVR.Lab
             m_tabs[topicIndex].TaskTabs[taskIndex].ButtonImage.sprite = GameDB.Instance.LabTaskTabActive;
             m_tabs[topicIndex].TaskTabs[taskIndex].ButtonRect.sizeDelta = new Vector2(m_tabs[topicIndex].TaskTabs[taskIndex].ButtonRect.sizeDelta.x, TAB_HEIGHT_ACTIVE);
 
-            GameMgr.Events.Dispatch(GameEvents.TaskSwitched, taskIndex);
-            GameMgr.Events.Dispatch(GameEvents.ClickSelectTask, m_currLab.Topics[topicIndex].Tasks[taskIndex]);
+            EventMgr.Events.Dispatch(GameEvents.TaskSwitched, taskIndex);
+            EventMgr.Events.Dispatch(GameEvents.ClickSelectTask, m_currLab.Topics[topicIndex].Tasks[taskIndex]);
 
             //if (!m_tabs[topicIndex].TaskTabs[taskIndex].HasBeenEvaluated())
             //{
@@ -695,12 +695,12 @@ namespace ThermoVR.Lab
 
             m_ScrollHorizontalContainer.localPosition = new Vector3(m_HorizontalScrollOrigin, m_ScrollHorizontalContainer.localPosition.y, m_ScrollHorizontalContainer.localPosition.z);
 
-            GameMgr.Events.Dispatch(GameEvents.TaskSwitched, newTaskIndex);
-            GameMgr.Events.Dispatch(GameEvents.SectionSwitched, topicIndex);
+            EventMgr.Events.Dispatch(GameEvents.TaskSwitched, newTaskIndex);
+            EventMgr.Events.Dispatch(GameEvents.SectionSwitched, topicIndex);
 
             if (fromPlayerAction)
             {
-                GameMgr.Events.Dispatch(GameEvents.ClickSelectSection, m_currLab.Topics[topicIndex]);
+                EventMgr.Events.Dispatch(GameEvents.ClickSelectSection, m_currLab.Topics[topicIndex]);
             }
 
             //if (!m_tabs[topicIndex].TaskTabs[0].HasBeenEvaluated())
@@ -746,7 +746,7 @@ namespace ThermoVR.Lab
                 }
             }
 
-            GameMgr.Events.Dispatch(GameEvents.SectionListDisplayed, m_visibleSections);
+            EventMgr.Events.Dispatch(GameEvents.SectionListDisplayed, m_visibleSections);
         }
 
         private void RefreshInteractableTaskTabs()
@@ -823,7 +823,7 @@ namespace ThermoVR.Lab
                 m_ScrollUpBtn.gameObject.SetActive(false);
             }
 
-            GameMgr.Events.Dispatch(GameEvents.TaskListDisplayed, m_visibleTasks);
+            EventMgr.Events.Dispatch(GameEvents.TaskListDisplayed, m_visibleTasks);
         }
 
     }

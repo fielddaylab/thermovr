@@ -972,7 +972,7 @@ public class ThermoPresent : MonoBehaviour
 
     private void Start() {
 
-        GameMgr.Events.Register(GameEvents.RestoreLastSimState, HandleRestoreLastSimState);
+        EventMgr.Events.Register(GameEvents.RestoreLastSimState, HandleRestoreLastSimState);
 
         string update_text = "";
         update_text = "region: " + region_to_name(state.region); DispatchText(update_text, "", state.region / 2.0f, VarID.Region);
@@ -1012,7 +1012,7 @@ public class ThermoPresent : MonoBehaviour
     }
 
     private void DispatchText(string update_text, string units, double proportion, VarID varId) {
-        GameMgr.Events.Dispatch(GameEvents.UpdateVarText, new VarUpdate(varId, update_text, units, (float)proportion));
+        EventMgr.Events.Dispatch(GameEvents.UpdateVarText, new VarUpdate(varId, update_text, units, (float)proportion));
     }
 
     private void HandleRestoreLastSimState()

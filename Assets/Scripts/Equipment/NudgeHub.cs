@@ -25,12 +25,12 @@ namespace ThermoVR.Dials
         {
             m_currDialIndex = 0;
 
-            GameMgr.Events.Register<int>(GameEvents.SelectNewDial, HandleSelectNewDial);
+            EventMgr.Events.Register<int>(GameEvents.SelectNewDial, HandleSelectNewDial);
 
             m_NudgeUpButton.OnPress += HandleNudgeUpPressed;
             m_NudgeDownButton.OnPress += HandleNudgeDownPressed;
 
-            GameMgr.Events.Register(GameEvents.DialTextUpdated, HandleDialTextUpdated);
+            EventMgr.Events.Register(GameEvents.DialTextUpdated, HandleDialTextUpdated);
         }
 
         #region Handlers
@@ -59,13 +59,13 @@ namespace ThermoVR.Dials
 
         private void HandleNudgeUpPressed(object sender, EventArgs args)
         {
-            GameMgr.Events.Dispatch(GameEvents.NudgeUpClicked, m_currDialIndex);
+            EventMgr.Events.Dispatch(GameEvents.NudgeUpClicked, m_currDialIndex);
 
         }
 
         private void HandleNudgeDownPressed(object sender, EventArgs args)
         {
-            GameMgr.Events.Dispatch(GameEvents.NudgeDownClicked, m_currDialIndex);
+            EventMgr.Events.Dispatch(GameEvents.NudgeDownClicked, m_currDialIndex);
         }
 
         #endregion // Handlers

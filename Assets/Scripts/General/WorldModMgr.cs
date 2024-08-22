@@ -42,7 +42,7 @@ namespace ThermoVR
             defaultTrail.MaxLength = 30;
             SetTrail(defaultTrail);
 
-            GameMgr.Events.Register(GameEvents.UISwitched, HandleUISwitched);
+            EventMgr.Events.Register(GameEvents.UISwitched, HandleUISwitched);
         }
 
         #region Tools
@@ -55,13 +55,13 @@ namespace ThermoVR
             else {
                 m_activeTools = new List<ToolType>(allowedTools);
             }
-            GameMgr.Events.Dispatch(GameEvents.UpdateAllowedTools, m_activeTools);
+            EventMgr.Events.Dispatch(GameEvents.UpdateAllowedTools, m_activeTools);
         }
 
         public void ResetToolRestrictions() {
             m_activeTools.Clear();
             m_activeTools = new List<ToolType>(m_allTools);
-            GameMgr.Events?.Dispatch(GameEvents.ResetToolRestrictions);
+            EventMgr.Events?.Dispatch(GameEvents.ResetToolRestrictions);
         }
 
         public void EnableGraphBallInteractions()

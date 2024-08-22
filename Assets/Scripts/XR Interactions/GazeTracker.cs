@@ -84,7 +84,7 @@ namespace ThermoVR.Controls
             Debug.Log("[Gaze Tracker] ending gaze on type " + m_CurrentGazeTarget + ". Time was " + m_GazeTime);
 
             // dispatch event
-            GameMgr.Events.Dispatch(GameEvents.GazeEnd, new Tuple<GazeTargetType, float>(m_CurrentGazeTarget, m_GazeTime));
+            EventMgr.Events.Dispatch(GameEvents.GazeEnd, new Tuple<GazeTargetType, float>(m_CurrentGazeTarget, m_GazeTime));
 
             // reset target
             m_CurrentGazeTarget = GazeTargetType.NONE;

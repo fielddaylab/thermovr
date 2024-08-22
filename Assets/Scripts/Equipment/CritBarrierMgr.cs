@@ -38,7 +38,7 @@ namespace ThermoVR.Tools
             if (other == m_graphBall)
             {
                 Debug.Log("[CritBarrierMgr] graph ball is in barrier zone!");
-                GameMgr.Events.Dispatch(GameEvents.RestoreLastSimState);
+                EventMgr.Events.Dispatch(GameEvents.RestoreLastSimState);
                 SetMat(m_activeMat);
             }
         }
@@ -48,7 +48,7 @@ namespace ThermoVR.Tools
             if (other == m_graphBall)
             {
                 Debug.Log("[CritBarrierMgr] graph ball is in barrier zone!");
-                GameMgr.Events.Dispatch(GameEvents.RestoreLastSimState);
+                EventMgr.Events.Dispatch(GameEvents.RestoreLastSimState);
             }
         }
 

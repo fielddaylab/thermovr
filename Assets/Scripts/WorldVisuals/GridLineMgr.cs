@@ -97,7 +97,7 @@ namespace ThermoVR
 
             m_lastKnownPos = m_graphBall.transform.position;
 
-            GameMgr.Events?.Register<GraphSettingUpdate>(GameEvents.UpdateGraphSetting, HandleUpdateGraphSetting);
+            EventMgr.Events?.Register<GraphSettingUpdate>(GameEvents.UpdateGraphSetting, HandleUpdateGraphSetting);
         }
 
         private void Update()

@@ -62,9 +62,9 @@ namespace ThermoVR.Lab
                 Tablet.Instance.PlayUIAudio(m_audioClip);
             }
 
-            GameMgr.Events?.Dispatch(GameEvents.PreActivateLab, new Tuple<LabInfo, int>(m_Lab, m_LabIndex));
-            GameMgr.Events?.Dispatch(GameEvents.SelectLab);
-            GameMgr.Events?.Dispatch(GameEvents.ActivateLab, m_Lab);
+            EventMgr.Events?.Dispatch(GameEvents.PreActivateLab, new Tuple<LabInfo, int>(m_Lab, m_LabIndex));
+            EventMgr.Events?.Dispatch(GameEvents.SelectLab);
+            EventMgr.Events?.Dispatch(GameEvents.ActivateLab, m_Lab);
         }
     }
 }

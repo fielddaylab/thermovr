@@ -29,11 +29,11 @@ namespace ThermoVR.Controls
                 presenceState = isPresent;
                 if (presenceState)
                 {
-                    GameMgr.Events?.Dispatch(GameEvents.HeadsetOn);
+                    EventMgr.Events?.Dispatch(GameEvents.HeadsetOn);
                 }
                 else
                 {
-                    GameMgr.Events?.Dispatch(GameEvents.HeadsetOff);
+                    EventMgr.Events?.Dispatch(GameEvents.HeadsetOff);
                 }
             }
         }

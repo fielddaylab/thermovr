@@ -210,7 +210,7 @@ namespace ThermoVR.Dials
                 textv_tmpro = textv.GetComponent<TextMeshPro>();
             }
 
-            GameMgr.Events?.Register<Tool>(GameEvents.ActivateTool, HandleActivateTool, this)
+            EventMgr.Events?.Register<Tool>(GameEvents.ActivateTool, HandleActivateTool, this)
                 .Register<Tool>(GameEvents.DeactivateTool, HandleDeactivateTool, this)
                 .Register<Tool>(GameEvents.AllowTool, HandleAllowTool, this)
                 .Register<Tool>(GameEvents.DisallowTool, HandleDisallowTool, this);
@@ -248,7 +248,7 @@ namespace ThermoVR.Dials
             string updateText = string.Format(this.valFormat, value);
             textv_tmpro.SetText(updateText);
 
-            GameMgr.Events.Dispatch(GameEvents.DialTextUpdated);
+            EventMgr.Events.Dispatch(GameEvents.DialTextUpdated);
         }
 
         public List<Tool> GetRelevantTools()
@@ -458,7 +458,7 @@ namespace ThermoVR.Dials
                 m_lastKnownNudgeHandPos = r_hand_pos;
             }
 
-            GameMgr.Events.Dispatch(GameEvents.ClickToolIncrease, new Tuple<ToolType, float, int>(firstType, newMap, uniqueStopID));
+            EventMgr.Events.Dispatch(GameEvents.ClickToolIncrease, new Tuple<ToolType, float, int>(firstType, newMap, uniqueStopID));
         }
 
         private void nudgeValDown(bool manual, Vector3 r_hand_pos)
@@ -492,7 +492,7 @@ namespace ThermoVR.Dials
                 m_lastKnownNudgeHandPos = r_hand_pos;
             }
 
-            GameMgr.Events.Dispatch(GameEvents.ClickToolDecrease, new Tuple<ToolType, float, int>(firstType, newMap, uniqueStopID));
+            EventMgr.Events.Dispatch(GameEvents.ClickToolDecrease, new Tuple<ToolType, float, int>(firstType, newMap, uniqueStopID));
 
         }
 
@@ -521,12 +521,12 @@ namespace ThermoVR.Dials
             float nudgeMult = 1;
             if (m_nudging)
             {
-                nudgeMult = GameMgr.I.IsDesktop ? 0.01f : 0.2f;
+                nudgeMult = ModeMgr.Instance.IsDesktop ? 0.01f : 0.2f;
             }
 
 
             float new_val;
-            if (GameMgr.I.IsDesktop) {
+            if (ModeMgr.Instance.IsDesktop) {
                 movement_vector *= -10f;
 
                 // float dx = (r_hand_pos.x - hand_pos.x) * -10f;
@@ -571,7 +571,7 @@ namespace ThermoVR.Dials
             if (Math.Max(min_constraint, min_override) == 0)
             {
                 // allow snapping
-                if (!GameMgr.I.IsDesktop)
+                if (!ModeMgr.Instance.IsDesktop)
                 {
                     if (new_val < Math.Max(min_constraint, min_override) + 0.05) { new_val = Math.Max(min_constraint, min_override); }
                 }
@@ -585,7 +585,7 @@ namespace ThermoVR.Dials
             if (max_constraint == 1)
             {
                 // allow snapping
-                if (!GameMgr.I.IsDesktop)
+                if (!ModeMgr.Instance.IsDesktop)
                 {
                     if (new_val > max_constraint - 0.05) new_val = max_constraint;
                 }
@@ -603,7 +603,7 @@ namespace ThermoVR.Dials
 
             float pre_set_val = val;
 
-            if (GameMgr.I.IsDesktop)
+            if (ModeMgr.Instance.IsDesktop)
             {
                 set_val(new_val);
             }
@@ -647,7 +647,7 @@ namespace ThermoVR.Dials
             if (hapticsThresholdCrossed)
             {
                 // Add Haptics
-                GameMgr.Events.Dispatch(GameEvents.DetentHit, inHand);
+                EventMgr.Events.Dispatch(GameEvents.DetentHit, inHand);
             }
         }
 

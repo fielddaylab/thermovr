@@ -93,7 +93,7 @@ namespace ThermoVR.Lab
 
             RefreshInteractableTabs();
 
-            GameMgr.Events.Dispatch(GameEvents.ClickLabScrollUp);
+            EventMgr.Events.Dispatch(GameEvents.ClickLabScrollUp);
         }
 
         private void HandleScrollDown(object sender, EventArgs args)
@@ -105,7 +105,7 @@ namespace ThermoVR.Lab
 
             RefreshInteractableTabs();
 
-            GameMgr.Events.Dispatch(GameEvents.ClickLabScrollDown);
+            EventMgr.Events.Dispatch(GameEvents.ClickLabScrollDown);
         }
 
         #endregion // Handlers
@@ -165,7 +165,7 @@ namespace ThermoVR.Lab
                 m_ScrollUpBtn.gameObject.SetActive(false);
             }
 
-            GameMgr.Events.Dispatch(GameEvents.LabMenuDisplayed, m_visibleLabs);
+            EventMgr.Events.Dispatch(GameEvents.LabMenuDisplayed, m_visibleLabs);
         }
     }
 

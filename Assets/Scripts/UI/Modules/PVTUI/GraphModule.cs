@@ -109,7 +109,7 @@ public class GraphModule : UIModule
         }
 
         bool val = toggle.IsOn();
-        GameMgr.Events.Dispatch(GameEvents.UpdateGraphSetting, new GraphSettingUpdate(id, val));
+        EventMgr.Events.Dispatch(GameEvents.UpdateGraphSetting, new GraphSettingUpdate(id, val));
     }
 
     #endregion // Helpers

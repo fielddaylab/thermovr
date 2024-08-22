@@ -199,17 +199,17 @@ namespace ThermoVR.Lab
                 }
             }
 
-            GameMgr.Events.Dispatch(GameEvents.TaskChoiceSelected, selectedStrs);
+            EventMgr.Events.Dispatch(GameEvents.TaskChoiceSelected, selectedStrs);
 
             bool isCorrect = IsSingleAnswerCorrect(args.ID);
             uint index = args.ID;
             if (selectedState)
             {
-                GameMgr.Events.Dispatch(GameEvents.ClickSelectAnswer, new AnswerSelectLogData(index, isCorrect));
+                EventMgr.Events.Dispatch(GameEvents.ClickSelectAnswer, new AnswerSelectLogData(index, isCorrect));
             }
             else
             {
-                GameMgr.Events.Dispatch(GameEvents.ClickDeselectAnswer, new AnswerSelectLogData(index, isCorrect));
+                EventMgr.Events.Dispatch(GameEvents.ClickDeselectAnswer, new AnswerSelectLogData(index, isCorrect));
             }
         }
 

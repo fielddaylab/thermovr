@@ -77,15 +77,15 @@ namespace ThermoVR.Lab
             PlaceTargetZone();
             if (m_initialized)
             {
-                GameMgr.Events?.Dispatch(GameEvents.TargetStateTaskBegan);
+                EventMgr.Events?.Dispatch(GameEvents.TargetStateTaskBegan);
             }
             m_initialized = true;
         }
 
         private void OnDisable()
         {
-            GameMgr.Events?.Dispatch(GameEvents.ClearTargetZone);
-            GameMgr.Events?.Dispatch(GameEvents.TargetStateTaskEnded);
+            EventMgr.Events?.Dispatch(GameEvents.ClearTargetZone);
+            EventMgr.Events?.Dispatch(GameEvents.TargetStateTaskEnded);
         }
 
         private void Update()
@@ -99,7 +99,7 @@ namespace ThermoVR.Lab
                     m_completionStateImg.fillAmount = 0;
 
                     m_completionState = ReachStateState.Countdown;
-                    GameMgr.Events.Dispatch(GameEvents.TargetStateEntered);
+                    EventMgr.Events.Dispatch(GameEvents.TargetStateEntered);
                     m_completed = false;
                 }
                 else if (m_completionState == ReachStateState.Countdown)
@@ -123,7 +123,7 @@ namespace ThermoVR.Lab
                         m_completionStateImg.sprite = GameDB.Instance.ReachStateComplete;
                         m_completionStateImg.fillAmount = 1;
 
-                        GameMgr.Events.Dispatch(GameEvents.TargetStateCompleted);
+                        EventMgr.Events.Dispatch(GameEvents.TargetStateCompleted);
                         m_completionState = ReachStateState.Complete;
                     }
                     m_completed = true;
@@ -136,7 +136,7 @@ namespace ThermoVR.Lab
 
                 if (m_completionState != ReachStateState.Incomplete)
                 {
-                    GameMgr.Events.Dispatch(GameEvents.TargetStateLost, GetDiscrepancies());
+                    EventMgr.Events.Dispatch(GameEvents.TargetStateLost, GetDiscrepancies());
                     m_completionState = ReachStateState.Incomplete;
                 }
                 m_completed = false;
@@ -201,7 +201,7 @@ namespace ThermoVR.Lab
                 || p > ThermoMath.p_max || v > ThermoMath.v_max || t > ThermoMath.t_max)
             {
                 Debug.Log("[ReachStateHub] No Target Zone generated. Insufficient valid dimension points.");
-                GameMgr.Events.Dispatch(GameEvents.ClearTargetZone);
+                EventMgr.Events.Dispatch(GameEvents.ClearTargetZone);
                 return;
             }
 
@@ -221,7 +221,7 @@ namespace ThermoVR.Lab
                     (float)(targetZoneMaxPos.y - targetZoneMinPos.y),
                     (float)(targetZoneMaxPos.z - targetZoneMinPos.z)
                 );
-            GameMgr.Events.Dispatch(GameEvents.TargetZoneUpdated, new Tuple<Vector3, Vector3>(targetZoneCenterPos, targetZoneDims));
+            EventMgr.Events.Dispatch(GameEvents.TargetZoneUpdated, new Tuple<Vector3, Vector3>(targetZoneCenterPos, targetZoneDims));
         }
 
         #region IEvaluable

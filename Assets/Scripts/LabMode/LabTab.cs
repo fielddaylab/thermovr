@@ -109,7 +109,7 @@ namespace ThermoVR.Lab
             if (args.IsCorrect) {
                 ShowCompletionSprite();
                 if (!wasCorrect) {
-                    GameMgr.Events.Dispatch(GameEvents.TaskCompleted);
+                    EventMgr.Events.Dispatch(GameEvents.TaskCompleted);
                     Tablet.Instance.PlayUIAudio(GameDB.Instance.TaskCompleteClip);
                 }
                 CompletedAndCorrect = true;

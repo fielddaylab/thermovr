@@ -26,7 +26,7 @@ public class QuizLoadedModule : UIModule
     #region Handlers
 
     private void HandleBeginPressed(object sender, EventArgs args) {
-        GameMgr.Events.Dispatch(GameEvents.BeginLab);
+        EventMgr.Events.Dispatch(GameEvents.BeginLab);
     }
 
     #endregion // Handlers

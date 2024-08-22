@@ -81,11 +81,11 @@ namespace ThermoVR
             m_graphTabButton.OnPress += HandleGraphTabPress;
             m_resetButton.OnPress += HandleResetPress;
 
-            GameMgr.Events.Register(GameEvents.UISwitched, HandleUISwitched)
+            EventMgr.Events.Register(GameEvents.UISwitched, HandleUISwitched)
                 .Register<string>(GameEvents.NewNameGenerated, SetUserCode, this);
 
 
-            if (!GameMgr.I.IsDesktop && OVRManager.display != null)
+            if (!ModeMgr.Instance.IsDesktop && OVRManager.display != null)
             {
                 OVRManager.display.RecenteredPose += DisconnectGrab;
             }
@@ -133,7 +133,7 @@ namespace ThermoVR
             // Open Sandbox UI
             m_hub.OpenUI(UIID.Sandbox);
 
-            GameMgr.Events?.Dispatch(GameEvents.SandboxModeClicked);
+            EventMgr.Events?.Dispatch(GameEvents.SandboxModeClicked);
 
             // HidePullout();
 
@@ -151,7 +151,7 @@ namespace ThermoVR
             // Open Quiz UI
             m_hub.OpenUI(UIID.Lab);
 
-            GameMgr.Events?.Dispatch(GameEvents.LabModeClicked);
+            EventMgr.Events?.Dispatch(GameEvents.LabModeClicked);
 
             ShowPullout();
 
@@ -169,7 +169,7 @@ namespace ThermoVR
             // Open Graph UI
             m_hub.OpenUI(UIID.Graph);
 
-            GameMgr.Events?.Dispatch(GameEvents.SettingsViewClicked);
+            EventMgr.Events?.Dispatch(GameEvents.SettingsViewClicked);
 
             ShowPullout();
 
@@ -182,7 +182,7 @@ namespace ThermoVR
         {
             PlayClick(m_graphTabButton);
 
-            GameMgr.Events.Dispatch(GameEvents.ResetPressed);
+            EventMgr.Events.Dispatch(GameEvents.ResetPressed);
         }
 
         private void HandleUISwitched()
@@ -223,7 +223,7 @@ namespace ThermoVR
             currPos.pos = new float[] { this.transform.position.x, this.transform.position.y, this.transform.position.z };
             currPos.rot = new float[] { this.transform.rotation.x, this.transform.rotation.y, this.transform.rotation.z, this.transform.rotation.w };
 
-            GameMgr.Events?.Dispatch(GameEvents.TabletGrabbed, new Tuple<PositionDataFrame, Hand>(currPos, arg));
+            EventMgr.Events?.Dispatch(GameEvents.TabletGrabbed, new Tuple<PositionDataFrame, Hand>(currPos, arg));
         }
 
         private void HandleReleased(object sender, Hand arg)
@@ -232,7 +232,7 @@ namespace ThermoVR
             currPos.pos = new float[] { this.transform.position.x, this.transform.position.y, this.transform.position.z };
             currPos.rot = new float[] { this.transform.rotation.x, this.transform.rotation.y, this.transform.rotation.z, this.transform.rotation.w };
 
-            GameMgr.Events?.Dispatch(GameEvents.TabletReleased, new Tuple<PositionDataFrame, Hand>(currPos, arg));
+            EventMgr.Events?.Dispatch(GameEvents.TabletReleased, new Tuple<PositionDataFrame, Hand>(currPos, arg));
         }
 
         #endregion // Handlers
