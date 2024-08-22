@@ -32,7 +32,7 @@ public class DirectionalIndicator : MonoBehaviour
         running = true;
         this.Stop(); // we start the game stopped.
 
-        GameMgr.Events?.Register<Tuple<double, double>>(GameEvents.UpdateVaporFlow, HandleUpdateVaporFlow, this);
+        EventMgr.Events?.Register<Tuple<double, double>>(GameEvents.UpdateVaporFlow, HandleUpdateVaporFlow, this);
     }
 
     private void HandleUpdateVaporFlow(Tuple<double, double> vaporInfo) {

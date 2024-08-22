@@ -97,12 +97,12 @@ namespace ThermoVR.Lab
 
             if (GameMgr.I.AudioEnabled) { Tablet.Instance.PlayUIAudio(m_taskResetClip); }
 
-            GameMgr.Events.Dispatch(GameEvents.TaskResetPressed);
+            EventMgr.Events.Dispatch(GameEvents.TaskResetPressed);
         }
 
         private void HandleNextPressed(object sender, EventArgs args)
         {
-            GameMgr.Events.Dispatch(GameEvents.TaskNextPressed);
+            EventMgr.Events.Dispatch(GameEvents.TaskNextPressed);
         }
     }
 }

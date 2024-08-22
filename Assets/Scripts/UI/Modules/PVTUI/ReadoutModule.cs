@@ -28,7 +28,7 @@ public class ReadoutModule : UIModule
     public override void Init() {
         base.Init();
 
-        GameMgr.Events?.Register<VarUpdate>(GameEvents.UpdateVarText, HandleUpdateVarText, this);
+        EventMgr.Events?.Register<VarUpdate>(GameEvents.UpdateVarText, HandleUpdateVarText, this);
     }
 
     public override void Open() {

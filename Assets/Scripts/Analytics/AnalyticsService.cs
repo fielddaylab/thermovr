@@ -176,7 +176,7 @@ namespace ThermoVR.Analytics
             m_LastInputProxyType = LogToolType.UNKOWN;
 
             // General Events
-            GameMgr.Events.Register<string>(GameEvents.NewNameGenerated, SetUserCode, this)
+            EventMgr.Events.Register<string>(GameEvents.NewNameGenerated, SetUserCode, this)
                 .Register<Hand>(GameEvents.HandStartPress, OnHandStartPress, this)
                 .Register<Tuple<LabInfo, int>>(GameEvents.PreActivateLab, OnPreActivateLab, this)
                 .Register<int>(GameEvents.SectionSwitched, OnSectionSwitched, this)
@@ -190,7 +190,7 @@ namespace ThermoVR.Analytics
                 ;
 
             // Analytics Events
-            GameMgr.Events.Register(GameEvents.StartGame, LogStartGame, this)
+            EventMgr.Events.Register(GameEvents.StartGame, LogStartGame, this)
                 .Register(GameEvents.StartSession, LogStartSession, this)
                 .Register(GameEvents.SelectLab, LogSelectLab, this)
                 .Register(GameEvents.ClickLabHome, LogClickLabHome, this)

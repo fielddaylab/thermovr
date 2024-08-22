@@ -55,12 +55,12 @@ namespace ThermoVR
             EndTrace();
             HideTrace();
 
-            GameMgr.Events.Register<Hand>(GameEvents.GraphBallGrabbed, HandleGraphBallGrabbed, this);
-            GameMgr.Events?.Register<Tuple<double, double, double>>(GameEvents.WarpPVT, HandleWarpPVT);
+            EventMgr.Events.Register<Hand>(GameEvents.GraphBallGrabbed, HandleGraphBallGrabbed, this);
+            EventMgr.Events?.Register<Tuple<double, double, double>>(GameEvents.WarpPVT, HandleWarpPVT);
 
-            GameMgr.Events?.Register<Tuple<float, float>>(GameEvents.RotateGraphClickedCCW, HandleRotateGraph, this);
-            GameMgr.Events?.Register<Tuple<float, float>>(GameEvents.RotateGraphClickedCW, HandleRotateGraph, this);
-            GameMgr.Events?.Register(GameEvents.RotateGraphCompleted, HandleRotateGraphCompleted, this);
+            EventMgr.Events?.Register<Tuple<float, float>>(GameEvents.RotateGraphClickedCCW, HandleRotateGraph, this);
+            EventMgr.Events?.Register<Tuple<float, float>>(GameEvents.RotateGraphClickedCW, HandleRotateGraph, this);
+            EventMgr.Events?.Register(GameEvents.RotateGraphCompleted, HandleRotateGraphCompleted, this);
         }
 
         private void Update()

@@ -144,18 +144,18 @@ namespace ThermoVR.Tools
             tare_heat_button.OnPress += HandleTareHeatPressed;
 
 
-            GameMgr.Events?.Register<Tuple<double, double, double>>(GameEvents.WarpPVT, HandleWarpPVT);
+            EventMgr.Events?.Register<Tuple<double, double, double>>(GameEvents.WarpPVT, HandleWarpPVT);
 
-            GameMgr.Events?.Register<Tool>(GameEvents.PressedToolToggle, HandleToolTogglePressed);
+            EventMgr.Events?.Register<Tool>(GameEvents.PressedToolToggle, HandleToolTogglePressed);
 
-            GameMgr.Events?.Register<List<ToolType>>(GameEvents.UpdateAllowedTools, HandleAllowedToolsUpdated);
-            GameMgr.Events?.Register(GameEvents.ResetToolRestrictions, HandleResetToolRestrictions);
+            EventMgr.Events?.Register<List<ToolType>>(GameEvents.UpdateAllowedTools, HandleAllowedToolsUpdated);
+            EventMgr.Events?.Register(GameEvents.ResetToolRestrictions, HandleResetToolRestrictions);
 
-            GameMgr.Events?.Register<GameObject>(GameEvents.ObjectGrabbed, HandleObjectGrabbed);
-            GameMgr.Events?.Register<GameObject>(GameEvents.ObjectReleased, HandleObjectReleased);
+            EventMgr.Events?.Register<GameObject>(GameEvents.ObjectGrabbed, HandleObjectGrabbed);
+            EventMgr.Events?.Register<GameObject>(GameEvents.ObjectReleased, HandleObjectReleased);
 
-            GameMgr.Events?.Register<int>(GameEvents.NudgeUpClicked, HandleNudgeUpClicked);
-            GameMgr.Events?.Register<int>(GameEvents.NudgeDownClicked, HandleNudgeDownClicked);
+            EventMgr.Events?.Register<int>(GameEvents.NudgeUpClicked, HandleNudgeUpClicked);
+            EventMgr.Events?.Register<int>(GameEvents.NudgeDownClicked, HandleNudgeDownClicked);
 
             m_panelLogState = new AnalyticsService.SliderPanelLogData();
             m_panelLogState.Insulation = new AnalyticsService.SliderSettings();
@@ -351,10 +351,10 @@ namespace ThermoVR.Tools
 
             if (!auto)
             {
-                GameMgr.Events?.Dispatch(GameEvents.ToolTogglePressed, new Tuple<ToolType, bool, bool, int>(t.tool_type, true, false, uniqueStopID));
+                EventMgr.Events?.Dispatch(GameEvents.ToolTogglePressed, new Tuple<ToolType, bool, bool, int>(t.tool_type, true, false, uniqueStopID));
             }
 
-            GameMgr.Events?.Dispatch(GameEvents.ActivateTool, t);
+            EventMgr.Events?.Dispatch(GameEvents.ActivateTool, t);
             UpdateApplyTool(t);
 
             Halfable h = o.GetComponent<Halfable>();
@@ -387,10 +387,10 @@ namespace ThermoVR.Tools
 
             if (!auto)
             {
-                GameMgr.Events?.Dispatch(GameEvents.ToolTogglePressed, new Tuple<ToolType, bool, bool, int>(t.tool_type, false, toolReset, uniqueStopID));
+                EventMgr.Events?.Dispatch(GameEvents.ToolTogglePressed, new Tuple<ToolType, bool, bool, int>(t.tool_type, false, toolReset, uniqueStopID));
             }
 
-            GameMgr.Events?.Dispatch(GameEvents.DeactivateTool, t);
+            EventMgr.Events?.Dispatch(GameEvents.DeactivateTool, t);
             UpdateApplyTool(t);
 
             RecordPanelUpdate();
@@ -435,7 +435,7 @@ namespace ThermoVR.Tools
             // TODO: show on buttons (dispatch event)
             t.allowed = true;
 
-            GameMgr.Events?.Dispatch(GameEvents.AllowTool, t);
+            EventMgr.Events?.Dispatch(GameEvents.AllowTool, t);
 
             RecordPanelUpdate();
         }
@@ -446,7 +446,7 @@ namespace ThermoVR.Tools
 
             DeactivateTool(t);
 
-            GameMgr.Events?.Dispatch(GameEvents.DisallowTool, t);
+            EventMgr.Events?.Dispatch(GameEvents.DisallowTool, t);
 
             RecordPanelUpdate();
         }
@@ -545,14 +545,14 @@ namespace ThermoVR.Tools
         {
             m_accumulatedHeatEnergy += deltaHeat;
 
-            GameMgr.Events.Dispatch(GameEvents.AccumHeatEnergyUpdated);
+            EventMgr.Events.Dispatch(GameEvents.AccumHeatEnergyUpdated);
         }
 
         public void ResetAccumulatedHeatEnergy()
         {
             m_accumulatedHeatEnergy = 0;
 
-            GameMgr.Events.Dispatch(GameEvents.AccumHeatEnergyUpdated);
+            EventMgr.Events.Dispatch(GameEvents.AccumHeatEnergyUpdated);
         }
 
         public double GetAccumulatedHeatEnergy()
@@ -593,7 +593,7 @@ namespace ThermoVR.Tools
             m_panelLogState.ChamberTemperature.Enabled = tool_surroundingTemp.enabled;
             m_panelLogState.ChamberTemperature.SliderVal = tool_surroundingTemp.GetVal();
 
-            GameMgr.Events.Dispatch(GameEvents.SliderPanelUpdated, m_panelLogState);
+            EventMgr.Events.Dispatch(GameEvents.SliderPanelUpdated, m_panelLogState);
         }
 
         #region Handlers
@@ -602,7 +602,7 @@ namespace ThermoVR.Tools
         private void HandleResetPressed(object sender, System.EventArgs args) {
             if (GameMgr.I.AudioEnabled) { reset_button.ClickAudio.Play(); }
 
-            GameMgr.Events.Dispatch(GameEvents.ResetPressed);
+            EventMgr.Events.Dispatch(GameEvents.ResetPressed);
 
             ResetDefaults();
         }

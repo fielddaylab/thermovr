@@ -21,7 +21,7 @@ namespace ThermoVR
         {
             m_mainGroup.alpha = 0;
             m_activeProxy = null;
-            GameMgr.Events.Register<InputProxy>(GameEvents.InputProxySelected, HandleInputProxySelected);
+            EventMgr.Events.Register<InputProxy>(GameEvents.InputProxySelected, HandleInputProxySelected);
 
             m_closeButton.onClick.AddListener(HandleCloseClicked);
             m_enterButton.onClick.AddListener(HandleEnterClicked);
@@ -43,7 +43,7 @@ namespace ThermoVR
         {
             m_mainGroup.alpha = 0;
             m_activeProxy = null;
-            GameMgr.Events.Dispatch(GameEvents.CancelEditToolVal);
+            EventMgr.Events.Dispatch(GameEvents.CancelEditToolVal);
         }
 
         private void HandleEnterClicked()

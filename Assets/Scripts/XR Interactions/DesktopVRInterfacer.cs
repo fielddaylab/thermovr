@@ -42,7 +42,7 @@ namespace ThermoVR.Controls {
                         Hand grabType = Hand.MOUSE;
                         dd.touchable.SetGrabbed(true, grabType);
                         World.Instance.GrabDial(dd, grabType);
-                        GameMgr.Events.Dispatch(GameEvents.ObjectGrabbed, m_Dragging);
+                        EventMgr.Events.Dispatch(GameEvents.ObjectGrabbed, m_Dragging);
                     }
                     else if (objHit.GetComponent<PlacementDotInteractions>())
                     {
@@ -55,8 +55,8 @@ namespace ThermoVR.Controls {
                     else if (objHit.GetComponent<InputProxy>())
                     {
                         var proxy = objHit.GetComponent<InputProxy>();
-                        GameMgr.Events.Dispatch(GameEvents.InputProxySelected, proxy);
-                        GameMgr.Events.Dispatch(GameEvents.EditToolValStarted, proxy.ToolType());
+                        EventMgr.Events.Dispatch(GameEvents.InputProxySelected, proxy);
+                        EventMgr.Events.Dispatch(GameEvents.EditToolValStarted, proxy.ToolType());
                     }
                 }
             }
@@ -87,7 +87,7 @@ namespace ThermoVR.Controls {
                         pdInteractions.FinishInteract(Hand.MOUSE);
                     }
 
-                    GameMgr.Events.Dispatch(GameEvents.ObjectReleased, m_Dragging);
+                    EventMgr.Events.Dispatch(GameEvents.ObjectReleased, m_Dragging);
                     m_Dragging = null;
                 }
             }

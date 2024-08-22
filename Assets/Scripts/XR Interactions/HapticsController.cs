@@ -11,10 +11,10 @@ namespace ThermoVR.Controls
 
         private void Start()
         {
-            if (GameMgr.I.IsDesktop) { return; }
+            if (ModeMgr.Instance.IsDesktop) { return; }
             
-            GameMgr.Events.Register<Hand>(GameEvents.HandStartPress, OnHandStartPress, this);
-            GameMgr.Events.Register<Hand>(GameEvents.DetentHit, OnDetentHit, this);
+            EventMgr.Events.Register<Hand>(GameEvents.HandStartPress, OnHandStartPress, this);
+            EventMgr.Events.Register<Hand>(GameEvents.DetentHit, OnDetentHit, this);
 
             // Press Haptics
             byte[] samples = new byte[50];

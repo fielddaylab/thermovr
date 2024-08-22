@@ -21,11 +21,11 @@ public sealed class CameraClampToVirtualViewport : MonoBehaviour
     private void Start()
     {
         this.CacheComponent(ref m_Camera);
-        GameMgr.RenderMgr.AddClampedViewportCamera(this);
+        ViewportMgr.RenderMgr.AddClampedViewportCamera(this);
     }
 
     private void OnDisable()
     {
-        GameMgr.RenderMgr.RemoveClampedViewportCamera(this);
+        ViewportMgr.RenderMgr.RemoveClampedViewportCamera(this);
     }
 }

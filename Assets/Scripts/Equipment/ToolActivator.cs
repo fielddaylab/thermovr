@@ -70,7 +70,7 @@ public class ToolActivator : MonoBehaviour
 
             if (GameMgr.I.AudioEnabled) { m_button.ClickAudio.Play(); }
             
-            GameMgr.Events.Dispatch(GameEvents.PressedToolToggle, tool);
+            EventMgr.Events.Dispatch(GameEvents.PressedToolToggle, tool);
         }
     }
 

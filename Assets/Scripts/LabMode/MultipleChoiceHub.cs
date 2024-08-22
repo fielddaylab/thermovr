@@ -204,16 +204,16 @@ namespace ThermoVR.Lab
                 }
             }
   
-            GameMgr.Events.Dispatch(GameEvents.TaskChoiceSelected, selectedStrs);
+            EventMgr.Events.Dispatch(GameEvents.TaskChoiceSelected, selectedStrs);
 
             if (deselectOld)
             {
-                GameMgr.Events.Dispatch(GameEvents.ClickDeselectAnswer, new AnswerSelectLogData(prevSelection, IsSingleAnswerCorrect(prevSelection)));
+                EventMgr.Events.Dispatch(GameEvents.ClickDeselectAnswer, new AnswerSelectLogData(prevSelection, IsSingleAnswerCorrect(prevSelection)));
             }
 
             bool isCorrect = IsSingleAnswerCorrect(args.ID);
             uint index = args.ID;
-            GameMgr.Events.Dispatch(GameEvents.ClickSelectAnswer, new AnswerSelectLogData(index, isCorrect));
+            EventMgr.Events.Dispatch(GameEvents.ClickSelectAnswer, new AnswerSelectLogData(index, isCorrect));
         }
 
         #endregion // Handlers

@@ -16,10 +16,6 @@ namespace ThermoVR
         public bool IsAlphaRelease = true; // temp solution to managing alpha release channel
         public bool IsDesktop = false;
 
-        static public RenderMgr RenderMgr { get; internal set; }
-
-        private readonly EventDispatcher<object> m_EventDispatcher = new EventDispatcher<object>();
-
         [SerializeField] private World m_world;
         [SerializeField] private ThermoPresent m_thermo_present;
 
@@ -29,13 +25,8 @@ namespace ThermoVR
 
         protected override void Awake() {
             base.Awake();
-            
-            RenderMgr = new RenderMgr();
-            RenderMgr.Initialize();
 
-            RenderMgr.EnableAspectClamping(1920, 1080);
-
-            GameMgr.Events.Dispatch(GameEvents.TryNewName);
+            EventMgr.Events.Dispatch(GameEvents.TryNewName);
         }
 
         private void Start() {
@@ -49,29 +40,13 @@ namespace ThermoVR
 
             m_ProfileName = string.Empty;
 
-            Events.Register(GameEvents.TryNewName, OnTryNewName, this);
+            EventMgr.Events.Register(GameEvents.TryNewName, OnTryNewName, this);
 
-            Events.Dispatch(GameEvents.InitialLoadComplete);
+            EventMgr.Events.Dispatch(GameEvents.InitialLoadComplete);
         }
 
         private void FixedUpdate() {
             m_world.ManualFixedUpdate();
-
-            Events.Dispatch(GameEvents.CanvasPreUpdate);
-            Events.Dispatch(GameEvents.ApplicationPreRender);
-        }
-
-        private void LateUpdate() {
-            m_EventDispatcher.FlushQueue();
-
-            RenderMgr.PollScreenSettings();
-        }
-
-        /// <summary>
-        /// Global game event dispatcher.
-        /// </summary>
-        static public EventDispatcher<object> Events {
-            get { return GameMgr.I?.m_EventDispatcher; }
         }
 
 
@@ -90,11 +65,11 @@ namespace ThermoVR
         {
             Debug.Log("[Analytics] New name success! " + inName);
 
-            GameMgr.Events.Dispatch(GameEvents.NewNameGenerated, inName);
+            EventMgr.Events.Dispatch(GameEvents.NewNameGenerated, inName);
             m_ProfileName = inName;
 
-            GameMgr.Events.Dispatch(GameEvents.StartSession);
-            GameMgr.Events.Dispatch(GameEvents.StartGame);
+            EventMgr.Events.Dispatch(GameEvents.StartSession);
+            EventMgr.Events.Dispatch(GameEvents.StartGame);
         }
 
         private void OnNewNameFail(OGD.Core.Error error)
@@ -103,8 +78,8 @@ namespace ThermoVR
 
             Log.Error("[Game] Generating new player id failed: {0}", error.Msg);
 
-            GameMgr.Events.Dispatch(GameEvents.StartSession);
-            GameMgr.Events.Dispatch(GameEvents.StartGame);
+            EventMgr.Events.Dispatch(GameEvents.StartSession);
+            EventMgr.Events.Dispatch(GameEvents.StartGame);
         }
 
         #endregion // New Game

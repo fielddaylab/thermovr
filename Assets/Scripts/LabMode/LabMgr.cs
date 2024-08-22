@@ -25,7 +25,7 @@ namespace ThermoVR.Lab
             }
 
             AvailableLabs = new List<LabInfo>();
-            GameMgr.Events.Register<LabInfo>(GameEvents.LabLoaded, HandleLabLoaded);
+            EventMgr.Events.Register<LabInfo>(GameEvents.LabLoaded, HandleLabLoaded);
         }
 
         #region Handlers

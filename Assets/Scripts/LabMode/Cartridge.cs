@@ -37,7 +37,7 @@ namespace ThermoVR.Lab
         }
 
         private void Start() {
-            GameMgr.Events.Dispatch(GameEvents.RegisterMovable, this.GetComponent<Touchable>());
+            EventMgr.Events.Dispatch(GameEvents.RegisterMovable, this.GetComponent<Touchable>());
 
             if (m_initialLabel != "Label") {
                 SetLabels(m_initialLabel);

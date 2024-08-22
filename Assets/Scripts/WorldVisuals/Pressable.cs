@@ -33,8 +33,8 @@ namespace ThermoVR
         }
 
         private void Start() {
-            GameMgr.Events?.Register(GameEvents.GatherPressables, HandleGatherPressables);
-            GameMgr.Events?.Register<bool>(GameEvents.CheckForPress, HandleCheckForPress);
+            EventMgr.Events?.Register(GameEvents.GatherPressables, HandleGatherPressables);
+            EventMgr.Events?.Register<bool>(GameEvents.CheckForPress, HandleCheckForPress);
         }
 
         private void FixedUpdate() {
@@ -61,7 +61,7 @@ namespace ThermoVR
         /// <param name="cooldown">Cooldown if in VR, none if in desktop</param>
         public void Press(bool cooldown, Hand inputType) {
             if (m_touchTimer <= 0) {
-                GameMgr.Events.Dispatch(GameEvents.HandStartPress, inputType);
+                EventMgr.Events.Dispatch(GameEvents.HandStartPress, inputType);
                 OnPress?.Invoke(this, EventArgs.Empty);
                 PressCompleted?.Invoke(this, EventArgs.Empty);
                 if (cooldown) {
@@ -101,7 +101,7 @@ namespace ThermoVR
         }
 
         private void HandleGatherPressables() {
-            GameMgr.Events.Dispatch(GameEvents.RegisterPressable, this);
+            EventMgr.Events.Dispatch(GameEvents.RegisterPressable, this);
         }
 
         private void HandleCheckForPress(bool left_hand) {

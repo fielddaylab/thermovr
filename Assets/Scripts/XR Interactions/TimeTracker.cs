@@ -17,7 +17,7 @@ namespace ThermoVR.Controls
         {
             m_elapsedTime += Time.deltaTime;
 
-            GameMgr.Events.Dispatch(GameEvents.ElapsedTimeUpdated, m_elapsedTime);
+            EventMgr.Events.Dispatch(GameEvents.ElapsedTimeUpdated, m_elapsedTime);
         }
     }
 }

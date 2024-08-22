@@ -194,7 +194,7 @@ namespace ThermoVR.Lab
         #region Unity Callbacks
 
         private void Start() {
-            if (GameMgr.I.IsAlphaRelease) {
+            if (ModeMgr.Instance.IsAlphaRelease) {
                 // enable lab mode
                 for (int i = 0; i < m_initialLabs.Length; i++) {
                     LoadLab(m_initialLabs[i]);
@@ -231,7 +231,7 @@ namespace ThermoVR.Lab
             if (TryParseLab(labInfoAsset, out LabInfo newLabInfo)) {
                 Debug.Log("[LabLoad] Asset " + labInfoAsset.name + " loaded successfully.");
 
-                GameMgr.Events.Dispatch(GameEvents.LabLoaded, newLabInfo);
+                EventMgr.Events.Dispatch(GameEvents.LabLoaded, newLabInfo);
             }
             else {
                 Debug.Log("[LabLoad] Failed to load asset " + labInfoAsset.name);

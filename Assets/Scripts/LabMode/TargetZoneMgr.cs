@@ -11,8 +11,8 @@ namespace ThermoVR.Tools
 
         private void Start()
         {
-            GameMgr.Events?.Register<Tuple<Vector3, Vector3>>(GameEvents.TargetZoneUpdated, HandleTargetZoneUpdated);
-            GameMgr.Events?.Register(GameEvents.ClearTargetZone, HandleClearTargetZone);
+            EventMgr.Events?.Register<Tuple<Vector3, Vector3>>(GameEvents.TargetZoneUpdated, HandleTargetZoneUpdated);
+            EventMgr.Events?.Register(GameEvents.ClearTargetZone, HandleClearTargetZone);
         }
 
         #region Handlers

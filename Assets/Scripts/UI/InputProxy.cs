@@ -47,7 +47,7 @@ namespace ThermoVR
                 }
                 catch
                 {
-                    GameMgr.Events.Dispatch(GameEvents.SetInvalidToolVal, newValStr);
+                    EventMgr.Events.Dispatch(GameEvents.SetInvalidToolVal, newValStr);
                     return;
                 }
             }
@@ -59,11 +59,11 @@ namespace ThermoVR
                 if (m_dialToSet.val_within_range(newVal))
                 {
                     m_dialToSet.convert_and_set_map(newVal);
-                    GameMgr.Events.Dispatch(GameEvents.ProxyInputSubmitted, newVal);
+                    EventMgr.Events.Dispatch(GameEvents.ProxyInputSubmitted, newVal);
                 }
                 else
                 {
-                    GameMgr.Events.Dispatch(GameEvents.SetInvalidToolVal, newValStr);
+                    EventMgr.Events.Dispatch(GameEvents.SetInvalidToolVal, newValStr);
                 }
             }
             else if (m_textToChange)

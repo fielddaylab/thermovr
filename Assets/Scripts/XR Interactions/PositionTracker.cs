@@ -53,9 +53,9 @@ namespace ThermoVR.Controls
             if (m_frameCounter == SAMPLE_SIZE - 1)
             {
                 // dispatch frames
-                GameMgr.Events.Dispatch(GameEvents.ViewportData, m_viewportBuffer);
-                GameMgr.Events.Dispatch(GameEvents.LeftHandData, m_rightHandBuffer);
-                GameMgr.Events.Dispatch(GameEvents.RightHandData, m_leftHandBuffer);
+                EventMgr.Events.Dispatch(GameEvents.ViewportData, m_viewportBuffer);
+                EventMgr.Events.Dispatch(GameEvents.LeftHandData, m_rightHandBuffer);
+                EventMgr.Events.Dispatch(GameEvents.RightHandData, m_leftHandBuffer);
 
                 // reset (old samples will be overriden frame by frame)
                 m_frameCounter = 0;
@@ -85,7 +85,7 @@ namespace ThermoVR.Controls
             LoadFrameToBuffer(m_leftHand, ref m_leftHandBuffer, frameCount);
             LoadFrameToBuffer(m_rightHand, ref m_rightHandBuffer, frameCount);
 
-            GameMgr.Events.Dispatch(GameEvents.HeadsetPosUpdated, m_viewportBuffer[frameCount]);
+            EventMgr.Events.Dispatch(GameEvents.HeadsetPosUpdated, m_viewportBuffer[frameCount]);
         }
 
         private void LoadFrameToBuffer(Transform toLoad, ref PositionDataFrame[] buffer, int frameIndex)

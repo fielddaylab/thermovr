@@ -33,7 +33,7 @@ namespace ThermoVR.UI.GraphElements
 
         private void Awake() {
             this.gameObject.SetActive(m_startVisible);
-            GameMgr.Events?.Register<GraphSettingUpdate>(GameEvents.UpdateGraphSetting, HandleUpdateGraphSetting);
+            EventMgr.Events?.Register<GraphSettingUpdate>(GameEvents.UpdateGraphSetting, HandleUpdateGraphSetting);
         }
 
         #region Handlers

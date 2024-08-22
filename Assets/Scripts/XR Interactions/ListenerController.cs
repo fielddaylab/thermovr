@@ -12,7 +12,7 @@ namespace ThermoVR.Controls
         private void Awake()
         {
             m_listener.enabled = false;
-            GameMgr.Events?.Register(GameEvents.InitialLoadComplete, HandleInitialLoadComplete);
+            EventMgr.Events?.Register(GameEvents.InitialLoadComplete, HandleInitialLoadComplete);
         }
 
         #region Handlers
