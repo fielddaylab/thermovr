@@ -60,7 +60,7 @@ namespace ThermoVR {
                 // trigger fullscreen
                 Screen.fullScreen = true;
                 #if UNITY_WEBGL && !UNITY_EDITOR
-                NativeFullscreen_SetFullscreen(fullscreen);
+                // NativeFullscreen_SetFullscreen(true);
                 #endif // UNITY_WEBGL && !UNITY_EDITOR
             }
 
