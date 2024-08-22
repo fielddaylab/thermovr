@@ -8,32 +8,12 @@ namespace ThermoVR
     {
         [SerializeField] private AudioSource m_src;
 
-        private bool m_initialized = false;
         private float m_pauseTime = 0;
 
         private void OnEnable()
         {
-            if (!PersistentState.Instance.Bools.ContainsKey(PersistentVars.MusicOnStart) || PersistentState.Instance.Bools[PersistentVars.MusicOnStart])
-            {
-                if (m_initialized)
-                {
-                    m_src.time = m_pauseTime;
-                    m_src.Play();
-                }
-                else
-                {
-                    m_src.Play();
-                    m_initialized = true;
-                }
-            }
-            else if (m_initialized)
-            {
-                m_src.Play();
-            }
-            else
-            {
-                m_initialized = true;
-            }
+            m_src.time = m_pauseTime;
+            m_src.Play();
         }
 
         private void Update()
