@@ -13,14 +13,25 @@ namespace ThermoVR
 
         private void OnEnable()
         {
-            if (m_initialized)
+            if (PersistentState.Instance.Bools[PersistentVars.MusicOnStart])
             {
-                m_src.time = m_pauseTime;
+                if (m_initialized)
+                {
+                    m_src.time = m_pauseTime;
+                    m_src.Play();
+                }
+                else
+                {
+                    m_src.Play();
+                    m_initialized = true;
+                }
+            }
+            else if (m_initialized)
+            {
                 m_src.Play();
             }
             else
             {
-                m_src.Play();
                 m_initialized = true;
             }
         }

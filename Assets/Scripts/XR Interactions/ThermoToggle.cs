@@ -21,6 +21,11 @@ namespace ThermoVR.UI
             m_toggle.PointerClicked.AddListener(HandlePointerClick);
         }
 
+        public void SetToggleState(bool isOn)
+        {
+            m_toggle.isOn = isOn;
+        }
+
         public bool IsOn() {
             return m_toggle.isOn;
         }
