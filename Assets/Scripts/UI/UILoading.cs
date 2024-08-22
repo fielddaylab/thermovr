@@ -17,6 +17,7 @@ namespace ThermoVR.UI
         [SerializeField] private GameObject m_desktopGroup;
         [SerializeField] private GameObject m_vrGroup;
         [SerializeField] private RectTransform m_loadGroup;
+        [SerializeField] private Button m_startButton;
 
         [Header("VR layout")]
         [SerializeField] private Vector3 m_vrLoadPos;
@@ -27,6 +28,10 @@ namespace ThermoVR.UI
             {
                 m_desktopGroup.SetActive(true);
                 m_vrGroup.SetActive(false);
+
+                EventMgr.Events.Register(GameEvents.AsyncLoadComplete, HandleAsyncLoadComplete);
+                m_startButton.onClick.AddListener(HandleStartGameClicked);
+                m_startButton.interactable = false;
             }
             else
             {
@@ -44,12 +49,33 @@ namespace ThermoVR.UI
                 m_minTimer -= Time.deltaTime;
             }
 
-            m_loadIcon.transform.Rotate(-m_rotation * Time.deltaTime, Space.Self);
+            if (m_startButton.interactable)
+            {
+                m_loadGroup.gameObject.SetActive(false);
+            }
+            else
+            {
+                m_loadIcon.transform.Rotate(-m_rotation * Time.deltaTime, Space.Self);
+            }
         }
 
         public bool MinLoadTimeCompleted()
         {
             return m_minTimer <= 0;
         }
+
+        #region Handlers
+
+        private void HandleAsyncLoadComplete()
+        {
+            m_startButton.interactable = true;
+        }
+
+        private void HandleStartGameClicked()
+        {
+            EventMgr.Events.Dispatch(GameEvents.StartGameClicked);
+        }
+
+        #endregion // Handlers
     }
 }

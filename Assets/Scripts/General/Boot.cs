@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using ThermoVR.UI;
 using UnityEditor;
 using UnityEngine;
@@ -11,18 +12,22 @@ namespace ThermoVR {
         [SerializeField] private string m_firstScene;
         [SerializeField] private UILoading m_loadingCanvas;
 
+        private AsyncOperation m_asyncLoad;
+
         // Start is called before the first frame update
         void Start()
         {
+            EventMgr.Events.Register(GameEvents.StartGameClicked, HandleStartGameClicked);
+
             StartCoroutine(LoadAsync());
         }
 
         private IEnumerator LoadAsync()
         {
-            AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(m_firstScene);
-            asyncLoad.allowSceneActivation = false;
+            AsyncOperation m_asyncLoad = SceneManager.LoadSceneAsync(m_firstScene);
+            m_asyncLoad.allowSceneActivation = false;
 
-            while (asyncLoad.progress < 0.9f)
+            while (m_asyncLoad.progress < 0.9f)
             {
                 yield return null;
             }
@@ -32,7 +37,25 @@ namespace ThermoVR {
                 yield return null;
             }
 
-            asyncLoad.allowSceneActivation = true;
+            if (ModeMgr.Instance.IsDesktop)
+            {
+                // Wait for button
+                EventMgr.Events.Dispatch(GameEvents.AsyncLoadComplete);
+            }
+            else
+            {
+                // Load immediately
+                m_asyncLoad.allowSceneActivation = true;
+            }
         }
+
+        #region Handlers
+
+        private void HandleStartGameClicked()
+        {
+            m_asyncLoad.allowSceneActivation = true;
+        }
+
+        #endregion // Handlers
     }
 }
