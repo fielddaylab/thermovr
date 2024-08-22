@@ -18,6 +18,7 @@ namespace ThermoVR {
             if (I == null)
             {
                 I = this;
+                DontDestroyOnLoad(this.gameObject);
             }
             else if (I != this)
             {

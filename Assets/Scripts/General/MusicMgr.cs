@@ -13,7 +13,7 @@ namespace ThermoVR
 
         private void OnEnable()
         {
-            if (PersistentState.Instance.Bools[PersistentVars.MusicOnStart])
+            if (!PersistentState.Instance.Bools.ContainsKey(PersistentVars.MusicOnStart) || PersistentState.Instance.Bools[PersistentVars.MusicOnStart])
             {
                 if (m_initialized)
                 {

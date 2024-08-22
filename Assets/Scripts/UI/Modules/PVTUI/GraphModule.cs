@@ -35,7 +35,10 @@ public class GraphModule : UIModule
             m_musicToggle
         };
 
-        m_musicToggle.SetToggleState(PersistentState.Instance.Bools[PersistentVars.MusicOnStart]);
+        if (PersistentState.Instance.Bools.ContainsKey(PersistentVars.MusicOnStart))
+        {
+            m_musicToggle.SetToggleState(PersistentState.Instance.Bools[PersistentVars.MusicOnStart]);
+        }
 
         for (int i = 0; i < m_toggles.Length; i++) {
             m_toggles[i].Init();

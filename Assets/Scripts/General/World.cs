@@ -142,7 +142,7 @@ public class World : MonoBehaviour
 
         EventMgr.Events.Register(GameEvents.UISwitched, HandleUISwitched);
 
-        if (!ModeMgr.Instance.IsDesktop && OVRManager.display != null)
+        if ((ModeMgr.Instance == null || !ModeMgr.Instance.IsDesktop) && OVRManager.display != null)
         {
             OVRManager.display.RecenteredPose += DisconnectGrab;
         }
