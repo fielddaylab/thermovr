@@ -5,7 +5,10 @@ using BeauUtil;
 
 static public class GameEvents
 {
-    static public readonly StringHash32 InitialLoadComplete = "world:initial-load-compelete";
+    static public readonly StringHash32 AsyncLoadComplete = "ui:async-load-complete";
+    static public readonly StringHash32 StartGameClicked = "ui:start-game-clicked";
+
+    static public readonly StringHash32 InitialLoadComplete = "world:initial-load-complete";
     static public readonly StringHash32 GatherPressables = "world:gather-pressables";
     static public readonly StringHash32 RegisterPressable = "world:register-pressable"; // Pressable
     static public readonly StringHash32 RegisterMovable = "world:register-movable"; // Touchable
