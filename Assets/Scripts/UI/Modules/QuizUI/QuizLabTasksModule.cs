@@ -386,6 +386,9 @@ namespace ThermoVR.Lab
             // Trail
             World.Instance.ModMgr.SetTrail(mods.TrailSettings);
 
+            // Tutorial
+            World.Instance.ModMgr.SetTutorial(mods.Tutorial);
+
             // prevent move ball functionality
             if (mods.GrabAllowed)
             {
@@ -406,6 +409,9 @@ namespace ThermoVR.Lab
 
             // Limits
             World.Instance?.ModMgr.ResetLimits();
+
+            // Tutorial
+            World.Instance?.ModMgr.ResetTutorial();
 
             // Restore move ball functionality
             World.Instance?.ModMgr.EnableGraphBallInteractions();

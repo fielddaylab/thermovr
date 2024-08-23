@@ -16,6 +16,7 @@
 |QuizInfo:
 	Text: ---Certain thermodynamic properties can be held constant in the cylinder.---
 |EfficiencyInfo:
+|TutorialInfo:
 
 || TASK
 
@@ -31,6 +32,7 @@
 	Questions-->
 	Answers: ["Pressure"(c), "Volume", "Temperature"]
 |EfficiencyInfo:
+|TutorialInfo:
 
 || TASK
 
@@ -44,6 +46,7 @@
 	Text: ---Pressure:
 	Pressure remains constant. There was enough room for volume to expand and contract.---
 |EfficiencyInfo:
+|TutorialInfo:
 
 || TASK
 
@@ -57,6 +60,7 @@
 	Text: ---Volume:
 	Note the volume label of the "System Properties" panel or the 3D plot.---
 |EfficiencyInfo:
+|TutorialInfo:
 
 || TASK
 
@@ -70,6 +74,7 @@
 	Text: ---Temperature:
 	Note the temperature label of the "System Properties" panel or the 3D plot.---
 |EfficiencyInfo:
+|TutorialInfo:
 
 
 || TOPIC // 2
@@ -87,6 +92,7 @@
 |QuizInfo:
 	Text: ---Next you'll enable the Clamps in order to increase cylinder temperature.---
 |EfficiencyInfo:
+|TutorialInfo:
 
 || TASK
 
@@ -102,6 +108,7 @@
 	Questions-->
 	Requirements: [(VolumeStop:1.86:0.1)]
 |EfficiencyInfo:
+|TutorialInfo:
 
 
 || TASK
@@ -118,6 +125,7 @@
 	Questions-->
 	Answers: ["Pressure", "Volume"(c), "Temperature"]
 |EfficiencyInfo:
+|TutorialInfo:
 
 || TASK
 
@@ -131,6 +139,7 @@
 	Text: ---Clamps:
 	Clamps constrain the Volume of the water. Pressure cannot equilibrate by increasing volume, so it increases with temperature.---
 |EfficiencyInfo:
+|TutorialInfo:
 
 
 || TOPIC // 3
@@ -148,6 +157,7 @@
 |QuizInfo:
 	Text: ---Next you'll disable Insulation and increase Pressure in the cylinder.---
 |EfficiencyInfo:
+|TutorialInfo:
 
 || TASK
 
@@ -160,6 +170,7 @@
 |QuizInfo:
 	Text: ---Set the Insulation to 0%.---
 |EfficiencyInfo:
+|TutorialInfo:
 
 || TASK
 
@@ -175,6 +186,7 @@
 	Questions-->
 	Answers: ["Temperature", "Volume", "Nothing"(c)]
 |EfficiencyInfo:
+|TutorialInfo:
 
 
 || TASK
@@ -189,6 +201,7 @@
 	Text: ---If insulation is 0%, any addition or removal of heat is instantly equilibrated to the exterior world, keeping T constant at the exterior temperature.
 	In the real world it takes some time for the temperature to equilibrate with the surroundings.---
 |EfficiencyInfo:
+|TutorialInfo:
 
 || TASK
 
@@ -204,6 +217,7 @@
 	Questions-->
 	Answers: ["Pressure", "Volume", "Temperature"(c)]
 |EfficiencyInfo:
+|TutorialInfo:
 
 
 || TASK
@@ -217,6 +231,7 @@
 |QuizInfo:
 	Text: ---By increasing the pressure, we were adding work energy to the system. This energy is lost to the environment in the form of heat.---
 |EfficiencyInfo:
+|TutorialInfo:
 
 
 

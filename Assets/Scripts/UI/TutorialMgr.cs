@@ -5,9 +5,19 @@ using UnityEngine.UI;
 
 namespace ThermoVR
 {
+    /// <summary>
+    /// Unique identifiers for tutorial types
+    /// </summary>
+    public enum TutorialID : byte
+    {
+        Nudge
+    }
+
     [DefaultExecutionOrder(10)]
     public class TutorialMgr : MonoBehaviour
     {
+        public static TutorialMgr Instance;
+
         [SerializeField] private GameObject m_nudgeTutorial;
         [SerializeField] private Image m_nudgeImage;
         [SerializeField] private int m_numTimesDisplayNudge = 4;
@@ -15,10 +25,25 @@ namespace ThermoVR
         private int m_timesSeenNudge = 0;
         private bool m_showingNudge = false;
 
+        public bool ForceNudge = false;
+
+        private void Awake()
+        {
+            if (Instance == null)
+            {
+                Instance = this;
+            }
+            else if (this != Instance)
+            {
+                Destroy(this.gameObject);
+                return;
+            }
+        }
+
         private void OnEnable()
         {
-            EventMgr.Events.Register<bool>(GameEvents.ShowNudgeTutorial, HandleShowNudgeTutorial);
-            EventMgr.Events.Register<bool>(GameEvents.HideNudgeTutorial, HandleHideNudgeTutorial);
+            EventMgr.Events.Register(GameEvents.ShowNudgeTutorial, HandleShowNudgeTutorial);
+            EventMgr.Events.Register(GameEvents.HideNudgeTutorial, HandleHideNudgeTutorial);
 
             if (ModeMgr.Instance.IsDesktop)
             {
@@ -34,9 +59,9 @@ namespace ThermoVR
 
         #region Handlers
 
-        private void HandleShowNudgeTutorial(bool overrideShow)
+        private void HandleShowNudgeTutorial()
         {
-            if (overrideShow)
+            if (ForceNudge)
             {
                 m_nudgeTutorial.SetActive(true);
                 return;
@@ -51,9 +76,9 @@ namespace ThermoVR
             m_nudgeTutorial.SetActive(true);
         }
 
-        private void HandleHideNudgeTutorial(bool overrideHide)
+        private void HandleHideNudgeTutorial()
         {
-            if (overrideHide)
+            if (ForceNudge)
             {
                 m_nudgeTutorial.SetActive(false);
                 return;

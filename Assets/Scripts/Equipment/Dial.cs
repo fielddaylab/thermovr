@@ -216,7 +216,7 @@ namespace ThermoVR.Dials
                 .Register<Tool>(GameEvents.AllowTool, HandleAllowTool, this)
                 .Register<Tool>(GameEvents.DisallowTool, HandleDisallowTool, this);
 
-            EventMgr.Events.Dispatch(GameEvents.HideNudgeTutorial, false);
+            EventMgr.Events.Dispatch(GameEvents.HideNudgeTutorial);
 
             Reset(true);
         }
@@ -525,11 +525,11 @@ namespace ThermoVR.Dials
             if (m_nudging)
             {
                 nudgeMult = ModeMgr.Instance.IsDesktop ? 0.01f : 0.2f;
-                EventMgr.Events.Dispatch(GameEvents.HideNudgeTutorial, false);
+                EventMgr.Events.Dispatch(GameEvents.HideNudgeTutorial);
             }
             else
             {
-                EventMgr.Events.Dispatch(GameEvents.ShowNudgeTutorial, false);
+                EventMgr.Events.Dispatch(GameEvents.ShowNudgeTutorial);
             }
 
 
@@ -712,7 +712,7 @@ namespace ThermoVR.Dials
         public void OnReleased()
         {
             m_currentlyGrabbed = false;
-            EventMgr.Events.Dispatch(GameEvents.HideNudgeTutorial, false);
+            EventMgr.Events.Dispatch(GameEvents.HideNudgeTutorial);
             UpdateSliderMaterials(relevant_tools[0].engaged, relevant_tools[0].allowed);
         }
 

@@ -149,6 +149,11 @@ namespace ThermoVR
 
         #endregion // Limits
 
+        public void ResetTutorial()
+        {
+            TutorialMgr.Instance.ForceNudge = false;
+        }
+
         public void SetActiveMods(TaskInfo newMods)
         {
             if (!newMods.Sets.IsEmpty())
@@ -213,6 +218,11 @@ namespace ThermoVR
                 TracerManager.Instance.HideTrace();
                 TracerManager.Instance.EndTrace();
             }
+        }
+
+        public void SetTutorial(TutorialGroup tutorial)
+        {
+            TutorialMgr.Instance.ForceNudge = tutorial.ForceNudge;
         }
 
         private void HandleUISwitched()
