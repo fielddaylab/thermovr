@@ -16,6 +16,8 @@ namespace ThermoVR.UI
 
         [SerializeField] private float m_minTimer = 3;
 
+        [SerializeField] private CameraClampToVirtualViewport m_clampCam;
+
         [Header("Elements")]
         [SerializeField] private RectTransform m_wrapperGroup;
         [SerializeField] private GameObject m_desktopGroup;
@@ -64,6 +66,7 @@ namespace ThermoVR.UI
             else
             {
                 m_canvas.renderMode = RenderMode.ScreenSpaceCamera;
+                m_clampCam.enabled = false;
 
                 m_desktopGroup.SetActive(false);
                 m_vrGroup.SetActive(true);
