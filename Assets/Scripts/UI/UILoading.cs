@@ -22,6 +22,8 @@ namespace ThermoVR.UI
         [SerializeField] private GameObject m_vrGroup;
         [SerializeField] private RectTransform m_loadGroup;
         [SerializeField] private Button m_startButton;
+        [SerializeField] private UICredits m_credits;
+        [SerializeField] private Button m_creditsButton;
 
         [Header("Settings")]
         [SerializeField] private Button m_musicOption;
@@ -56,6 +58,8 @@ namespace ThermoVR.UI
 
                 m_fullscreenOption.onClick.AddListener(HandleFullscreenOptionSelected);
                 m_fullscreenFill.enabled = m_fullscreenSelected;
+
+                m_creditsButton.onClick.AddListener(HandleTitleCreditsClicked);
             }
             else
             {
@@ -69,6 +73,11 @@ namespace ThermoVR.UI
                 m_wrapperGroup.anchoredPosition = m_vrWrapperPos;
                 m_wrapperGroup.localScale = m_vrWrapperScale;
             }
+
+            m_credits.Init(true);
+            m_credits.gameObject.SetActive(false);
+
+            EventMgr.Events.Register(GameEvents.TitleCreditsClosed, HandleTitleCreditsClosed);
         }
 
         private void Update()
@@ -125,6 +134,17 @@ namespace ThermoVR.UI
         {
             m_fullscreenSelected = !m_fullscreenSelected;
             m_fullscreenFill.enabled = m_fullscreenSelected;
+        }
+
+        private void HandleTitleCreditsClosed()
+        {
+            m_wrapperGroup.gameObject.SetActive(true);
+        }
+
+        private void HandleTitleCreditsClicked()
+        {
+            m_wrapperGroup.gameObject.SetActive(false);
+            EventMgr.Events.Dispatch(GameEvents.TitleCreditsOpened);
         }
 
         #endregion // Handlers
