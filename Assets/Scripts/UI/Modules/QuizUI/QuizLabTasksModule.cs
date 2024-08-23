@@ -189,6 +189,12 @@ namespace ThermoVR.Lab
                         newTab.RegisterFrame(newFrame);
                     }
 
+                    // Remove "Next" button from final lab task
+                    if (taskIndex == m_currLab.Topics[topicIndex].Tasks.Count - 1 && topicIndex == m_currLab.Topics.Count - 1)
+                    {
+                        newFrame.ConfigureAsLastTask();
+                    }
+
                     // tabs start hidden
                     DeactivateTopicTab(topicIndex);
                 }
@@ -642,11 +648,23 @@ namespace ThermoVR.Lab
                 {
                     // at end of topic; move to next topic
                     HandleLabTopicTabPressed(m_activeTopicIndex + 1, false);
+
+                    // shift left task bar down if there is room below
+                    if (m_ScrollDownBtn.isActiveAndEnabled)
+                    {
+                        HandleScrollDown(this, EventArgs.Empty);
+                    }
                 }
             }
             else
             {
                 HandleLabTabPressed(m_activeTopicIndex, m_activeTabIndex + 1);
+
+                // shift top task bar right if there is room on the right
+                if (m_ScrollRightBtn.isActiveAndEnabled)
+                {
+                    HandleScrollRight(this, EventArgs.Empty);
+                }
             }
         }
 
