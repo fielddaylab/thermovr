@@ -74,11 +74,6 @@ namespace ThermoVR.Dials
         [SerializeField] private BoxCollider sliderCollider;
 
         [Space(5)]
-        [Header("Tutorail")]
-        [SerializeField] private GameObject nudge_tutorial;
-        [SerializeField] private Image nudge_image;
-
-        [Space(5)]
         [Header("Activation")]
 
         [SerializeField] private MeshRenderer[] knob_renderers;
@@ -221,16 +216,7 @@ namespace ThermoVR.Dials
                 .Register<Tool>(GameEvents.AllowTool, HandleAllowTool, this)
                 .Register<Tool>(GameEvents.DisallowTool, HandleDisallowTool, this);
 
-            nudge_tutorial.SetActive(false);
-
-            if (ModeMgr.Instance.IsDesktop)
-            {
-                nudge_image.sprite = GameDB.Instance.TutorialNudgeDesktop;
-            }
-            else
-            {
-                nudge_image.sprite = GameDB.Instance.TutorialNudgeVR;
-            }
+            EventMgr.Events.Dispatch(GameEvents.HideNudgeTutorial, false);
 
             Reset(true);
         }
@@ -539,11 +525,11 @@ namespace ThermoVR.Dials
             if (m_nudging)
             {
                 nudgeMult = ModeMgr.Instance.IsDesktop ? 0.01f : 0.2f;
-                nudge_tutorial.SetActive(false);
+                EventMgr.Events.Dispatch(GameEvents.HideNudgeTutorial, false);
             }
             else
             {
-                nudge_tutorial.SetActive(true);
+                EventMgr.Events.Dispatch(GameEvents.ShowNudgeTutorial, false);
             }
 
 
@@ -726,7 +712,7 @@ namespace ThermoVR.Dials
         public void OnReleased()
         {
             m_currentlyGrabbed = false;
-            nudge_tutorial.SetActive(false);
+            EventMgr.Events.Dispatch(GameEvents.HideNudgeTutorial, false);
             UpdateSliderMaterials(relevant_tools[0].engaged, relevant_tools[0].allowed);
         }
 
