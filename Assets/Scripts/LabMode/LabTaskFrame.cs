@@ -90,6 +90,14 @@ namespace ThermoVR.Lab
             return m_evaluables;
         }
 
+        public void ConfigureAsLastTask()
+        {
+            if (NextButton)
+            {
+                NextButton.gameObject.SetActive(false);
+            }
+        }
+
         private void HandleResetPressed(object sender, EventArgs args) {
             for (int i = 0; i < m_evaluables.Length; i++) {
                 m_evaluables[i].ResetState();
