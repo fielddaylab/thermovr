@@ -81,6 +81,12 @@ namespace ThermoVR.Lab
     }
 
     [Serializable]
+    public struct TutorialGroup
+    {
+        public bool ForceNudge; // whether this forces nudge tutorial to appear
+    }
+
+    [Serializable]
     public struct LimitBounds
     {
         public double Ceiling;
@@ -111,6 +117,7 @@ namespace ThermoVR.Lab
         public bool GrabAllowed;
         public SetGroup Sets; // p, v, and t values to set
         public LimitsGroup Limits; // stores limits for simulation variables
+        public TutorialGroup Tutorial; // stores tutorial info
         public TrailGroup TrailSettings; // settings for tracer trail
 
         // Multiple choice, word bank, multi-select
@@ -143,8 +150,9 @@ namespace ThermoVR.Lab
         private static uint TARGET_INDEX = 6;
         private static uint QUIZ_INDEX = 7;
         private static uint EFFICIENCY_INDEX = 8;
+        private static uint TUTORIAL_INDEX = 9;
 
-        private static uint NUM_TASK_SECTIONS = 9; // 8 + 1 leading delim
+        private static uint NUM_TASK_SECTIONS = 10; // 9 + 1 leading delim
 
         private static uint TOPIC_HEADER_INDEX = 1;
 
@@ -162,6 +170,7 @@ namespace ThermoVR.Lab
         private static string SET_CHUNK_DELIM = ":";
         private static string LIMIT_GROUP_DELIM = ",";
         private static string LIMIT_CHUNK_DELIM = ":";
+        private static string TUTORIAL_GROUP_DELIM = ",";
         private static string TRAIL_GROUP_DELIM = ",";
         private static string TEXT_DELIM = "---";
 
@@ -454,6 +463,11 @@ namespace ThermoVR.Lab
             string efficiencyInfo = sections[EFFICIENCY_INDEX].Trim();
             if (m_verboseDebug) { Debug.Log("[LabLoad] Efficiency Info: " + efficiencyInfo); }
 
+            // Tutorial
+            string tutorialInfo = sections[TUTORIAL_INDEX].Trim();
+            ParseTaskTutorial(ref tutorialInfo, ref newTaskInfo);
+            if (m_verboseDebug) { Debug.Log("[LabLoad] Tutorial Info: " + tutorialInfo); }
+
             // TODO: labInfo.etc = etcInfo
 
             labInfo.Topics[labInfo.Topics.Count - 1].Tasks.Add(newTaskInfo);
@@ -691,6 +705,18 @@ namespace ThermoVR.Lab
             }
         }
 
+        private void RecordTutorial(TutorialID tutVar, ref TutorialGroup tutorialGroup)
+        {
+            switch (tutVar)
+            {
+                case TutorialID.Nudge:
+                    tutorialGroup.ForceNudge = true;
+                    break;
+                default:
+                    break;
+            }
+        }
+
         private void ParseTaskTrail(ref string trailInfo, ref TaskInfo newTaskInfo)
         {
             // Example format is [enabled, clear-previous, 30], or [disabled, preserve-previous, -1]
@@ -889,6 +915,51 @@ namespace ThermoVR.Lab
             newTaskInfo.TextOnly = iterateQuizInfo;
 
             if (m_verboseDebug) { Debug.Log("[LabLoad] Text: " + newTaskInfo.TextOnly); }
+        }
+
+
+        private void ParseTaskTutorial(ref string tutorialInfo, ref TaskInfo newTaskInfo)
+        {
+            // Example format is [(pressure:10:ceiling), (pressure:1:floor), (enthalpy:10:floor)]
+            TutorialGroup newTutorial = new TutorialGroup();
+            newTutorial.ForceNudge = false;
+            newTaskInfo.Tutorial = newTutorial;
+
+            int startIndex = tutorialInfo.IndexOf('[') + 1;
+            if (startIndex == 0)
+            {
+                // Debug.Log("[LabLoad] TutorialInfo definition is invalid");
+                return;
+            }
+            string iterateTutorialInfo = tutorialInfo.Substring(startIndex);
+            int endIndex = iterateTutorialInfo.IndexOf(']');
+            if (endIndex == -1)
+            {
+                Debug.Log("[LabLoad] TutorialInfo definition is invalid");
+                return;
+            }
+            int length = endIndex;
+            iterateTutorialInfo = iterateTutorialInfo.Substring(0, length);
+            string[] tutorialGroups = iterateTutorialInfo.Split(TUTORIAL_GROUP_DELIM);
+
+            for (int i = 0; i < tutorialGroups.Length; i++)
+            {
+                string group = tutorialGroups[i];
+                group.Trim();
+
+                TutorialID tutVar;
+                bool validInputs = true;
+
+                validInputs = Enum.TryParse(group, true, out tutVar) ? validInputs : false;
+
+                if (validInputs)
+                {
+                    RecordTutorial(tutVar, ref newTutorial);
+                }
+            }
+
+            newTaskInfo.Tutorial = newTutorial;
+            if (m_verboseDebug) { Debug.Log("[LabLoad] Task Tutorials: " + newTaskInfo.Tutorial); }
         }
 
         #endregion // Task Parsing

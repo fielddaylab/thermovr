@@ -16,6 +16,7 @@
 |QuizInfo:
 	Text: ---The "faces" of the PVT graph represent states of matter.---
 |EfficiencyInfo:
+|TutorialInfo:
 
 || TASK
 
@@ -28,6 +29,7 @@
 |QuizInfo:
 	Text: ---Note that water can only exist in the combinations of pressure, temperature and volume that are along the surface of this plot.---
 |EfficiencyInfo:
+|TutorialInfo:
 
 || TASK
 
@@ -40,6 +42,7 @@
 |QuizInfo:
 	Text: ---Why are they different shapes? Let's explore.---
 |EfficiencyInfo:
+|TutorialInfo:
 
 
 || TOPIC // 2
@@ -57,6 +60,7 @@
 |QuizInfo:
 	Text: ---Liquid state is sometimes called "subcooled", as it has been cooled below the saturation temperature or "compressed" because it is at a pressure higher than the saturation pressure.---
 |EfficiencyInfo:
+|TutorialInfo:
 
 || TASK
 
@@ -69,6 +73,7 @@
 |QuizInfo:
 	Text: ---Start in the Liquid phase with insulation at 100%.---
 |EfficiencyInfo:
+|TutorialInfo:
 
 
 || TASK
@@ -86,6 +91,7 @@
 	Questions-->
 	Answers: ["Pressure"(c), "Volume", "Temperature"]
 |EfficiencyInfo:
+|TutorialInfo:
 
 
 || TASK
@@ -103,6 +109,7 @@
 	Questions-->
 	Answers: ["Pressure", "Volume"(c), "Temperature"]
 |EfficiencyInfo:
+|TutorialInfo:
 
 
 || TASK
@@ -116,6 +123,7 @@
 |QuizInfo:
 	Text: ---Volume remains relatively unchanged, only affected by the thermal expansion of water.---
 |EfficiencyInfo:
+|TutorialInfo:
 
 
 || TASK
@@ -133,6 +141,7 @@
 	Questions-->
 	Answers: ["Pressure", "Volume", "Temperature"(c)]
 |EfficiencyInfo:
+|TutorialInfo:
 
 
 || TASK
@@ -150,6 +159,7 @@
 	Questions-->
 	Answers: ["Pressure", "Volume"(c), "Temperature"]
 |EfficiencyInfo:
+|TutorialInfo:
 
 
 || TASK
@@ -163,6 +173,7 @@
 |QuizInfo:
 	Text: ---This means that even at extreme pressures, water is not very compressible.---
 |EfficiencyInfo:
+|TutorialInfo:
 
 
 || TOPIC // 3
@@ -181,6 +192,7 @@
 	Text: ---The two-phase segment is also called the "vapor dome" due to its curved shape.
 This state is a mixture of saturated liquid and saturated vapor.---
 |EfficiencyInfo:
+|TutorialInfo:
 
 || TASK // 2
 
@@ -193,6 +205,7 @@ This state is a mixture of saturated liquid and saturated vapor.---
 |QuizInfo:
 	Text: ---We use the word "saturated" to describe all the conditions where the water is within the vapor dome, existing as a mixture of liquid and vapor at the same time.---
 |EfficiencyInfo:
+|TutorialInfo:
 
 || TASK // 3
 
@@ -209,6 +222,7 @@ It is 0 (0%) when the "mixture" is all saturated liquid - we call this the satur
 
 It is 1 (100%) when the "mixture" is all saturated vapor - we call this the saturated vapor line.---
 |EfficiencyInfo:
+|TutorialInfo:
 
 || TASK // 4
 
@@ -221,6 +235,7 @@ It is 1 (100%) when the "mixture" is all saturated vapor - we call this the satu
 |QuizInfo:
 	Text: ---Quality is not defined outside of the vapor dome.---
 |EfficiencyInfo:
+|TutorialInfo:
 
 || TASK // 5
 
@@ -237,6 +252,7 @@ It is 1 (100%) when the "mixture" is all saturated vapor - we call this the satu
 	Questions-->
 	Answers: ["Less than 10%"(c), "About 50%", "More than 90%"]
 |EfficiencyInfo:
+|TutorialInfo:
 
 || TASK // 6
 
@@ -251,6 +267,7 @@ It is 1 (100%) when the "mixture" is all saturated vapor - we call this the satu
 
 Note that the ball is close to the saturated vapor line on the 3D plot. This is because the plot is using a logarithmic scale.---
 |EfficiencyInfo:
+|TutorialInfo:
 
 
 || TASK // 7
@@ -268,6 +285,7 @@ Note that the ball is close to the saturated vapor line on the 3D plot. This is 
 	Questions-->
 	Answers: ["Pressure"(c), "Volume", "Temperature"(c)]
 |EfficiencyInfo:
+|TutorialInfo:
 
 
 || TASK // 8
@@ -283,6 +301,7 @@ Note that the ball is close to the saturated vapor line on the 3D plot. This is 
 
 When energy is added to the two-state system, the energy goes towards overcoming the heat of vaporization (increasing the quality and volume).---
 |EfficiencyInfo:
+|TutorialInfo:
 
 
 || TASK // 9
@@ -299,6 +318,7 @@ When energy is added to the two-state system, the energy goes towards overcoming
 	Questions-->
 	Requirements: [(VolumeStop:0.14:0.025)]
 |EfficiencyInfo:
+|TutorialInfo:
 
 
 || TASK // 10
@@ -316,6 +336,7 @@ When energy is added to the two-state system, the energy goes towards overcoming
 	Questions-->
 	Answers: ["Pressure"(c), "Volume", "Temperature"(c)]
 |EfficiencyInfo:
+|TutorialInfo:
 
 || TASK // 11
 
@@ -332,6 +353,7 @@ When energy is added to the two-state system, the energy goes towards overcoming
 	Questions-->
 	Answers: ["Pressure", "Volume"(c), "Temperature"]
 |EfficiencyInfo:
+|TutorialInfo:
 
 
 || TASK // 12
@@ -348,6 +370,7 @@ When energy is added to the two-state system, the energy goes towards overcoming
 	Questions-->
 	Requirements: [(Volume:0.14:0.025), (Temperature:373:13)]
 |EfficiencyInfo:
+|TutorialInfo:
 
 
 || TASK // 13
@@ -365,6 +388,7 @@ When energy is added to the two-state system, the energy goes towards overcoming
 	Questions-->
 	Answers: ["Pressure", "Volume"(c), "Temperature"]
 |EfficiencyInfo:
+|TutorialInfo:
 
 
 || TASK // 14
@@ -382,6 +406,7 @@ When energy is added to the two-state system, the energy goes towards overcoming
 	Questions-->
 	Answers: ["Pressure"(c), "Volume", "Temperature"(c)]
 |EfficiencyInfo:
+|TutorialInfo:
 
 
 || TASK // 15
@@ -399,6 +424,7 @@ When energy is added to the two-state system, the energy goes towards overcoming
 	Questions-->
 	Answers: ["Pressure", "Volume"(c), "Temperature"]
 |EfficiencyInfo:
+|TutorialInfo:
 
 
 || TASK // 16
@@ -416,6 +442,7 @@ When energy is added to the two-state system, the energy goes towards overcoming
 	Questions-->
 	Answers: ["Pressure"(c), "Volume", "Temperature"(c)]
 |EfficiencyInfo:
+|TutorialInfo:
 
 
 || TOPIC // 4
@@ -433,6 +460,7 @@ When energy is added to the two-state system, the energy goes towards overcoming
 |QuizInfo:
 	Text: ---The vapor state is sometimes called "superheated," as it has been heated beyond saturation.---
 |EfficiencyInfo:
+|TutorialInfo:
 
 || TASK // 2
 
@@ -449,6 +477,7 @@ When energy is added to the two-state system, the energy goes towards overcoming
 	Questions-->
 	Answers: ["Pressure", "Volume"(c), "Temperature"(c)]
 |EfficiencyInfo:
+|TutorialInfo:
 
 || TASK // 3
 
@@ -465,6 +494,7 @@ When energy is added to the two-state system, the energy goes towards overcoming
 	Questions-->
 	Answers: ["Pressure"(c), "Volume", "Temperature"]
 |EfficiencyInfo:
+|TutorialInfo:
 
 || TASK // 4
 
@@ -477,6 +507,7 @@ When energy is added to the two-state system, the energy goes towards overcoming
 |QuizInfo:
 	Text: ---Notice how, unlike the two-phase region, temperature and pressure are independent in the superheated region.---
 |EfficiencyInfo:
+|TutorialInfo:
 
 
 || TASK // 5
@@ -494,6 +525,7 @@ When energy is added to the two-state system, the energy goes towards overcoming
 	Questions-->
 	Answers: ["Pressure"(c), "Volume"(c), "Temperature"]
 |EfficiencyInfo:
+|TutorialInfo:
 
 || TASK // 6
 
@@ -506,6 +538,7 @@ When energy is added to the two-state system, the energy goes towards overcoming
 |QuizInfo:
 	Text: ---Note that pressure and volume vary in opposite directions.---
 |EfficiencyInfo:
+|TutorialInfo:
 
 || TASK // 7
 
@@ -522,6 +555,7 @@ When energy is added to the two-state system, the energy goes towards overcoming
 	Questions-->
 	Answers: ["Pressure", "Volume", "Temperature"(c)]
 |EfficiencyInfo:
+|TutorialInfo:
 
 || TASK // 8
 
@@ -534,6 +568,7 @@ When energy is added to the two-state system, the energy goes towards overcoming
 |QuizInfo:
 	Text: ---In the superheated region far away from the vapor dome, the fluid (water) behaves like an ideal gas, for which PV = nRT where n & R are constants.---
 |EfficiencyInfo:
+|TutorialInfo:
 
 
 || END

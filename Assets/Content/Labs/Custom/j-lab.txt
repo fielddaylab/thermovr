@@ -21,6 +21,7 @@
 	Questions-->
 	Requirements: [(Region:1:0)]
 |EfficiencyInfo:
+|TutorialInfo:
 
 
 || TASK
@@ -38,6 +39,7 @@
 	Questions-->
 	Answers: ["3.35e2 K", "3.85e2 K"(c), "4.45e2 K"]
 |EfficiencyInfo:
+|TutorialInfo:
 
 
 || TASK
@@ -54,6 +56,7 @@
 	Questions-->
 	Requirements: [(Temperature:343:5)]
 |EfficiencyInfo:
+|TutorialInfo:
 
 || TASK
 
@@ -68,7 +71,8 @@
 	Question: "In which region are you?"
 	Questions-->
 	Answers: ["Subcooled Liquid"(c), "Two-phase", "Superheated Vapor"]
-|EfficiencyInfo: 
+|EfficiencyInfo:
+|TutorialInfo: 
 
 
 || TASK
@@ -85,6 +89,7 @@
 	Questions-->
 	Requirements: [(Temperature:423:5)]
 |EfficiencyInfo:
+|TutorialInfo:
 
 || TASK
 
@@ -99,7 +104,8 @@
 	Question: "In which region are you?"
 	Questions-->
 	Answers: ["Subcooled Liquid", "Two-phase", "Superheated Vapor"(c)]
-|EfficiencyInfo: 
+|EfficiencyInfo:
+|TutorialInfo: 
 
 
 || TOPIC
@@ -122,6 +128,7 @@
 	Questions-->
 	Requirements: [(Region:1:0)]
 |EfficiencyInfo:
+|TutorialInfo:
 
 || TASK
 
@@ -138,6 +145,7 @@
 	Questions-->
 	Answers: ["2.25e2 kPa", "1.25e2 kPa", "3.25e1 kPa"(c)]
 |EfficiencyInfo:
+|TutorialInfo:
 
 
 || TASK
@@ -154,6 +162,7 @@
 	Questions-->
 	Requirements: [(Region:0:0), (Pressure:101:10)]
 |EfficiencyInfo:
+|TutorialInfo:
 
 || TASK
 
@@ -168,7 +177,8 @@
 	Question: "In which region are you?"
 	Questions-->
 	Answers: ["Subcooled Liquid"(c), "Two-phase", "Superheated Vapor"]
-|EfficiencyInfo: 
+|EfficiencyInfo:
+|TutorialInfo: 
 
 || TASK
 
@@ -184,6 +194,7 @@
 	Questions-->
 	Requirements: [(Region:2:0)]
 |EfficiencyInfo:
+|TutorialInfo:
 
 || TASK
 
@@ -198,7 +209,8 @@
 	Question: "In which region are you?"
 	Questions-->
 	Answers: ["Subcooled Liquid", "Two-phase", "Superheated Vapor"(c)]
-|EfficiencyInfo: 
+|EfficiencyInfo:
+|TutorialInfo: 
 
 || TOPIC
 
@@ -218,7 +230,8 @@
 	Question: "Add insulation layer and set its value to 100%. Add mass until P = 8.8e2 kPa."
 	Questions-->
 	Requirements: [(Pressure:880:20)]
-|EfficiencyInfo: 
+|EfficiencyInfo:
+|TutorialInfo: 
 
 
 || TASK
@@ -234,7 +247,8 @@
 	Question: "In which region are you?"
 	Questions-->
 	Answers: ["Subcooled Liquid"(c), "Two-phase", "Superheated Vapor"]
-|EfficiencyInfo: 
+|EfficiencyInfo:
+|TutorialInfo: 
 
 || TASK
 
@@ -249,7 +263,8 @@
 	Question: "What type of thermodynamic path did you use in this process?"
 	Questions-->
 	Answers: ["constant pressure", "constant volume", "constant temperature", "constant entropy"(c), "constant enthalpy"]
-|EfficiencyInfo: 
+|EfficiencyInfo:
+|TutorialInfo: 
 
 
 || TOPIC
@@ -270,7 +285,8 @@
 	Question: "Bring the pressure to 1.01e2 kPa and temperature to 4.50e2 K."
 	Questions-->
 	Requirements: [(Pressure:101:10), (Temperature:450:10)]
-|EfficiencyInfo: 
+|EfficiencyInfo:
+|TutorialInfo: 
 
 
 || TASK
@@ -286,7 +302,8 @@
 	Question: "In which region are you?"
 	Questions-->
 	Answers: ["Subcooled Liquid", "Two-phase", "Superheated Vapor"(c)] 
-|EfficiencyInfo: 
+|EfficiencyInfo:
+|TutorialInfo: 
 
 
 || TASK
@@ -303,7 +320,8 @@
 	Question: "Add mass to top of piston and increase mass until pressure = 8.8e2 kPa."
 	Questions-->
 	Requirements: [(Pressure:880:20)]
-|EfficiencyInfo: 
+|EfficiencyInfo:
+|TutorialInfo: 
 
 || TASK
 
@@ -318,7 +336,8 @@
 	Question: "What type of thermodynamic path did you use in this process?"
 	Questions-->
 	Answers: ["constant pressure", "constant volume", "constant temperature", "constant entropy"(c), "constant enthalpy"]
-|EfficiencyInfo: 
+|EfficiencyInfo:
+|TutorialInfo: 
 
 || TOPIC
 
@@ -340,7 +359,8 @@
 	Question: "Apply the Bunsen burner until the piston just hits the stop, v = 3.0e-1 m^3/kg."
 	Questions-->
 	Requirements: [(Volume:0.3:0.05)]
-|EfficiencyInfo: 
+|EfficiencyInfo:
+|TutorialInfo: 
 
 
 || TASK
@@ -356,7 +376,8 @@
 	Question: "Continue to add heat until P = 2.00e2 kPa."
 	Questions-->
 	Requirements: [(Pressure:200:10)]
-|EfficiencyInfo: 
+|EfficiencyInfo:
+|TutorialInfo: 
 
 || TASK
 
@@ -371,7 +392,8 @@
 	Question: "What is the final temperature?"
 	Questions-->
 	Answers: ["3.53e2 K", "3.73e2 K", "3.93e2 K"(c)]
-|EfficiencyInfo: 
+|EfficiencyInfo:
+|TutorialInfo: 
 
 
 || TASK
@@ -388,7 +410,8 @@
 	Question: "Apply the cooling coil until the piston just hits the stop, v = 1.0e-1 m^3/kg."
 	Questions-->
 	Requirements: [(Region:1:0), (Volume:0.1:0.09)]
-|EfficiencyInfo: 
+|EfficiencyInfo:
+|TutorialInfo: 
 
 || TASK
 
@@ -403,7 +426,8 @@
 	Question: "Continue to add cooling until P = 4.0e1 kPa."
 	Questions-->
 	Requirements: [(Pressure:40:1)]
-|EfficiencyInfo: 
+|EfficiencyInfo:
+|TutorialInfo: 
 
 || TASK
 
@@ -418,6 +442,7 @@
 	Question: "What is the final temperature?"
 	Questions-->
 	Answers: ["3.49e2 K"(c), "3.69e2 K", "3.89e2 K"]
-|EfficiencyInfo: 
+|EfficiencyInfo:
+|TutorialInfo: 
 
 || END

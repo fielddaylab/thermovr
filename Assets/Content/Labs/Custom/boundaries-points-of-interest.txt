@@ -17,6 +17,7 @@
 	Text: ---The "edges" where the Two-Phase region transitions into subcooled liquid or superheated vapor are known as Saturation Lines.
 	They are also the locations each property would need to reach to become completely liquid or completely vapor.---
 |EfficiencyInfo:
+|TutorialInfo:
 
 || TASK // 2
 
@@ -29,6 +30,7 @@
 |QuizInfo:
 	Text: ---Any given two-phase state has a connected Saturation Temperature and Saturation Pressure. If you know one, you can look up the other.---
 |EfficiencyInfo:
+|TutorialInfo:
 
 || TASK // 3
 
@@ -44,6 +46,7 @@
 	Questions-->
 	Requirements: [(Pressure:70.6:20), (Volume:0.0010356:0.0007), (Temperature:363:15), (Region:0:0)]
 |EfficiencyInfo:
+|TutorialInfo:
 
 || TASK // 4
 
@@ -55,12 +58,12 @@
 |TargetInfo:
 |QuizInfo:
 	--Questions:
-	Question: "Use the nudge mode to accurately reach the saturated liquid line. 
-[Nudge by holding <b>Shift</b> in desktop mode, or holding the <b>A</b>/<b>X</b> button and toggling the joystick vertically in VR mode.]"
+	Question: "Use the nudge mode to accurately reach the saturated liquid line."
 	Question: "What is the Saturation Temperature at this pressure (70.6 kPa)?"
 	Questions-->
 	Answers: ["353 K", "358 K", "363 K"(c), "368 K"]
 |EfficiencyInfo:
+|TutorialInfo: [nudge]
 
 
 || TASK // 5
@@ -77,6 +80,7 @@
 	Questions-->
 	Requirements: [(Pressure:26.3:20), (Volume:0.0010202:0.0007), (Temperature:339:15), (Region:0:0)]
 |EfficiencyInfo:
+|TutorialInfo:
 
 
 || TASK // 6
@@ -89,12 +93,12 @@
 |TargetInfo:
 |QuizInfo:
 	--Questions:
-	Question: "Use the nudge mode to accurately reach the saturated liquid line. 
-[Nudge by holding <b>Shift</b> in desktop mode, or holding the <b>A</b>/<b>X</b> button and toggling the joystick vertically in VR mode.]"
+	Question: "Use the nudge mode to accurately reach the saturated liquid line."
 	Question: "What is the Saturation Temperature at this pressure (26.3 kPa)?"
 	Questions-->
 	Answers: ["339 K"(c), "344 K", "349 K", "354 K"]
 |EfficiencyInfo:
+|TutorialInfo: [nudge]
 
 
 || TASK // 7
@@ -111,6 +115,7 @@
 	Questions-->
 	Requirements: [(Pressure:20.2:15), (Volume:0.0010187:0.0007), (Temperature:333:15), (Region:0:0)]
 |EfficiencyInfo:
+|TutorialInfo:
 
 || TASK // 8
 
@@ -122,12 +127,12 @@
 |TargetInfo:
 |QuizInfo:
 	--Questions:
-	Question: "Use the nudge mode to accurately reach the saturated liquid line.
-[Nudge by holding <b>Shift</b> in desktop mode, or holding the <b>A</b>/<b>X</b> button and toggling the joystick vertically in VR mode.]"
+	Question: "Use the nudge mode to accurately reach the saturated liquid line."
 	Question: "What is the approximate Saturation Pressure at this temperature (333 K)?"
 	Questions-->
 	Answers: ["3.00e+1 kPa", "1.98e+1 kPa"(c), "9.00e+0 kPa", "7.00e+0 kPa"]
 |EfficiencyInfo:
+|TutorialInfo: [nudge]
 
 
 
