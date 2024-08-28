@@ -13,9 +13,12 @@ namespace ThermoVR.UI
     public class ThermoButton : MonoBehaviour
     {
         public event EventHandler OnButtonPressed; // Wrapper for the Pressable event
+        public RectTransform Rect;
+
         private Pressable Pressable;
         [SerializeField] private Button m_button;
         [SerializeField] private TMP_Text m_text;
+
 
         public void OnEnable() {
             // Register physical touch

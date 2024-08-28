@@ -2,7 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace ThermoVR {
+namespace ThermoVR
+{   [DefaultExecutionOrder(-5)]
     public class ModeMgr : MonoBehaviour
     {
         public static ModeMgr Instance;

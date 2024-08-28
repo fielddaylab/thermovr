@@ -31,6 +31,7 @@ namespace ThermoVR.UI
         [SerializeField] private Button m_ReturnButton;
         [SerializeField] private RectTransform m_Rect;
         // [SerializeField] private Canvas m_Canvas;
+        [SerializeField] private bool m_isTitleScreen = false;
 
         [Space(5)]
         [Header("Text")]
@@ -51,6 +52,8 @@ namespace ThermoVR.UI
         [SerializeField] private float m_SpacingPerChunk = 75;
         [SerializeField] private float m_SpacingPerGroupLine = 15;
         [SerializeField] private float m_SpacingPerNamesLine = 5;
+        [SerializeField] private float m_ResetPos = -700;
+        [SerializeField] private float m_ViewHeight = 1400;
 
         private bool m_Scrolling;
         private float m_ScrollSpeed;
@@ -82,10 +85,10 @@ namespace ThermoVR.UI
         {
             if (m_Scrolling && m_ScrollTimer > -m_ScrollTimeBuffer)
             {
-                m_TextContainer.transform.position = new Vector3(
-                    m_TextContainer.transform.position.x,
-                    m_TextContainer.transform.position.y + m_ScrollSpeed * Time.deltaTime,
-                    m_TextContainer.transform.position.z
+                m_TextContainer.transform.localPosition = new Vector3(
+                    m_TextContainer.transform.localPosition.x,
+                    m_TextContainer.transform.localPosition.y + m_ScrollSpeed * Time.deltaTime,
+                    m_TextContainer.transform.localPosition.z
                     );
 
                 m_ScrollTimer -= Time.deltaTime;
@@ -96,12 +99,16 @@ namespace ThermoVR.UI
 
         public void Init(bool isLaunch)
         {
-            m_ReturnButton.onClick.AddListener(HandleReturnClicked);
+            if (m_ReturnButton)
+            {
+                m_ReturnButton.onClick.AddListener(HandleReturnClicked);
+            }
 
             ParseCredits();
             CreditsBlocksToText();
 
             EventMgr.Events.Register(GameEvents.TitleCreditsOpened, OpenPanelImmediate);
+            EventMgr.Events.Register(GameEvents.TabletCreditsOpened, OpenPanelImmediate);
 
             m_Initialized = true;
 
@@ -118,11 +125,18 @@ namespace ThermoVR.UI
             */
         }
 
+        public void ManualReturnClick()
+        {
+            HandleReturnClicked();
+        }
+
         #region Button Handlers
 
         private void HandleReturnClicked()
         {
-            EventMgr.Events.Dispatch(GameEvents.TitleCreditsClosed);
+            if (m_isTitleScreen) { EventMgr.Events.Dispatch(GameEvents.TitleCreditsClosed); }
+            else { EventMgr.Events.Dispatch(GameEvents.TabletCreditsClosed); }
+
             if (m_Transitioning) { return; }
             m_TransitionRoutine.Replace(this, ExitRoutine()).ExecuteWhileDisabled();
         }
@@ -151,7 +165,7 @@ namespace ThermoVR.UI
         {
             m_Transitioning = true;
             m_ScrollTimer = m_ScrollTime;
-            this.gameObject.SetActive(true);
+            if (this.m_isTitleScreen) { this.gameObject.SetActive(true); }
             // yield return m_Rect.AnchorPosTo(0, TRANSITION_TIME, Axis.X).Ease(Curve.CubeOut);
             yield return null;
             m_Scrolling = true;
@@ -161,7 +175,7 @@ namespace ThermoVR.UI
         private IEnumerator ExitRoutine()
         {
             m_Transitioning = true;
-            this.gameObject.SetActive(false);
+            if (this.m_isTitleScreen) { this.gameObject.SetActive(false); }
             // m_Rect.SetAnchorsPreservePosition(new Vector2(1, 0), new Vector2(2, 1));
             // yield return m_Rect.AnchorPosTo(0, TRANSITION_TIME, Axis.X).Ease(Curve.CubeOut);
             yield return null;
@@ -179,7 +193,7 @@ namespace ThermoVR.UI
             // Text position
             m_TextContainer.transform.localPosition = new Vector3(
                 m_TextContainer.transform.localPosition.x,
-                -700 - m_TextContainer.rect.size.y,
+                m_ResetPos - m_TextContainer.rect.size.y,
                 m_TextContainer.transform.localPosition.z
                 );
 
@@ -189,13 +203,11 @@ namespace ThermoVR.UI
 
         private void SetupScroll()
         {
-            var viewHeight = 1400;
-
             // Calculate scroll speed based on scroll time and distance to travel
             Assert.True(m_ScrollTime > 0);
             if (m_CreditsBlocks.Count > 0)
             {
-                m_ScrollSpeed = (m_CreditsBlocks[0].transform.position.y - m_CreditsBlocks[m_CreditsBlocks.Count - 1].transform.position.y + m_TextContainer.rect.size.y + viewHeight) / (m_ScrollTime);
+                m_ScrollSpeed = (m_CreditsBlocks[0].transform.localPosition.y - m_CreditsBlocks[m_CreditsBlocks.Count - 1].transform.localPosition.y + m_TextContainer.rect.size.y + m_ViewHeight) / (m_ScrollTime);
             }
 
             ResetLayout();
@@ -255,19 +267,22 @@ namespace ThermoVR.UI
 
             // m_TextLayout.ForceRebuild();
 
-            m_TextLayout.enabled = false;
+            if (m_TextLayout)
+            {
+                m_TextLayout.enabled = false;
+            }
 
             ApplySpacing();
         }
 
         public void ApplySpacing()
         {
-            float currX = m_CreditsBlocks[0].transform.position.x;
-            float currY = m_CreditsBlocks[0].transform.position.y;
+            float currX = m_CreditsBlocks[0].transform.localPosition.x;
+            float currY = m_CreditsBlocks[0].transform.localPosition.y;
 
             for (int i = 0; i < m_CreditsBlocks.Count; i++)
             {
-                m_CreditsBlocks[i].transform.position = new Vector2(currX, currY);
+                m_CreditsBlocks[i].transform.localPosition = new Vector2(currX, currY);
 
                 int numGroupLines = m_CreditsBlocks[i].Header.textInfo.lineCount;
                 int numNamesLines = m_CreditsBlocks[i].Names.textInfo.lineCount;
@@ -276,6 +291,7 @@ namespace ThermoVR.UI
 
                 m_CreditsBlocks[i].Layout.ForceRebuild();
             }
+
         }
 
         #endregion // Credits Parsing
