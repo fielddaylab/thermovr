@@ -27,10 +27,12 @@ namespace ThermoVR
         [SerializeField] private Pressable m_sandboxTabButton;
         [SerializeField] private Pressable m_labModeButton;
         [SerializeField] private Pressable m_graphTabButton;
+        [SerializeField] private Pressable m_gameTabButton;
 
         [SerializeField] private ButtonPressMovement m_sandboxTabMovement;
         [SerializeField] private ButtonPressMovement m_labModeMovement;
         [SerializeField] private ButtonPressMovement m_graphTabMovement;
+        [SerializeField] private ButtonPressMovement m_gameTabMovement;
 
         [Space(5)]
         [Header("Functions")]
@@ -72,6 +74,7 @@ namespace ThermoVR
                 m_sandboxTabButton,
                 m_labModeButton,
                 m_graphTabButton,
+                m_gameTabButton,
                 m_resetButton
             };
 
@@ -79,6 +82,7 @@ namespace ThermoVR
             m_sandboxTabButton.OnPress += HandleSandboxTabPress;
             m_labModeButton.OnPress += HandleQuizTabPress;
             m_graphTabButton.OnPress += HandleGraphTabPress;
+            m_gameTabButton.OnPress += HandleGameTabPress;
             m_resetButton.OnPress += HandleResetPress;
 
             EventMgr.Events.Register(GameEvents.UISwitched, HandleUISwitched)
@@ -140,6 +144,7 @@ namespace ThermoVR
             m_graphTabMovement.ResetPosition();
             m_labModeMovement.ResetPosition();
             m_sandboxTabMovement.Indent();
+            m_gameTabMovement.ResetPosition();
         }
 
         private void HandleQuizTabPress(object sender, EventArgs args) {
@@ -158,6 +163,7 @@ namespace ThermoVR
             m_graphTabMovement.ResetPosition();
             m_labModeMovement.Indent();
             m_sandboxTabMovement.ResetPosition();
+            m_gameTabMovement.ResetPosition();
         }
 
         private void HandleGraphTabPress(object sender, EventArgs args) {
@@ -176,6 +182,25 @@ namespace ThermoVR
             m_graphTabMovement.Indent();
             m_labModeMovement.ResetPosition();
             m_sandboxTabMovement.ResetPosition();
+            m_gameTabMovement.ResetPosition();
+        }
+
+        private void HandleGameTabPress(object sender, EventArgs args)
+        {
+            PlayClick(m_gameTabButton);
+
+            if (m_currID == UIID.Game) { return; }
+            m_currID = UIID.Game;
+
+            // Open Graph UI
+            m_hub.OpenUI(UIID.Game);
+
+            EventMgr.Events?.Dispatch(GameEvents.GameModeClicked);
+
+            m_graphTabMovement.ResetPosition();
+            m_labModeMovement.ResetPosition();
+            m_sandboxTabMovement.ResetPosition();
+            m_gameTabMovement.Indent();
         }
 
         private void HandleResetPress(object sender, EventArgs args)
