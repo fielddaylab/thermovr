@@ -7,6 +7,8 @@ static public class GameEvents
 {
     static public readonly StringHash32 TitleCreditsOpened = "ui:title-credits-opened";
     static public readonly StringHash32 TitleCreditsClosed = "ui:title-credits-closed";
+    static public readonly StringHash32 TabletCreditsOpened = "ui:tablet-credits-opened";
+    static public readonly StringHash32 TabletCreditsClosed = "ui:tablet-credits-closed";
 
     static public readonly StringHash32 AsyncLoadComplete = "ui:async-load-complete";
     static public readonly StringHash32 StartGameClicked = "ui:start-game-clicked";

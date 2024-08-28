@@ -2118,9 +2118,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_ReturnButton: {fileID: 8587712286641866692}
   m_Rect: {fileID: 5771758266743450740}
+  m_isTitleScreen: 1
   m_CreditsTextAsset: {fileID: 4900000, guid: 9855b2ab6dd686b4398f349d35b40eed, type: 3}
   m_TextContainer: {fileID: 2978664487142823962}
-  m_TextLayout: {fileID: 6692729057246227289}
+  m_TextLayout: {fileID: 0}
   m_CreditsBlockPrefab: {fileID: 7702835525864695565, guid: 68402703545f182448a83cb7701682e2,
     type: 3}
   m_ScrollTime: 50
@@ -2129,6 +2130,8 @@ MonoBehaviour:
   m_SpacingPerChunk: 0
   m_SpacingPerGroupLine: 10
   m_SpacingPerNamesLine: 30
+  m_ResetPos: -700
+  m_ViewHeight: 1400
 --- !u!1001 &1989844814536996658
 PrefabInstance:
   m_ObjectHideFlags: 0
