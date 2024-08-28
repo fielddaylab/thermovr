@@ -94,6 +94,7 @@ static public class GameEvents
     static public readonly StringHash32 SandboxModeClicked = "lab:sandbox-mode-clicked";
     static public readonly StringHash32 LabModeClicked = "lab:lab-mode-clicked";
     static public readonly StringHash32 SettingsViewClicked = "lab:settings-view-clicked";
+    static public readonly StringHash32 GameModeClicked = "lab:game-mode-clicked";
     static public readonly StringHash32 TaskCompleted = "lab:task-completed";
     static public readonly StringHash32 SectionCompleted = "lab:section-completed";
     static public readonly StringHash32 LabCompleted = "lab:lab-completed";

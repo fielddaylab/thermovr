@@ -18,7 +18,10 @@ namespace ThermoVR.UI
         QuizLabTasks,
 
         // None
-        None
+        None,
+
+        //Game
+        Game
     }
 
 
