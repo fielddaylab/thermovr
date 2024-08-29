@@ -23,7 +23,7 @@ public class GameModule : UIModule
     private static float V_MARGIN = 0f;
     private static float T_MARGIN = 5;
 
-    private static float FAILURES_BEFORE_CONTINUE = 5;
+    private static float FAILURES_BEFORE_CONTINUE = 1;
 
     #endregion // Consts
 
@@ -38,6 +38,7 @@ public class GameModule : UIModule
     [SerializeField] private ThermoButton m_homeButton;
     [SerializeField] private ReachStateHub m_reachStateHub;
     [SerializeField] private Image m_stateIndicatorImg;
+    [SerializeField] private Image m_loadingOverlayImg;
     [SerializeField] private TMP_Text m_scoreNumText;
     [SerializeField] private GameObject m_graph;
     [SerializeField] private PlacementDotInteractions m_pdInteractions;
@@ -96,6 +97,8 @@ public class GameModule : UIModule
         // hide target zone
         m_targetZone.gameObject.SetActive(false);
 
+        m_generateTargetRoutine.Stop();
+
         // disable reach state hub
         m_reachStateHub.gameObject.SetActive(false);
     }
@@ -114,6 +117,8 @@ public class GameModule : UIModule
         // generate a new target on open
         m_failedTargetCount = 0;
         m_generateTargetRoutine.Replace(GenerateTargetRoutine());
+
+        m_loadingOverlayImg.gameObject.SetActive(false);
 
         // enable reach state hub
         m_reachStateHub.gameObject.SetActive(true);
@@ -156,7 +161,25 @@ public class GameModule : UIModule
 
     private IEnumerator GenerateTargetRoutine()
     {
-        m_stateIndicatorImg.sprite = GameDB.Instance.Circle;
+        m_stateIndicatorImg.gameObject.SetActive(false);
+        m_loadingOverlayImg.gameObject.SetActive(true);
+        m_targetZone.gameObject.SetActive(false);
+        EventMgr.Events.Dispatch(GameEvents.GameModeBeginGenerateTarget);
+
+        var defaultRange = 2f;
+
+        var lowerX = m_graph.transform.position.x;
+        var lowerY = m_graph.transform.position.y;
+        var lowerZ = m_graph.transform.position.z;
+
+        // Calculate the distance in world (not local units)
+        // from the bottom-left corner of the graph (by p and v) to the outer bounds.
+        // Will change if graph changes in size
+        Vector3 extentDist = new Vector3(0.33714f, 0.468314f * 0.95f, 0.468314f /*0.1243223f*/);
+
+        var upperX = m_graph.transform.position.x + extentDist.x;
+        var upperY = m_graph.transform.position.y + extentDist.y;
+        var upperZ = m_graph.transform.position.z + extentDist.z;
 
         bool isValid = false;
         int numTriesThisFrame = 0;
@@ -171,9 +194,13 @@ public class GameModule : UIModule
 
             // randomly pick position
             // x = t, y = p, z = v
-            float xPos = UnityEngine.Random.Range(m_graph.transform.position.x + 0.3f, m_graph.transform.position.x - 0.3f);
-            float yPos = UnityEngine.Random.Range(m_graph.transform.position.y + 0.3f, m_graph.transform.position.y - 0.3f);
-            float zPos = UnityEngine.Random.Range(m_graph.transform.position.z + 0.3f, m_graph.transform.position.z - 0.3f);
+            //float xPos = m_graph.transform.position.x + 0.5f; // UnityEngine.Random.Range(lowerX, upperX);
+            //float yPos = m_graph.transform.position.y + 0.5f;  // UnityEngine.Random.Range(lowerY, upperY);
+            //float zPos = m_graph.transform.position.z + 0.5f; // UnityEngine.Random.Range(lowerZ, upperZ);
+
+            float xPos = UnityEngine.Random.Range(lowerX, upperX);
+            float yPos = UnityEngine.Random.Range(lowerY, upperY);
+            float zPos = UnityEngine.Random.Range(lowerZ, upperZ);
 
             Vector3 interactPos = new Vector3(xPos, yPos, zPos);
 
@@ -202,7 +229,13 @@ public class GameModule : UIModule
 
             // keep bounds off edge cases
             var newPos = ThermoPresent.Instance.plot(thermoguess.y, thermoguess.x, thermoguess.z);
-            if (newPos.x < 0.06f || newPos.y > 0.8f || newPos.z > 0.9f)
+            if (newPos.x < 0.1f
+                || newPos.x > 0.9f
+                || newPos.y < 0.1f
+                || newPos.y > 0.9f
+                || newPos.z < 0.1f
+                || newPos.z > 0.9f
+                )
             {
                 isValid = false;
             }
@@ -240,6 +273,9 @@ public class GameModule : UIModule
 
         m_reachStateHub.SetDefinition(m_currTargetDef);
 
+        m_stateIndicatorImg.gameObject.SetActive(true);
+        m_loadingOverlayImg.gameObject.SetActive(false);
+        m_targetZone.gameObject.SetActive(true);
         m_generatingNewTarget = false;
     }
 
