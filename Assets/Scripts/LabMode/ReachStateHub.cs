@@ -85,6 +85,7 @@ namespace ThermoVR.Lab
                 EventMgr.Events.Register(GameEvents.GameModeTargetEntered, HandleGameModeTargetEntered);
                 EventMgr.Events.Register(GameEvents.GameModeTargetExited, HandleGameModeTargetExited);
                 EventMgr.Events.Register(GameEvents.GameModeExited, HandleGameModeExited);
+                EventMgr.Events.Register(GameEvents.GameModeBeginGenerateTarget, HandleGameModeBeginGenerateTarget);
             }
 
             PlaceTargetZone();
@@ -110,6 +111,7 @@ namespace ThermoVR.Lab
                 EventMgr.Events.Deregister(GameEvents.GameModeTargetEntered, HandleGameModeTargetEntered);
                 EventMgr.Events.Deregister(GameEvents.GameModeTargetExited, HandleGameModeTargetExited);
                 EventMgr.Events.Deregister(GameEvents.GameModeExited, HandleGameModeExited);
+                EventMgr.Events.Deregister(GameEvents.GameModeBeginGenerateTarget, HandleGameModeBeginGenerateTarget);
             }
         }
 
@@ -379,6 +381,11 @@ namespace ThermoVR.Lab
         }
 
         private void HandleGameModeExited()
+        {
+            m_gameModeTargetReached = false;
+        }
+
+        private void HandleGameModeBeginGenerateTarget()
         {
             m_gameModeTargetReached = false;
         }

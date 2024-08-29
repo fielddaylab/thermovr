@@ -95,6 +95,12 @@ namespace ThermoVR.UI
             }
         }
 
+        private void OnDestroy()
+        {
+            EventMgr.Events.Deregister(GameEvents.TitleCreditsOpened, OpenPanelImmediate);
+            EventMgr.Events.Deregister(GameEvents.TabletCreditsOpened, OpenPanelImmediate);
+        }
+
         #endregion // Unity Callbacks
 
         public void Init(bool isLaunch)
