@@ -94,7 +94,13 @@ namespace ThermoVR
                 OVRManager.display.RecenteredPose += DisconnectGrab;
             }
 
+            // start in sandbox
             m_currID = UIID.Sandbox;
+
+            m_graphTabMovement.ResetPosition();
+            m_labModeMovement.ResetPosition();
+            m_sandboxTabMovement.Indent();
+            m_gameTabMovement.ResetPosition();
 
             // HidePullout();
         }

@@ -2,7 +2,9 @@ using BeauRoutine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace ThermoVR
 {
@@ -24,6 +26,12 @@ namespace ThermoVR
         [SerializeField] private Material m_changeToMat;
         [SerializeField] private int m_matIndex;
         private Material m_defaultMat;
+
+        [SerializeField] private TMP_Text m_textRenderer;
+        [SerializeField] private SpriteRenderer m_imageRenderer;
+        [SerializeField] private Color m_changeToColor;
+
+        private Color m_defaultColor;
 
         private bool m_indented;
 
@@ -55,6 +63,14 @@ namespace ThermoVR
             if (m_changesMat)
             {
                 m_defaultMat = m_meshRenderer.sharedMaterials[m_matIndex];
+                if (m_imageRenderer)
+                {
+                    m_defaultColor = m_imageRenderer.color;
+                }
+                if (m_textRenderer)
+                {
+                    m_defaultColor = m_textRenderer.color;
+                }
             }
         }
 
@@ -89,6 +105,16 @@ namespace ThermoVR
                 var mats = m_meshRenderer.sharedMaterials;
                 mats[m_matIndex] = m_defaultMat;
                 m_meshRenderer.sharedMaterials = mats;
+
+                // set image / text color
+                if (m_imageRenderer)
+                {
+                    m_imageRenderer.color = m_defaultColor;
+                }
+                if (m_textRenderer)
+                {
+                    m_textRenderer.color = m_defaultColor;
+                }
             }
         }
 
@@ -101,6 +127,16 @@ namespace ThermoVR
                 var mats = m_meshRenderer.sharedMaterials;
                 mats[m_matIndex] = m_changeToMat;
                 m_meshRenderer.sharedMaterials = mats;
+
+                // set image / text color
+                if (m_imageRenderer)
+                {
+                    m_imageRenderer.color = m_changeToColor;
+                }
+                if (m_textRenderer)
+                {
+                    m_textRenderer.color = m_changeToColor;
+                }
             }
         }
 
