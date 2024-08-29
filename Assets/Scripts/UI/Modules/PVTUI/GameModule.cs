@@ -45,6 +45,11 @@ public class GameModule : UIModule
     [SerializeField] private ThermoButton m_resetScoreButton;
     [SerializeField] private GameObject m_targetZone;
 
+    [SerializeField] private GameObject m_xExtentAnchor;
+    [SerializeField] private GameObject m_yExtentAnchor;
+    [SerializeField] private GameObject m_zExtentAnchor;
+
+
     #endregion //  Inspector
 
     private int m_currScore;
@@ -175,7 +180,12 @@ public class GameModule : UIModule
         // Calculate the distance in world (not local units)
         // from the bottom-left corner of the graph (by p and v) to the outer bounds.
         // Will change if graph changes in size
-        Vector3 extentDist = new Vector3(0.33714f, 0.468314f * 0.95f, 0.468314f /*0.1243223f*/);
+        Vector3 extentDist = new Vector3(
+            m_xExtentAnchor.transform.position.x - m_graph.transform.position.x,
+            m_yExtentAnchor.transform.position.y - m_graph.transform.position.y,
+            m_zExtentAnchor.transform.position.z - m_graph.transform.position.z
+            );
+            // 0.468314f * 0.95f, 0.468314f /*0.1243223f*/);
 
         var upperX = m_graph.transform.position.x + extentDist.x;
         var upperY = m_graph.transform.position.y + extentDist.y;
@@ -229,6 +239,7 @@ public class GameModule : UIModule
 
             // keep bounds off edge cases
             var newPos = ThermoPresent.Instance.plot(thermoguess.y, thermoguess.x, thermoguess.z);
+
             if (newPos.x < 0.1f
                 || newPos.x > 0.9f
                 || newPos.y < 0.1f

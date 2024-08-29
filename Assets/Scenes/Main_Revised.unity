@@ -3323,6 +3323,24 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 8596095802245781792}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1001649045 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5921319584559830165, guid: 276bbdcb8ff79af45aec063946bb5829,
+    type: 3}
+  m_PrefabInstance: {fileID: 3537379272608767446}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &1001649046 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7750645021917681792, guid: 276bbdcb8ff79af45aec063946bb5829,
+    type: 3}
+  m_PrefabInstance: {fileID: 3537379272608767446}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &1001649047 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5981338317259661407, guid: 276bbdcb8ff79af45aec063946bb5829,
+    type: 3}
+  m_PrefabInstance: {fileID: 3537379272608767446}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1020262037
 GameObject:
   m_ObjectHideFlags: 0
@@ -10139,7 +10157,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
 --- !u!1 &3537379272608767451 stripped
 GameObject:
-  m_CorrespondingSourceObject: {fileID: 3537379272915726876, guid: 276bbdcb8ff79af45aec063946bb5829,
+  m_CorrespondingSourceObject: {fileID: 3537379271707420847, guid: 276bbdcb8ff79af45aec063946bb5829,
     type: 3}
   m_PrefabInstance: {fileID: 3537379272608767446}
   m_PrefabAsset: {fileID: 0}
@@ -10553,6 +10571,21 @@ PrefabInstance:
       propertyPath: m_gridLineMgr
       value: 
       objectReference: {fileID: 3537379272608767450}
+    - target: {fileID: 3672861308715105123, guid: 4f339ce2803f48847bf3bed161d1beb7,
+        type: 3}
+      propertyPath: m_xExtentAnchor
+      value: 
+      objectReference: {fileID: 1001649047}
+    - target: {fileID: 3672861308715105123, guid: 4f339ce2803f48847bf3bed161d1beb7,
+        type: 3}
+      propertyPath: m_yExtentAnchor
+      value: 
+      objectReference: {fileID: 1001649046}
+    - target: {fileID: 3672861308715105123, guid: 4f339ce2803f48847bf3bed161d1beb7,
+        type: 3}
+      propertyPath: m_zExtentAnchor
+      value: 
+      objectReference: {fileID: 1001649045}
     - target: {fileID: 3672861308715105123, guid: 4f339ce2803f48847bf3bed161d1beb7,
         type: 3}
       propertyPath: m_pdInteractions
