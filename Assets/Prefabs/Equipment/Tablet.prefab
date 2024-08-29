@@ -271,7 +271,7 @@ MonoBehaviour:
   m_fontColor32:
     serializedVersion: 2
     rgba: 4288795619
-  m_fontColor: {r: 0.89019614, g: 0.82745105, b: 0.6313726, a: 1}
+  m_fontColor: {r: 0.8901961, g: 0.827451, b: 0.6313726, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -367,7 +367,7 @@ Transform:
   m_GameObject: {fileID: 1108102857785276514}
   m_LocalRotation: {x: -0.7070961, y: -0.0038886508, z: 0.0038883043, w: 0.70709604}
   m_LocalPosition: {x: 0.069, y: 0.4209, z: 0.1196}
-  m_LocalScale: {x: 0.64, y: 0.64, z: 0.64}
+  m_LocalScale: {x: 0.7, y: 0.7, z: 0.7}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 32187044377975097}
@@ -567,10 +567,13 @@ MonoBehaviour:
   m_explicitCalls: 1
   m_hasTimer: 0
   m_resetTime: 0
-  m_changesMat: 0
-  m_meshRenderer: {fileID: 0}
-  m_changeToMat: {fileID: 0}
+  m_changesMat: 1
+  m_meshRenderer: {fileID: 4235239432472186731}
+  m_changeToMat: {fileID: 2100000, guid: ad76ef423720ba240a1aa9eb5ce7b2fa, type: 2}
   m_matIndex: 0
+  m_textRenderer: {fileID: 4018372573924256320}
+  m_imageRenderer: {fileID: 0}
+  m_changeToColor: {r: 0, g: 0, b: 0, a: 1}
 --- !u!114 &5413464380572719703
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -981,7 +984,7 @@ MonoBehaviour:
   m_fontColor32:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
+  m_fontColor: {r: 0.8901961, g: 0.827451, b: 0.6313726, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -998,7 +1001,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 1.15
+  m_fontSize: 0.9
   m_fontSizeBase: 1.15
   m_fontWeight: 400
   m_enableAutoSizing: 0
@@ -1156,7 +1159,7 @@ MonoBehaviour:
   m_fontColor32:
     serializedVersion: 2
     rgba: 4278190080
-  m_fontColor: {r: 0, g: 0, b: 0, a: 1}
+  m_fontColor: {r: 0.8901961, g: 0.827451, b: 0.6313726, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -1641,6 +1644,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 5421072824984601977}
     m_Modifications:
+    - target: {fileID: -8858562978911207885, guid: 8d30df8bb674ad54eb0273bcaa632255,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: f032619ddbcf28f4b89a7905530ae92c, type: 2}
     - target: {fileID: -8679921383154817045, guid: 8d30df8bb674ad54eb0273bcaa632255,
         type: 3}
       propertyPath: m_RootOrder
@@ -1711,6 +1719,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -8584222611024920280, guid: 8d30df8bb674ad54eb0273bcaa632255,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: f032619ddbcf28f4b89a7905530ae92c, type: 2}
     - target: {fileID: -8205027151302343616, guid: 8d30df8bb674ad54eb0273bcaa632255,
         type: 3}
       propertyPath: m_Layer
@@ -1970,10 +1983,13 @@ MonoBehaviour:
   m_explicitCalls: 1
   m_hasTimer: 0
   m_resetTime: 0
-  m_changesMat: 0
-  m_meshRenderer: {fileID: 0}
-  m_changeToMat: {fileID: 0}
+  m_changesMat: 1
+  m_meshRenderer: {fileID: 3903150189824445950}
+  m_changeToMat: {fileID: 2100000, guid: ad76ef423720ba240a1aa9eb5ce7b2fa, type: 2}
   m_matIndex: 0
+  m_textRenderer: {fileID: 0}
+  m_imageRenderer: {fileID: 1839236643345871663}
+  m_changeToColor: {r: 0, g: 0, b: 0, a: 1}
 --- !u!1 &3478470494532667037 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -4113823780772717290, guid: 8d30df8bb674ad54eb0273bcaa632255,
@@ -2123,10 +2139,13 @@ MonoBehaviour:
   m_explicitCalls: 1
   m_hasTimer: 0
   m_resetTime: 0
-  m_changesMat: 0
-  m_meshRenderer: {fileID: 0}
-  m_changeToMat: {fileID: 0}
+  m_changesMat: 1
+  m_meshRenderer: {fileID: 8340330655655323064}
+  m_changeToMat: {fileID: 2100000, guid: ad76ef423720ba240a1aa9eb5ce7b2fa, type: 2}
   m_matIndex: 0
+  m_textRenderer: {fileID: 460873260424988830}
+  m_imageRenderer: {fileID: 0}
+  m_changeToColor: {r: 0, g: 0, b: 0, a: 1}
 --- !u!114 &1863636058959318956
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2172,6 +2191,12 @@ MonoBehaviour:
 --- !u!4 &3732383622469062860 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -4223577877591766201, guid: 8d30df8bb674ad54eb0273bcaa632255,
+    type: 3}
+  m_PrefabInstance: {fileID: 8551985416623938443}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &3903150189824445950 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: -4574523590907734411, guid: 8d30df8bb674ad54eb0273bcaa632255,
     type: 3}
   m_PrefabInstance: {fileID: 8551985416623938443}
   m_PrefabAsset: {fileID: 0}
@@ -2342,10 +2367,13 @@ MonoBehaviour:
   m_explicitCalls: 1
   m_hasTimer: 0
   m_resetTime: 0
-  m_changesMat: 0
-  m_meshRenderer: {fileID: 0}
-  m_changeToMat: {fileID: 0}
+  m_changesMat: 1
+  m_meshRenderer: {fileID: 9110912240165001891}
+  m_changeToMat: {fileID: 2100000, guid: ad76ef423720ba240a1aa9eb5ce7b2fa, type: 2}
   m_matIndex: 0
+  m_textRenderer: {fileID: 7013891906216006531}
+  m_imageRenderer: {fileID: 0}
+  m_changeToColor: {r: 0, g: 0, b: 0, a: 1}
 --- !u!114 &293897244167372311
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2397,6 +2425,12 @@ Transform:
 --- !u!4 &8152773237383478368 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 8d30df8bb674ad54eb0273bcaa632255,
+    type: 3}
+  m_PrefabInstance: {fileID: 8551985416623938443}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &8340330655655323064 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: -8858562978911207885, guid: 8d30df8bb674ad54eb0273bcaa632255,
     type: 3}
   m_PrefabInstance: {fileID: 8551985416623938443}
   m_PrefabAsset: {fileID: 0}
@@ -2553,6 +2587,9 @@ MonoBehaviour:
   m_meshRenderer: {fileID: 0}
   m_changeToMat: {fileID: 0}
   m_matIndex: 0
+  m_textRenderer: {fileID: 0}
+  m_imageRenderer: {fileID: 0}
+  m_changeToColor: {r: 0, g: 0, b: 0, a: 0}
 --- !u!114 &3039919479871027695
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2659,3 +2696,9 @@ MonoBehaviour:
   ltouch: 0
   rtouch: 0
   touch: 0
+--- !u!23 &9110912240165001891 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: -8584222611024920280, guid: 8d30df8bb674ad54eb0273bcaa632255,
+    type: 3}
+  m_PrefabInstance: {fileID: 8551985416623938443}
+  m_PrefabAsset: {fileID: 0}

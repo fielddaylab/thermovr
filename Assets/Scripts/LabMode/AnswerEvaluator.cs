@@ -30,15 +30,15 @@ namespace ThermoVR.Lab
     {
         [SerializeField] private Evaluable[] m_toEvaluate;
         [SerializeField] private bool m_constantCheck = false;
-        [SerializeField] private ThermoButton m_submitButton;
+        public ThermoButton SubmitButton;
         [SerializeField] private bool m_autoSuccess = false;
 
         public EventHandler<EvalUpdateEventArgs> OnEvaluationUpdated;
 
         private void OnEnable() {
             if (!m_constantCheck && !m_autoSuccess) {
-                m_submitButton.OnButtonPressed += HandleSubmitPressed;
-                m_submitButton.SetInteractable(false);
+                SubmitButton.OnButtonPressed += HandleSubmitPressed;
+                SubmitButton.SetInteractable(false);
             }
 
             if (m_autoSuccess)
@@ -49,7 +49,7 @@ namespace ThermoVR.Lab
 
         private void OnDisable() {
             if (!m_constantCheck && !m_autoSuccess) {
-                m_submitButton.OnButtonPressed -= HandleSubmitPressed;
+                SubmitButton.OnButtonPressed -= HandleSubmitPressed;
             }
         }
 
@@ -85,7 +85,7 @@ namespace ThermoVR.Lab
                 }
             }
 
-            m_submitButton.SetInteractable(allSelected);
+            SubmitButton.SetInteractable(allSelected);
         }
 
         private void HandleSubmitPressed(object sender, EventArgs args) {

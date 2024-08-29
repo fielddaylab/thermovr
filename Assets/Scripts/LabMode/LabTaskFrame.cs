@@ -16,6 +16,7 @@ namespace ThermoVR.Lab
         [SerializeField] AudioClip m_taskResetClip;
 
         [SerializeField] private Evaluable[] m_evaluables;
+        [SerializeField] private bool m_usesSubmit = true;
 
         private void OnEnable() {
             if (TaskResetButton)
@@ -25,6 +26,7 @@ namespace ThermoVR.Lab
             if (NextButton)
             {
                 NextButton.OnButtonPressed += HandleNextPressed;
+                NextButton.SetInteractable(false);
             }
 
             bool anyEvaluated = AnyEvaluated();
@@ -83,6 +85,12 @@ namespace ThermoVR.Lab
             if (NextButton)
             {
                 NextButton.SetInteractable(anyEvaluated);
+                NextButton.gameObject.SetActive(anyEvaluated);
+            }
+            
+            if (m_usesSubmit)
+            {
+                AnswerEvaluator.SubmitButton.gameObject.SetActive(!anyEvaluated);
             }
         }
 

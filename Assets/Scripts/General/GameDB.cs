@@ -45,6 +45,11 @@ public class GameDB : MonoBehaviour
     public Sprite TutorialNudgeDesktop;
     public Sprite TutorialNudgeVR;
 
+    [Space(5)]
+    [Header("Tablet")]
+    public Material InactiveModuleMaterial;
+    public Material ActiveModuleMaterial;
+
     private void Awake() {
         if (Instance == null)
         {
