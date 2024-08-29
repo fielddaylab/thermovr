@@ -53,6 +53,8 @@ namespace ThermoVR.Lab
 
         [SerializeField] private InstructionLineGenerator m_lineGenerator;
 
+        [SerializeField] private bool m_isLabTask = true;
+
         private ReachStateDefinition m_definition;
 
         private ReachStateState m_completionState;
@@ -63,9 +65,11 @@ namespace ThermoVR.Lab
         private bool m_completed;
 
         private bool m_initialized;
+        private bool m_hasDef = false;
 
         public void SetDefinition(ReachStateDefinition def) {
             m_definition = def;
+            m_hasDef = true;
 
             m_completionTime = 4f;
 
@@ -77,19 +81,27 @@ namespace ThermoVR.Lab
             PlaceTargetZone();
             if (m_initialized)
             {
-                EventMgr.Events?.Dispatch(GameEvents.TargetStateTaskBegan);
+                if (m_isLabTask)
+                {
+                    EventMgr.Events?.Dispatch(GameEvents.TargetStateTaskBegan);
+                }
             }
             m_initialized = true;
         }
 
         private void OnDisable()
         {
-            EventMgr.Events?.Dispatch(GameEvents.ClearTargetZone);
-            EventMgr.Events?.Dispatch(GameEvents.TargetStateTaskEnded);
+            if (m_isLabTask)
+            {
+                EventMgr.Events?.Dispatch(GameEvents.ClearTargetZone);
+                EventMgr.Events?.Dispatch(GameEvents.TargetStateTaskEnded);
+            }
         }
 
         private void Update()
         {
+            if (!m_hasDef) { return; }
+
             if (IsWithinRange())
             {
                 if (m_completionState == ReachStateState.Incomplete)
@@ -99,7 +111,10 @@ namespace ThermoVR.Lab
                     m_completionStateImg.fillAmount = 0;
 
                     m_completionState = ReachStateState.Countdown;
-                    EventMgr.Events.Dispatch(GameEvents.TargetStateEntered);
+                    if (m_isLabTask)
+                    {
+                        EventMgr.Events.Dispatch(GameEvents.TargetStateEntered);
+                    }
                     m_completed = false;
                 }
                 else if (m_completionState == ReachStateState.Countdown)
@@ -123,7 +138,10 @@ namespace ThermoVR.Lab
                         m_completionStateImg.sprite = GameDB.Instance.ReachStateComplete;
                         m_completionStateImg.fillAmount = 1;
 
-                        EventMgr.Events.Dispatch(GameEvents.TargetStateCompleted);
+                        if (m_isLabTask)
+                        {
+                            EventMgr.Events.Dispatch(GameEvents.TargetStateCompleted);
+                        }
                         m_completionState = ReachStateState.Complete;
                     }
                     m_completed = true;
@@ -136,7 +154,11 @@ namespace ThermoVR.Lab
 
                 if (m_completionState != ReachStateState.Incomplete)
                 {
-                    EventMgr.Events.Dispatch(GameEvents.TargetStateLost, GetDiscrepancies());
+                    if (m_isLabTask)
+                    {
+                        EventMgr.Events.Dispatch(GameEvents.TargetStateLost, GetDiscrepancies());
+                    }
+
                     m_completionState = ReachStateState.Incomplete;
                 }
                 m_completed = false;
@@ -237,6 +259,8 @@ namespace ThermoVR.Lab
             m_completionState = ReachStateState.Incomplete;
 
             m_completionTimer = m_completionTime;
+
+            PlaceTargetZone();
         }
 
         public override bool AnswerSelected() {

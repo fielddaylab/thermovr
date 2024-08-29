@@ -139,6 +139,9 @@ static public class GameEvents
     static public readonly StringHash32 CanvasPreUpdate = "game:canvas-pre-update";
     static public readonly StringHash32 ApplicationPreRender = "game:application-pre-render";
 
+    static public readonly StringHash32 GameModeStarted = "ui:game-mode-started";
+    static public readonly StringHash32 GameModeExited = "ui:game-mode-exited";
+
 }
 
 static public class PersistentVars

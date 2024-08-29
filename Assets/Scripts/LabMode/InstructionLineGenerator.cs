@@ -13,6 +13,8 @@ namespace ThermoVR.Lab
 
         public void GenerateLines(string[] lines)
         {
+            if (lines == null) { return; }
+
             float adjustedSpacing = m_spacing;
             float overrideTextHeight = 0;
             float overrideImgHeight = 0;

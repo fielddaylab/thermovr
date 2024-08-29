@@ -345,7 +345,7 @@ namespace ThermoVR
             ProcessPLine(ref newLine, allPositions);
         }
 
-        private void PopulateVLine(double constV, ref LineRenderer newLine, bool highResolution = true)
+        public void PopulateVLine(double constV, ref LineRenderer newLine, bool highResolution = true, bool processLine = true)
         {
             newLine.material = m_vLineMat;
             newLine.transform.position = m_volumeLinesContainer.position;
@@ -491,7 +491,10 @@ namespace ThermoVR
 
             #endregion // Second Half (Two-Phase)
 
-            ProcessVLine(ref newLine, allPositions);
+            if (processLine)
+            {
+                ProcessVLine(ref newLine, allPositions);
+            }
         }
 
         private void PopulateTLine(double constT, ref LineRenderer newLine, bool highResolution = true)
