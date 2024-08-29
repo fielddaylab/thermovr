@@ -7,7 +7,6 @@ using BeauUtil;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using FieldDay;
 using BeauUtil.Tags;
 using BeauPools;
 using ThermoVR.Lab;
@@ -16,6 +15,7 @@ using Newtonsoft.Json;
 using ThermoVR.UI.GraphElements;
 using ThermoVR.Controls;
 using ThermoVR.State;
+using OGD;
 
 namespace ThermoVR.Analytics
 {

@@ -6022,6 +6022,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 365b67b6eda801543949da5b30eddd15, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &901741879 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3537379271707420847, guid: 276bbdcb8ff79af45aec063946bb5829,
+    type: 3}
+  m_PrefabInstance: {fileID: 10738157}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &934694549
 GameObject:
   m_ObjectHideFlags: 0
@@ -6896,6 +6902,18 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 32
   m_LocalEulerAnglesHint: {x: 13.794, y: -92.664, z: -90.636}
+--- !u!114 &1435241537 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 181848664742009425, guid: 276bbdcb8ff79af45aec063946bb5829,
+    type: 3}
+  m_PrefabInstance: {fileID: 10738157}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5dcb97aa8002ea940bc49c36840b4494, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1445139976
 GameObject:
   m_ObjectHideFlags: 0
@@ -8204,6 +8222,12 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1749172099}
   m_CullTransparentMesh: 1
+--- !u!1 &1776435399 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4278471101032065628, guid: 276bbdcb8ff79af45aec063946bb5829,
+    type: 3}
+  m_PrefabInstance: {fileID: 10738157}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1798372592
 GameObject:
   m_ObjectHideFlags: 0
@@ -9385,6 +9409,26 @@ PrefabInstance:
       propertyPath: m_Materials.Array.data[0]
       value: 
       objectReference: {fileID: 2100000, guid: f045c1bc88ad0244684cc6e47cd3c430, type: 2}
+    - target: {fileID: 652215753386735951, guid: 959a44152e40c5b4f91aa5f50e0f0e2b,
+        type: 3}
+      propertyPath: m_graph
+      value: 
+      objectReference: {fileID: 901741879}
+    - target: {fileID: 652215753386735951, guid: 959a44152e40c5b4f91aa5f50e0f0e2b,
+        type: 3}
+      propertyPath: m_targetZone
+      value: 
+      objectReference: {fileID: 1776435399}
+    - target: {fileID: 652215753386735951, guid: 959a44152e40c5b4f91aa5f50e0f0e2b,
+        type: 3}
+      propertyPath: m_gridLineMgr
+      value: 
+      objectReference: {fileID: 1435241537}
+    - target: {fileID: 652215753386735951, guid: 959a44152e40c5b4f91aa5f50e0f0e2b,
+        type: 3}
+      propertyPath: m_pdInteractions
+      value: 
+      objectReference: {fileID: 888884780}
     - target: {fileID: 932558765956269815, guid: 959a44152e40c5b4f91aa5f50e0f0e2b,
         type: 3}
       propertyPath: m_AnchorMax.y

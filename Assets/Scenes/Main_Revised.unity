@@ -6878,6 +6878,12 @@ MonoBehaviour:
   m_VerticalAxis: Vertical
   m_SubmitButton: Submit
   m_CancelButton: Cancel
+--- !u!1 &1826992855 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4278471101032065628, guid: 276bbdcb8ff79af45aec063946bb5829,
+    type: 3}
+  m_PrefabInstance: {fileID: 3537379272608767446}
+  m_PrefabAsset: {fileID: 0}
 --- !u!43 &1851351942
 Mesh:
   m_ObjectHideFlags: 0
@@ -10119,6 +10125,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 365b67b6eda801543949da5b30eddd15, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &3537379272608767450 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 181848664742009425, guid: 276bbdcb8ff79af45aec063946bb5829,
+    type: 3}
+  m_PrefabInstance: {fileID: 3537379272608767446}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5dcb97aa8002ea940bc49c36840b4494, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!1 &3537379272608767451 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3537379272915726876, guid: 276bbdcb8ff79af45aec063946bb5829,
+    type: 3}
+  m_PrefabInstance: {fileID: 3537379272608767446}
+  m_PrefabAsset: {fileID: 0}
 --- !u!33 &4044710141741947754
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -10514,6 +10538,26 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3672861308715105123, guid: 4f339ce2803f48847bf3bed161d1beb7,
+        type: 3}
+      propertyPath: m_graph
+      value: 
+      objectReference: {fileID: 3537379272608767451}
+    - target: {fileID: 3672861308715105123, guid: 4f339ce2803f48847bf3bed161d1beb7,
+        type: 3}
+      propertyPath: m_targetZone
+      value: 
+      objectReference: {fileID: 1826992855}
+    - target: {fileID: 3672861308715105123, guid: 4f339ce2803f48847bf3bed161d1beb7,
+        type: 3}
+      propertyPath: m_gridLineMgr
+      value: 
+      objectReference: {fileID: 3537379272608767450}
+    - target: {fileID: 3672861308715105123, guid: 4f339ce2803f48847bf3bed161d1beb7,
+        type: 3}
+      propertyPath: m_pdInteractions
+      value: 
+      objectReference: {fileID: 3537379272608767449}
     - target: {fileID: 3801816812306695927, guid: 4f339ce2803f48847bf3bed161d1beb7,
         type: 3}
       propertyPath: m_AnchorMax.y
