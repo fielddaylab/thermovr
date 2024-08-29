@@ -67,6 +67,8 @@ namespace ThermoVR.Lab
         private bool m_initialized;
         private bool m_hasDef = false;
 
+        private bool m_gameModeTargetReached = false;
+
         public void SetDefinition(ReachStateDefinition def) {
             m_definition = def;
             m_hasDef = true;
@@ -78,6 +80,13 @@ namespace ThermoVR.Lab
 
         private void OnEnable()
         {
+            if (!m_isLabTask)
+            {
+                EventMgr.Events.Register(GameEvents.GameModeTargetEntered, HandleGameModeTargetEntered);
+                EventMgr.Events.Register(GameEvents.GameModeTargetExited, HandleGameModeTargetExited);
+                EventMgr.Events.Register(GameEvents.GameModeExited, HandleGameModeExited);
+            }
+
             PlaceTargetZone();
             if (m_initialized)
             {
@@ -96,13 +105,19 @@ namespace ThermoVR.Lab
                 EventMgr.Events?.Dispatch(GameEvents.ClearTargetZone);
                 EventMgr.Events?.Dispatch(GameEvents.TargetStateTaskEnded);
             }
+            else
+            {
+                EventMgr.Events.Deregister(GameEvents.GameModeTargetEntered, HandleGameModeTargetEntered);
+                EventMgr.Events.Deregister(GameEvents.GameModeTargetExited, HandleGameModeTargetExited);
+                EventMgr.Events.Deregister(GameEvents.GameModeExited, HandleGameModeExited);
+            }
         }
 
         private void Update()
         {
             if (!m_hasDef) { return; }
 
-            if (IsWithinRange())
+            if (IsWithinRange() || m_gameModeTargetReached)
             {
                 if (m_completionState == ReachStateState.Incomplete)
                 {
@@ -348,6 +363,27 @@ namespace ThermoVR.Lab
 
             return discrepancies;
         }
+
+        #region Handlers
+
+        private void HandleGameModeTargetEntered()
+        {
+            m_gameModeTargetReached = true;
+            Debug.Log("[ReachState] Game mode reached");
+        }
+
+        private void HandleGameModeTargetExited()
+        {
+            m_gameModeTargetReached = false;
+            Debug.Log("[ReachState] Game mode exited");
+        }
+
+        private void HandleGameModeExited()
+        {
+            m_gameModeTargetReached = false;
+        }
+
+        #endregion // Handlers
     }
 
 

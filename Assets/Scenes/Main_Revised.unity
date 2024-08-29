@@ -6878,6 +6878,12 @@ MonoBehaviour:
   m_VerticalAxis: Vertical
   m_SubmitButton: Submit
   m_CancelButton: Cancel
+--- !u!1 &1826992855 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4278471101032065628, guid: 276bbdcb8ff79af45aec063946bb5829,
+    type: 3}
+  m_PrefabInstance: {fileID: 3537379272608767446}
+  m_PrefabAsset: {fileID: 0}
 --- !u!43 &1851351942
 Mesh:
   m_ObjectHideFlags: 0
@@ -10537,6 +10543,11 @@ PrefabInstance:
       propertyPath: m_graph
       value: 
       objectReference: {fileID: 3537379272608767451}
+    - target: {fileID: 3672861308715105123, guid: 4f339ce2803f48847bf3bed161d1beb7,
+        type: 3}
+      propertyPath: m_targetZone
+      value: 
+      objectReference: {fileID: 1826992855}
     - target: {fileID: 3672861308715105123, guid: 4f339ce2803f48847bf3bed161d1beb7,
         type: 3}
       propertyPath: m_gridLineMgr

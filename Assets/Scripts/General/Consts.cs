@@ -141,6 +141,8 @@ static public class GameEvents
 
     static public readonly StringHash32 GameModeStarted = "ui:game-mode-started";
     static public readonly StringHash32 GameModeExited = "ui:game-mode-exited";
+    static public readonly StringHash32 GameModeTargetEntered = "ui:game-mode-target-entered";
+    static public readonly StringHash32 GameModeTargetExited = "ui:game-mode-target-exited";
 
 }
 

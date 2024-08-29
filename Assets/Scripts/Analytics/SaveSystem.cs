@@ -77,7 +77,7 @@ namespace ThermoVR {
             string serialized = Serializer.Write(newData, OutputOptions.None, Serializer.Format.Binary);
 
             using(var localFuture = Future.Create())
-            using(var saveRequest = OGD.GameState.PushState(userCode, serialized, localFuture.Complete, (f) => localFuture.Fail(f))) {
+            using(var saveRequest = OGD.GameState.PushState(userCode, serialized, localFuture.Complete, (f) => localFuture.Fail(f), 0)) {
                 Log.Msg("[SaveSystem] Attempting declare starting save data for id '{0}'", userCode);
                 yield return localFuture;
 
@@ -109,7 +109,7 @@ namespace ThermoVR {
             bool saved = false;
             while(!saved) {
                 using(var localFuture = Future.Create())
-                using(var saveRequest = OGD.GameState.PushState(userCode, saveData, localFuture.Complete, (f) => localFuture.Fail(f))) {
+                using(var saveRequest = OGD.GameState.PushState(userCode, saveData, localFuture.Complete, (f) => localFuture.Fail(f), 0)) {
                     Log.Msg("[SaveSystem] Attempting server save with user code '{0}'", userCode);
                     yield return localFuture;
 
@@ -140,7 +140,7 @@ namespace ThermoVR {
 
         private IEnumerator ServerReadRoutine(Future<PlayerData> data, string userCode) {
             using(var localFuture = Future.Create<string>())
-            using(var loadRequest = OGD.GameState.RequestLatestState(userCode, localFuture.Complete, (f) => localFuture.Fail(f))) {
+            using(var loadRequest = OGD.GameState.RequestLatestState(userCode, localFuture.Complete, (f) => localFuture.Fail(f), 0)) {
                 Log.Msg("[SaveSystem] Attempting server load with user code '{0}'", userCode);
                 yield return localFuture;
 

@@ -9,20 +9,21 @@ using ThermoVR.State;
 using ThermoVR.UI;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GameModule : UIModule
 {
     #region Consts
 
-    private static float P_RANGE = 100000;
-    private static float V_RANGE = 0.01f;
-    private static float T_RANGE = 5;
+    private static float P_RANGE = 0;
+    private static float V_RANGE = 0;
+    private static float T_RANGE = 0;
 
     private static float P_MARGIN = 10000;
     private static float V_MARGIN = 0f;
     private static float T_MARGIN = 5;
 
-    private static float FAILURES_BEFORE_CANCEL = 5;
+    private static float FAILURES_BEFORE_CONTINUE = 5;
 
     #endregion // Consts
 
@@ -36,27 +37,41 @@ public class GameModule : UIModule
     [SerializeField] private CanvasGroup m_gameGroup;
     [SerializeField] private ThermoButton m_homeButton;
     [SerializeField] private ReachStateHub m_reachStateHub;
+    [SerializeField] private Image m_stateIndicatorImg;
     [SerializeField] private TMP_Text m_scoreNumText;
     [SerializeField] private GameObject m_graph;
     [SerializeField] private PlacementDotInteractions m_pdInteractions;
+    [SerializeField] private ThermoButton m_resetScoreButton;
+    [SerializeField] private GameObject m_targetZone;
 
     #endregion //  Inspector
 
     private int m_currScore;
     private Routine m_reachStateRoutine;
+    private Routine m_generateTargetRoutine;
     private int m_failedTargetCount;
 
     private ReachStateDefinition m_currTargetDef;
+
+    private float m_debugTimer = 0;
+    private bool m_generatingNewTarget = false;
 
     #region Unity Callbacks
 
     private void Update()
     {
-        if (m_gameGroup.alpha == 1 && m_reachStateHub.IsCorrect())
+        if (m_gameGroup.alpha == 1 && m_reachStateHub.IsCorrect() && !m_generatingNewTarget)
         {
             OnStateReached();
 
             // TODO: dispatch logging event
+        }
+
+        m_debugTimer -= Time.deltaTime;
+        if (m_debugTimer <= 0)
+        { 
+            m_debugTimer = 0.5f;
+            // GenerateTarget();
         }
     }
 
@@ -75,6 +90,12 @@ public class GameModule : UIModule
         SetHomePanelVisible(true);
         SetGamePanelVisible(false);
 
+        // allow dragging
+        World.Instance.ModMgr.EnableGraphBallInteractions();
+
+        // hide target zone
+        m_targetZone.gameObject.SetActive(false);
+
         // disable reach state hub
         m_reachStateHub.gameObject.SetActive(false);
     }
@@ -87,12 +108,12 @@ public class GameModule : UIModule
         SetHomePanelVisible(false);
         SetGamePanelVisible(true);
 
+        // Disallow dragging
+        World.Instance.ModMgr.DisableGraphBallInteractions();
+
         // generate a new target on open
         m_failedTargetCount = 0;
-        GenerateTarget();
-
-        // reset score to 0 on open
-        SetScore(0);
+        m_generateTargetRoutine.Replace(GenerateTargetRoutine());
 
         // enable reach state hub
         m_reachStateHub.gameObject.SetActive(true);
@@ -102,12 +123,14 @@ public class GameModule : UIModule
     {
         m_beginButton.OnButtonPressed += HandleBeginButtonPressed;
         m_homeButton.OnButtonPressed += HandleHomeButtonPressed;
+        m_resetScoreButton.OnButtonPressed += HandleResetScorePressed;
     }
 
     private void RemoveListeners()
     {
-        m_beginButton.OnButtonPressed += HandleBeginButtonPressed;
-        m_homeButton.OnButtonPressed += HandleHomeButtonPressed;
+        m_beginButton.OnButtonPressed -= HandleBeginButtonPressed;
+        m_homeButton.OnButtonPressed -= HandleHomeButtonPressed;
+        m_resetScoreButton.OnButtonPressed -= HandleResetScorePressed;
     }
 
     private void SetHomePanelVisible(bool isVisible)
@@ -131,75 +154,76 @@ public class GameModule : UIModule
         m_scoreNumText.SetText(newScore.ToStringLookup());
     }
 
-    private void GenerateTarget()
+    private IEnumerator GenerateTargetRoutine()
     {
-        // randomly pick position
-        double v = UnityEngine.Random.Range(2.0f, 3.0f);
-        //double v = UnityEngine.Random.Range((float)ThermoMath.v_min + V_RANGE, (float)ThermoMath.v_max - V_RANGE); ;
+        m_stateIndicatorImg.sprite = GameDB.Instance.Circle;
 
-        // graph bounds are 0.25f
-        // x = t, y = p, z = v
-        float xPos = UnityEngine.Random.Range(m_graph.transform.position.x + 0.5f, m_graph.transform.position.x - 0.1f);
-        float yPos = UnityEngine.Random.Range(m_graph.transform.position.y + 0.5f, m_graph.transform.position.y + 0.1f);
-        float zPos = UnityEngine.Random.Range(m_graph.transform.position.z + 0.5f, m_graph.transform.position.z + 0.1f);
-
-        Vector3 interactPos = new Vector3(xPos, yPos, zPos);
-
-        Vector3 localspace = m_graph.transform.InverseTransformPoint(interactPos);
-        Vector3 correctedspace = new Vector3(localspace.z, localspace.y, localspace.x); // * 4.0f; //rotate 90, mul by 4 (inverse transform of gmodel)
-
-        //Vector3 thermoguess = thermo.guessPlot(ThermoMath.t_neutral, correctedspace.y, correctedspace.x);
-        Vector3 thermoguess = ThermoPresent.Instance.guessMeshPlot(correctedspace.x, correctedspace.y, correctedspace.z);
-        Vector3 localguess = ThermoPresent.Instance.plot(thermoguess.y, thermoguess.x, thermoguess.z); //note swizzle!
-
-        bool isValid = true;
-
-        if (MathUtility.floatNumeric(localguess.x) && MathUtility.floatNumeric(localguess.y) && MathUtility.floatNumeric(localguess.z))
+        bool isValid = false;
+        int numTriesThisFrame = 0;
+        Vector3 finalPVT = Vector3.zero;
+        while (!isValid)
         {
-            // interactPos = thermoguess;
-            isValid = true;
-        }
-        else
-        {
-            isValid = false;
-        }
-
-        // x = v, y = p, z = t
-        var pvt = thermoguess; // ThermoPresent.Instance.invplot(interactPos.y, interactPos.z, interactPos.x);
-
-        if (pvt.y < ThermoMath.p_min || pvt.x < ThermoMath.v_min || pvt.z < ThermoMath.t_min
-            || pvt.y > ThermoMath.p_max || pvt.x > ThermoMath.v_max || pvt.z > ThermoMath.t_max)
-        {
-            isValid = false;
-        }
-
-        if (!isValid)
-        {
-            if (m_failedTargetCount > FAILURES_BEFORE_CANCEL)
+            if (numTriesThisFrame > FAILURES_BEFORE_CONTINUE)
             {
-                // TODO: handle failed target generation visually
-                return;
+                numTriesThisFrame = 0;
+                yield return null;
             }
 
-            m_failedTargetCount++;
-            GenerateTarget();
-            return;
+            // randomly pick position
+            // x = t, y = p, z = v
+            float xPos = UnityEngine.Random.Range(m_graph.transform.position.x + 0.3f, m_graph.transform.position.x - 0.3f);
+            float yPos = UnityEngine.Random.Range(m_graph.transform.position.y + 0.3f, m_graph.transform.position.y - 0.3f);
+            float zPos = UnityEngine.Random.Range(m_graph.transform.position.z + 0.3f, m_graph.transform.position.z - 0.3f);
+
+            Vector3 interactPos = new Vector3(xPos, yPos, zPos);
+
+            Vector3 localspace = m_graph.transform.InverseTransformPoint(interactPos);
+            Vector3 correctedspace = new Vector3(localspace.z, localspace.y, localspace.x); // * 4.0f; //rotate 90, mul by 4 (inverse transform of gmodel)
+
+            //Vector3 thermoguess = thermo.guessPlot(ThermoMath.t_neutral, correctedspace.y, correctedspace.x);
+            Vector3 thermoguess = ThermoPresent.Instance.guessMeshPlot(correctedspace.x, correctedspace.y, correctedspace.z);
+            Vector3 localguess = ThermoPresent.Instance.plot(thermoguess.y, thermoguess.x, thermoguess.z); //note swizzle!
+
+            if (MathUtility.floatNumeric(localguess.x) && MathUtility.floatNumeric(localguess.y) && MathUtility.floatNumeric(localguess.z))
+            {
+                // interactPos = thermoguess;
+                isValid = true;
+            }
+
+            // x = v, y = p, z = t
+
+            finalPVT = thermoguess; // ThermoPresent.Instance.invplot(interactPos.y, interactPos.z, interactPos.x);
+
+            if (finalPVT.y < ThermoMath.p_min || finalPVT.x < ThermoMath.v_min || finalPVT.z < ThermoMath.t_min
+                || finalPVT.y > ThermoMath.p_max || finalPVT.x > ThermoMath.v_max || finalPVT.z > ThermoMath.t_max)
+            {
+                isValid = false;
+            }
+
+            // keep bounds off edge cases
+            var newPos = ThermoPresent.Instance.plot(thermoguess.y, thermoguess.x, thermoguess.z);
+            if (newPos.x < 0.06f || newPos.y > 0.8f || newPos.z > 0.9f)
+            {
+                isValid = false;
+            }
+
+            numTriesThisFrame++;
         }
 
         // Create a new reach state def
         SimStateTarget pTarget = new SimStateTarget();
         pTarget.TargetID = VarID.Pressure;
-        pTarget.TargetVal = (float)pvt.y / 1000f;
+        pTarget.TargetVal = (float)finalPVT.y / 1000f;
         pTarget.TargetRange = P_RANGE / 1000f;
 
         SimStateTarget vTarget = new SimStateTarget();
         vTarget.TargetID = VarID.Volume;
-        vTarget.TargetVal = (float)pvt.x;
+        vTarget.TargetVal = (float)finalPVT.x;
         vTarget.TargetRange = V_RANGE;
 
         SimStateTarget tTarget = new SimStateTarget();
         tTarget.TargetID = VarID.Temperature;
-        tTarget.TargetVal = (float)pvt.z;
+        tTarget.TargetVal = (float)finalPVT.z;
         tTarget.TargetRange = T_RANGE;
 
         List<SimStateTarget> target = new List<SimStateTarget>() {
@@ -215,10 +239,13 @@ public class GameModule : UIModule
             );
 
         m_reachStateHub.SetDefinition(m_currTargetDef);
+
+        m_generatingNewTarget = false;
     }
 
     private void OnStateReached()
     {
+        m_generatingNewTarget = true;
         m_reachStateRoutine.Replace(StateReachedRoutine());
     }
 
@@ -235,7 +262,7 @@ public class GameModule : UIModule
         SetScore(m_currScore + 1);
 
         // pick a new target
-        GenerateTarget();
+        m_generateTargetRoutine.Replace(GenerateTargetRoutine());
 
         yield return null;
     }
@@ -264,6 +291,7 @@ public class GameModule : UIModule
 
         RemoveListeners();
         m_reachStateRoutine.Stop();
+        m_generateTargetRoutine.Stop();
     }
 
     #endregion // IUIModule
@@ -278,6 +306,11 @@ public class GameModule : UIModule
     private void HandleHomeButtonPressed(object sender, EventArgs args)
     {
         MoveToHomeWindow();
+    }
+
+    private void HandleResetScorePressed(object sender, EventArgs args)
+    {
+        SetScore(0);
     }
 
     #endregion // Handlers

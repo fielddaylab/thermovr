@@ -20,6 +20,8 @@ public class GameDB : MonoBehaviour
     public Sprite LabTaskTabInactive, LabTaskTabActive;
     public Sprite LabTopicTabInactive, LabTopicTabActive;
 
+    public Sprite Circle;
+
     public Color TabSelectedColor, TabDefaultColor;
     public Color MCSelectedBG, MCUnselectedBG, MCIncorrectBG;
 

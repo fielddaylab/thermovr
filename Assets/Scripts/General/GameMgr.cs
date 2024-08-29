@@ -25,8 +25,6 @@ namespace ThermoVR
 
         protected override void Awake() {
             base.Awake();
-
-            EventMgr.Events.Dispatch(GameEvents.TryNewName);
         }
 
         private void Start() {
@@ -41,6 +39,8 @@ namespace ThermoVR
             m_ProfileName = string.Empty;
 
             EventMgr.Events.Register(GameEvents.TryNewName, OnTryNewName, this);
+
+            EventMgr.Events.Dispatch(GameEvents.TryNewName);
 
             EventMgr.Events.Dispatch(GameEvents.InitialLoadComplete);
         }
