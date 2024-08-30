@@ -64,8 +64,10 @@ namespace ThermoVR.Tools
         [Space(5)]
         [Header("Other")]
         [SerializeField] private Pressable tare_heat_button;
+        [SerializeField] private Pressable tare_weight_button;
 
         private double m_accumulatedHeatEnergy;
+        private double m_accumulatedWeightEnergy;
 
         private AnalyticsService.SliderPanelLogData m_panelLogState;
 
@@ -142,6 +144,7 @@ namespace ThermoVR.Tools
             // Initialize Buttons
             reset_button.OnPress += HandleResetPressed;
             tare_heat_button.OnPress += HandleTareHeatPressed;
+            tare_weight_button.OnPress += HandleTareWeightPressed;
 
 
             EventMgr.Events?.Register<Tuple<double, double, double>>(GameEvents.WarpPVT, HandleWarpPVT);
@@ -555,9 +558,28 @@ namespace ThermoVR.Tools
             EventMgr.Events.Dispatch(GameEvents.AccumHeatEnergyUpdated);
         }
 
+        public void RecordToAccumulatedWeightEnergy(double deltaWeight)
+        {
+            m_accumulatedWeightEnergy += Math.Abs(deltaWeight);
+
+            EventMgr.Events.Dispatch(GameEvents.AccumWeightEnergyUpdated);
+        }
+
+        public void ResetAccumulatedWeightEnergy()
+        {
+            m_accumulatedWeightEnergy = 0;
+
+            EventMgr.Events.Dispatch(GameEvents.AccumWeightEnergyUpdated);
+        }
+
         public double GetAccumulatedHeatEnergy()
         {
             return m_accumulatedHeatEnergy;
+        }
+
+        public double GetAccumulatedWeightEnergy()
+        {
+            return m_accumulatedWeightEnergy;
         }
 
         public double GetAppliedWeight() {
@@ -612,6 +634,13 @@ namespace ThermoVR.Tools
             Debug.Log("[ToolMgr] Heat tare pressed!");
 
             ResetAccumulatedHeatEnergy();
+        }
+
+        private void HandleTareWeightPressed(object sender, System.EventArgs args)
+        {
+            Debug.Log("[ToolMgr] Weight tare pressed!");
+
+            ResetAccumulatedWeightEnergy();
         }
 
         private void ResetDefaults() {

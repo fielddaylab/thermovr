@@ -60,6 +60,7 @@ static public class GameEvents
     static public readonly StringHash32 DetentHit = "world:detent-hit"; // Hand
 
     static public readonly StringHash32 AccumHeatEnergyUpdated = "world:accum-heat-energy-updated";
+    static public readonly StringHash32 AccumWeightEnergyUpdated = "world:accum-weight-energy-updated";
 
     static public readonly StringHash32 SelectLab = "lab:select-lab";
     static public readonly StringHash32 ClickLabHome = "lab:click-lab-home";

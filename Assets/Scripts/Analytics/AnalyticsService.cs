@@ -885,6 +885,7 @@ namespace ThermoVR.Analytics
             }
         }
 
+        
         private void LogTargetStateTaskBegan()
         {
             Debug.Log("[Analytics] event: target_state_task_began");
