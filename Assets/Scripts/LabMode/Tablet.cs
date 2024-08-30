@@ -201,7 +201,7 @@ namespace ThermoVR
             // Open Graph UI
             m_hub.OpenUI(UIID.Game);
 
-            EventMgr.Events?.Dispatch(GameEvents.GameModeClicked);
+            EventMgr.Events?.Dispatch(GameEvents.ClickGameMode);
 
             m_graphTabMovement.ResetPosition();
             m_labModeMovement.ResetPosition();

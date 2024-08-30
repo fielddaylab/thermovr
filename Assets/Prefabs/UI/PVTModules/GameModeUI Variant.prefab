@@ -778,7 +778,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Reach the target state!
+  m_text: Reach the green target!
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -1125,16 +1125,16 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'The simulation will randomly choose a  target (a set of p, v, t) on the
+  m_text: 'The simulation will randomly choose a target (a set of p, v, t) on the
     graph.
 
 
-    Use the tools available to reach the target.
+    Use the tools available to reach the green target.
 
 
-    Once you reach
-    the target, the simulation will tally your score and repeat by picking a new
-    target.'
+    Once you
+    reach the target, the simulation will tally your score and repeat by picking
+    a new target.'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -2539,6 +2539,9 @@ MonoBehaviour:
   m_pdInteractions: {fileID: 0}
   m_resetScoreButton: {fileID: 1805810486205158479}
   m_targetZone: {fileID: 0}
+  m_xExtentAnchor: {fileID: 0}
+  m_yExtentAnchor: {fileID: 0}
+  m_zExtentAnchor: {fileID: 0}
 --- !u!1001 &1395284454670408341
 PrefabInstance:
   m_ObjectHideFlags: 0

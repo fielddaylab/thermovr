@@ -95,7 +95,6 @@ static public class GameEvents
     static public readonly StringHash32 SandboxModeClicked = "lab:sandbox-mode-clicked";
     static public readonly StringHash32 LabModeClicked = "lab:lab-mode-clicked";
     static public readonly StringHash32 SettingsViewClicked = "lab:settings-view-clicked";
-    static public readonly StringHash32 GameModeClicked = "lab:game-mode-clicked";
     static public readonly StringHash32 TaskCompleted = "lab:task-completed";
     static public readonly StringHash32 SectionCompleted = "lab:section-completed";
     static public readonly StringHash32 LabCompleted = "lab:lab-completed";
@@ -145,7 +144,18 @@ static public class GameEvents
     static public readonly StringHash32 GameModeTargetEntered = "ui:game-mode-target-entered";
     static public readonly StringHash32 GameModeTargetExited = "ui:game-mode-target-exited";
     static public readonly StringHash32 GameModeBeginGenerateTarget = "ui:game-mode-begin-generate-target";
-    
+    static public readonly StringHash32 GameModeCompleteGenerateTarget = "ui:game-mode-complete-generate-target"; // Tuple<int, int, int> p, v, t
+    static public readonly StringHash32 GameModeScoreUpdated = "ui:game-mode-score-updated"; // int
+
+    static public readonly StringHash32 ClickGameMode = "ui:click_game_mode";
+    static public readonly StringHash32 ClickGameStart = "ui:click_game_start";
+    static public readonly StringHash32 ClickGameStop = "ui:click_game_stop";
+    static public readonly StringHash32 ClickGameScoreReset = "ui:click_game_score_reset";
+    static public readonly StringHash32 NewGameTargetAssigned = "sim:new-game-target-assigned";
+
+    static public readonly StringHash32 EnterNudgeMode = "world:enter-nudge-mode";
+    static public readonly StringHash32 ExitNudgeMode = "world:exit-nudge-mode";
+
 
 }
 
