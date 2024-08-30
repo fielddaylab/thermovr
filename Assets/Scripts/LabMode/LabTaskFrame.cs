@@ -18,6 +18,8 @@ namespace ThermoVR.Lab
         [SerializeField] private Evaluable[] m_evaluables;
         [SerializeField] private bool m_usesSubmit = true;
 
+        private bool m_deactivateNext;
+
         private void OnEnable() {
             if (TaskResetButton)
             {
@@ -82,7 +84,7 @@ namespace ThermoVR.Lab
 
         private void UpdateNextButtonState(bool anyEvaluated)
         {
-            if (NextButton)
+            if (NextButton && !m_deactivateNext)
             {
                 NextButton.SetInteractable(anyEvaluated);
                 NextButton.gameObject.SetActive(anyEvaluated);
@@ -103,6 +105,8 @@ namespace ThermoVR.Lab
             if (NextButton)
             {
                 NextButton.gameObject.SetActive(false);
+
+                m_deactivateNext = true;
             }
         }
 

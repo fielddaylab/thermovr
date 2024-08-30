@@ -120,7 +120,9 @@ public class World : MonoBehaviour
     private List<Pressable> m_pressables; // pressables register themselves with this on event
 
     private double starting_p;
+    private double prev_tool_p;
     private double p_change;
+    private double tool_p_change;
 
     #endregion // Inspector
 
@@ -252,19 +254,13 @@ public class World : MonoBehaviour
         room_temp = ToolMgr.GetToolVal(ToolType.SurroundingTemperature);
         double weight_pressure = (ToolMgr.GetAppliedWeight()) / ThermoState.surfacearea_insqr; //psi
         weight_pressure *= PSI_TO_PASCAL; //conversion from psi to pascal
+        double tool_weight_pressure = weight_pressure;
         weight_pressure += ambient_pressure;
-        weight_pressure = Math.Clamp(weight_pressure, ThermoMath.p_min, ThermoMath.p_max);
+        double unclamped_weight_pressure = weight_pressure;
+        weight_pressure = Math.Clamp(unclamped_weight_pressure, ThermoMath.p_min, ThermoMath.p_max);
 
         // get the amount of weight to apply, based on the difference between the total weight to be applied and how much is currently applied
         double delta_weight = (weight_pressure - thermo_present.get_pressure());
-        /*
-        if (System.Math.Abs(delta_weight * delta_time) < World.DELTA_PRESSURE_CUTOFF) {
-            // small enough step; finish transition
-        }
-        else {
-            // delta_weight *= delta_time;
-        }
-        */
 
         double insulation_coefficient;
 
@@ -345,6 +341,38 @@ public class World : MonoBehaviour
         p_change = thermo_present.get_pressure() - starting_p;
         // play pressure release sound effect if drop is significant
         sim_audio.ProcessPressureAudio((float)p_change);
+
+        /*
+        // tool pressure change in terms of work done cannot be more than the actual simulation pressure change
+        double unclamped_tool_weight_pressure = unclamped_weight_pressure;// -   ;
+        double excess_tool_weight_pressure = 0;
+
+        if (unclamped_tool_weight_pressure > 0)
+        {
+            excess_tool_weight_pressure =
+                unclamped_tool_weight_pressure
+                - Math.Max(0, unclamped_tool_weight_pressure)
+                ;
+        }
+        else
+        {
+            excess_tool_weight_pressure =
+                unclamped_tool_weight_pressure
+                - Math.Max(0, unclamped_tool_weight_pressure)
+                ;
+        }
+
+        tool_p_change = Math.Min(p_change,
+            (unclamped_weight_pressure     // total weight pressure
+            - ambient_pressure             // minus ambient pressure gives tool pressure
+            - excess_tool_weight_pressure  // minus tool pressure over the sim limits
+            - prev_tool_p)                // minus prev tool pressure gives delta tool pressure
+            );
+
+        ToolMgr.Instance.RecordToAccumulatedWeightEnergy(tool_p_change / 1000);
+        
+        prev_tool_p = tool_weight_pressure;
+        */
     }
 
     private double calc_specific_heat_given_q()
