@@ -694,6 +694,8 @@ namespace ThermoVR.Dials
             m_nudging = true;
             m_lastKnownNudgeHandPos = Vector3.zero;
             UpdateSliderMaterials(relevant_tools[0].engaged, relevant_tools[0].allowed);
+
+            EventMgr.Events.Dispatch(GameEvents.EnterNudgeMode);
         }
 
         public void DeactivateNudge()
@@ -701,6 +703,8 @@ namespace ThermoVR.Dials
             m_nudging = false;
             m_lastKnownNudgeHandPos = Vector3.zero;
             UpdateSliderMaterials(relevant_tools[0].engaged, relevant_tools[0].allowed);
+            
+            EventMgr.Events.Dispatch(GameEvents.ExitNudgeMode);
         }
 
 

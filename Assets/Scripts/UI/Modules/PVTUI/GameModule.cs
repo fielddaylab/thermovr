@@ -52,7 +52,7 @@ public class GameModule : UIModule
 
     #endregion //  Inspector
 
-    private int m_currScore;
+    private int m_currScore = 0;
     private Routine m_reachStateRoutine;
     private Routine m_generateTargetRoutine;
     private int m_failedTargetCount;
@@ -162,6 +162,8 @@ public class GameModule : UIModule
         m_currScore = newScore;
 
         m_scoreNumText.SetText(newScore.ToStringLookup());
+
+        EventMgr.Events.Dispatch(GameEvents.GameModeScoreUpdated, newScore);
     }
 
     private IEnumerator GenerateTargetRoutine()
@@ -288,6 +290,9 @@ public class GameModule : UIModule
         m_loadingOverlayImg.gameObject.SetActive(false);
         m_targetZone.gameObject.SetActive(true);
         m_generatingNewTarget = false;
+
+        EventMgr.Events.Dispatch(GameEvents.GameModeCompleteGenerateTarget,
+            new Tuple<float, float, float>(pTarget.TargetVal, vTarget.TargetVal, tTarget.TargetVal));
     }
 
     private void OnStateReached()
@@ -347,16 +352,21 @@ public class GameModule : UIModule
 
     private void HandleBeginButtonPressed(object sender, EventArgs args)
     {
+        EventMgr.Events.Dispatch(GameEvents.ClickGameStart);
         MoveToGameWindow();
     }
 
     private void HandleHomeButtonPressed(object sender, EventArgs args)
     {
+        EventMgr.Events.Dispatch(GameEvents.ClickGameStop);
+
         MoveToHomeWindow();
     }
 
     private void HandleResetScorePressed(object sender, EventArgs args)
     {
+        EventMgr.Events.Dispatch(GameEvents.ClickGameScoreReset);
+
         SetScore(0);
     }
 

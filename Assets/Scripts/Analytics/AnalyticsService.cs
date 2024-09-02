@@ -141,6 +141,11 @@ namespace ThermoVR.Analytics
         private int m_ActiveTaskIndex;
         private Hand m_LastHandPress;
         private LogToolType m_LastInputProxyType;
+        private LogToolType m_LastKnownSliderToolType;
+
+        private bool m_IsGameMode;
+        private Tuple<float, float, float> m_LastKnownGameModeTarget;
+        private int m_LastKnownGameModeScore;
 
         private List<string> m_LastKnownWordBankStrs = new List<string>();
 
@@ -158,6 +163,7 @@ namespace ThermoVR.Analytics
         private LabLogData m_GSLab;
         private SectionLogData m_GSSection;
         private TaskLogData m_GSTask;
+        private int m_GSPlayScore;
 
         #endregion // GameStateVars
 
@@ -187,7 +193,11 @@ namespace ThermoVR.Analytics
                 .Register<SliderPanelLogData>(GameEvents.SliderPanelUpdated, OnSliderPanelUpdated)
                 .Register(GameEvents.LabProgressUpdated, OnLabProgressUpdated)
                 .Register<float>(GameEvents.ElapsedTimeUpdated, OnElapsedTimeUpdated)
-                ;
+                .Register<Tuple<float, float, float>>(GameEvents.GameModeCompleteGenerateTarget, OnGameModeCompleteGenerateTarget)
+                .Register<int>(GameEvents.GameModeScoreUpdated, OnGameModeScoreUpdated)
+                .Register(GameEvents.GameModeStarted, OnGameModeStarted)
+                .Register(GameEvents.GameModeExited, OnGameModeExited)
+            ;
 
             // Analytics Events
             EventMgr.Events.Register(GameEvents.StartGame, LogStartGame, this)
@@ -250,7 +260,14 @@ namespace ThermoVR.Analytics
                 .Register<float>(GameEvents.ProxyInputSubmitted, LogSetToolVal, this)
                 .Register<string>(GameEvents.SetInvalidToolVal, LogSetInvalidToolVal, this)
                 .Register(GameEvents.CancelEditToolVal, LogCancelEditToolVal, this)
-                ;
+                .Register(GameEvents.ClickGameMode, LogClickGameMode, this)
+                .Register(GameEvents.ClickGameStart, LogClickGameStart, this)
+                .Register(GameEvents.ClickGameStop, LogClickGameStop, this)
+                .Register(GameEvents.ClickGameScoreReset, LogClickGameScoreReset, this)
+                .Register(GameEvents.NewGameTargetAssigned, LogNewGameTargetAssigned, this)
+                .Register(GameEvents.EnterNudgeMode, LogEnterNudgeMode, this)
+                .Register(GameEvents.ExitNudgeMode, LogExitNudgeMode, this)
+            ;
 
             m_Log = new OGDLog(
                 new OGDLogConsts()
@@ -361,6 +378,7 @@ namespace ThermoVR.Analytics
                     gs.Param("current_lab", JsonConvert.SerializeObject(m_GSLab));
                     gs.Param("current_section", JsonConvert.SerializeObject(m_GSSection));
                     gs.Param("current_task", JsonConvert.SerializeObject(m_GSTask));
+                    gs.Param("play_score", JsonConvert.SerializeObject(m_LastKnownGameModeScore));
                 }
             }
             catch
@@ -603,6 +621,8 @@ namespace ThermoVR.Analytics
         {
             LogToolType type = ToolTypeToLogToolType(args.Item1, args.Item4);
 
+            m_LastKnownSliderToolType = type;
+
             Debug.Log("[Analytics] event: grab_tool_slider");
 
             using (var e = m_Log.NewEvent("grab_tool_slider"))
@@ -617,6 +637,8 @@ namespace ThermoVR.Analytics
         private void LogReleaseToolSlider(Tuple<ToolType, float, Hand, bool, int> args)
         {
             LogToolType type = ToolTypeToLogToolType(args.Item1, args.Item5);
+
+            m_LastKnownSliderToolType = LogToolType.UNKOWN;
 
             Debug.Log("[Analytics] event: release_tool_slider");
 
@@ -927,12 +949,23 @@ namespace ThermoVR.Analytics
         {
             Dictionary<string, float> targetState = new Dictionary<string, float>();
             Dictionary<string, float> targetTolerances = new Dictionary<string, float>();
-            TaskInfo info = m_ActiveLabInfo.Topics[m_ActiveSectionIndex].Tasks[m_ActiveTaskIndex];
-            foreach (var simTarget in info.Targets)
+
+            string scoreStr = "null";
+
+            if (m_IsGameMode)
             {
-                targetState.Add(simTarget.TargetID.ToString(), simTarget.TargetVal);
-                targetTolerances.Add(simTarget.TargetID.ToString(), simTarget.TargetRange);
+                scoreStr = m_LastKnownGameModeScore.ToStringLookup();
             }
+            else
+            {
+                TaskInfo info = m_ActiveLabInfo.Topics[m_ActiveSectionIndex].Tasks[m_ActiveTaskIndex];
+                foreach (var simTarget in info.Targets)
+                {
+                    targetState.Add(simTarget.TargetID.ToString(), simTarget.TargetVal);
+                    targetTolerances.Add(simTarget.TargetID.ToString(), simTarget.TargetRange);
+                }
+            }
+
 
             Debug.Log("[Analytics] event: target_state_completed");
 
@@ -940,6 +973,7 @@ namespace ThermoVR.Analytics
             {
                 e.Param("target_state", JsonConvert.SerializeObject(targetState));
                 e.Param("tolerances", JsonConvert.SerializeObject(targetTolerances));
+                e.Param("score_value", scoreStr);
             }
         }
 
@@ -1146,6 +1180,80 @@ namespace ThermoVR.Analytics
             }
         }
 
+        private void LogClickGameMode()
+        {
+            Debug.Log("[Analytics] event: click_game_mode");
+
+            using (var e = m_Log.NewEvent("click_game_mode"))
+            {
+                e.Param("hand", m_LastHandPress.ToString());
+            }
+        }
+
+        private void LogClickGameStart()
+        {
+            Debug.Log("[Analytics] event: click_game_start");
+
+            using (var e = m_Log.NewEvent("click_game_start"))
+            {
+                e.Param("hand", m_LastHandPress.ToString());
+            }
+        }
+
+        private void LogNewGameTargetAssigned()
+        {
+            Debug.Log("[Analytics] event: click_game_target_assigned");
+
+            using (var e = m_Log.NewEvent("click_game_target_assigned"))
+            {
+                e.Param("p", m_LastKnownGameModeTarget.Item1.ToString());
+                e.Param("v", m_LastKnownGameModeTarget.Item2.ToString());
+                e.Param("t", m_LastKnownGameModeTarget.Item3.ToString());
+            }
+        }
+
+        private void LogClickGameStop()
+        {
+            Debug.Log("[Analytics] event: click_game_stop");
+
+            using (var e = m_Log.NewEvent("click_game_stop"))
+            {
+                e.Param("hand", m_LastHandPress.ToString());
+            }
+        }
+
+        private void LogClickGameScoreReset()
+        {
+            Debug.Log("[Analytics] event: click_game_score_reset");
+
+            using (var e = m_Log.NewEvent("click_game_score_reset"))
+            {
+                e.Param("hand", m_LastHandPress.ToString());
+            }
+        }
+
+        private void LogEnterNudgeMode()
+        {
+            Debug.Log("[Analytics] event: enter_nudge_mode");
+
+            using (var e = m_Log.NewEvent("enter_nudge_mode"))
+            {
+                e.Param("tool", m_LastKnownSliderToolType.ToString());
+                e.Param("hand", m_LastHandPress.ToString());
+            }
+        }
+
+        private void LogExitNudgeMode()
+        {
+            Debug.Log("[Analytics] event: exit_nudge_mode");
+
+            using (var e = m_Log.NewEvent("exit_nudge_mode"))
+            {
+                e.Param("tool", m_LastKnownSliderToolType.ToString());
+                e.Param("hand", m_LastHandPress.ToString());
+            }
+        }
+
         #endregion // Log Events
 
         #region Other Events
@@ -1216,6 +1324,26 @@ namespace ThermoVR.Analytics
         private void OnElapsedTimeUpdated(float newTime)
         {
             m_GSElapsedTime = newTime;
+        }
+
+        private void OnGameModeCompleteGenerateTarget(Tuple<float, float, float> pvt)
+        {
+            m_LastKnownGameModeTarget = pvt;
+        }
+
+        private void OnGameModeScoreUpdated(int newScore)
+        {
+            m_LastKnownGameModeScore = newScore;
+        }
+
+        private void OnGameModeStarted()
+        {
+            m_IsGameMode = true;
+        }
+
+        private void OnGameModeExited()
+        {
+            m_IsGameMode = false;
         }
 
         #endregion // Other Events
