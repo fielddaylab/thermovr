@@ -686,6 +686,8 @@ namespace ThermoVR.Lab
             //{
                 ApplyWorldMods(m_currLab.Topics[topicIndex].Tasks[taskIndex]);
             //}
+
+            EventMgr.Events.Dispatch(GameEvents.TaskAssigned, m_currLab.Topics[topicIndex].Tasks[taskIndex]);
         }
 
         private void DeactivateTab(int topicIndex, int taskIndex)

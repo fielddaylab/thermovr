@@ -556,6 +556,8 @@ namespace ThermoVR.Tools
             m_accumulatedHeatEnergy = 0;
 
             EventMgr.Events.Dispatch(GameEvents.AccumHeatEnergyUpdated);
+
+            EventMgr.Events.Dispatch(GameEvents.ClickClearHeatMeter);
         }
 
         public void RecordToAccumulatedWeightEnergy(double deltaWeight)
@@ -563,6 +565,8 @@ namespace ThermoVR.Tools
             m_accumulatedWeightEnergy += Math.Abs(deltaWeight);
 
             EventMgr.Events.Dispatch(GameEvents.AccumWeightEnergyUpdated);
+
+            EventMgr.Events.Dispatch(GameEvents.ClickClearWorkMeter);
         }
 
         public void ResetAccumulatedWeightEnergy()

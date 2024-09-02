@@ -43,6 +43,7 @@ static public class GameEvents
     static public readonly StringHash32 UpdateVarText = "sim:update-var-text"; // VarUpdate
     static public readonly StringHash32 UpdateGraphSetting = "sim:update-graph-setting"; // GraphSettingUpdate
     static public readonly StringHash32 UISwitched = "sim:ui-switched"; // GraphSettingUpdate
+    static public readonly StringHash32 TabletModeSwitched = "sim:tablet-mode-switched"; // TabletMode
 
     static public readonly StringHash32 ShowNudgeTutorial = "ui:show-nudge-tutorial";
     static public readonly StringHash32 HideNudgeTutorial = "ui:hide-nudge-tutorial";
@@ -68,6 +69,7 @@ static public class GameEvents
     static public readonly StringHash32 ClickSelectSection = "lab:click-select-section";
     static public readonly StringHash32 SectionSwitched = "lab:section-switched"; // int
     static public readonly StringHash32 TaskSwitched = "lab:task-switched"; // int
+    static public readonly StringHash32 TaskAssigned = "lab:task-assigned";
     static public readonly StringHash32 ClickTaskScrollLeft = "lab:task-scroll-left";
     static public readonly StringHash32 ClickTaskScrollRight = "lab:task-scroll-right";
     static public readonly StringHash32 ClickSectionScrollUp = "lab:section-scroll-up";
@@ -155,8 +157,21 @@ static public class GameEvents
 
     static public readonly StringHash32 EnterNudgeMode = "world:enter-nudge-mode";
     static public readonly StringHash32 ExitNudgeMode = "world:exit-nudge-mode";
+    static public readonly StringHash32 NudgeHintDisplayed = "world:nudge-hint-displayed";
+    static public readonly StringHash32 NudgeHintHidden = "world:nudge-hint-hidden";
 
+    static public readonly StringHash32 TitleScreenDisplayed = "ui:title-screen-displayed";
+    static public readonly StringHash32 TitleScreenClosed = "ui:title-screen-closed";
+    static public readonly StringHash32 ClickCloseTitleScreen = "ui:click-close-title-screen";
+    static public readonly StringHash32 ClickDisplayCredits = "ui:click-display-credits";
+    static public readonly StringHash32 ClickCloseCredits = "ui:click-close-credits";
+    static public readonly StringHash32 ClickToggleTitleSetting = "ui:click-toggle-title-setting";
 
+    static public readonly StringHash32 ClickConfigTab = "ui:click-config-tab";
+    static public readonly StringHash32 ClickControlsTab = "ui:click-controls-tab";
+
+    static public readonly StringHash32 ClickClearHeatMeter = "ui:click-clear-heat-meter";
+    static public readonly StringHash32 ClickClearWorkMeter = "ui:click-clear-work-meter";
 }
 
 static public class PersistentVars

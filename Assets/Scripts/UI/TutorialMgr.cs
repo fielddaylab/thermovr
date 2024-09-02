@@ -64,16 +64,23 @@ namespace ThermoVR
             if (ForceNudge)
             {
                 m_nudgeTutorial.SetActive(true);
-                return;
-            }
 
-            if (m_timesSeenNudge >= m_numTimesDisplayNudge)
+                m_showingNudge = true;
+
+                EventMgr.Events.Dispatch(GameEvents.NudgeHintDisplayed);
+            }
+            else
             {
-                return;
-            }
+                if (m_timesSeenNudge >= m_numTimesDisplayNudge)
+                {
+                    return;
+                }
 
-            m_showingNudge = true;
-            m_nudgeTutorial.SetActive(true);
+                m_showingNudge = true;
+                m_nudgeTutorial.SetActive(true);
+
+                EventMgr.Events.Dispatch(GameEvents.NudgeHintDisplayed);
+            }
         }
 
         private void HandleHideNudgeTutorial()
@@ -81,17 +88,20 @@ namespace ThermoVR
             if (ForceNudge)
             {
                 m_nudgeTutorial.SetActive(false);
-                return;
             }
-
-
-            if (m_showingNudge)
+            else
             {
-                m_timesSeenNudge++;
+                if (m_showingNudge)
+                {
+                    m_timesSeenNudge++;
+                }
+
+                m_nudgeTutorial.SetActive(false);
             }
+
             m_showingNudge = false;
 
-            m_nudgeTutorial.SetActive(false);
+            EventMgr.Events.Dispatch(GameEvents.NudgeHintHidden);
         }
 
         #endregion // Handlers

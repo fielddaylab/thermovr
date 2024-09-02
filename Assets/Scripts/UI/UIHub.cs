@@ -78,6 +78,12 @@ namespace ThermoVR.UI
             toOpen.Open();
 
             EventMgr.Events.Dispatch(GameEvents.UISwitched);
+
+            // Dispatch tablet mode change if one of main panels
+            if ((id == UIID.Sandbox) || (id == UIID.Lab) || (id == UIID.Graph) || (id == UIID.Game))
+            {
+                EventMgr.Events.Dispatch(GameEvents.TabletModeSwitched, id);
+            }
         }
     }
 }

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using ThermoVR.Lab;
+using ThermoVR.UI.GraphElements;
 using UnityEngine;
 using UnityEngine.UI;
 using static ThermoVR.Analytics.AnalyticsService;
@@ -81,6 +82,8 @@ namespace ThermoVR.UI
             m_credits.gameObject.SetActive(false);
 
             EventMgr.Events.Register(GameEvents.TitleCreditsClosed, HandleTitleCreditsClosed);
+
+            EventMgr.Events.Dispatch(GameEvents.TitleScreenDisplayed);
         }
 
         private void Update()
@@ -125,29 +128,42 @@ namespace ThermoVR.UI
         private void HandleStartGameClicked()
         {
             EventMgr.Events.Dispatch(GameEvents.StartGameClicked);
+
+            EventMgr.Events.Dispatch(GameEvents.ClickCloseTitleScreen);
+
+            EventMgr.Events.Dispatch(GameEvents.TitleScreenClosed);
         }
 
         private void HandleMusicOptionSelected()
         {
             m_musicSelected = !m_musicSelected;
             m_musicFill.enabled = m_musicSelected;
+
+            EventMgr.Events.Dispatch(GameEvents.ClickToggleTitleSetting, new GraphSettingUpdate(GraphElementID.Music, m_fullscreenSelected));
         }
 
         private void HandleFullscreenOptionSelected()
         {
             m_fullscreenSelected = !m_fullscreenSelected;
             m_fullscreenFill.enabled = m_fullscreenSelected;
+
+            EventMgr.Events.Dispatch(GameEvents.ClickToggleTitleSetting, new GraphSettingUpdate(GraphElementID.Fullscreen, m_fullscreenSelected));
         }
 
         private void HandleTitleCreditsClosed()
         {
             m_wrapperGroup.gameObject.SetActive(true);
+
+            EventMgr.Events.Dispatch(GameEvents.ClickCloseCredits, true);
         }
 
         private void HandleTitleCreditsClicked()
         {
             m_wrapperGroup.gameObject.SetActive(false);
             EventMgr.Events.Dispatch(GameEvents.TitleCreditsOpened);
+
+            EventMgr.Events.Dispatch(GameEvents.ClickDisplayCredits, true);
+
         }
 
         #endregion // Handlers
