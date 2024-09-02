@@ -16,9 +16,11 @@ using ThermoVR.UI.GraphElements;
 using ThermoVR.Controls;
 using ThermoVR.State;
 using OGD;
+using ThermoVR.UI;
 
 namespace ThermoVR.Analytics
 {
+    [DefaultExecutionOrder(-10)]
     public partial class AnalyticsService : MonoBehaviour
     {
         #region Inspector
@@ -34,7 +36,13 @@ namespace ThermoVR.Analytics
         private enum GamePlatform
         {
             VR,
-            WEB
+            DESKTOP
+        }
+
+        private enum Location
+        {
+            TITLE_SCREEN,
+            TABLET
         }
 
         private enum GraphElement
@@ -132,8 +140,6 @@ namespace ThermoVR.Analytics
 
         private OGDLog m_Log;
 
-        private GamePlatform m_Platform;
-
         private LabInfo m_ActiveLabInfo;
         private int m_ActiveLabIndex;
         private LabLogData m_ActiveLabLogData;
@@ -164,6 +170,8 @@ namespace ThermoVR.Analytics
         private SectionLogData m_GSSection;
         private TaskLogData m_GSTask;
         private int m_GSPlayScore;
+        private string m_GSPlatform;
+        private string m_GSTabletMode;
 
         #endregion // GameStateVars
 
@@ -197,6 +205,7 @@ namespace ThermoVR.Analytics
                 .Register<int>(GameEvents.GameModeScoreUpdated, OnGameModeScoreUpdated)
                 .Register(GameEvents.GameModeStarted, OnGameModeStarted)
                 .Register(GameEvents.GameModeExited, OnGameModeExited)
+                .Register<UIID>(GameEvents.TabletModeSwitched, OnTabletModeSwitched)
             ;
 
             // Analytics Events
@@ -212,8 +221,8 @@ namespace ThermoVR.Analytics
                 .Register(GameEvents.ClickSectionScrollDown, LogClickSectionScrollDown, this)
                 .Register(GameEvents.ClickTaskScrollLeft, LogClickTaskScrollLeft, this)
                 .Register(GameEvents.ClickTaskScrollRight, LogClickTaskScrollRight, this)
-                .Register(GameEvents.TargetStateTaskBegan, LogTargetStateTaskBegan, this)
-                .Register(GameEvents.TargetStateTaskEnded, LogTargetStateTaskEnded, this)
+                //.Register(GameEvents.TargetStateTaskBegan, LogTargetStateTaskBegan, this)
+                //.Register(GameEvents.TargetStateTaskEnded, LogTargetStateTaskEnded, this)
                 .Register(GameEvents.TargetStateEntered, LogTargetStateEntered, this)
                 .Register(GameEvents.TargetStateCompleted, LogTargetStateCompleted, this)
                 .Register<List<string>>(GameEvents.TargetStateLost, LogTargetStateLost, this)
@@ -267,6 +276,20 @@ namespace ThermoVR.Analytics
                 .Register(GameEvents.NewGameTargetAssigned, LogNewGameTargetAssigned, this)
                 .Register(GameEvents.EnterNudgeMode, LogEnterNudgeMode, this)
                 .Register(GameEvents.ExitNudgeMode, LogExitNudgeMode, this)
+                .Register(GameEvents.TitleScreenDisplayed, LogTitleScreenDisplayed, this)
+                .Register(GameEvents.TitleScreenClosed, LogTitleScreenClosed, this)
+                .Register(GameEvents.ClickCloseTitleScreen, LogClickCloseTitleScreen, this)
+                .Register<bool>(GameEvents.ClickDisplayCredits, LogClickDisplayCredits, this)
+                .Register<bool>(GameEvents.ClickCloseCredits, LogClickCloseCredits, this)
+                .Register<GraphSettingUpdate>(GameEvents.ClickToggleTitleSetting, LogClickToggleTitleSetting, this)
+                .Register(GameEvents.ClickConfigTab, LogClickConfigTab, this)
+                .Register(GameEvents.ClickControlsTab, LogClickControlsTab, this)
+                .Register(GameEvents.NudgeHintDisplayed, LogNudgeHintDisplayed, this)
+                .Register(GameEvents.NudgeHintHidden, LogNudgeHintHidden, this)
+                .Register<TaskInfo>(GameEvents.TaskAssigned, LogTaskAssigned, this)
+                .Register(GameEvents.TaskNextPressed, LogClickNextTask, this)
+                .Register(GameEvents.ClickClearHeatMeter, LogClickClearHeatMeter, this)
+                .Register(GameEvents.ClickClearWorkMeter, LogClickClearWorkMeter, this)
             ;
 
             m_Log = new OGDLog(
@@ -291,11 +314,12 @@ namespace ThermoVR.Analytics
 
             m_Log.SetDebug(m_Debug);
 
-            m_Platform = GamePlatform.VR;
+            m_GSPlatform = GamePlatform.VR.ToString();
 #if UNITY_WEBGL
-            m_Platform = GamePlatform.WEB;
+            m_GSPlatform = GamePlatform.DESKTOP.ToString();
+            m_LastHandPress = Hand.MOUSE;
 #elif UNITY_ANDROID
-            m_Platform = GamePlatform.VR;
+            m_GSPlatform = GamePlatform.VR.ToString();
 #endif
         }
 
@@ -379,6 +403,8 @@ namespace ThermoVR.Analytics
                     gs.Param("current_section", JsonConvert.SerializeObject(m_GSSection));
                     gs.Param("current_task", JsonConvert.SerializeObject(m_GSTask));
                     gs.Param("play_score", JsonConvert.SerializeObject(m_LastKnownGameModeScore));
+                    gs.Param("tablet_mode", m_GSTabletMode);
+                    gs.Param("platform", m_GSPlatform.ToString()); ;
                 }
             }
             catch
@@ -393,21 +419,21 @@ namespace ThermoVR.Analytics
 
         private void LogStartGame()
         {
-            Debug.Log("[Analytics] event: game_start" + "\n" + "Platform: " + m_Platform);
+            Debug.Log("[Analytics] event: game_start");
 
             using (var e = m_Log.NewEvent("game_start"))
             {
-                e.Param("mode", m_Platform.ToString());
+
             }
         }
 
         private void LogStartSession()
         {
-            Debug.Log("[Analytics] event: session_start" + "\n" + "Platform: " + m_Platform);
+            Debug.Log("[Analytics] event: session_start");
 
             using (var e = m_Log.NewEvent("session_start"))
             {
-                e.Param("mode", m_Platform.ToString());
+
             }
         }
 
@@ -684,6 +710,17 @@ namespace ThermoVR.Analytics
             }
         }
 
+        private void LogClickToggleTitleSetting(GraphSettingUpdate settingUpdate)
+        {
+            Debug.Log("[Analytics] event: click_toggle_title_setting");
+
+            using (var e = m_Log.NewEvent("click_toggle_title_setting"))
+            {
+                e.Param("setting", settingUpdate.GraphElementID.ToString());
+                e.Param("enabled", settingUpdate.ToggleVal);
+            }
+        }
+
         private void LogToolLocked(Tool tool)
         {
             LogToolType type = ToolTypeToLogToolType(tool.tool_type, tool.unique_id);
@@ -907,7 +944,7 @@ namespace ThermoVR.Analytics
             }
         }
 
-        
+        /*
         private void LogTargetStateTaskBegan()
         {
             Debug.Log("[Analytics] event: target_state_task_began");
@@ -927,6 +964,7 @@ namespace ThermoVR.Analytics
 
             }
         }
+        */
 
         private void LogTargetStateEntered()
         {
@@ -1254,6 +1292,141 @@ namespace ThermoVR.Analytics
             }
         }
 
+        private void LogTitleScreenDisplayed()
+        {
+            Debug.Log("[Analytics] event: title_screen_displayed");
+
+            using (var e = m_Log.NewEvent("title_screen_displayed"))
+            {
+
+            }
+        }
+
+        private void LogTitleScreenClosed()
+        {
+            Debug.Log("[Analytics] event: title_screen_closed");
+
+            using (var e = m_Log.NewEvent("title_screen_closed"))
+            {
+
+            }
+        }
+
+        private void LogClickCloseTitleScreen()
+        {
+            Debug.Log("[Analytics] event: click_close_title_screen");
+
+            using (var e = m_Log.NewEvent("click_close_title_screen"))
+            {
+
+            }
+        }
+
+        private void LogClickDisplayCredits(bool isTitle)
+        {
+            Debug.Log("[Analytics] event: click_display_credits");
+
+            using (var e = m_Log.NewEvent("click_display_credits"))
+            {
+                e.Param("location", isTitle ? Location.TITLE_SCREEN.ToString() : Location.TABLET.ToString());
+                e.Param("hand", m_LastHandPress.ToString());
+            }
+        }
+
+        private void LogClickCloseCredits(bool isTitle)
+        {
+            Debug.Log("[Analytics] event: click_close_credits");
+
+            using (var e = m_Log.NewEvent("click_close_credits"))
+            {
+                e.Param("location", isTitle ? Location.TITLE_SCREEN.ToString() : Location.TABLET.ToString());
+                e.Param("hand", m_LastHandPress.ToString());
+            }
+        }
+
+        private void LogClickConfigTab()
+        {
+            Debug.Log("[Analytics] event: click_config_tab");
+
+            using (var e = m_Log.NewEvent("click_config_tab"))
+            {
+
+            }
+        }
+
+        private void LogClickControlsTab()
+        {
+            Debug.Log("[Analytics] event: click_controls_tab");
+
+            using (var e = m_Log.NewEvent("click_controls_tab"))
+            {
+
+            }
+        }
+
+        private void LogNudgeHintDisplayed()
+        {
+            Debug.Log("[Analytics] event: nudge_hint_displayed");
+
+            using (var e = m_Log.NewEvent("nudge_hint_displayed"))
+            {
+
+            }
+        }
+
+        private void LogNudgeHintHidden()
+        {
+            Debug.Log("[Analytics] event: nudge_hint_hidden");
+
+            using (var e = m_Log.NewEvent("nudge_hint_hidden"))
+            {
+
+            }
+        }
+
+        private void LogTaskAssigned(TaskInfo task)
+        {
+            TaskLogData taskData = TaskInfoToTaskLogData(task, m_ActiveSectionIndex, m_ActiveTaskIndex, false);
+
+            Debug.Log("[Analytics] event: click_task_assigned");
+
+            using (var e = m_Log.NewEvent("click_task_assigned"))
+            {
+                e.Param("hand", m_LastHandPress.ToString());
+                e.Param("task", JsonConvert.SerializeObject(taskData));
+            }
+        }
+
+        private void LogClickNextTask()
+        {
+            Debug.Log("[Analytics] event: click_next_task");
+
+            using (var e = m_Log.NewEvent("click_next_task"))
+            {
+                e.Param("hand", m_LastHandPress.ToString());
+            }
+        }
+
+        private void LogClickClearHeatMeter()
+        {
+            Debug.Log("[Analytics] event: click_clear_heat_meter");
+
+            using (var e = m_Log.NewEvent("click_clear_heat_meter"))
+            {
+                e.Param("hand", m_LastHandPress.ToString());
+            }
+        }
+
+        private void LogClickClearWorkMeter()
+        {
+            Debug.Log("[Analytics] event: click_clear_work_meter");
+
+            using (var e = m_Log.NewEvent("click_clear_work_meter"))
+            {
+                e.Param("hand", m_LastHandPress.ToString());
+            }
+        }
+
         #endregion // Log Events
 
         #region Other Events
@@ -1344,6 +1517,27 @@ namespace ThermoVR.Analytics
         private void OnGameModeExited()
         {
             m_IsGameMode = false;
+        }
+
+        private void OnTabletModeSwitched(UIID newMode)
+        {
+            switch (newMode) {
+                case UIID.Sandbox:
+                    m_GSTabletMode = TabletMode.SANDBOX.ToString();
+                    break;
+                case UIID.Lab:
+                    m_GSTabletMode = TabletMode.LAB.ToString();
+                    break;
+                case UIID.Game:
+                    m_GSTabletMode = TabletMode.GAME.ToString();
+                    break;
+                case UIID.Graph:
+                    m_GSTabletMode = TabletMode.SETTINGS.ToString();
+                    break;
+                default:
+                    break;
+            }
+
         }
 
         #endregion // Other Events

@@ -46,6 +46,8 @@ namespace ThermoVR {
             {
                 // Load immediately
                 m_asyncLoad.allowSceneActivation = true;
+
+                EventMgr.Events.Dispatch(GameEvents.TitleScreenClosed);
             }
         }
 
