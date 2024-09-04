@@ -297,7 +297,7 @@ namespace ThermoVR.Analytics
                 {
                     AppId = m_AppId,
                     AppVersion = m_AppVersion,
-                    ClientLogVersion = 2
+                    ClientLogVersion = 3
                 },
                 new OGDLog.MemoryConfig
                 (
