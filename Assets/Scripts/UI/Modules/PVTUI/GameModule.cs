@@ -44,6 +44,8 @@ public class GameModule : UIModule
     [SerializeField] private PlacementDotInteractions m_pdInteractions;
     [SerializeField] private ThermoButton m_resetScoreButton;
     [SerializeField] private GameObject m_targetZone;
+    [SerializeField] private SphereCollider m_targetCollider;
+    [SerializeField] private Collider m_pvtOverlayCollider;
 
     [SerializeField] private GameObject m_xExtentAnchor;
     [SerializeField] private GameObject m_yExtentAnchor;
@@ -219,6 +221,8 @@ public class GameModule : UIModule
             Vector3 localspace = m_graph.transform.InverseTransformPoint(interactPos);
             Vector3 correctedspace = new Vector3(localspace.z, localspace.y, localspace.x); // * 4.0f; //rotate 90, mul by 4 (inverse transform of gmodel)
 
+            var debugOffGraph = new Vector3(0.51972f, 2314042f, 493.0317f);
+
             //Vector3 thermoguess = thermo.guessPlot(ThermoMath.t_neutral, correctedspace.y, correctedspace.x);
             Vector3 thermoguess = ThermoPresent.Instance.guessMeshPlot(correctedspace.x, correctedspace.y, correctedspace.z);
             Vector3 localguess = ThermoPresent.Instance.plot(thermoguess.y, thermoguess.x, thermoguess.z); //note swizzle!
@@ -240,7 +244,7 @@ public class GameModule : UIModule
             }
 
             // keep bounds off edge cases
-            var newPos = ThermoPresent.Instance.plot(thermoguess.y, thermoguess.x, thermoguess.z);
+            var newPos = localguess;
 
             if (newPos.x < 0.1f
                 || newPos.x > 0.9f
@@ -252,6 +256,15 @@ public class GameModule : UIModule
             {
                 isValid = false;
             }
+
+            /*
+            // ensure pvt and ball overlap
+            if (!Physics.ComputePenetration(m_targetCollider, m_targetZone.transform.position, m_targetZone.transform.rotation,
+                m_pvtOverlayCollider, m_pvtOverlayCollider.gameObject.transform.position, m_pvtOverlayCollider.gameObject.transform.rotation, out Vector3 dir, out float dist))
+            {
+                isValid = false;
+            }
+            */
 
             numTriesThisFrame++;
         }
