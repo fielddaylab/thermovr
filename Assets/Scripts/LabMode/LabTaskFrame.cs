@@ -18,6 +18,9 @@ namespace ThermoVR.Lab
         [SerializeField] private Evaluable[] m_evaluables;
         [SerializeField] private bool m_usesSubmit = true;
 
+        [SerializeField] private float m_nextTime = 0.75f;
+        private float m_nextTimer;
+
         private bool m_deactivateNext;
 
         private void OnEnable() {
@@ -29,6 +32,8 @@ namespace ThermoVR.Lab
             {
                 NextButton.OnButtonPressed += HandleNextPressed;
                 NextButton.SetInteractable(false);
+
+                m_nextTimer = m_nextTime;
             }
 
             bool anyEvaluated = AnyEvaluated();
@@ -70,6 +75,11 @@ namespace ThermoVR.Lab
         {
             bool anyEvaluated = AnyEvaluated();
 
+            if (m_nextTimer > 0)
+            {
+                m_nextTimer -= Time.deltaTime;
+            }
+
             UpdateResetButtonState(anyEvaluated);
             UpdateNextButtonState(anyEvaluated);
         }
@@ -88,6 +98,15 @@ namespace ThermoVR.Lab
             {
                 NextButton.SetInteractable(anyEvaluated);
                 NextButton.gameObject.SetActive(anyEvaluated);
+
+                if (anyEvaluated && m_nextTimer <= 0)
+                {
+                    NextButton.SetInteractable(true);
+                }
+                else
+                {
+                    NextButton.SetInteractable(false);
+                }
             }
             
             if (m_usesSubmit)
