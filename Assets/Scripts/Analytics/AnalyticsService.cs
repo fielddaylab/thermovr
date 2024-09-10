@@ -255,7 +255,7 @@ namespace ThermoVR.Analytics
                 .Register<Tuple<ToolType, bool, bool, int>>(GameEvents.ToolTogglePressed, LogClickToolToggle, this)
                 .Register<Tuple<ToolType, float, int>>(GameEvents.ClickToolIncrease, LogClickToolIncrease, this)
                 .Register<Tuple<ToolType, float, int>>(GameEvents.ClickToolDecrease, LogClickToolDecrease, this)
-                .Register<Tuple<ToolType, float, Hand, bool, int>>(GameEvents.ReleaseToolSlider, LogReleaseToolSlider, this)
+                .Register<Tuple<ToolType, float, Hand, bool, int, List<double>>>(GameEvents.ReleaseToolSlider, LogReleaseToolSlider, this)
                 .Register<Tuple<ToolType, float, Hand, int>>(GameEvents.GrabToolSlider, LogGrabToolSlider, this)
                 .Register<Tool>(GameEvents.AllowTool, LogToolUnlocked, this)
                 .Register<Tool>(GameEvents.DisallowTool, LogToolLocked, this)
@@ -265,6 +265,7 @@ namespace ThermoVR.Analytics
                 .Register<PositionDataFrame[]>(GameEvents.ViewportData, LogViewportData)
                 .Register<PositionDataFrame[]>(GameEvents.LeftHandData, LogLeftHandData)
                 .Register<PositionDataFrame[]>(GameEvents.RightHandData, LogRightHandData)
+                .Register<SimStateDataFrame[]>(GameEvents.SimStateData, LogSimStateData)
                 .Register<ToolType>(GameEvents.EditToolValStarted, LogClickEditToolVal, this)
                 .Register<float>(GameEvents.ProxyInputSubmitted, LogSetToolVal, this)
                 .Register<string>(GameEvents.SetInvalidToolVal, LogSetInvalidToolVal, this)
@@ -297,7 +298,7 @@ namespace ThermoVR.Analytics
                 {
                     AppId = m_AppId,
                     AppVersion = m_AppVersion,
-                    ClientLogVersion = 3
+                    ClientLogVersion = 4
                 },
                 new OGDLog.MemoryConfig
                 (
@@ -508,6 +509,17 @@ namespace ThermoVR.Analytics
             }
         }
 
+        // simulation_data { array of ~30 frame samples, each has { P, V, T, u, s, h, x } of sim vars at each frame }
+        private void LogSimStateData(SimStateDataFrame[] data)
+        {
+            Debug.Log("[Analytics] event: simulation_data");
+
+            using (var e = m_Log.NewEvent("simulation_data"))
+            {
+                e.Param("data", JsonConvert.SerializeObject(data));
+            }
+        }
+
         private void LogGrabTablet(Tuple<PositionDataFrame, Hand> args)
         {
             Debug.Log("[Analytics] event: grab_tablet");
@@ -660,7 +672,7 @@ namespace ThermoVR.Analytics
         }
 
         // release_tool_slider { tool_name, end_value // in physical units, not 0-1, hand : enum(LEFT, RIGHT), auto_release : bool // true if slider was automatically released due to hand getting to far away, or sim was reset }
-        private void LogReleaseToolSlider(Tuple<ToolType, float, Hand, bool, int> args)
+        private void LogReleaseToolSlider(Tuple<ToolType, float, Hand, bool, int, List<double>> args)
         {
             LogToolType type = ToolTypeToLogToolType(args.Item1, args.Item5);
 
@@ -674,6 +686,7 @@ namespace ThermoVR.Analytics
                 e.Param("end_value", args.Item2);
                 e.Param("hand", args.Item3.ToString());
                 e.Param("auto_release", args.Item4);
+                e.Param("movement_data", JsonConvert.SerializeObject(args.Item6));
             }
         }
 

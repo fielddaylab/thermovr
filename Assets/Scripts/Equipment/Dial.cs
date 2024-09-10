@@ -139,6 +139,9 @@ namespace ThermoVR.Dials
         private bool m_currentlyGrabbed;
         private Vector3 m_lastKnownNudgeHandPos;
 
+        private bool m_trackValue;
+        private List<double> m_valTracker;
+
         [HideInInspector] public UnityEvent DialMoved;
 
         /// <summary>
@@ -211,6 +214,8 @@ namespace ThermoVR.Dials
                 textv_tmpro = textv.GetComponent<TextMeshPro>();
             }
 
+            m_valTracker = new List<double>();
+
             EventMgr.Events?.Register<Tool>(GameEvents.ActivateTool, HandleActivateTool, this)
                 .Register<Tool>(GameEvents.DeactivateTool, HandleDeactivateTool, this)
                 .Register<Tool>(GameEvents.AllowTool, HandleAllowTool, this)
@@ -227,11 +232,10 @@ namespace ThermoVR.Dials
                 return;
             }
 
-            /*
-            float magnitude = 0.05f - val * 0.1f;
-            meter.transform.localPosition = Quaternion.Euler(0, 2.0f, 0) * meter.transform.forward * magnitude;
-            forceMap();
-            */
+            if (m_trackValue)
+            {
+                m_valTracker.Add(map);
+            }
         }
 
         private void RecalibratePos() {
@@ -345,6 +349,24 @@ namespace ThermoVR.Dials
         {
             float new_map = (float)((target_map - min_map) / (max_map - min_map));
             set_mapped_val(new_map);
+        }
+
+        public void StartTrackingVal()
+        {
+            m_trackValue = true;
+
+            m_valTracker.Clear();
+        }
+
+        public List<double> GetTrackedVals()
+        {
+            return m_valTracker;
+        }
+
+        public void StopTrackingVal()
+        {
+            m_trackValue = false;
+            m_valTracker.Clear();
         }
 
         public void SetConstraint(float constraint, ConstrainType constrainType, float margin = 0) {

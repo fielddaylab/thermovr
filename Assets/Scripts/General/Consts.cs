@@ -118,12 +118,13 @@ static public class GameEvents
     static public readonly StringHash32 LeftHandData = "world:left-hand-data";
     static public readonly StringHash32 RightHandData = "world:right-hand-data";
     static public readonly StringHash32 ElapsedTimeUpdated = "world:elapsed-time-updated";
+    static public readonly StringHash32 SimStateData = "world:sim-state-data";
 
     static public readonly StringHash32 ToolTogglePressed = "sim:tool-toggle-pressed";
     static public readonly StringHash32 ClickToolIncrease = "sim:click-tool-increase";
     static public readonly StringHash32 ClickToolDecrease = "sim:click-tool-decrease";
     static public readonly StringHash32 GrabToolSlider = "sim:grab-tool-slider";
-    static public readonly StringHash32 ReleaseToolSlider = "sim:release-tool-slider";
+    static public readonly StringHash32 ReleaseToolSlider = "sim:release-tool-slider"; // Tuple<ToolType, float, Hand, bool, int, List<double>>
 
     static public readonly StringHash32 StatePropertiesUpdated = "sim:state-properties-updated";
     static public readonly StringHash32 HeadsetPosUpdated = "sim:headset-pos-updated";
