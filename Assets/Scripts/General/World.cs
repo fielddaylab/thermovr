@@ -863,8 +863,13 @@ public class World : MonoBehaviour
             }
         }
 
-        EventMgr.Events.Dispatch(GameEvents.ReleaseToolSlider, new Tuple<ToolType, float, Hand, bool, int>(firstType, dd.map, handType, autoRelease, uniqueStopID));
+        // Stop tracking slider movement data
+        var history = dd.GetTrackedVals();
+
+        EventMgr.Events.Dispatch(GameEvents.ReleaseToolSlider, new Tuple<ToolType, float, Hand, bool, int, List<double>>(firstType, dd.map, handType, autoRelease, uniqueStopID, history));
         EventMgr.Events.Dispatch(GameEvents.ObjectReleased, dd.gameObject);
+
+        dd.StopTrackingVal();
     }
 
     public void GrabDial(Dial dd, Hand handType)
@@ -882,6 +887,9 @@ public class World : MonoBehaviour
         }
 
         EventMgr.Events.Dispatch(GameEvents.GrabToolSlider, new Tuple<ToolType, float, Hand, int>(firstType, dd.map, handType, uniqueStopID));
+
+        // Start tracking slider movement data
+        dd.StartTrackingVal();
     }
 
     private void update_meshes(ref bool ltouch, ref bool rtouch) {

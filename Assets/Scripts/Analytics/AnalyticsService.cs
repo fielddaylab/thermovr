@@ -255,7 +255,7 @@ namespace ThermoVR.Analytics
                 .Register<Tuple<ToolType, bool, bool, int>>(GameEvents.ToolTogglePressed, LogClickToolToggle, this)
                 .Register<Tuple<ToolType, float, int>>(GameEvents.ClickToolIncrease, LogClickToolIncrease, this)
                 .Register<Tuple<ToolType, float, int>>(GameEvents.ClickToolDecrease, LogClickToolDecrease, this)
-                .Register<Tuple<ToolType, float, Hand, bool, int>>(GameEvents.ReleaseToolSlider, LogReleaseToolSlider, this)
+                .Register<Tuple<ToolType, float, Hand, bool, int, List<double>>>(GameEvents.ReleaseToolSlider, LogReleaseToolSlider, this)
                 .Register<Tuple<ToolType, float, Hand, int>>(GameEvents.GrabToolSlider, LogGrabToolSlider, this)
                 .Register<Tool>(GameEvents.AllowTool, LogToolUnlocked, this)
                 .Register<Tool>(GameEvents.DisallowTool, LogToolLocked, this)
@@ -672,7 +672,7 @@ namespace ThermoVR.Analytics
         }
 
         // release_tool_slider { tool_name, end_value // in physical units, not 0-1, hand : enum(LEFT, RIGHT), auto_release : bool // true if slider was automatically released due to hand getting to far away, or sim was reset }
-        private void LogReleaseToolSlider(Tuple<ToolType, float, Hand, bool, int> args)
+        private void LogReleaseToolSlider(Tuple<ToolType, float, Hand, bool, int, List<double>> args)
         {
             LogToolType type = ToolTypeToLogToolType(args.Item1, args.Item5);
 
@@ -686,6 +686,7 @@ namespace ThermoVR.Analytics
                 e.Param("end_value", args.Item2);
                 e.Param("hand", args.Item3.ToString());
                 e.Param("auto_release", args.Item4);
+                e.Param("movement_data", JsonConvert.SerializeObject(args.Item6));
             }
         }
 
