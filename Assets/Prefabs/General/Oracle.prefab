@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 2423173608412668978}
   - component: {fileID: 1924913066817648878}
   - component: {fileID: 5943454709359365371}
+  - component: {fileID: 6074722703816159702}
   m_Layer: 0
   m_Name: Oracle
   m_TagString: Untagged
@@ -57,38 +58,23 @@ MonoBehaviour:
   tab_hi: {fileID: 2100000, guid: f4aa9c4b98eb7f64fa17bac3a7627635, type: 2}
   tab_sel: {fileID: 2100000, guid: 4ef849f3e69020c44abdb078dbff6ecc, type: 2}
   tab_hisel: {fileID: 2100000, guid: 3c94870dbdbce6a4f9cd57e73e4a2814, type: 2}
-  arrows: {fileID: 0}
   thermo_present: {fileID: 2423173608412668977}
   tablet: {fileID: 0}
+  tablet_grabbable: {fileID: 0}
+  tablet_handle_left: {fileID: 0}
+  tablet_handle_right: {fileID: 0}
   graph_elements: []
   cam_offset: {fileID: 0}
   ceye: {fileID: 0}
+  lhand_obj: {fileID: 0}
   lhand: {fileID: 0}
+  rhand_obj: {fileID: 0}
   rhand: {fileID: 0}
   origin: {fileID: 0}
+  general_audio: {fileID: 0}
+  sim_audio: {fileID: 0}
   handle_workspace: {fileID: 0}
-  tool_insulator: {fileID: 0}
-  tool_stop1: {fileID: 0}
-  tool_stop2: {fileID: 0}
-  tool_burner: {fileID: 0}
-  tool_coil: {fileID: 0}
-  tool_weight: {fileID: 0}
-  tool_balloon: {fileID: 0}
-  tool_ambientPressure: {fileID: 0}
-  tool_roomTemp: {fileID: 0}
-  dial_stop1: {fileID: 0}
-  dial_stop2: {fileID: 0}
-  dial_burner: {fileID: 0}
-  dial_coil: {fileID: 0}
-  dial_weight: {fileID: 0}
-  dial_balloon: {fileID: 0}
-  dial_ambientPressure: {fileID: 0}
-  dial_roomTemp: {fileID: 0}
-  dial_percentInsulation: {fileID: 0}
-  toggle_heatTransfer: {fileID: 0}
-  dials: []
-  reset_button: {fileID: 0}
-  halfer_button: {fileID: 0}
+  pd_interactions: {fileID: 0}
 --- !u!114 &2423173608412668977
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -102,11 +88,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   state: {fileID: 2423173608412668978}
+  piston: {fileID: 0}
+  contents: {fileID: 0}
   dot_x_tracker: {fileID: 0}
   dot_y_tracker: {fileID: 0}
   dot_z_tracker: {fileID: 0}
   graph_material: {fileID: 2100000, guid: 0ddf9de8dbc3db34f94dce2e6e70f2ad, type: 2}
   graph_material_lit: {fileID: 2100000, guid: e7097598c35b1974abeb5028474d088c, type: 2}
+  pd_interactions: {fileID: 0}
   error_flasher: {fileID: 0}
   error_message: {fileID: 0}
   size_p: 0
@@ -141,9 +130,6 @@ MonoBehaviour:
   prev_quality: 0
   prev_region: 0
   mass: 1
-  radius: 0.05
-  surfacearea: 1
-  surfacearea_insqr: 38.2447935395871
   v_stop1: 0
   v_stop2: 0
 --- !u!114 &1924913066817648878
@@ -171,3 +157,41 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0ceeee1747f28774393dfc4849831e75, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  tool_insulator: {fileID: 0}
+  tool_stop1: {fileID: 0}
+  tool_stop2: {fileID: 0}
+  tool_burner: {fileID: 0}
+  tool_coil: {fileID: 0}
+  tool_weight: {fileID: 0}
+  tool_negativeWeight: {fileID: 0}
+  tool_surroundingPressure: {fileID: 0}
+  tool_surroundingTemp: {fileID: 0}
+  dial_stop1: {fileID: 0}
+  dial_stop2: {fileID: 0}
+  dial_burner: {fileID: 0}
+  dial_coil: {fileID: 0}
+  dial_weight: {fileID: 0}
+  dial_negativeWeight: {fileID: 0}
+  dial_surroundingPressure: {fileID: 0}
+  dial_surroundingTemp: {fileID: 0}
+  dial_percentInsulation: {fileID: 0}
+  dial_selector: {fileID: 0}
+  toggle_heatTransfer: {fileID: 0}
+  DetentStep: 0.05
+  Dials: []
+  reset_button: {fileID: 0}
+  tare_heat_button: {fileID: 0}
+  tare_weight_button: {fileID: 0}
+--- !u!114 &6074722703816159702
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2423173608412668981}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f3d90083d932bce46ba83d24cbb38daa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_thermoPresent: {fileID: 2423173608412668977}

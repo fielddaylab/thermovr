@@ -118,6 +118,7 @@ static public class GameEvents
     static public readonly StringHash32 LeftHandData = "world:left-hand-data";
     static public readonly StringHash32 RightHandData = "world:right-hand-data";
     static public readonly StringHash32 ElapsedTimeUpdated = "world:elapsed-time-updated";
+    static public readonly StringHash32 SimStateData = "world:sim-state-data";
 
     static public readonly StringHash32 ToolTogglePressed = "sim:tool-toggle-pressed";
     static public readonly StringHash32 ClickToolIncrease = "sim:click-tool-increase";

@@ -265,6 +265,7 @@ namespace ThermoVR.Analytics
                 .Register<PositionDataFrame[]>(GameEvents.ViewportData, LogViewportData)
                 .Register<PositionDataFrame[]>(GameEvents.LeftHandData, LogLeftHandData)
                 .Register<PositionDataFrame[]>(GameEvents.RightHandData, LogRightHandData)
+                .Register<SimStateDataFrame[]>(GameEvents.SimStateData, LogSimStateData)
                 .Register<ToolType>(GameEvents.EditToolValStarted, LogClickEditToolVal, this)
                 .Register<float>(GameEvents.ProxyInputSubmitted, LogSetToolVal, this)
                 .Register<string>(GameEvents.SetInvalidToolVal, LogSetInvalidToolVal, this)
@@ -297,7 +298,7 @@ namespace ThermoVR.Analytics
                 {
                     AppId = m_AppId,
                     AppVersion = m_AppVersion,
-                    ClientLogVersion = 3
+                    ClientLogVersion = 4
                 },
                 new OGDLog.MemoryConfig
                 (
@@ -503,6 +504,17 @@ namespace ThermoVR.Analytics
             Debug.Log("[Analytics] event: right_hand_data");
 
             using (var e = m_Log.NewEvent("right_hand_data"))
+            {
+                e.Param("data", JsonConvert.SerializeObject(data));
+            }
+        }
+
+        // simulation_data { array of ~30 frame samples, each has { P, V, T, u, s, h, x } of sim vars at each frame }
+        private void LogSimStateData(SimStateDataFrame[] data)
+        {
+            Debug.Log("[Analytics] event: simulation_data");
+
+            using (var e = m_Log.NewEvent("simulation_data"))
             {
                 e.Param("data", JsonConvert.SerializeObject(data));
             }
