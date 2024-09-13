@@ -512,12 +512,14 @@ namespace ThermoVR.Analytics
         // simulation_data { array of ~30 frame samples, each has { P, V, T, u, s, h, x } of sim vars at each frame }
         private void LogSimStateData(SimStateDataFrame[] data)
         {
+            /* TODO: fix so that no more Out of Memory errors are thrown
             Debug.Log("[Analytics] event: simulation_data");
 
             using (var e = m_Log.NewEvent("simulation_data"))
             {
                 e.Param("data", JsonConvert.SerializeObject(data));
             }
+            */
         }
 
         private void LogGrabTablet(Tuple<PositionDataFrame, Hand> args)
@@ -674,6 +676,7 @@ namespace ThermoVR.Analytics
         // release_tool_slider { tool_name, end_value // in physical units, not 0-1, hand : enum(LEFT, RIGHT), auto_release : bool // true if slider was automatically released due to hand getting to far away, or sim was reset }
         private void LogReleaseToolSlider(Tuple<ToolType, float, Hand, bool, int, List<double>> args)
         {
+            /* TODO: fix this so that no more Out of Memory errors
             LogToolType type = ToolTypeToLogToolType(args.Item1, args.Item5);
 
             m_LastKnownSliderToolType = LogToolType.UNKOWN;
@@ -688,6 +691,7 @@ namespace ThermoVR.Analytics
                 e.Param("auto_release", args.Item4);
                 e.Param("movement_data", JsonConvert.SerializeObject(args.Item6));
             }
+            */
         }
 
         // gaze_object_end { object : enum(TABLET, PISTON, GRAPH, CONTROLS), gaze_duration }
