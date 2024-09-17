@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using BeauUtil.Extensions;
 using UnityEngine;
 
 namespace ThermoVR {
@@ -20,7 +21,7 @@ namespace ThermoVR {
         {
             if (col.gameObject.name == m_checkObj.name)
             {
-                EventMgr.Events.Dispatch(GameEvents.GameModeTargetEntered, this);
+                EventMgr.Events.Dispatch(GameEvents.GameModeTargetEntered, EvtArgs.Ref(this));
             }
         }
 
@@ -28,7 +29,7 @@ namespace ThermoVR {
         {
             if (col.gameObject.name == m_checkObj.name)
             {
-                EventMgr.Events.Dispatch(GameEvents.GameModeTargetExited, this);
+                EventMgr.Events.Dispatch(GameEvents.GameModeTargetExited, EvtArgs.Ref(this));
             }
         }
     }

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using ThermoVR.Controls;
+using BeauUtil.Extensions;
 
 namespace ThermoVR
 {
@@ -61,7 +62,7 @@ namespace ThermoVR
         /// <param name="cooldown">Cooldown if in VR, none if in desktop</param>
         public void Press(bool cooldown, Hand inputType) {
             if (m_touchTimer <= 0) {
-                EventMgr.Events.Dispatch(GameEvents.HandStartPress, inputType);
+                EventMgr.Events.Dispatch(GameEvents.HandStartPress, EvtArgs.Create(inputType));
                 OnPress?.Invoke(this, EventArgs.Empty);
                 PressCompleted?.Invoke(this, EventArgs.Empty);
                 if (cooldown) {
@@ -101,7 +102,7 @@ namespace ThermoVR
         }
 
         private void HandleGatherPressables() {
-            EventMgr.Events.Dispatch(GameEvents.RegisterPressable, this);
+            EventMgr.Events.Dispatch(GameEvents.RegisterPressable, EvtArgs.Ref(this));
         }
 
         private void HandleCheckForPress(bool left_hand) {

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using BeauUtil.Extensions;
 using ThermoVR.Dials;
 using UnityEngine;
 
@@ -42,7 +43,7 @@ namespace ThermoVR.Controls {
                         Hand grabType = Hand.MOUSE;
                         dd.touchable.SetGrabbed(true, grabType);
                         World.Instance.GrabDial(dd, grabType);
-                        EventMgr.Events.Dispatch(GameEvents.ObjectGrabbed, m_Dragging);
+                        EventMgr.Events.Dispatch(GameEvents.ObjectGrabbed, EvtArgs.Ref(m_Dragging));
                     }
                     else if (objHit.GetComponent<PlacementDotInteractions>())
                     {
@@ -55,8 +56,8 @@ namespace ThermoVR.Controls {
                     else if (objHit.GetComponent<InputProxy>())
                     {
                         var proxy = objHit.GetComponent<InputProxy>();
-                        EventMgr.Events.Dispatch(GameEvents.InputProxySelected, proxy);
-                        EventMgr.Events.Dispatch(GameEvents.EditToolValStarted, proxy.ToolType());
+                        EventMgr.Events.Dispatch(GameEvents.InputProxySelected, EvtArgs.Ref(proxy));
+                        EventMgr.Events.Dispatch(GameEvents.EditToolValStarted, EvtArgs.Create(proxy.ToolType()));
                     }
                 }
             }
@@ -87,7 +88,7 @@ namespace ThermoVR.Controls {
                         pdInteractions.FinishInteract(Hand.MOUSE);
                     }
 
-                    EventMgr.Events.Dispatch(GameEvents.ObjectReleased, m_Dragging);
+                    EventMgr.Events.Dispatch(GameEvents.ObjectReleased, EvtArgs.Ref(m_Dragging));
                     m_Dragging = null;
                 }
             }

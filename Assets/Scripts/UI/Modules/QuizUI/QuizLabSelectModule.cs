@@ -8,6 +8,7 @@ using BeauUtil;
 using BeauRoutine;
 using System.Collections.Generic;
 using ThermoVR.Analytics;
+using BeauUtil.Extensions;
 
 namespace ThermoVR.Lab
 {
@@ -165,7 +166,7 @@ namespace ThermoVR.Lab
                 m_ScrollUpBtn.gameObject.SetActive(false);
             }
 
-            EventMgr.Events.Dispatch(GameEvents.LabMenuDisplayed, m_visibleLabs);
+            EventMgr.Events.Dispatch(GameEvents.LabMenuDisplayed, EvtArgs.Ref(m_visibleLabs));
         }
     }
 

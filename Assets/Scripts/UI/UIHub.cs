@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using ThermoVR.UI.Interfaces;
+using BeauUtil.Extensions;
 
 namespace ThermoVR.UI
 {
@@ -82,7 +83,7 @@ namespace ThermoVR.UI
             // Dispatch tablet mode change if one of main panels
             if ((id == UIID.Sandbox) || (id == UIID.Lab) || (id == UIID.Graph) || (id == UIID.Game))
             {
-                EventMgr.Events.Dispatch(GameEvents.TabletModeSwitched, id);
+                EventMgr.Events.Dispatch(GameEvents.TabletModeSwitched, EvtArgs.Create(id));
             }
         }
     }

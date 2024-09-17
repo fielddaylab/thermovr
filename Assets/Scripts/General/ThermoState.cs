@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using ThermoVR.Tools;
 using ThermoVR.Analytics;
+using BeauUtil.Extensions;
 
 namespace ThermoVR.State
 {
@@ -187,10 +188,10 @@ namespace ThermoVR.State
 
             if (fromClick)
             {
-                EventMgr.Events.Dispatch(GameEvents.ResetSimClicked, BundleStateProperties());
+                EventMgr.Events.Dispatch(GameEvents.ResetSimClicked, EvtArgs.Box(BundleStateProperties()));
             }
 
-            EventMgr.Events.Dispatch(GameEvents.WarpPVT, new Tuple<double, double, double>(pressure, volume, temperature));
+            EventMgr.Events.Dispatch(GameEvents.WarpPVT, EvtArgs.Create(new STuple<double, double, double>(pressure, volume, temperature)));
         }
 
         #region Enforce State
@@ -473,7 +474,7 @@ namespace ThermoVR.State
                         }
                 }
 
-                EventMgr.Events.Dispatch(GameEvents.WarpPVT, new Tuple<double, double, double>(pressure, volume, temperature));
+                EventMgr.Events.Dispatch(GameEvents.WarpPVT, EvtArgs.Create(new STuple<double, double, double>(pressure, volume, temperature)));
             }
             catch (Exception e)
             {
@@ -1989,8 +1990,8 @@ namespace ThermoVR.State
         {
             if (Mathf.Abs((float)delta_pressure) > World.DELTA_PRESSURE_CUTOFF)
             {
-                Tuple<double, double> vaporInfo = new Tuple<double, double>(delta_pressure, insulation_coefficient);
-                EventMgr.Events.Dispatch(GameEvents.UpdateVaporFlow, vaporInfo);
+                STuple<double, double> vaporInfo = new STuple<double, double>(delta_pressure, insulation_coefficient);
+                EventMgr.Events.Dispatch(GameEvents.UpdateVaporFlow, EvtArgs.Create(vaporInfo));
             }
         }
 

@@ -1,3 +1,4 @@
+using BeauUtil.Extensions;
 using Oculus.Interaction.Input;
 using System;
 using System.Collections;
@@ -251,19 +252,19 @@ namespace ThermoVR
         private void HandleGrabbed(object sender, Hand arg)
         {
             PositionDataFrame currPos = new PositionDataFrame();
-            currPos.pos = new float[] { this.transform.position.x, this.transform.position.y, this.transform.position.z };
-            currPos.rot = new float[] { this.transform.rotation.x, this.transform.rotation.y, this.transform.rotation.z, this.transform.rotation.w };
+            currPos.posVector = this.transform.position;
+            currPos.rotQuat = this.transform.rotation;
 
-            EventMgr.Events?.Dispatch(GameEvents.TabletGrabbed, new Tuple<PositionDataFrame, Hand>(currPos, arg));
+            EventMgr.Events?.Dispatch(GameEvents.TabletGrabbed, EvtArgs.Create(new STuple<PositionDataFrame, Hand>(currPos, arg)));
         }
 
         private void HandleReleased(object sender, Hand arg)
         {
             PositionDataFrame currPos = new PositionDataFrame();
-            currPos.pos = new float[] { this.transform.position.x, this.transform.position.y, this.transform.position.z };
-            currPos.rot = new float[] { this.transform.rotation.x, this.transform.rotation.y, this.transform.rotation.z, this.transform.rotation.w };
+            currPos.posVector = this.transform.position;
+            currPos.rotQuat = this.transform.rotation;
 
-            EventMgr.Events?.Dispatch(GameEvents.TabletReleased, new Tuple<PositionDataFrame, Hand>(currPos, arg));
+            EventMgr.Events?.Dispatch(GameEvents.TabletReleased, EvtArgs.Create(new STuple<PositionDataFrame, Hand>(currPos, arg)));
         }
 
         #endregion // Handlers

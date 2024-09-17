@@ -13,7 +13,7 @@ namespace ThermoVR
         [HideInInspector] public Vector3 placement_thermo;
         [HideInInspector] public bool placement_thermo_reasonable;
 
-        [SerializeField] private MeshCollider collider;
+        [SerializeField] private new MeshCollider collider;
 
         public GameObject graph;
         private Touchable graph_touchable;

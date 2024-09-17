@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using BeauUtil.Extensions;
 using ThermoVR;
 using ThermoVR.Controls;
 using ThermoVR.UI;
@@ -188,7 +189,7 @@ namespace ThermoVR
             }
 
             bool val = toggle.IsOn();
-            EventMgr.Events.Dispatch(GameEvents.UpdateGraphSetting, new GraphSettingUpdate(id, val));
+            EventMgr.Events.Dispatch(GameEvents.UpdateGraphSetting, EvtArgs.Create(new GraphSettingUpdate(id, val)));
         }
 
         private void SetCreditsVisible(bool isVisible)

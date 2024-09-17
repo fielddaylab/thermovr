@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using BeauUtil.Extensions;
 using UnityEngine;
 
 namespace ThermoVR.State
@@ -15,17 +16,6 @@ namespace ThermoVR.State
         public double s;
         public double h;
         public double x;
-
-        public void Init()
-        {
-            P = 0;
-            V = 0;
-            T = 0;
-            u = 0;
-            s = 0;
-            h = 0;
-            x = 0;
-        }
     }
 
     public class SimValTracker : MonoBehaviour
@@ -43,7 +33,6 @@ namespace ThermoVR.State
         private void OnEnable()
         {
             m_stateBuffer = new SimStateDataFrame[SAMPLE_SIZE];
-            InitBuffer(ref m_stateBuffer);
 
             m_frameCounter = 0;
         }
@@ -55,7 +44,7 @@ namespace ThermoVR.State
             if (m_frameCounter == SAMPLE_SIZE - 1)
             {
                 // dispatch frames
-                EventMgr.Events.Dispatch(GameEvents.SimStateData, m_stateBuffer);
+                EventMgr.Events.Dispatch(GameEvents.SimStateData, EvtArgs.Ref(m_stateBuffer));
 
                 // reset (old samples will be overriden frame by frame)
                 m_frameCounter = 0;
@@ -70,14 +59,6 @@ namespace ThermoVR.State
 
         #region Helpers
 
-        private void InitBuffer(ref SimStateDataFrame[] buffer)
-        {
-            for (int i = 0; i < buffer.Length; i++)
-            {
-                buffer[i].Init();
-            }
-        }
-
         private void UpdateBuffers(int frameCount)
         {
             // add current frame data
@@ -86,7 +67,7 @@ namespace ThermoVR.State
 
         private void LoadFrameToBuffer(ThermoPresent toLoad, ref SimStateDataFrame[] buffer, int frameIndex)
         {
-            SimStateDataFrame newDataFrame = buffer[frameIndex];
+            ref SimStateDataFrame newDataFrame = ref buffer[frameIndex];
 
             newDataFrame.P = toLoad.get_state_var(VarID.Pressure);
             newDataFrame.V = toLoad.get_state_var(VarID.Volume);
@@ -95,8 +76,6 @@ namespace ThermoVR.State
             newDataFrame.s = toLoad.get_state_var(VarID.Entropy);
             newDataFrame.h = toLoad.get_state_var(VarID.Enthalpy);
             newDataFrame.x = toLoad.get_state_var(VarID.Quality);
-
-            buffer[frameIndex] = newDataFrame;
         }
 
         #endregion // Helpers

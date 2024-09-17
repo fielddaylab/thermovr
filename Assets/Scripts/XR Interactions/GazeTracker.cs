@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using BeauUtil.Extensions;
 using UnityEngine;
 
 namespace ThermoVR.Controls
@@ -84,7 +85,7 @@ namespace ThermoVR.Controls
             Debug.Log("[Gaze Tracker] ending gaze on type " + m_CurrentGazeTarget + ". Time was " + m_GazeTime);
 
             // dispatch event
-            EventMgr.Events.Dispatch(GameEvents.GazeEnd, new Tuple<GazeTargetType, float>(m_CurrentGazeTarget, m_GazeTime));
+            EventMgr.Events.Dispatch(GameEvents.GazeEnd, EvtArgs.Create(new STuple<GazeTargetType, float>(m_CurrentGazeTarget, m_GazeTime)));
 
             // reset target
             m_CurrentGazeTarget = GazeTargetType.NONE;

@@ -11,7 +11,7 @@ namespace ThermoVR {
     {
         public static EventMgr I;
 
-        private readonly EventDispatcher<object> m_EventDispatcher = new EventDispatcher<object>();
+        private readonly EventDispatcher<EvtArgs> m_EventDispatcher = new EventDispatcher<EvtArgs>();
 
         protected void Awake()
         {
@@ -29,14 +29,14 @@ namespace ThermoVR {
 
         private void LateUpdate()
         {
-            m_EventDispatcher.FlushQueue();
+            m_EventDispatcher.Flush();
         }
 
 
         /// <summary>
         /// Global game event dispatcher.
         /// </summary>
-        static public EventDispatcher<object> Events
+        static public EventDispatcher<EvtArgs> Events
         {
             get { return EventMgr.I?.m_EventDispatcher; }
         }

@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 8367924436574712420}
   - component: {fileID: 8367924436574712423}
   - component: {fileID: 3955357059504493542}
+  - component: {fileID: 4455112571550700440}
   m_Layer: 0
   m_Name: OGD
   m_TagString: Untagged
@@ -68,3 +69,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_ServerAddress: https://fieldday-web.wcer.wisc.edu/wsgi-bin/opengamedata.wsgi
   m_SaveRetryDelay: 10
+--- !u!114 &4455112571550700440
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8367924436574712421}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3cfefc0c42079f74cb2e74439ce50c1e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_UniqueID: bd75f143-72bb-42f8-8413-6b02760a3783
+  m_WakeUpChildren: 1

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using BeauUtil.Extensions;
 using ThermoVR;
 using ThermoVR.Tools;
 using UnityEngine;
@@ -70,7 +71,7 @@ public class ToolActivator : MonoBehaviour
 
             if (GameMgr.I.AudioEnabled) { m_button.ClickAudio.Play(); }
             
-            EventMgr.Events.Dispatch(GameEvents.PressedToolToggle, tool);
+            EventMgr.Events.Dispatch(GameEvents.PressedToolToggle, EvtArgs.Ref(tool));
         }
     }
 
