@@ -13,6 +13,7 @@ using System.Collections.Specialized;
 using ThermoVR.Tools;
 using ThermoVR;
 using ThermoVR.State;
+using BeauUtil.Extensions;
 
 //One-Off class used for ordering points in graphgen zipper phase
 class GRAPHPTCMP : IComparer<int>
@@ -1012,7 +1013,7 @@ public class ThermoPresent : MonoBehaviour
     }
 
     private void DispatchText(string update_text, string units, double proportion, VarID varId) {
-        EventMgr.Events.Dispatch(GameEvents.UpdateVarText, new VarUpdate(varId, update_text, units, (float)proportion));
+        EventMgr.Events.Dispatch(GameEvents.UpdateVarText, EvtArgs.Box(new VarUpdate(varId, update_text, units, (float)proportion)));
     }
 
     private void HandleRestoreLastSimState()

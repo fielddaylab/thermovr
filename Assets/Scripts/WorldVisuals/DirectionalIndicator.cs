@@ -32,10 +32,10 @@ public class DirectionalIndicator : MonoBehaviour
         running = true;
         this.Stop(); // we start the game stopped.
 
-        EventMgr.Events?.Register<Tuple<double, double>>(GameEvents.UpdateVaporFlow, HandleUpdateVaporFlow, this);
+        EventMgr.Events?.Register<STuple<double, double>>(GameEvents.UpdateVaporFlow, HandleUpdateVaporFlow, this);
     }
 
-    private void HandleUpdateVaporFlow(Tuple<double, double> vaporInfo) {
+    private void HandleUpdateVaporFlow(STuple<double, double> vaporInfo) {
         double delta_pressure = vaporInfo.Item1;
         double insulation_coefficient = vaporInfo.Item2;
         if (insulation_coefficient != 1 && Mathf.Abs((float)delta_pressure) > 0) {

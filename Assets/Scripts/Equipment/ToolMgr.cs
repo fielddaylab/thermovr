@@ -1,4 +1,5 @@
 using BeauUtil;
+using BeauUtil.Extensions;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -147,7 +148,7 @@ namespace ThermoVR.Tools
             tare_weight_button.OnPress += HandleTareWeightPressed;
 
 
-            EventMgr.Events?.Register<Tuple<double, double, double>>(GameEvents.WarpPVT, HandleWarpPVT);
+            EventMgr.Events?.Register<STuple<double, double, double>>(GameEvents.WarpPVT, HandleWarpPVT);
 
             EventMgr.Events?.Register<Tool>(GameEvents.PressedToolToggle, HandleToolTogglePressed);
 
@@ -354,10 +355,10 @@ namespace ThermoVR.Tools
 
             if (!auto)
             {
-                EventMgr.Events?.Dispatch(GameEvents.ToolTogglePressed, new Tuple<ToolType, bool, bool, int>(t.tool_type, true, false, uniqueStopID));
+                EventMgr.Events?.Dispatch(GameEvents.ToolTogglePressed, EvtArgs.Create(new STuple<ToolType, bool, bool, int>(t.tool_type, true, false, uniqueStopID)));
             }
 
-            EventMgr.Events?.Dispatch(GameEvents.ActivateTool, t);
+            EventMgr.Events?.Dispatch(GameEvents.ActivateTool, EvtArgs.Ref(t));
             UpdateApplyTool(t);
 
             Halfable h = o.GetComponent<Halfable>();
@@ -390,10 +391,10 @@ namespace ThermoVR.Tools
 
             if (!auto)
             {
-                EventMgr.Events?.Dispatch(GameEvents.ToolTogglePressed, new Tuple<ToolType, bool, bool, int>(t.tool_type, false, toolReset, uniqueStopID));
+                EventMgr.Events?.Dispatch(GameEvents.ToolTogglePressed, EvtArgs.Create(new STuple<ToolType, bool, bool, int>(t.tool_type, false, toolReset, uniqueStopID)));
             }
 
-            EventMgr.Events?.Dispatch(GameEvents.DeactivateTool, t);
+            EventMgr.Events?.Dispatch(GameEvents.DeactivateTool, EvtArgs.Ref(t));
             UpdateApplyTool(t);
 
             RecordPanelUpdate();
@@ -438,7 +439,7 @@ namespace ThermoVR.Tools
             // TODO: show on buttons (dispatch event)
             t.allowed = true;
 
-            EventMgr.Events?.Dispatch(GameEvents.AllowTool, t);
+            EventMgr.Events?.Dispatch(GameEvents.AllowTool, EvtArgs.Ref(t));
 
             RecordPanelUpdate();
         }
@@ -449,7 +450,7 @@ namespace ThermoVR.Tools
 
             DeactivateTool(t);
 
-            EventMgr.Events?.Dispatch(GameEvents.DisallowTool, t);
+            EventMgr.Events?.Dispatch(GameEvents.DisallowTool, EvtArgs.Ref(t));
 
             RecordPanelUpdate();
         }
@@ -619,7 +620,7 @@ namespace ThermoVR.Tools
             m_panelLogState.ChamberTemperature.Enabled = tool_surroundingTemp.enabled;
             m_panelLogState.ChamberTemperature.SliderVal = tool_surroundingTemp.GetVal();
 
-            EventMgr.Events.Dispatch(GameEvents.SliderPanelUpdated, m_panelLogState);
+            EventMgr.Events.Dispatch(GameEvents.SliderPanelUpdated, EvtArgs.Box(m_panelLogState));
         }
 
         #region Handlers
@@ -682,7 +683,7 @@ namespace ThermoVR.Tools
             SetAllHalfed(!halfed);
         }
 
-        private void HandleWarpPVT(Tuple<double, double, double> pvt) {
+        private void HandleWarpPVT(STuple<double, double, double> pvt) {
             // Pop off applied tools after warp
             DeactivateAllTools(true);
 

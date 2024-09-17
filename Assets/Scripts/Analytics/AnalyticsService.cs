@@ -8,15 +8,15 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using BeauUtil.Tags;
-using BeauPools;
+using Newtonsoft.Json;
 using ThermoVR.Lab;
 using ThermoVR.Tools;
-using Newtonsoft.Json;
 using ThermoVR.UI.GraphElements;
 using ThermoVR.Controls;
 using ThermoVR.State;
 using OGD;
 using ThermoVR.UI;
+using FieldDay;
 
 namespace ThermoVR.Analytics
 {
@@ -105,7 +105,7 @@ namespace ThermoVR.Analytics
             public int Index;
             public string LabName;
             public string LabAuthor;
-            public string PercentComplete;
+            public float PercentComplete;
             public bool IsActive;
             public List<SectionLogData> Sections;
         }
@@ -148,9 +148,10 @@ namespace ThermoVR.Analytics
         private Hand m_LastHandPress;
         private LogToolType m_LastInputProxyType;
         private LogToolType m_LastKnownSliderToolType;
+        private Hand m_LastKnownSliderHand;
 
         private bool m_IsGameMode;
-        private Tuple<float, float, float> m_LastKnownGameModeTarget;
+        private STuple<float, float, float> m_LastKnownGameModeTarget;
         private int m_LastKnownGameModeScore;
 
         private List<string> m_LastKnownWordBankStrs = new List<string>();
@@ -173,6 +174,8 @@ namespace ThermoVR.Analytics
         private string m_GSPlatform;
         private string m_GSTabletMode;
 
+        private JsonBuilder m_JsonBuilder = new JsonBuilder(1024);
+
         #endregion // GameStateVars
 
         #region Unity Callbacks
@@ -192,7 +195,7 @@ namespace ThermoVR.Analytics
             // General Events
             EventMgr.Events.Register<string>(GameEvents.NewNameGenerated, SetUserCode, this)
                 .Register<Hand>(GameEvents.HandStartPress, OnHandStartPress, this)
-                .Register<Tuple<LabInfo, int>>(GameEvents.PreActivateLab, OnPreActivateLab, this)
+                .Register<STuple<LabInfo, int>>(GameEvents.PreActivateLab, OnPreActivateLab, this)
                 .Register<int>(GameEvents.SectionSwitched, OnSectionSwitched, this)
                 .Register<int>(GameEvents.TaskSwitched, OnTaskSwitched, this)
                 .Register<List<string>>(GameEvents.TaskChoiceSelected, OnTaskChoiceSelected)
@@ -201,7 +204,7 @@ namespace ThermoVR.Analytics
                 .Register<SliderPanelLogData>(GameEvents.SliderPanelUpdated, OnSliderPanelUpdated)
                 .Register(GameEvents.LabProgressUpdated, OnLabProgressUpdated)
                 .Register<float>(GameEvents.ElapsedTimeUpdated, OnElapsedTimeUpdated)
-                .Register<Tuple<float, float, float>>(GameEvents.GameModeCompleteGenerateTarget, OnGameModeCompleteGenerateTarget)
+                .Register<STuple<float, float, float>>(GameEvents.GameModeCompleteGenerateTarget, OnGameModeCompleteGenerateTarget)
                 .Register<int>(GameEvents.GameModeScoreUpdated, OnGameModeScoreUpdated)
                 .Register(GameEvents.GameModeStarted, OnGameModeStarted)
                 .Register(GameEvents.GameModeExited, OnGameModeExited)
@@ -237,12 +240,12 @@ namespace ThermoVR.Analytics
                 .Register<List<IndexedTopicInfo>>(GameEvents.SectionListDisplayed, LogSectionListDisplayed, this)
                 .Register<List<IndexedLabInfo>>(GameEvents.LabMenuDisplayed, LogLabMenuDisplayed, this)
                 .Register<StateProperties>(GameEvents.ResetSimClicked, LogClickResetSim, this)
-                .Register<Tuple<PositionDataFrame, Hand>>(GameEvents.TabletGrabbed, LogGrabTablet, this)
-                .Register<Tuple<PositionDataFrame, Hand>>(GameEvents.TabletReleased, LogReleaseTablet, this)
-                .Register<Tuple<PositionDataFrame, Hand>>(GameEvents.WorkspaceHandleGrabbed, LogGrabWorkstationHandle, this)
-                .Register<Tuple<PositionDataFrame, Hand>>(GameEvents.WorkspaceHandleReleased, LogReleaseWorkstationHandle, this)
-                .Register<Tuple<float, float>>(GameEvents.RotateGraphClickedCW, LogClickRotateGraphCW, this)
-                .Register<Tuple<float, float>>(GameEvents.RotateGraphClickedCCW, LogClickRotateGraphCCW, this)
+                .Register<STuple<PositionDataFrame, Hand>>(GameEvents.TabletGrabbed, LogGrabTablet, this)
+                .Register<STuple<PositionDataFrame, Hand>>(GameEvents.TabletReleased, LogReleaseTablet, this)
+                .Register<STuple<PositionDataFrame, Hand>>(GameEvents.WorkspaceHandleGrabbed, LogGrabWorkstationHandle, this)
+                .Register<STuple<PositionDataFrame, Hand>>(GameEvents.WorkspaceHandleReleased, LogReleaseWorkstationHandle, this)
+                .Register<STuple<float, float>>(GameEvents.RotateGraphClickedCW, LogClickRotateGraphCW, this)
+                .Register<STuple<float, float>>(GameEvents.RotateGraphClickedCCW, LogClickRotateGraphCCW, this)
                 .Register<Hand>(GameEvents.GraphBallGrabbed, LogGrabGraphBall, this)
                 .Register<Hand>(GameEvents.GraphBallReleased, LogReleaseGraphBall, this)
                 .Register(GameEvents.SandboxModeClicked, LogClickSandboxMode, this)
@@ -252,16 +255,17 @@ namespace ThermoVR.Analytics
                 .Register(GameEvents.LabCompleted, LogCompleteLab, this)
                 .Register(GameEvents.HeadsetOn, LogHeadsetOn, this)
                 .Register(GameEvents.HeadsetOff, LogHeadsetOff, this)
-                .Register<Tuple<ToolType, bool, bool, int>>(GameEvents.ToolTogglePressed, LogClickToolToggle, this)
-                .Register<Tuple<ToolType, float, int>>(GameEvents.ClickToolIncrease, LogClickToolIncrease, this)
-                .Register<Tuple<ToolType, float, int>>(GameEvents.ClickToolDecrease, LogClickToolDecrease, this)
-                .Register<Tuple<ToolType, float, Hand, bool, int, List<double>>>(GameEvents.ReleaseToolSlider, LogReleaseToolSlider, this)
-                .Register<Tuple<ToolType, float, Hand, int>>(GameEvents.GrabToolSlider, LogGrabToolSlider, this)
+                .Register<STuple<ToolType, bool, bool, int>>(GameEvents.ToolTogglePressed, LogClickToolToggle, this)
+                .Register<STuple<ToolType, float, int>>(GameEvents.ClickToolIncrease, LogClickToolIncrease, this)
+                .Register<STuple<ToolType, float, int>>(GameEvents.ClickToolDecrease, LogClickToolDecrease, this)
+                .Register<STuple<ToolType, int, List<double>>> (GameEvents.MoveToolSlider, LogMoveToolSlider, this)
+                .Register<STuple<ToolType, float, Hand, bool, int>>(GameEvents.ReleaseToolSlider, LogReleaseToolSlider, this)
+                .Register<STuple<ToolType, float, Hand, int>>(GameEvents.GrabToolSlider, LogGrabToolSlider, this)
                 .Register<Tool>(GameEvents.AllowTool, LogToolUnlocked, this)
                 .Register<Tool>(GameEvents.DisallowTool, LogToolLocked, this)
                 .Register(GameEvents.SettingsViewClicked, LogClickViewSettings, this)
                 .Register<GraphSettingUpdate>(GameEvents.UpdateGraphSetting, LogClickToggleSetting)
-                .Register<Tuple<GazeTargetType, float>>(GameEvents.GazeEnd, LogGazeObjectEnd)
+                .Register<STuple<GazeTargetType, float>>(GameEvents.GazeEnd, LogGazeObjectEnd)
                 .Register<PositionDataFrame[]>(GameEvents.ViewportData, LogViewportData)
                 .Register<PositionDataFrame[]>(GameEvents.LeftHandData, LogLeftHandData)
                 .Register<PositionDataFrame[]>(GameEvents.RightHandData, LogRightHandData)
@@ -314,6 +318,10 @@ namespace ThermoVR.Analytics
             #endif // DEVELOPMENT
 
             m_Log.SetDebug(m_Debug);
+
+            var schedulingConfig = OGDLog.SchedulingConfig.Default;
+            schedulingConfig.FlushDelay = 2;
+            m_Log.ConfigureScheduling(schedulingConfig);
 
             m_GSPlatform = GamePlatform.VR.ToString();
 #if UNITY_WEBGL
@@ -386,26 +394,30 @@ namespace ThermoVR.Analytics
         {
             try
             {
-                using (var gs = m_Log.OpenGameState())
+                using (var gs = m_Log.OpenGameState(m_JsonBuilder))
                 {
-                    gs.Param("seconds_from_launch", JsonConvert.SerializeObject(m_GSElapsedTime));
-                    gs.Param("thermo_attributes", JsonConvert.SerializeObject(m_GSProperties));
-                    gs.Param("headset", JsonConvert.SerializeObject(m_GSHeadset));
-                    gs.Param("slider_insulation", JsonConvert.SerializeObject(m_GSPanel.Insulation));
-                    gs.Param("slider_lower_stop", JsonConvert.SerializeObject(m_GSPanel.LowerStop));
-                    gs.Param("slider_upper_stop", JsonConvert.SerializeObject(m_GSPanel.UpperStop));
-                    gs.Param("slider_weight", JsonConvert.SerializeObject(m_GSPanel.Weight));
-                    gs.Param("slider_negative_weight", JsonConvert.SerializeObject(m_GSPanel.NegativeWeight));
-                    gs.Param("slider_heat", JsonConvert.SerializeObject(m_GSPanel.Heat));
-                    gs.Param("slider_cooling", JsonConvert.SerializeObject(m_GSPanel.Cooling));
-                    gs.Param("slider_chamber_pressure", JsonConvert.SerializeObject(m_GSPanel.ChamberPressure));
-                    gs.Param("slider_chamber_temperature", JsonConvert.SerializeObject(m_GSPanel.ChamberTemperature));
-                    gs.Param("current_lab", JsonConvert.SerializeObject(m_GSLab));
-                    gs.Param("current_section", JsonConvert.SerializeObject(m_GSSection));
-                    gs.Param("current_task", JsonConvert.SerializeObject(m_GSTask));
-                    gs.Param("play_score", JsonConvert.SerializeObject(m_LastKnownGameModeScore));
-                    gs.Param("tablet_mode", m_GSTabletMode);
-                    gs.Param("platform", m_GSPlatform.ToString()); ;
+                    gs.Field("seconds_from_launch", m_GSElapsedTime);
+
+                    WriteStateProperties(gs, "thermo_attributes", m_GSProperties);
+                    WritePositionDataFrame(gs, "headset", m_GSHeadset);
+
+                    WriteSliderSettings(gs, "slider_insulation", m_GSPanel.Insulation);
+                    WriteSliderSettings(gs, "slider_lower_stop", m_GSPanel.LowerStop);
+                    WriteSliderSettings(gs, "slider_upper_stop", m_GSPanel.UpperStop);
+                    WriteSliderSettings(gs, "slider_weight", m_GSPanel.Weight);
+                    WriteSliderSettings(gs, "slider_negative_weight", m_GSPanel.NegativeWeight);
+                    WriteSliderSettings(gs, "slider_heat", m_GSPanel.Heat);
+                    WriteSliderSettings(gs, "slider_cooling", m_GSPanel.Cooling);
+                    WriteSliderSettings(gs, "slider_chamber_pressure", m_GSPanel.ChamberPressure);
+                    WriteSliderSettings(gs, "slider_chamber_temperature", m_GSPanel.ChamberTemperature);
+
+                    WriteLabLogData(gs, "current_lab", m_GSLab);
+                    WriteSectionLogData(gs, "current_section", m_GSSection);
+                    WriteTaskLogData(gs, "current_task", m_GSTask);
+                    
+                    gs.Field("play_score", m_LastKnownGameModeScore);
+                    gs.Field("tablet_mode", m_GSTabletMode);
+                    gs.Field("platform", m_GSPlatform);
                 }
             }
             catch
@@ -456,10 +468,10 @@ namespace ThermoVR.Analytics
         {
             Debug.Log("[Analytics] event: click_reset_sim" + "\n" + "hand: " + m_LastHandPress);
 
-            using (var e = m_Log.NewEvent("click_reset_sim"))
+            using (var e = m_Log.NewEvent("click_reset_sim", m_JsonBuilder))
             {
-                e.Param("hand", m_LastHandPress.ToString());
-                e.Param("default_state", JsonConvert.SerializeObject(resetTo));
+                e.Field("hand", m_LastHandPress.ToString());
+                WriteStateProperties(e, "default_state", resetTo);
             }
         }
 
@@ -481,9 +493,13 @@ namespace ThermoVR.Analytics
         {
             Debug.Log("[Analytics] event: viewport_data");
 
-            using (var e = m_Log.NewEvent("viewport_data"))
+            using (var e = m_Log.NewEvent("viewport_data", m_JsonBuilder))
             {
-                e.Param("data", JsonConvert.SerializeObject(data));
+                e.BeginArray("data");
+                foreach (var f in data) {
+                    WritePositionDataFrame(e, f);
+                }
+                e.EndArray();
             }
         }
 
@@ -492,9 +508,13 @@ namespace ThermoVR.Analytics
         {
             Debug.Log("[Analytics] event: left_hand_data");
 
-            using (var e = m_Log.NewEvent("left_hand_data"))
+            using (var e = m_Log.NewEvent("left_hand_data", m_JsonBuilder))
             {
-                e.Param("data", JsonConvert.SerializeObject(data));
+                e.BeginArray("data");
+                foreach (var f in data) {
+                    WritePositionDataFrame(e, f);
+                }
+                e.EndArray();
             }
         }
 
@@ -503,74 +523,77 @@ namespace ThermoVR.Analytics
         {
             Debug.Log("[Analytics] event: right_hand_data");
 
-            using (var e = m_Log.NewEvent("right_hand_data"))
+            using (var e = m_Log.NewEvent("right_hand_data", m_JsonBuilder))
             {
-                e.Param("data", JsonConvert.SerializeObject(data));
+                e.BeginArray("data");
+                foreach (var f in data) {
+                    WritePositionDataFrame(e, f);
+                }
+                e.EndArray();
             }
         }
 
         // simulation_data { array of ~30 frame samples, each has { P, V, T, u, s, h, x } of sim vars at each frame }
-        private void LogSimStateData(SimStateDataFrame[] data)
+        private unsafe void LogSimStateData(SimStateDataFrame[] data)
         {
-            /* TODO: fix so that no more Out of Memory errors are thrown
+            // TODO: fix so that no more Out of Memory errors are thrown
             Debug.Log("[Analytics] event: simulation_data");
 
-            using (var e = m_Log.NewEvent("simulation_data"))
+            using (var e = m_Log.NewEvent("simulation_data", m_JsonBuilder))
             {
-                e.Param("data", JsonConvert.SerializeObject(data));
+                e.BeginArray("data");
+                foreach (var f in data) {
+                    WriteSimStateDataFrame(e, f);
+                }
+                e.EndArray();
             }
-            */
         }
 
-        private void LogGrabTablet(Tuple<PositionDataFrame, Hand> args)
+        private unsafe void LogGrabTablet(STuple<PositionDataFrame, Hand> args)
         {
             Debug.Log("[Analytics] event: grab_tablet");
 
-            using (var e = m_Log.NewEvent("grab_tablet"))
+            using (var e = m_Log.NewEvent("grab_tablet", m_JsonBuilder))
             {
-                e.Param("start_pos", JsonConvert.SerializeObject(args.Item1.pos));
-                e.Param("start_rot", JsonConvert.SerializeObject(args.Item1.rot));
-                e.Param("hand", args.Item2.ToString());
+                DoPositionDataFrame(e, args.Item1, "start_pos", "start_rot");
+                e.Field("hand", args.Item2.ToString());
             }
         }
 
-        private void LogReleaseTablet(Tuple<PositionDataFrame, Hand> args)
+        private unsafe void LogReleaseTablet(STuple<PositionDataFrame, Hand> args)
         {
             Debug.Log("[Analytics] event: release_tablet");
 
-            using (var e = m_Log.NewEvent("release_tablet"))
+            using (var e = m_Log.NewEvent("release_tablet", m_JsonBuilder))
             {
-                e.Param("end_pos", JsonConvert.SerializeObject(args.Item1.pos));
-                e.Param("end_rot", JsonConvert.SerializeObject(args.Item1.rot));
-                e.Param("hand", args.Item2.ToString());
+                DoPositionDataFrame(e, args.Item1, "end_pos", "end_rot");
+                e.Field("hand", args.Item2.ToString());
             }
         }
 
-        private void LogGrabWorkstationHandle(Tuple<PositionDataFrame, Hand> args)
+        private unsafe void LogGrabWorkstationHandle(STuple<PositionDataFrame, Hand> args)
         {
             Debug.Log("[Analytics] event: grab_workstation_handle");
 
-            using (var e = m_Log.NewEvent("grab_workstation_handle"))
+            using (var e = m_Log.NewEvent("grab_workstation_handle", m_JsonBuilder))
             {
-                e.Param("start_pos", JsonConvert.SerializeObject(args.Item1.pos));
-                e.Param("start_rot", JsonConvert.SerializeObject(args.Item1.rot));
-                e.Param("hand", args.Item2.ToString());
+                DoPositionDataFrame(e, args.Item1, "start_pos", "start_rot");
+                e.Field("hand", args.Item2.ToString());
             }
         }
 
-        private void LogReleaseWorkstationHandle(Tuple<PositionDataFrame, Hand> args)
+        private unsafe void LogReleaseWorkstationHandle(STuple<PositionDataFrame, Hand> args)
         {
             Debug.Log("[Analytics] event: release_workstation_handle");
 
-            using (var e = m_Log.NewEvent("release_workstation_handle"))
+            using (var e = m_Log.NewEvent("release_workstation_handle", m_JsonBuilder))
             {
-                e.Param("end_pos", JsonConvert.SerializeObject(args.Item1.pos));
-                e.Param("end_rot", JsonConvert.SerializeObject(args.Item1.rot));
-                e.Param("hand", args.Item2.ToString());
+                DoPositionDataFrame(e, args.Item1, "end_pos", "end_rot");
+                e.Field("hand", args.Item2.ToString());
             }
         }
 
-        private void LogClickRotateGraphCW(Tuple<float, float> degrees)
+        private void LogClickRotateGraphCW(STuple<float, float> degrees)
         {
             Debug.Log("[Analytics] event: click_rotate_graph_cw");
 
@@ -582,7 +605,7 @@ namespace ThermoVR.Analytics
             }
         }
 
-        private void LogClickRotateGraphCCW(Tuple<float, float> degrees)
+        private void LogClickRotateGraphCCW(STuple<float, float> degrees)
         {
             Debug.Log("[Analytics] event: click_rotate_graph_ccw");
 
@@ -614,7 +637,7 @@ namespace ThermoVR.Analytics
             }
         }
 
-        private void LogClickToolToggle(Tuple<ToolType, bool, bool, int> args)
+        private void LogClickToolToggle(STuple<ToolType, bool, bool, int> args)
         {
             LogToolType type = ToolTypeToLogToolType(args.Item1, args.Item4);
 
@@ -629,7 +652,7 @@ namespace ThermoVR.Analytics
             }
         }
 
-        private void LogClickToolIncrease(Tuple<ToolType, float, int> args)
+        private void LogClickToolIncrease(STuple<ToolType, float, int> args)
         {
             LogToolType type = ToolTypeToLogToolType(args.Item1, args.Item3);
 
@@ -643,7 +666,7 @@ namespace ThermoVR.Analytics
             }
         }
 
-        private void LogClickToolDecrease(Tuple<ToolType, float, int> args)
+        private void LogClickToolDecrease(STuple<ToolType, float, int> args)
         {
             LogToolType type = ToolTypeToLogToolType(args.Item1, args.Item3);
 
@@ -657,11 +680,12 @@ namespace ThermoVR.Analytics
             }
         }
 
-        private void LogGrabToolSlider(Tuple<ToolType, float, Hand, int> args)
+        private void LogGrabToolSlider(STuple<ToolType, float, Hand, int> args)
         {
             LogToolType type = ToolTypeToLogToolType(args.Item1, args.Item4);
 
             m_LastKnownSliderToolType = type;
+            m_LastKnownSliderHand = args.Item3;
 
             Debug.Log("[Analytics] event: grab_tool_slider");
 
@@ -673,10 +697,31 @@ namespace ThermoVR.Analytics
             }
         }
 
+        private void LogMoveToolSlider(STuple<ToolType, int, List<double>> args) {
+            LogToolType type = ToolTypeToLogToolType(args.Item1, args.Item2);
+
+            Debug.Log("[Analytics] event: move_tool_slider");
+
+            using (var e = m_Log.NewEvent("move_tool_slider", m_JsonBuilder)) {
+                e.Field("tool_name", type.ToString());
+                e.Field("hand", m_LastKnownSliderHand.ToString());
+                e.BeginArray("movement_data");
+                foreach (var item in args.Item3) {
+                    e.Item(item);
+                }
+                e.EndArray();
+            }
+
+            //using (var e = m_Log.NewEvent("move_tool_slider")) {
+            //    e.Param("tool_name", type.ToString());
+            //    e.Param("hand", m_LastKnownSliderHand.ToString());
+            //    e.Json("movement_data", JsonConvert.SerializeObject(args.Item3));
+            //}
+        }
+
         // release_tool_slider { tool_name, end_value // in physical units, not 0-1, hand : enum(LEFT, RIGHT), auto_release : bool // true if slider was automatically released due to hand getting to far away, or sim was reset }
-        private void LogReleaseToolSlider(Tuple<ToolType, float, Hand, bool, int, List<double>> args)
+        private void LogReleaseToolSlider(STuple<ToolType, float, Hand, bool, int> args)
         {
-            /* TODO: fix this so that no more Out of Memory errors
             LogToolType type = ToolTypeToLogToolType(args.Item1, args.Item5);
 
             m_LastKnownSliderToolType = LogToolType.UNKOWN;
@@ -689,13 +734,11 @@ namespace ThermoVR.Analytics
                 e.Param("end_value", args.Item2);
                 e.Param("hand", args.Item3.ToString());
                 e.Param("auto_release", args.Item4);
-                e.Param("movement_data", JsonConvert.SerializeObject(args.Item6));
             }
-            */
         }
 
         // gaze_object_end { object : enum(TABLET, PISTON, GRAPH, CONTROLS), gaze_duration }
-        private void LogGazeObjectEnd(Tuple<GazeTargetType, float> args)
+        private void LogGazeObjectEnd(STuple<GazeTargetType, float> args)
         {
             Debug.Log("[Analytics] event: gaze_object_end");
 
@@ -791,7 +834,7 @@ namespace ThermoVR.Analytics
 
                 using (var e = m_Log.NewEvent("click_lab_mode"))
                 {
-                    e.Param("initial_lab", JsonConvert.SerializeObject(newLab));
+                    e.Json("initial_lab", JsonConvert.SerializeObject(newLab));
                     e.Param("hand", m_LastHandPress.ToString());
                 }
             }
@@ -834,7 +877,7 @@ namespace ThermoVR.Analytics
 
             using (var e = m_Log.NewEvent("lab_menu_displayed"))
             {
-                e.Param("available_labs", JsonConvert.SerializeObject(visibleLabsData));
+                e.Json("available_labs", JsonConvert.SerializeObject(visibleLabsData));
             }
         }
 
@@ -870,7 +913,7 @@ namespace ThermoVR.Analytics
             using (var e = m_Log.NewEvent("click_select_section"))
             {
                 e.Param("hand", m_LastHandPress.ToString());
-                e.Param("section", JsonConvert.SerializeObject(sectionData));
+                e.Json("section", JsonConvert.SerializeObject(sectionData));
             }
         }
 
@@ -908,7 +951,7 @@ namespace ThermoVR.Analytics
 
             using (var e = m_Log.NewEvent("section_list_displayed"))
             {
-                e.Param("available_sections", JsonConvert.SerializeObject(sectionsData));
+                e.Json("available_sections", JsonConvert.SerializeObject(sectionsData));
             }
         }
 
@@ -921,7 +964,7 @@ namespace ThermoVR.Analytics
             using (var e = m_Log.NewEvent("click_select_task"))
             {
                 e.Param("hand", m_LastHandPress.ToString());
-                e.Param("task", JsonConvert.SerializeObject(taskData));
+                e.Json("task", JsonConvert.SerializeObject(taskData));
             }
         }
 
@@ -957,7 +1000,7 @@ namespace ThermoVR.Analytics
 
             using (var e = m_Log.NewEvent("task_list_displayed"))
             {
-                e.Param("task_list", JsonConvert.SerializeObject(tasksData));
+                e.Json("task_list", JsonConvert.SerializeObject(tasksData));
             }
         }
 
@@ -985,18 +1028,17 @@ namespace ThermoVR.Analytics
 
         private void LogTargetStateEntered()
         {
-            Dictionary<string, float> targetState = new Dictionary<string, float>();
             TaskInfo info = m_ActiveLabInfo.Topics[m_ActiveSectionIndex].Tasks[m_ActiveTaskIndex];
-            foreach (var simTarget in info.Targets)
-            {
-                targetState.Add(simTarget.TargetID.ToString(), simTarget.TargetVal);
-            }
 
             Debug.Log("[Analytics] event: target_state_entered");
 
-            using (var e = m_Log.NewEvent("target_state_entered"))
+            using (var e = m_Log.NewEvent("target_state_entered", m_JsonBuilder))
             {
-                e.Param("target_state", JsonConvert.SerializeObject(targetState));
+                e.BeginObject("target_state");
+                foreach (var simTarget in info.Targets) {
+                    e.Field(simTarget.TargetID.ToString(), simTarget.TargetVal);
+                }
+                e.EndObject();
             }
         }
 
@@ -1005,13 +1047,7 @@ namespace ThermoVR.Analytics
             Dictionary<string, float> targetState = new Dictionary<string, float>();
             Dictionary<string, float> targetTolerances = new Dictionary<string, float>();
 
-            string scoreStr = "null";
-
-            if (m_IsGameMode)
-            {
-                scoreStr = m_LastKnownGameModeScore.ToStringLookup();
-            }
-            else
+            if (!m_IsGameMode)
             {
                 TaskInfo info = m_ActiveLabInfo.Topics[m_ActiveSectionIndex].Tasks[m_ActiveTaskIndex];
                 foreach (var simTarget in info.Targets)
@@ -1026,28 +1062,36 @@ namespace ThermoVR.Analytics
 
             using (var e = m_Log.NewEvent("target_state_completed"))
             {
-                e.Param("target_state", JsonConvert.SerializeObject(targetState));
-                e.Param("tolerances", JsonConvert.SerializeObject(targetTolerances));
-                e.Param("score_value", scoreStr);
+                e.Json("target_state", JsonConvert.SerializeObject(targetState));
+                e.Json("tolerances", JsonConvert.SerializeObject(targetTolerances));
+                if (m_IsGameMode) {
+                    e.Param("score_value", m_LastKnownGameModeScore);
+                } else {
+                    e.Param("score_value", "null");
+                }
             }
         }
 
 
         private void LogTargetStateLost(List<string> incorrectVars)
         {
-            Dictionary<string, float> targetState = new Dictionary<string, float>();
             TaskInfo info = m_ActiveLabInfo.Topics[m_ActiveSectionIndex].Tasks[m_ActiveTaskIndex];
-            foreach (var simTarget in info.Targets)
-            {
-                targetState.Add(simTarget.TargetID.ToString(), simTarget.TargetVal);
-            }
 
             Debug.Log("[Analytics] event: target_state_lost");
 
-            using (var e = m_Log.NewEvent("target_state_lost"))
+            using (var e = m_Log.NewEvent("target_state_lost", m_JsonBuilder))
             {
-                e.Param("target_state", JsonConvert.SerializeObject(targetState));
-                e.Param("incorrect_variables", JsonConvert.SerializeObject(incorrectVars));
+                e.BeginObject("target_state");
+                foreach (var simTarget in info.Targets) {
+                    e.Field(simTarget.TargetID.ToString(), simTarget.TargetVal);
+                }
+                e.EndObject();
+
+                e.BeginArray("incorrect_variables");
+                foreach(var v in incorrectVars) {
+                    e.Item(v);
+                }
+                e.EndArray();
             }
         }
 
@@ -1064,7 +1108,7 @@ namespace ThermoVR.Analytics
 
             using (var e = m_Log.NewEvent("click_select_answer"))
             {
-                e.Param("quiz_task", JsonConvert.SerializeObject(taskData));
+                e.Json("quiz_task", JsonConvert.SerializeObject(taskData));
                 e.Param("selection_index", answerSelectData.SelectionIndex);
                 e.Param("is_correct_answer", answerSelectData.IsCorrectAnswer);
             }
@@ -1078,7 +1122,7 @@ namespace ThermoVR.Analytics
 
             using (var e = m_Log.NewEvent("click_deselect_answer"))
             {
-                e.Param("quiz_task", JsonConvert.SerializeObject(taskData));
+                e.Json("quiz_task", JsonConvert.SerializeObject(taskData));
                 e.Param("selection_index", answerSelectData.SelectionIndex);
                 e.Param("is_correct_answer", answerSelectData.IsCorrectAnswer);
             }
@@ -1094,7 +1138,7 @@ namespace ThermoVR.Analytics
 
             using (var e = m_Log.NewEvent("click_submit_answer"))
             {
-                e.Param("quiz_task", JsonConvert.SerializeObject(taskData));
+                e.Json("quiz_task", JsonConvert.SerializeObject(taskData));
                 e.Param("is_correct_answer", isCorrect);
             }
         }
@@ -1109,7 +1153,7 @@ namespace ThermoVR.Analytics
 
             using (var e = m_Log.NewEvent("click_reset_quiz"))
             {
-                e.Param("quiz_task", JsonConvert.SerializeObject(taskData));
+                e.Json("quiz_task", JsonConvert.SerializeObject(taskData));
                 e.Param("was_correct_answer", wasCorrect);
             }
         }
@@ -1122,7 +1166,7 @@ namespace ThermoVR.Analytics
 
             using (var e = m_Log.NewEvent("click_open_word_bank"))
             {
-                e.Param("quiz_task", JsonConvert.SerializeObject(taskData));
+                e.Json("quiz_task", JsonConvert.SerializeObject(taskData));
             }
         }
 
@@ -1134,7 +1178,7 @@ namespace ThermoVR.Analytics
 
             using (var e = m_Log.NewEvent("word_bank_displayed"))
             {
-                e.Param("words", JsonConvert.SerializeObject(words));
+                e.Json("words", JsonConvert.SerializeObject(words));
             }
         }
 
@@ -1144,8 +1188,8 @@ namespace ThermoVR.Analytics
 
             using (var e = m_Log.NewEvent("word_bank_closed"))
             {
-                e.Param("words", JsonConvert.SerializeObject(m_LastKnownWordBankStrs));
-                e.Param("selected_word", JsonConvert.SerializeObject(selectedWord));
+                e.Json("words", JsonConvert.SerializeObject(m_LastKnownWordBankStrs));
+                e.Param("selected_word", selectedWord);
             }
         }
 
@@ -1156,7 +1200,7 @@ namespace ThermoVR.Analytics
 
             using (var e = m_Log.NewEvent("complete_lab"))
             {
-                e.Param("lab", JsonConvert.SerializeObject(completedLab));
+                e.Json("lab", JsonConvert.SerializeObject(completedLab));
             }
         }
 
@@ -1170,7 +1214,7 @@ namespace ThermoVR.Analytics
 
             using (var e = m_Log.NewEvent("complete_section"))
             {
-                e.Param("section", JsonConvert.SerializeObject(sectionData));
+                e.Json("section", JsonConvert.SerializeObject(sectionData));
             }
         }
 
@@ -1182,7 +1226,7 @@ namespace ThermoVR.Analytics
 
             using (var e = m_Log.NewEvent("complete_task"))
             {
-                e.Param("task", JsonConvert.SerializeObject(data));
+                e.Json("task", JsonConvert.SerializeObject(data));
             }
         }
 
@@ -1261,9 +1305,9 @@ namespace ThermoVR.Analytics
 
             using (var e = m_Log.NewEvent("click_game_target_assigned"))
             {
-                e.Param("p", m_LastKnownGameModeTarget.Item1.ToString());
-                e.Param("v", m_LastKnownGameModeTarget.Item2.ToString());
-                e.Param("t", m_LastKnownGameModeTarget.Item3.ToString());
+                e.Param("p", m_LastKnownGameModeTarget.Item1);
+                e.Param("v", m_LastKnownGameModeTarget.Item2);
+                e.Param("t", m_LastKnownGameModeTarget.Item3);
             }
         }
 
@@ -1410,7 +1454,7 @@ namespace ThermoVR.Analytics
             using (var e = m_Log.NewEvent("click_task_assigned"))
             {
                 e.Param("hand", m_LastHandPress.ToString());
-                e.Param("task", JsonConvert.SerializeObject(taskData));
+                e.Json("task", JsonConvert.SerializeObject(taskData));
             }
         }
 
@@ -1448,7 +1492,7 @@ namespace ThermoVR.Analytics
 
         #region Other Events
 
-        private void OnPreActivateLab(Tuple<LabInfo, int> labInfo)
+        private void OnPreActivateLab(STuple<LabInfo, int> labInfo)
         {
             m_ActiveLabInfo = labInfo.Item1;
             m_ActiveLabIndex = labInfo.Item2;
@@ -1508,7 +1552,7 @@ namespace ThermoVR.Analytics
 
         private void OnLabProgressUpdated()
         {
-            m_GSLab.PercentComplete = LabMgr.Instance.Stats.LabMap[m_ActiveLabInfo.ID].Progress.ToString();
+            m_GSLab.PercentComplete = LabMgr.Instance.Stats.LabMap[m_ActiveLabInfo.ID].Progress;
         }
 
         private void OnElapsedTimeUpdated(float newTime)
@@ -1516,7 +1560,7 @@ namespace ThermoVR.Analytics
             m_GSElapsedTime = newTime;
         }
 
-        private void OnGameModeCompleteGenerateTarget(Tuple<float, float, float> pvt)
+        private void OnGameModeCompleteGenerateTarget(STuple<float, float, float> pvt)
         {
             m_LastKnownGameModeTarget = pvt;
         }
@@ -1685,7 +1729,7 @@ namespace ThermoVR.Analytics
             labData.Index = labIndex;
             labData.LabName = info.Name;
             labData.LabAuthor = info.Author;
-            labData.PercentComplete = LabMgr.Instance.Stats.LabMap.ContainsKey(info.ID) ? LabMgr.Instance.Stats.LabMap[info.ID].Progress.ToString() : "0";
+            labData.PercentComplete = LabMgr.Instance.Stats.LabMap.ContainsKey(info.ID) ? LabMgr.Instance.Stats.LabMap[info.ID].Progress : 0;
             labData.IsActive = info.ID == m_ActiveLabInfo.ID;
             if (includeSections) {
                 List<SectionLogData> allSections = new List<SectionLogData>();
@@ -1729,5 +1773,165 @@ namespace ThermoVR.Analytics
         }
 
         #endregion // Helpers
+
+        #region Types
+
+        static private unsafe void WritePositionDataFrame(OGDExtensions.JsonScope scope, in PositionDataFrame frame) {
+            scope.BeginObject();
+            DoPositionDataFrame(scope, frame, "pos", "rot");
+            scope.EndObject();
+        }
+
+        static private unsafe void WritePositionDataFrame(OGDExtensions.JsonScope scope, string fieldName, in PositionDataFrame frame) {
+            scope.BeginObject(fieldName);
+            DoPositionDataFrame(scope, frame, "pos", "rot");
+            scope.EndObject();
+        }
+
+        static private unsafe void DoPositionDataFrame(OGDExtensions.JsonScope scope, in PositionDataFrame frame, string posFieldName, string rotFieldName) {
+            scope.BeginArray(posFieldName)
+                .Item(frame.pos[0])
+                .Item(frame.pos[1])
+                .Item(frame.pos[2])
+                .EndArray();
+            scope.BeginArray(rotFieldName)
+                .Item(frame.rot[0])
+                .Item(frame.rot[1])
+                .Item(frame.rot[2])
+                .Item(frame.rot[3])
+                .EndArray();
+        }
+
+        static private unsafe void WriteSimStateDataFrame(OGDExtensions.JsonScope scope, in SimStateDataFrame frame) {
+            scope.BeginObject()
+                .Field("P", frame.P)
+                .Field("V", frame.V)
+                .Field("T", frame.T)
+                .Field("u", frame.u)
+                .Field("s", frame.s)
+                .Field("h", frame.h)
+                .Field("x", frame.x)
+                .EndObject();
+        }
+
+        static private unsafe void WriteStateProperties(OGDExtensions.JsonScope scope, string fieldName, in StateProperties properties) {
+            scope.BeginObject(fieldName)
+                .Field("Region", properties.Region)
+                .Field("P", properties.P)
+                .Field("V", properties.V)
+                .Field("T", properties.T)
+                .Field("u", properties.u)
+                .Field("s", properties.s)
+                .Field("h", properties.h)
+                .Field("x", properties.x)
+                .EndObject();
+        }
+
+        static private unsafe void WriteSliderSettings(OGDExtensions.JsonScope scope, string fieldName, in SliderSettings settings) {
+            scope.BeginObject(fieldName)
+                .Field("Enabled", settings.Enabled)
+                .Field("SliderVal", settings.SliderVal)
+                .EndObject();
+        }
+
+        static private unsafe void WriteLabLogData(OGDExtensions.JsonScope scope, string fieldName, in LabLogData data) {
+            scope.BeginObject(fieldName);
+            DoLabLogData(scope, data);
+            scope.EndObject();
+        }
+
+        static private unsafe void DoLabLogData(OGDExtensions.JsonScope scope, in LabLogData data) {
+            scope.Field("Index", data.Index)
+                .Field("LabName", data.LabName)
+                .Field("LabAuthor", data.LabAuthor)
+                .Field("PercentComplete", data.PercentComplete, 3)
+                .Field("IsActive", data.IsActive);
+
+            scope.BeginArray("Sections");
+            if (data.Sections != null) {
+                foreach (var section in data.Sections) {
+                    WriteSectionLogData(scope, section);
+                }
+            }
+            scope.EndArray();
+        }
+
+        #region SectionLogData
+
+        static private unsafe void WriteSectionLogData(OGDExtensions.JsonScope scope, in SectionLogData data) {
+            scope.BeginObject();
+            DoSectionLogData(scope, data);
+            scope.EndObject();
+        }
+
+        static private unsafe void WriteSectionLogData(OGDExtensions.JsonScope scope, string fieldName, in SectionLogData data) {
+            scope.BeginObject(fieldName);
+            DoSectionLogData(scope, data);
+            scope.EndObject();
+        }
+
+        static private unsafe void DoSectionLogData(OGDExtensions.JsonScope scope, in SectionLogData data) {
+            scope.Field("Index", data.Index)
+                .Field("LabName", data.LabName)
+                .Field("Description", data.Description)
+                .Field("IsComplete", data.IsComplete)
+                .Field("IsActive", data.IsActive);
+
+            scope.BeginArray("Tasks");
+            if (data.Tasks != null) {
+                foreach (var task in data.Tasks) {
+                    WriteTaskLogData(scope, task);
+                }
+            }
+            scope.EndArray();
+        }
+
+        #endregion // SectionLogData
+
+        #region TaskLogData
+
+        static private unsafe void WriteTaskLogData(OGDExtensions.JsonScope scope, string fieldName, in TaskLogData data) {
+            if (data == null) {
+                scope.Field(fieldName, (string) null);
+            } else {
+                scope.BeginObject(fieldName);
+                DoTaskLogData(scope, data);
+                scope.EndObject();
+            }
+        }
+
+        static private unsafe void WriteTaskLogData(OGDExtensions.JsonScope scope, in TaskLogData data) {
+            scope.BeginObject();
+            DoTaskLogData(scope, data);
+            scope.EndObject();
+        }
+        
+        static private unsafe void DoTaskLogData(OGDExtensions.JsonScope scope, in TaskLogData data) {
+            scope.Field("Category", data.Category.ToString())
+                .Field("LabName", data.LabName)
+                .Field("Index", data.Index)
+                .Field("IsActive", data.IsActive)
+                .Field("IsComplete", data.IsComplete);
+
+            scope.BeginArray("AvailableTools");
+            if (data.AvailableTools != null) {
+                foreach (var tool in data.AvailableTools) {
+                    scope.Item(tool);
+                }
+            }
+            scope.EndArray();
+
+            scope.BeginArray("Prompts");
+            if (data.Prompts != null) {
+                foreach (var prompt in data.Prompts) {
+                    scope.Item(prompt);
+                }
+            }
+            scope.EndArray();
+        }
+
+        #endregion // TaskLogData
+
+        #endregion // Types
     }
 }

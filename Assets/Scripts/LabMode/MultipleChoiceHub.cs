@@ -1,4 +1,5 @@
 using BeauUtil;
+using BeauUtil.Extensions;
 using JetBrains.Annotations;
 using System;
 using System.Collections;
@@ -204,16 +205,16 @@ namespace ThermoVR.Lab
                 }
             }
   
-            EventMgr.Events.Dispatch(GameEvents.TaskChoiceSelected, selectedStrs);
+            EventMgr.Events.Dispatch(GameEvents.TaskChoiceSelected, EvtArgs.Ref(selectedStrs));
 
             if (deselectOld)
             {
-                EventMgr.Events.Dispatch(GameEvents.ClickDeselectAnswer, new AnswerSelectLogData(prevSelection, IsSingleAnswerCorrect(prevSelection)));
+                EventMgr.Events.Dispatch(GameEvents.ClickDeselectAnswer, EvtArgs.Create(new AnswerSelectLogData(prevSelection, IsSingleAnswerCorrect(prevSelection))));
             }
 
             bool isCorrect = IsSingleAnswerCorrect(args.ID);
             uint index = args.ID;
-            EventMgr.Events.Dispatch(GameEvents.ClickSelectAnswer, new AnswerSelectLogData(index, isCorrect));
+            EventMgr.Events.Dispatch(GameEvents.ClickSelectAnswer, EvtArgs.Create(new AnswerSelectLogData(index, isCorrect)));
         }
 
         #endregion // Handlers

@@ -16,7 +16,7 @@ public class VisAid : MonoBehaviour
   [System.NonSerialized]
   public Touchable touchable;
   [System.NonSerialized]
-  public Rigidbody rigidbody;
+  public new Rigidbody rigidbody;
   [System.NonSerialized]
   public Transform og_transform;
   [System.NonSerialized]

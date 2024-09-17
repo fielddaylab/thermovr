@@ -15,7 +15,7 @@ namespace ThermoVR.Tools
 
         private void Start()
         {
-            EventMgr.Events?.Register<Tuple<Vector3, Vector3>>(GameEvents.TargetZoneUpdated, HandleTargetZoneUpdated);
+            EventMgr.Events?.Register<STuple<Vector3, Vector3>>(GameEvents.TargetZoneUpdated, HandleTargetZoneUpdated);
             EventMgr.Events?.Register(GameEvents.ClearTargetZone, HandleClearTargetZone);
             EventMgr.Events?.Register(GameEvents.GameModeStarted, HandleGameModeStarted);
             EventMgr.Events?.Register(GameEvents.GameModeExited, HandleGameModeExited);
@@ -23,7 +23,7 @@ namespace ThermoVR.Tools
 
         #region Handlers
 
-        private void HandleTargetZoneUpdated(Tuple<Vector3, Vector3> args)
+        private void HandleTargetZoneUpdated(STuple<Vector3, Vector3> args)
         {
             m_targetZone.transform.localPosition = args.Item1;
 

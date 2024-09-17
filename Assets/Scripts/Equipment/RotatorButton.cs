@@ -1,4 +1,5 @@
 using BeauRoutine;
+using BeauUtil.Extensions;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -51,8 +52,8 @@ public class RotatorButton : MonoBehaviour
         Vector3 targetRotation = targetTransform.localEulerAngles;
         targetRotation.y = targetYRotation;
 
-        if (m_rotationStep > 0) { EventMgr.Events.Dispatch(GameEvents.RotateGraphClickedCW, new Tuple<float, float>(targetTransform.eulerAngles.y, targetRotation.y)); }
-        else { EventMgr.Events.Dispatch(GameEvents.RotateGraphClickedCCW, new Tuple<float, float>(targetTransform.eulerAngles.y, targetRotation.y)); }
+        if (m_rotationStep > 0) { EventMgr.Events.Dispatch(GameEvents.RotateGraphClickedCW, EvtArgs.Create(new STuple<float, float>(targetTransform.eulerAngles.y, targetRotation.y))); }
+        else { EventMgr.Events.Dispatch(GameEvents.RotateGraphClickedCCW, EvtArgs.Create(new STuple<float, float>(targetTransform.eulerAngles.y, targetRotation.y))); }
         
         yield return targetTransform.RotateTo(targetRotation, 0.5f, Axis.Y);
 

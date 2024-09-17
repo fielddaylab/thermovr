@@ -1,4 +1,5 @@
 using BeauRoutine;
+using BeauUtil.Extensions;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -77,7 +78,7 @@ namespace ThermoVR.Lab
         public override void Init() {
             base.Init();
 
-            EventMgr.Events?.Register<Tuple<LabInfo, int>>(GameEvents.PreActivateLab, HandlePreActivateLab);
+            EventMgr.Events?.Register<STuple<LabInfo, int>>(GameEvents.PreActivateLab, HandlePreActivateLab);
             EventMgr.Events?.Register(GameEvents.DeactivateLab, HandleDeactivateLab);
 
             EventMgr.Events?.Register(GameEvents.TaskResetPressed, HandleTaskResetPressed);
@@ -427,7 +428,7 @@ namespace ThermoVR.Lab
 
         #region Handlers
 
-        private void HandlePreActivateLab(Tuple<LabInfo, int> info) {
+        private void HandlePreActivateLab(STuple<LabInfo, int> info) {
             m_currLab = info.Item1;
             m_labIsActive = true;
         }
@@ -680,14 +681,14 @@ namespace ThermoVR.Lab
             m_tabs[topicIndex].TaskTabs[taskIndex].ButtonRect.sizeDelta = new Vector2(m_tabs[topicIndex].TaskTabs[taskIndex].ButtonRect.sizeDelta.x, TAB_HEIGHT_ACTIVE);
 
             EventMgr.Events.Dispatch(GameEvents.TaskSwitched, taskIndex);
-            EventMgr.Events.Dispatch(GameEvents.ClickSelectTask, m_currLab.Topics[topicIndex].Tasks[taskIndex]);
+            EventMgr.Events.Dispatch(GameEvents.ClickSelectTask, EvtArgs.Box(m_currLab.Topics[topicIndex].Tasks[taskIndex]));
 
             //if (!m_tabs[topicIndex].TaskTabs[taskIndex].HasBeenEvaluated())
             //{
                 ApplyWorldMods(m_currLab.Topics[topicIndex].Tasks[taskIndex]);
             //}
 
-            EventMgr.Events.Dispatch(GameEvents.TaskAssigned, m_currLab.Topics[topicIndex].Tasks[taskIndex]);
+            EventMgr.Events.Dispatch(GameEvents.TaskAssigned, EvtArgs.Box(m_currLab.Topics[topicIndex].Tasks[taskIndex]));
         }
 
         private void DeactivateTab(int topicIndex, int taskIndex)
@@ -726,7 +727,7 @@ namespace ThermoVR.Lab
 
             if (fromPlayerAction)
             {
-                EventMgr.Events.Dispatch(GameEvents.ClickSelectSection, m_currLab.Topics[topicIndex]);
+                EventMgr.Events.Dispatch(GameEvents.ClickSelectSection, EvtArgs.Box(m_currLab.Topics[topicIndex]));
             }
 
             //if (!m_tabs[topicIndex].TaskTabs[0].HasBeenEvaluated())
@@ -772,7 +773,7 @@ namespace ThermoVR.Lab
                 }
             }
 
-            EventMgr.Events.Dispatch(GameEvents.SectionListDisplayed, m_visibleSections);
+            EventMgr.Events.Dispatch(GameEvents.SectionListDisplayed, EvtArgs.Ref(m_visibleSections));
         }
 
         private void RefreshInteractableTaskTabs()
@@ -849,7 +850,7 @@ namespace ThermoVR.Lab
                 m_ScrollUpBtn.gameObject.SetActive(false);
             }
 
-            EventMgr.Events.Dispatch(GameEvents.TaskListDisplayed, m_visibleTasks);
+            EventMgr.Events.Dispatch(GameEvents.TaskListDisplayed, EvtArgs.Ref(m_visibleTasks));
         }
 
     }

@@ -1,525 +1,611 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using BeauUtil;
+using BeauUtil.Debugger;
+using UnityEngine;
 
 namespace BeauUtil.Extensions
 {
-    public sealed class EventDispatcher<TArg>
-    {
+    /// <summary>
+    /// Event dispatcher collection.
+    /// </summary>
+    public sealed class EventDispatcher<TArg> : IEventDispatcher {
         #region Types
 
         /// <summary>
-        /// Small struct for holding a queued event.
+        /// Record of a queued event.
         /// </summary>
-        private struct QueuedEvent
-        {
-            public readonly StringHash32 Id;
-            public readonly TArg Argument;
+        private struct QueuedEvent {
+            public StringHash32 Id;
+            public TArg Arg;
 
-            public QueuedEvent(StringHash32 id, TArg argument) {
+            public QueuedEvent(StringHash32 id, TArg arg) {
                 Id = id;
-                Argument = argument;
-            }
-        }
-
-        /// <summary>
-        /// Block of handlers.
-        /// </summary>
-        private class HandlerBlock
-        {
-            public StringHash32 EventId;
-
-            private readonly RingBuffer<Handler> m_Handlers = new RingBuffer<Handler>(8, RingBufferMode.Expand);
-            private uint[] m_QueuedDeleteMasks = new uint[8];
-            private bool m_ForceCleanup;
-            private uint m_ExecutionDepth;
-
-            /// <summary>
-            /// Returns if this handler block has no handlers.
-            /// </summary>
-            public bool IsEmpty() {
-                return m_Handlers.Count == 0;
-            }
-
-            #region Add
-
-            /// <summary>
-            /// Registers a handler.
-            /// </summary>
-            public void Add(Action<TArg> action, UnityEngine.Object binding) {
-                m_Handlers.PushBack(new Handler(CastableAction<TArg>.Create(action), binding));
-            }
-
-            /// <summary>
-            /// Registers a handler.
-            /// </summary>
-            public void Add(Action action, UnityEngine.Object binding) {
-                m_Handlers.PushBack(new Handler(CastableAction<TArg>.Create(action), binding));
-            }
-
-            /// <summary>
-            /// Registers a handler.
-            /// </summary>
-            public void Add<U>(Action<U> action, UnityEngine.Object binding) {
-                m_Handlers.PushBack(new Handler(CastableAction<TArg>.Create(action), binding));
-            }
-
-            #endregion // Add 
-
-            #region Remove
-
-            /// <summary>
-            /// Removes all handlers for the given binding.
-            /// </summary>
-            public void RemoveAll(UnityEngine.Object binding) {
-                for (int i = m_Handlers.Count - 1; i >= 0; i--) {
-                    if (m_Handlers[i].MatchesBinding(binding)) {
-                        if (m_ExecutionDepth > 0) {
-                            m_QueuedDeleteMasks[i / 32] |= 1u << (i % 32);
-                        }
-                        else {
-                            m_Handlers.FastRemoveAt(i);
-                        }
-                    }
-                }
-            }
-
-            /// <summary>
-            /// Removes the first handler for the given method.
-            /// </summary>
-            public void Remove(Action action) {
-                for (int i = 0; i < m_Handlers.Count; i++) {
-                    if (m_Handlers[i].MatchesAction(action)) {
-                        if (m_ExecutionDepth > 0) {
-                            m_QueuedDeleteMasks[i / 32] |= 1u << (i % 32);
-                        }
-                        else {
-                            m_Handlers.FastRemoveAt(i);
-                        }
-                        return;
-                    }
-                }
-            }
-
-            /// <summary>
-            /// Removes the first handler for the given method.
-            /// </summary>
-            public void Remove(Action<TArg> action) {
-                for (int i = 0; i < m_Handlers.Count; i++) {
-                    if (m_Handlers[i].MatchesAction(action)) {
-                        if (m_ExecutionDepth > 0) {
-                            m_QueuedDeleteMasks[i / 32] |= 1u << (i % 32);
-                        }
-                        else {
-                            m_Handlers.FastRemoveAt(i);
-                        }
-                        return;
-                    }
-                }
-            }
-
-            /// <summary>
-            /// Removes the first handler for the given method.
-            /// </summary>
-            public void Remove<U>(Action<U> action) {
-                for (int i = 0; i < m_Handlers.Count; i++) {
-                    if (m_Handlers[i].MatchesAction(action)) {
-                        if (m_ExecutionDepth > 0) {
-                            m_QueuedDeleteMasks[i / 32] |= 1u << (i % 32);
-                        }
-                        else {
-                            m_Handlers.FastRemoveAt(i);
-                        }
-                        return;
-                    }
-                }
-            }
-
-            #endregion // Remove
-
-            /// <summary>
-            /// Invokes the event on all registered handlers.
-            /// </summary>
-            public void Invoke(TArg context) {
-                int count = m_Handlers.Count;
-
-                if (count == 0) {
-                    return;
-                }
-
-                m_ExecutionDepth++;
-
-                for (int i = 0; i < count; i++) {
-                    Handler handler = m_Handlers[i];
-                    // if this handler is not queued for removal
-                    if ((m_QueuedDeleteMasks[i / 32] & (1 << (i % 32))) == 0) {
-                        handler.Invoke(context);
-                    }
-                }
-
-                if (--m_ExecutionDepth == 1) {
-                    if (HasDeletesQueued()) {
-                        Cleanup();
-                    }
-                }
-            }
-
-            /// <summary>
-            /// Cleans up queued deletes.
-            /// </summary>
-            public void Cleanup() {
-                if (m_ExecutionDepth > 0) {
-                    m_ForceCleanup = true;
-                }
-                else {
-                    for (int i = m_Handlers.Count - 1; i >= 0; i--) {
-                        if ((m_QueuedDeleteMasks[i / 32] & (1 << (i % 32))) != 0) {
-                            m_Handlers.FastRemoveAt(i);
-                        }
-                    }
-
-                    for (int i = 0; i < m_QueuedDeleteMasks.Length; i++) {
-                        m_QueuedDeleteMasks[i] = 0;
-                    }
-                }
-            }
-
-            /// <summary>
-            /// Clears all handlers.
-            /// </summary>
-            public void Clear() {
-                if (m_ExecutionDepth > 0) {
-                    for (int i = 0; i < m_QueuedDeleteMasks.Length; i++) {
-                        m_QueuedDeleteMasks[i] = uint.MaxValue;
-                    }
-                }
-                else {
-                    m_Handlers.Clear();
-                    m_ForceCleanup = false;
-                    for (int i = 0; i < m_QueuedDeleteMasks.Length; i++) {
-                        m_QueuedDeleteMasks[i] = 0;
-                    }
-                }
-            }
-
-            /// <summary>
-            /// Returns if any deletes are queued on this handler block.
-            /// </summary>
-            private bool HasDeletesQueued() {
-                if (m_ForceCleanup) {
-                    return true;
-                }
-
-                for (int i = 0; i < m_QueuedDeleteMasks.Length; i++) {
-                    if (m_QueuedDeleteMasks[i] != 0) {
-                        return true;
-                    }
-                }
-
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// Struct for holding a method and its binding.
-        /// </summary>
-        private struct Handler
-        {
-            private int m_BindingInstanceId;
-            private CastableAction<TArg> m_Action;
-
-            public Handler(CastableAction<TArg> action, UnityEngine.Object binding) {
-                m_BindingInstanceId = !ReferenceEquals(binding, null) ? binding.GetInstanceID() : 0;
-                m_Action = action;
-            }
-
-            public void Invoke(TArg context) {
-                m_Action.Invoke(context);
-            }
-
-            public bool MatchesBinding(UnityEngine.Object binding) {
-                return !ReferenceEquals(binding, null) ? m_BindingInstanceId == binding.GetInstanceID() : m_BindingInstanceId == 0;
-            }
-
-            public bool MatchesAction(Action action) {
-                return m_Action.Equals(action);
-            }
-
-            public bool MatchesAction(Action<TArg> action) {
-                return m_Action.Equals(action);
-            }
-
-            public bool MatchesAction(MulticastDelegate action) {
-                return m_Action.Equals(action);
+                Arg = arg;
             }
         }
 
         #endregion // Types
 
-        private readonly Dictionary<StringHash32, HandlerBlock> m_Handlers = new Dictionary<StringHash32, HandlerBlock>();
-        private readonly RingBuffer<HandlerBlock> m_FreeHandlers = new RingBuffer<HandlerBlock>();
-        private readonly RingBuffer<QueuedEvent> m_QueuedEvents = new RingBuffer<QueuedEvent>(16, RingBufferMode.Expand);
-        private readonly List<StringHash32> m_TempEventList = new List<StringHash32>();
+        private readonly Dictionary<uint, CastableEvent<TArg>> m_HandlerBlocks;
+        private readonly RingBuffer<QueuedEvent> m_EventQueue;
+        private readonly RingBuffer<CastableEvent<TArg>> m_BlockPool;
+        private readonly int m_DefaultEventHandlerCapacity;
+        private readonly List<uint> m_TempEventIdList;
 
-        #region Registration
+        public EventDispatcher(int initialEventTypeCapacity = 32, int initialEventQueueCapacity = 32, int defaultHandlerCapacity = 4) {
+            m_HandlerBlocks = new Dictionary<uint, CastableEvent<TArg>>(initialEventTypeCapacity);
+            m_EventQueue = new RingBuffer<QueuedEvent>(initialEventQueueCapacity, RingBufferMode.Expand);
 
-        /// <summary>
-        /// Registers an event handler, optionally bound to a given object.
-        /// </summary>
-        public EventDispatcher<TArg> Register(StringHash32 eventId, Action inAction, UnityEngine.Object binding = null) {
-            HandlerBlock block = GetBlock(eventId, true);
-            block.Add(inAction, binding);
-            return this;
+            m_BlockPool = new RingBuffer<CastableEvent<TArg>>(4, RingBufferMode.Expand);
+
+            m_TempEventIdList = new List<uint>(initialEventTypeCapacity / 2);
+            m_DefaultEventHandlerCapacity = defaultHandlerCapacity;
         }
 
-        /// <summary>
-        /// Registers an event handler, optionally bound to a given object.
-        /// </summary>
-        public EventDispatcher<TArg> Register(StringHash32 eventId, Action<TArg> inActionWithContext, UnityEngine.Object binding = null) {
-            HandlerBlock block = GetBlock(eventId, true);
-            block.Add(inActionWithContext, binding);
-            return this;
-        }
+        #region Internal
 
-        /// <summary>
-        /// Registers an event handler, optionally bound to a given object.
-        /// </summary>
-        public EventDispatcher<TArg> Register<U>(StringHash32 eventId, Action<U> inActionWithCastedContext, UnityEngine.Object binding = null) {
-            HandlerBlock block = GetBlock(eventId, true);
-            block.Add(inActionWithCastedContext, binding);
-            return this;
-        }
-
-        /// <summary>
-        /// Deregisters an event handler.
-        /// </summary>
-        public EventDispatcher<TArg> Deregister(StringHash32 eventId, Action action) {
-            HandlerBlock block;
-            if (m_Handlers.TryGetValue(eventId, out block)) {
-                block.Remove(action);
-                if (block.IsEmpty()) {
-                    m_Handlers.Remove(eventId);
-                    m_FreeHandlers.PushBack(block);
+        // Gets or creates a handler block for the given event id
+        private CastableEvent<TArg> GetOrCreateEventBlock(StringHash32 id) {
+            if (id.IsEmpty) {
+                throw new ArgumentNullException("eventId", "Cannot register for an empty eventId");
+            }
+            if (!m_HandlerBlocks.TryGetValue(id.HashValue, out CastableEvent<TArg> block)) {
+                if (m_BlockPool.Count > 0) {
+                    block = m_BlockPool.PopBack();
+                } else {
+                    block = new CastableEvent<TArg>(m_DefaultEventHandlerCapacity);
                 }
-            }
-
-            return this;
-        }
-
-        /// <summary>
-        /// Deregisters an event handler.
-        /// </summary>
-        public EventDispatcher<TArg> Deregister(StringHash32 eventId, Action<TArg> action) {
-            HandlerBlock block;
-            if (m_Handlers.TryGetValue(eventId, out block)) {
-                block.Remove(action);
-                if (block.IsEmpty()) {
-                    m_Handlers.Remove(eventId);
-                    m_FreeHandlers.PushBack(block);
-                }
-            }
-
-            return this;
-        }
-
-        /// <summary>
-        /// Deregisters an event handler.
-        /// </summary>
-        public EventDispatcher<TArg> Deregister<T>(StringHash32 eventId, Action<T> castedAction) {
-            HandlerBlock block;
-            if (m_Handlers.TryGetValue(eventId, out block)) {
-                block.Remove(castedAction);
-                if (block.IsEmpty()) {
-                    m_Handlers.Remove(eventId);
-                    m_FreeHandlers.PushBack(block);
-                }
-            }
-
-            return this;
-        }
-
-        /// <summary>
-        /// Deregisters all handlers for the given event.
-        /// </summary>
-        public EventDispatcher<TArg> DeregisterAll(StringHash32 eventId) {
-            HandlerBlock block;
-            if (m_Handlers.TryGetValue(eventId, out block)) {
-                block.Clear();
-                m_Handlers.Remove(eventId);
-                m_FreeHandlers.PushBack(block);
-            }
-
-            return this;
-        }
-
-        /// <summary>
-        /// Deregisters all handlers associated with the given binding.
-        /// </summary>
-        public EventDispatcher<TArg> DeregisterAll(UnityEngine.Object binding) {
-            if (binding.IsReferenceNull()) {
-                return this;
-            }
-
-            m_TempEventList.Clear();
-            foreach (var block in m_Handlers.Values) {
-                block.RemoveAll(binding);
-                if (block.IsEmpty()) {
-                    m_FreeHandlers.PushBack(block);
-                    m_TempEventList.Add(block.EventId);
-                }
-            }
-
-            foreach (var tempEventId in m_TempEventList) {
-                m_Handlers.Remove(tempEventId);
-            }
-
-            m_TempEventList.Clear();
-            return this;
-        }
-
-        private HandlerBlock GetBlock(StringHash32 eventId, bool createIfNotThere) {
-            HandlerBlock block;
-            if (!m_Handlers.TryGetValue(eventId, out block) && createIfNotThere) {
-                if (m_FreeHandlers.Count > 0) {
-                    block = m_FreeHandlers.PopBack();
-                }
-                else {
-                    block = new HandlerBlock();
-                }
-                block.EventId = eventId;
-                m_Handlers.Add(eventId, block);
+                m_HandlerBlocks.Add(id.HashValue, block);
             }
             return block;
         }
 
-        #endregion // Registration
+        #endregion // Internal
 
-        #region Operations
+        #region Register
 
         /// <summary>
-        /// Dispatches the event to its handlers.
+        /// Registers a handler for the given event id.
         /// </summary>
-        public void Dispatch(StringHash32 eventId, TArg argument = default) {
-            HandlerBlock block;
-            if (m_Handlers.TryGetValue(eventId, out block)) {
-                block.Invoke(argument);
+        public EventDispatcher<TArg> Register(StringHash32 eventId, Action action, UnityEngine.Object context = null) {
+            CastableEvent<TArg> block = GetOrCreateEventBlock(eventId);
+            block.Register(action, context);
+            return this;
+        }
+
+        /// <summary>
+        /// Registers a handler for the given event id.
+        /// </summary>
+        public EventDispatcher<TArg> Register(StringHash32 eventId, Action<TArg> action, UnityEngine.Object context = null) {
+            CastableEvent<TArg> block = GetOrCreateEventBlock(eventId);
+            block.Register(action, context);
+            return this;
+        }
+
+        /// <summary>
+        /// Registers a handler for the given event id.
+        /// </summary>
+        public EventDispatcher<TArg> Register(StringHash32 eventId, RefAction<TArg> action, UnityEngine.Object context = null) {
+            CastableEvent<TArg> block = GetOrCreateEventBlock(eventId);
+            block.Register(action, context);
+            return this;
+        }
+
+        /// <summary>
+        /// Registers a handler for the given event id.
+        /// </summary>
+        public EventDispatcher<TArg> Register<TCasted>(StringHash32 eventId, Action<TCasted> action, UnityEngine.Object context = null) {
+            CastableEvent<TArg> block = GetOrCreateEventBlock(eventId);
+            block.Register<TCasted>(action, context);
+            return this;
+        }
+
+        #endregion // Register
+
+        #region Deregister
+
+        /// <summary>
+        /// Deregisters a handler for the given event id.
+        /// </summary>
+        public EventDispatcher<TArg> Deregister(StringHash32 eventId, Action action) {
+            if (m_HandlerBlocks.TryGetValue(eventId.HashValue, out CastableEvent<TArg> block)) {
+                block.Deregister(action);
+            }
+            return this;
+        }
+
+        /// <summary>
+        /// Deregisters a handler for the given event id.
+        /// </summary>
+        public EventDispatcher<TArg> Deregister(StringHash32 eventId, Action<TArg> action) {
+            if (m_HandlerBlocks.TryGetValue(eventId.HashValue, out CastableEvent<TArg> block)) {
+                block.Deregister(action);
+            }
+            return this;
+        }
+
+        /// <summary>
+        /// Deregisters a handler for the given event id.
+        /// </summary>
+        public EventDispatcher<TArg> Deregister(StringHash32 eventId, RefAction<TArg> action) {
+            if (m_HandlerBlocks.TryGetValue(eventId.HashValue, out CastableEvent<TArg> block)) {
+                block.Deregister(action);
+            }
+            return this;
+        }
+
+        /// <summary>
+        /// Deregisters a handler for the given event id.
+        /// </summary>
+        public EventDispatcher<TArg> Deregister<TCasted>(StringHash32 eventId, Action<TCasted> action) {
+            if (m_HandlerBlocks.TryGetValue(eventId.HashValue, out CastableEvent<TArg> block)) {
+                block.Deregister(action);
+            }
+            return this;
+        }
+
+        /// <summary>
+        /// Deregisters all handlers for the given event id.
+        /// </summary>
+        public EventDispatcher<TArg> DeregisterAll(StringHash32 eventId) {
+            if (m_HandlerBlocks.TryGetValue(eventId.HashValue, out CastableEvent<TArg> block)) {
+                block.Clear();
+                m_BlockPool.PushBack(block);
+                m_HandlerBlocks.Remove(eventId.HashValue);
+            }
+            return this;
+        }
+
+        /// <summary>
+        /// Deregisters all handlers bound to the given context.
+        /// </summary>
+        public EventDispatcher<TArg> DeregisterAllForContext(UnityEngine.Object context) {
+            if (ReferenceEquals(context, null)) {
+                return this;
+            }
+
+            m_TempEventIdList.Clear();
+            foreach (var kv in m_HandlerBlocks) {
+                if (kv.Value.DeregisterAll(context) > 0 && kv.Value.IsEmpty) {
+                    m_BlockPool.PushBack(kv.Value);
+                    m_TempEventIdList.Add(kv.Key);
+                }
+            }
+
+            foreach (var eventId in m_TempEventIdList) {
+                m_HandlerBlocks.Remove(eventId);
+            }
+
+            m_TempEventIdList.Clear();
+            return this;
+        }
+
+        #endregion // Deregister
+
+        #region Invoke
+
+        /// <summary>
+        /// Dispatches the given event to all corresponding handlers.
+        /// </summary>
+        public void Dispatch(StringHash32 eventId) {
+            if (m_HandlerBlocks.TryGetValue(eventId.HashValue, out CastableEvent<TArg> evt)) {
+                evt.Invoke(default(TArg));
             }
         }
 
         /// <summary>
-        /// Dispatches the event to its handlers the next time FlushQueue() is called.
+        /// Dispatches the given event to all corresponding handlers.
         /// </summary>
-        public void Queue(StringHash32 eventId, TArg argument = default) {
-            m_QueuedEvents.PushBack(new QueuedEvent(eventId, argument));
+        public void Dispatch(StringHash32 eventId, TArg arg) {
+            if (m_HandlerBlocks.TryGetValue(eventId.HashValue, out CastableEvent<TArg> evt)) {
+                evt.Invoke(ref arg);
+            }
         }
 
         /// <summary>
-        /// Dispatches all events queued up with Queue.
+        /// Dispatches the given event to all corresponding handlers.
         /// </summary>
-        public void FlushQueue() {
+        public void Dispatch(StringHash32 eventId, ref TArg arg) {
+            if (m_HandlerBlocks.TryGetValue(eventId.HashValue, out CastableEvent<TArg> evt)) {
+                evt.Invoke(ref arg);
+            }
+        }
+
+        /// <summary>
+        /// Queues an event to dispatch at the next time Flush() is called
+        /// </summary>
+        public void Queue(StringHash32 eventId) {
+            m_EventQueue.PushBack(new QueuedEvent(eventId, default(TArg)));
+        }
+
+        /// <summary>
+        /// Queues an event to dispatch at the next time Flush() is called
+        /// </summary>
+        public void Queue(StringHash32 eventId, TArg arg) {
+            m_EventQueue.PushBack(new QueuedEvent(eventId, arg));
+        }
+
+        /// <summary>
+        /// Flushes all queued events.
+        /// </summary>
+        public void Flush() {
             QueuedEvent evt;
-            while (m_QueuedEvents.TryPopFront(out evt)) {
-                Dispatch(evt.Id, evt.Argument);
+            while (m_EventQueue.TryPopFront(out evt)) {
+                Dispatch(evt.Id, ref evt.Arg);
             }
         }
 
-        #endregion // Operations
-
-        #region Helpers
-
         /// <summary>
-        /// Coroutine/iterator. Waits for an event with the given id to dispatch before continuing.
+        /// Returns an enumerator that waits for the given event id to be dispatched.
         /// </summary>
-        public IEnumerator Wait(StringHash32 eventId) {
-            return new WaitIterator(this, eventId, null);
+        public WaitForEventEnumerator Wait(StringHash32 eventId) {
+            return WaitForEventEnumerator.Create(this, eventId);
         }
 
-        /// <summary>
-        /// Coroutine/iterator. Waits for an event with the given id to dispatch before continuing.
-        /// </summary>
-        public IEnumerator Wait(StringHash32 eventId, Action callback) {
-            return new WaitIterator(this, eventId, CastableAction<TArg>.Create(callback));
-        }
+        #endregion // Invoke
+
+        #region Cleanup
 
         /// <summary>
-        /// Coroutine/iterator. Waits for an event with the given id to dispatch before continuing.
+        /// Clears all event handlers and queued events.
         /// </summary>
-        public IEnumerator Wait(StringHash32 eventId, Action<TArg> callback) {
-            return new WaitIterator(this, eventId, CastableAction<TArg>.Create(callback));
-        }
-
-        /// <summary>
-        /// Coroutine/iterator. Waits for an event with the given id to dispatch before continuing.
-        /// </summary>
-        public IEnumerator Wait<T>(StringHash32 eventId, Action<T> callback) {
-            return new WaitIterator(this, eventId, CastableAction<TArg>.Create(callback));
-        }
-
-        private class WaitIterator : IEnumerator, IDisposable
-        {
-            private const int Phase_Init = 0;
-            private const int Phase_Wait = 1;
-            private const int Phase_Done = 2;
-
-            private EventDispatcher<TArg> m_Parent;
-            private readonly StringHash32 m_EventId;
-            private Action<TArg> m_InnerCallback;
-            private CastableAction<TArg>? m_CustomCallback;
-            private int m_Phase = 0;
-
-            public WaitIterator(EventDispatcher<TArg> parent, StringHash32 eventId, CastableAction<TArg>? customCallback) {
-                m_Parent = parent;
-                m_EventId = eventId;
-                m_InnerCallback = InnerCallback;
-                m_CustomCallback = customCallback;
+        public void Clear() {
+            m_EventQueue.Clear();
+            foreach (var kv in m_HandlerBlocks) {
+                kv.Value.Clear();
+                m_BlockPool.PushBack(kv.Value);
             }
+            m_HandlerBlocks.Clear();
+        }
 
-            public object Current { get { return null; } }
-
-            public bool MoveNext() {
-                switch (m_Phase) {
-                    case Phase_Init: {
-                            m_Parent.Register(m_EventId, m_InnerCallback);
-                            m_Phase++;
-                            return true;
-                        }
-
-                    case Phase_Wait: {
-                            return true;
-                        }
-
-                    case Phase_Done:
-                    default: {
-                            return false;
-                        }
+        /// <summary>
+        /// Cleans up any event handlers owned by now-dead objects.
+        /// </summary>
+        public void CleanupDeadReferences() {
+            m_TempEventIdList.Clear();
+            foreach (var kv in m_HandlerBlocks) {
+                int eventDeadCount = kv.Value.DeregisterAllWithDeadContext();
+                if (eventDeadCount > 0) {
+                    Log.Warn("[EventDispatcher] Found {0} stale handlers for event '{1}' - make sure to deregister your handlers in OnDisable or OnDestroy", eventDeadCount, new StringHash32(kv.Key).ToDebugString());
+                    if (kv.Value.IsEmpty) {
+                        m_BlockPool.PushBack(kv.Value);
+                        m_TempEventIdList.Add(kv.Key);
+                    }
                 }
             }
 
-            public void Reset() {
-                throw new NotSupportedException();
+            foreach (var eventId in m_TempEventIdList) {
+                m_HandlerBlocks.Remove(eventId);
             }
 
-            public void Dispose() {
-                if (m_Phase == Phase_Wait) {
-                    m_Parent.Deregister(m_EventId, m_InnerCallback);
-                }
-                m_Phase = Phase_Done;
-                m_CustomCallback = null;
-                m_Parent = null;
-                m_InnerCallback = null;
+            m_TempEventIdList.Clear();
+        }
+
+        #endregion // Cleanup
+
+        #region Explicit Interface Implementations
+
+        IEventDispatcher IEventDispatcher.Register(StringHash32 eventId, Action action, UnityEngine.Object context) {
+            return Register(eventId, action, context);
+        }
+
+        IEventDispatcher IEventDispatcher.Deregister(StringHash32 eventId, Action action) {
+            return Deregister(eventId, action);
+        }
+
+        IEventDispatcher IEventDispatcher.DeregisterAll(StringHash32 eventId) {
+            return DeregisterAll(eventId);
+        }
+
+        IEventDispatcher IEventDispatcher.DeregisterAllForContext(UnityEngine.Object context) {
+            return DeregisterAllForContext(context);
+        }
+
+        #endregion // Explicit Interface Implementations
+    }
+
+    /// <summary>
+    /// Event dispatcher interface.
+    /// </summary>
+    public interface IEventDispatcher {
+        /// <summary>
+        /// Cleans up any event handlers owned by now-dead objects.
+        /// </summary>
+        void CleanupDeadReferences();
+
+        /// <summary>
+        /// Flushes all queued events.
+        /// </summary>
+        void Flush();
+
+        /// <summary>
+        /// Clears all queued events and handlers.
+        /// </summary>
+        void Clear();
+
+        /// <summary>
+        /// Dispatches the given event to all corresponding handlers.
+        /// </summary>
+        void Dispatch(StringHash32 eventId);
+
+        /// <summary>
+        /// Queues an event to dispatch at the next time Flush() is called
+        /// </summary>
+        void Queue(StringHash32 eventId);
+
+        /// <summary>
+        /// Registers a parameter-less handler for the given event type.
+        /// </summary>
+        IEventDispatcher Register(StringHash32 eventId, Action action, UnityEngine.Object context = null);
+
+        /// <summary>
+        /// Deregisters a parameter-less handler from the given event type.
+        /// </summary>
+        IEventDispatcher Deregister(StringHash32 eventId, Action action);
+
+        /// <summary>
+        /// Deregisters all handlers for the given event id.
+        /// </summary>
+        IEventDispatcher DeregisterAll(StringHash32 eventId);
+
+        /// <summary>
+        /// Deregisters all handlers bound to the given context.
+        /// </summary>
+        IEventDispatcher DeregisterAllForContext(UnityEngine.Object context);
+
+        /// <summary>
+        /// Waits for the given event to be dispatched.
+        /// </summary>
+        WaitForEventEnumerator Wait(StringHash32 eventId);
+    }
+
+    /// <summary>
+    /// Enumerator class that waits until an event is dispatched.
+    /// </summary>
+    public sealed class WaitForEventEnumerator : IEnumerator, IDisposable {
+        private const int UNINITIALIZED = 0;
+        private const int WAITING = 1;
+        private const int DONE = 2;
+
+        static private readonly RingBuffer<WaitForEventEnumerator> s_Pool = new RingBuffer<WaitForEventEnumerator>(8, RingBufferMode.Expand);
+
+        private IEventDispatcher m_Parent;
+        private StringHash32 m_EventId;
+        private int m_Phase;
+
+        private readonly Action m_CachedHandler;
+
+        public object Current { get { return null; } }
+
+        internal WaitForEventEnumerator() {
+            m_CachedHandler = OnInvoke;
+        }
+
+        static internal WaitForEventEnumerator Create(IEventDispatcher parent, StringHash32 eventId) {
+            if (!s_Pool.TryPopBack(out WaitForEventEnumerator inst)) {
+                inst = new WaitForEventEnumerator();
+            }
+            inst.Init(parent, eventId);
+            return inst;
+        }
+
+        internal void Init(IEventDispatcher parent, StringHash32 eventId) {
+            if (m_Phase > UNINITIALIZED) {
+                m_Parent.Deregister(eventId, m_CachedHandler);
+                m_Phase = UNINITIALIZED;
             }
 
-            private void InnerCallback(TArg arg) {
-                m_Phase = Phase_Done;
-                m_Parent.Deregister(m_EventId, m_InnerCallback);
-                m_CustomCallback?.Invoke(arg);
-                m_InnerCallback = null;
-                m_Parent = null;
-                m_CustomCallback = null;
+            m_Parent = parent;
+            m_EventId = eventId;
+        }
+
+        private void OnInvoke() {
+            m_Phase = DONE;
+        }
+
+        public void Dispose() {
+            if (m_Phase > UNINITIALIZED) {
+                m_Parent.Deregister(m_EventId, m_CachedHandler);
+                s_Pool.PushBack(this);
+                m_Phase = UNINITIALIZED;
+            }
+
+            m_EventId = StringHash32.Null;
+        }
+
+        public bool MoveNext() {
+            if (m_Phase == UNINITIALIZED) {
+                m_Parent.Register(m_EventId, m_CachedHandler);
+                m_Phase = WAITING;
+            }
+
+            return m_Phase == WAITING;
+        }
+
+        void IEnumerator.Reset() {
+            throw new NotSupportedException();
+        }
+    }
+
+    /// <summary>
+    /// Event arguments struct. Represents unmanaged data, boxed structs, and object references.
+    /// </summary>
+    public struct EvtArgs {
+        // would be great to have a queued event data fit entirely on a cache line
+        // 64 bytes total, minus the event id and object reference (assume 64bit pointer)
+        private const int MaxUnmanagedSize = (int) (64 - 4 - 8);
+
+        private struct UnmanagedData {
+            public unsafe fixed ulong Data[MaxUnmanagedSize / 8];
+        }
+
+        private object m_Instance;
+        private UnmanagedData m_Unmanaged;
+
+        #region Accessors
+
+        public T Unbox<T>() where T : struct {
+            return (T) m_Instance;
+        }
+
+        public T Deref<T>() where T : class {
+            return (T) m_Instance;
+        }
+
+        public T Unpack<T>() where T : unmanaged {
+            return Unsafe.FastReinterpret<UnmanagedData, T>(m_Unmanaged);
+        }
+
+        #endregion // Accessors
+
+        #region Operators
+
+        static public implicit operator EvtArgs(sbyte data) {
+            return Create(data);
+        }
+
+        static public implicit operator EvtArgs(byte data) {
+            return Create(data);
+        }
+
+        static public implicit operator EvtArgs(short data) {
+            return Create(data);
+        }
+
+        static public implicit operator EvtArgs(ushort data) {
+            return Create(data);
+        }
+
+        static public implicit operator EvtArgs(char data) {
+            return Create(data);
+        }
+
+        static public implicit operator EvtArgs(int data) {
+            return Create(data);
+        }
+
+        static public implicit operator EvtArgs(uint data) {
+            return Create(data);
+        }
+
+        static public implicit operator EvtArgs(long data) {
+            return Create(data);
+        }
+
+        static public implicit operator EvtArgs(ulong data) {
+            return Create(data);
+        }
+
+        static public implicit operator EvtArgs(float data) {
+            return Create(data);
+        }
+
+        static public implicit operator EvtArgs(double data) {
+            return Create(data);
+        }
+
+        static public implicit operator EvtArgs(bool data) {
+            return Create(data);
+        }
+
+        static public implicit operator EvtArgs(string data) {
+            return Create(data);
+        }
+
+        static public implicit operator EvtArgs(StringHash32 data) {
+            return Create(data);
+        }
+
+        static public implicit operator EvtArgs(StringHash64 data) {
+            return Create(data);
+        }
+
+        static public implicit operator EvtArgs(RuntimeObjectHandle data) {
+            return Create(data);
+        }
+
+        #endregion // Operators
+
+        #region Constructors
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static public EvtArgs Create<T>(T data) where T : unmanaged {
+            return UnmanagedConverter<T>.Create(data);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static public EvtArgs Create(string data) {
+            return BoxedConverter<string>.Create(data);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static public EvtArgs Ref<T>(T data) where T : class {
+            return BoxedConverter<T>.Create(data);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static public EvtArgs Box<T>(T data) where T : struct {
+            return BoxedConverter<T>.Create(data);
+        }
+
+        #endregion // Constructors
+
+        #region Converters
+
+        static private unsafe class UnmanagedConverter<T> where T : unmanaged {
+            static UnmanagedConverter() {
+                Assert.True(sizeof(T) <= sizeof(UnmanagedData), "Unmanaged type '{0}' exceeds the maximum allowed size for an EvtData ({1} > {2})", typeof(T).FullName, sizeof(T), sizeof(UnmanagedData));
+                Log.Msg("[EvtArgs] Registering unmanaged converter from '{0}' to '{1}'", typeof(EvtArgs).FullName, typeof(T).FullName);
+#if SUPPORTS_FUNCTION_POINTERS
+                CastableArgument.RegisterConverter<EvtArgs, T>(&Cast);
+#else
+                CastableArgument.RegisterConverter<EvtArgs, T>(Cast);
+#endif // SUPPORTS_FUNCTION_POINTERS
+            }
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static private T Cast(EvtArgs args) {
+                Assert.True(ReferenceEquals(args.m_Instance, typeof(T)), "Mismatched create/cast between '{0}' and '{1}'", ((Type) args.m_Instance).FullName, typeof(T).FullName);
+                return Unsafe.FastReinterpret<ulong, T>(args.m_Unmanaged.Data);
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            static public EvtArgs Create(T data) {
+                EvtArgs dat = default;
+                *(T*) (&dat.m_Unmanaged) = data;
+                dat.m_Instance = typeof(T);
+                return dat;
             }
         }
 
-        #endregion // Helpers
+        static private unsafe class BoxedConverter<T> {
+            static BoxedConverter() {
+                Assert.True(RuntimeHelpers.IsReferenceOrContainsReferences<T>() || Marshal.SizeOf<T>() > sizeof(UnmanagedData), "Unmanaged type '{0}' passed into 'EvtArgs.Box'", typeof(T).FullName);
+                Log.Msg("[EvtArgs] Registering managed converter from '{0}' to '{1}'", typeof(EvtArgs).FullName, typeof(T).FullName);
+#if SUPPORTS_FUNCTION_POINTERS
+                CastableArgument.RegisterConverter<EvtArgs, T>(&Cast);
+#else
+                CastableArgument.RegisterConverter<EvtArgs, T>(Cast);
+#endif // SUPPORTS_FUNCTION_POINTERS
+            }
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static private T Cast(EvtArgs args) {
+                return (T) args.m_Instance;
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            static public EvtArgs Create(T data) {
+                EvtArgs dat = default;
+                dat.m_Instance = data;
+                return dat;
+            }
+        }
+
+        #endregion // Converters
     }
 }

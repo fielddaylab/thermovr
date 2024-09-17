@@ -56,10 +56,10 @@ namespace ThermoVR
             HideTrace();
 
             EventMgr.Events.Register<Hand>(GameEvents.GraphBallGrabbed, HandleGraphBallGrabbed, this);
-            EventMgr.Events?.Register<Tuple<double, double, double>>(GameEvents.WarpPVT, HandleWarpPVT);
+            EventMgr.Events?.Register<STuple<double, double, double>>(GameEvents.WarpPVT, HandleWarpPVT);
 
-            EventMgr.Events?.Register<Tuple<float, float>>(GameEvents.RotateGraphClickedCCW, HandleRotateGraph, this);
-            EventMgr.Events?.Register<Tuple<float, float>>(GameEvents.RotateGraphClickedCW, HandleRotateGraph, this);
+            EventMgr.Events?.Register<STuple<float, float>>(GameEvents.RotateGraphClickedCCW, HandleRotateGraph, this);
+            EventMgr.Events?.Register<STuple<float, float>>(GameEvents.RotateGraphClickedCW, HandleRotateGraph, this);
             EventMgr.Events?.Register(GameEvents.RotateGraphCompleted, HandleRotateGraphCompleted, this);
         }
 
@@ -140,7 +140,7 @@ namespace ThermoVR
             EndTrace();
         }
 
-        private void HandleWarpPVT(Tuple<double, double, double> args)
+        private void HandleWarpPVT(STuple<double, double, double> args)
         {
             EndTrace();
 
@@ -157,7 +157,7 @@ namespace ThermoVR
             }
         }
 
-        private void HandleRotateGraph(Tuple<float, float> args)
+        private void HandleRotateGraph(STuple<float, float> args)
         {
             EndTrace();
             HideTrace();

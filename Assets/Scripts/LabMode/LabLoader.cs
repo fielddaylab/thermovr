@@ -1,4 +1,5 @@
 using BeauUtil;
+using BeauUtil.Extensions;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -240,7 +241,7 @@ namespace ThermoVR.Lab
             if (TryParseLab(labInfoAsset, out LabInfo newLabInfo)) {
                 Debug.Log("[LabLoad] Asset " + labInfoAsset.name + " loaded successfully.");
 
-                EventMgr.Events.Dispatch(GameEvents.LabLoaded, newLabInfo);
+                EventMgr.Events.Dispatch(GameEvents.LabLoaded, EvtArgs.Box(newLabInfo));
             }
             else {
                 Debug.Log("[LabLoad] Failed to load asset " + labInfoAsset.name);

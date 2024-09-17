@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using BeauUtil.Extensions;
 using TMPro;
 using UnityEngine;
 
@@ -37,7 +38,7 @@ namespace ThermoVR.Lab
         }
 
         private void Start() {
-            EventMgr.Events.Dispatch(GameEvents.RegisterMovable, this.GetComponent<Touchable>());
+            EventMgr.Events.Dispatch(GameEvents.RegisterMovable, EvtArgs.Ref(this.GetComponent<Touchable>()));
 
             if (m_initialLabel != "Label") {
                 SetLabels(m_initialLabel);

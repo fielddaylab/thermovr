@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using BeauUtil.Extensions;
 using ThermoVR.UI;
 using TMPro;
 using UnityEngine;
@@ -62,9 +63,9 @@ namespace ThermoVR.Lab
                 Tablet.Instance.PlayUIAudio(m_audioClip);
             }
 
-            EventMgr.Events?.Dispatch(GameEvents.PreActivateLab, new Tuple<LabInfo, int>(m_Lab, m_LabIndex));
+            EventMgr.Events?.Dispatch(GameEvents.PreActivateLab, EvtArgs.Box(new STuple<LabInfo, int>(m_Lab, m_LabIndex)));
             EventMgr.Events?.Dispatch(GameEvents.SelectLab);
-            EventMgr.Events?.Dispatch(GameEvents.ActivateLab, m_Lab);
+            EventMgr.Events?.Dispatch(GameEvents.ActivateLab, EvtArgs.Box(m_Lab));
         }
     }
 }

@@ -1,5 +1,6 @@
 using BeauRoutine;
 using BeauUtil;
+using BeauUtil.Extensions;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -305,7 +306,7 @@ public class GameModule : UIModule
         m_generatingNewTarget = false;
 
         EventMgr.Events.Dispatch(GameEvents.GameModeCompleteGenerateTarget,
-            new Tuple<float, float, float>(pTarget.TargetVal, vTarget.TargetVal, tTarget.TargetVal));
+            EvtArgs.Create(new STuple<float, float, float>(pTarget.TargetVal, vTarget.TargetVal, tTarget.TargetVal)));
     }
 
     private void OnStateReached()

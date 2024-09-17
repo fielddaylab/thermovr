@@ -74,7 +74,9 @@ namespace Meta.WitAi.Data
             // Use default mic script
             if (_micInput == null)
             {
-                // _micInput = gameObject.AddComponent<Mic>();
+#if !UNITY_WEBGL
+                _micInput = gameObject.AddComponent<Mic>();
+#endif // !UNITY_WEBGL
             }
 
             InitializeMicDataBuffer();

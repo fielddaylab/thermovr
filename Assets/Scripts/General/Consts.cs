@@ -84,7 +84,7 @@ static public class GameEvents
     static public readonly StringHash32 TargetStateTaskEnded = "lab:target-state-ended";
     static public readonly StringHash32 TargetStateEntered = "lab:target-state-entered";
     static public readonly StringHash32 TargetStateCompleted = "lab:target-state-completed";
-    static public readonly StringHash32 TargetZoneUpdated = "world:target-zone-updated"; // Tuple<Vector3, Vector3>
+    static public readonly StringHash32 TargetZoneUpdated = "world:target-zone-updated"; // STuple<Vector3, Vector3>
     static public readonly StringHash32 ClearTargetZone = "world:clear-target-zone";
     static public readonly StringHash32 TargetStateLost = "lab:target-state-lost";
     static public readonly StringHash32 ClickSelectAnswer = "lab:click-select-answer";
@@ -124,13 +124,14 @@ static public class GameEvents
     static public readonly StringHash32 ClickToolIncrease = "sim:click-tool-increase";
     static public readonly StringHash32 ClickToolDecrease = "sim:click-tool-decrease";
     static public readonly StringHash32 GrabToolSlider = "sim:grab-tool-slider";
-    static public readonly StringHash32 ReleaseToolSlider = "sim:release-tool-slider"; // Tuple<ToolType, float, Hand, bool, int, List<double>>
+    static public readonly StringHash32 MoveToolSlider = "sim:move-tool-slider";
+    static public readonly StringHash32 ReleaseToolSlider = "sim:release-tool-slider"; // STuple<ToolType, float, Hand, bool, int, List<double>>
 
     static public readonly StringHash32 StatePropertiesUpdated = "sim:state-properties-updated";
     static public readonly StringHash32 HeadsetPosUpdated = "sim:headset-pos-updated";
     static public readonly StringHash32 SliderPanelUpdated = "world:slider-panel-updated";
 
-    static public readonly StringHash32 DialTextUpdated = "world:dial-text-updated"; // Tuple<string, string>
+    static public readonly StringHash32 DialTextUpdated = "world:dial-text-updated"; // STuple<string, string>
     static public readonly StringHash32 RestoreLastSimState = "world:restore-last-sim-state";
 
     static public readonly StringHash32 InputProxySelected = "world:input-proxy-selected";
@@ -147,7 +148,7 @@ static public class GameEvents
     static public readonly StringHash32 GameModeTargetEntered = "ui:game-mode-target-entered";
     static public readonly StringHash32 GameModeTargetExited = "ui:game-mode-target-exited";
     static public readonly StringHash32 GameModeBeginGenerateTarget = "ui:game-mode-begin-generate-target";
-    static public readonly StringHash32 GameModeCompleteGenerateTarget = "ui:game-mode-complete-generate-target"; // Tuple<int, int, int> p, v, t
+    static public readonly StringHash32 GameModeCompleteGenerateTarget = "ui:game-mode-complete-generate-target"; // STuple<int, int, int> p, v, t
     static public readonly StringHash32 GameModeScoreUpdated = "ui:game-mode-score-updated"; // int
 
     static public readonly StringHash32 ClickGameMode = "ui:click_game_mode";

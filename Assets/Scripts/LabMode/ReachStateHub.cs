@@ -1,4 +1,5 @@
 using BeauUtil;
+using BeauUtil.Extensions;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -173,7 +174,7 @@ namespace ThermoVR.Lab
                 {
                     if (m_isLabTask)
                     {
-                        EventMgr.Events.Dispatch(GameEvents.TargetStateLost, GetDiscrepancies());
+                        EventMgr.Events.Dispatch(GameEvents.TargetStateLost, EvtArgs.Ref(GetDiscrepancies()));
                     }
 
                     m_completionState = ReachStateState.Incomplete;
@@ -260,7 +261,7 @@ namespace ThermoVR.Lab
                     (float)(targetZoneMaxPos.y - targetZoneMinPos.y),
                     (float)(targetZoneMaxPos.z - targetZoneMinPos.z)
                 );
-            EventMgr.Events.Dispatch(GameEvents.TargetZoneUpdated, new Tuple<Vector3, Vector3>(targetZoneCenterPos, targetZoneDims));
+            EventMgr.Events.Dispatch(GameEvents.TargetZoneUpdated, EvtArgs.Create(new STuple<Vector3, Vector3>(targetZoneCenterPos, targetZoneDims)));
         }
 
         #region IEvaluable
@@ -307,7 +308,7 @@ namespace ThermoVR.Lab
 
                 if (currTarget.TargetID == VarID.VolumeStop)
                 {
-                    Tuple<double, double> stopVals = World.Instance.get_stop_vals();
+                    STuple<double, double> stopVals = World.Instance.get_stop_vals();
                     bool stop1OutOfRange = (stopVals.Item1 < currTarget.TargetVal - currTarget.TargetRange || stopVals.Item1 > currTarget.TargetVal + currTarget.TargetRange);
                     bool stop2OutOfRange = (stopVals.Item2 < currTarget.TargetVal - currTarget.TargetRange || stopVals.Item2 > currTarget.TargetVal + currTarget.TargetRange);
                     if (stop1OutOfRange && stop2OutOfRange)
@@ -342,7 +343,7 @@ namespace ThermoVR.Lab
 
                 if (currTarget.TargetID == VarID.VolumeStop)
                 {
-                    Tuple<double, double> stopVals = World.Instance.get_stop_vals();
+                    STuple<double, double> stopVals = World.Instance.get_stop_vals();
                     bool stop1OutOfRange = (stopVals.Item1 < currTarget.TargetVal - currTarget.TargetRange || stopVals.Item1 > currTarget.TargetVal + currTarget.TargetRange);
                     bool stop2OutOfRange = (stopVals.Item2 < currTarget.TargetVal - currTarget.TargetRange || stopVals.Item2 > currTarget.TargetVal + currTarget.TargetRange);
                     if (stop1OutOfRange && stop2OutOfRange)

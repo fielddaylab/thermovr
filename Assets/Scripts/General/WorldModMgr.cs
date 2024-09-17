@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using BeauUtil.Extensions;
 using ThermoVR.Lab;
 using ThermoVR.State;
 using ThermoVR.Tools;
@@ -55,7 +56,7 @@ namespace ThermoVR
             else {
                 m_activeTools = new List<ToolType>(allowedTools);
             }
-            EventMgr.Events.Dispatch(GameEvents.UpdateAllowedTools, m_activeTools);
+            EventMgr.Events.Dispatch(GameEvents.UpdateAllowedTools, EvtArgs.Ref(m_activeTools));
         }
 
         public void ResetToolRestrictions() {

@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using BeauUtil.Extensions;
 using ThermoVR.Controls;
 using ThermoVR.Tools;
 using TMPro;
@@ -61,6 +62,7 @@ namespace ThermoVR.Dials
     {
         private const int KNOB_MAT_INDEX = 0;
         private const int NUDGE_MAT_INDEX = 0;
+        private const int MAX_VALUE_HISTORY = 100;
 
         [SerializeField] private Transform max_pos;
         [SerializeField] private Transform min_pos;
@@ -214,7 +216,7 @@ namespace ThermoVR.Dials
                 textv_tmpro = textv.GetComponent<TextMeshPro>();
             }
 
-            m_valTracker = new List<double>();
+            m_valTracker = new List<double>(MAX_VALUE_HISTORY);
 
             EventMgr.Events?.Register<Tool>(GameEvents.ActivateTool, HandleActivateTool, this)
                 .Register<Tool>(GameEvents.DeactivateTool, HandleDeactivateTool, this)
@@ -235,6 +237,9 @@ namespace ThermoVR.Dials
             if (m_trackValue)
             {
                 m_valTracker.Add(map);
+                if (m_valTracker.Count >= MAX_VALUE_HISTORY) {
+                    FlushTrackedVals();
+                }
             }
         }
 
@@ -363,6 +368,28 @@ namespace ThermoVR.Dials
             return m_valTracker;
         }
 
+        public void FlushTrackedVals()
+        {
+            if (m_valTracker.Count <= 0) {
+                return;
+            }
+
+            ToolType firstType = ToolType.Burner;
+            int uniqueStopID = 0;
+            List<Tool> relevant_tools = get_relevant_tools();
+            if (relevant_tools.Count > 0) {
+                firstType = relevant_tools[0].tool_type;
+                if (firstType == ToolType.Stops) {
+                    uniqueStopID = ToolMgr.Instance.IdentifyStop(relevant_tools[0]);
+                }
+            }
+
+            STuple<ToolType, int, List<double>> args;
+            args = new STuple<ToolType, int, List<double>>(firstType, uniqueStopID, m_valTracker);
+            EventMgr.Events?.Dispatch(GameEvents.MoveToolSlider, EvtArgs.Box(args));
+            m_valTracker.Clear();
+        }
+
         public void StopTrackingVal()
         {
             m_trackValue = false;
@@ -483,7 +510,7 @@ namespace ThermoVR.Dials
                 m_lastKnownNudgeHandPos = r_hand_pos;
             }
 
-            EventMgr.Events.Dispatch(GameEvents.ClickToolIncrease, new Tuple<ToolType, float, int>(firstType, newMap, uniqueStopID));
+            EventMgr.Events.Dispatch(GameEvents.ClickToolIncrease, EvtArgs.Create(new STuple<ToolType, float, int>(firstType, newMap, uniqueStopID)));
         }
 
         private void nudgeValDown(bool manual, Vector3 r_hand_pos)
@@ -517,7 +544,7 @@ namespace ThermoVR.Dials
                 m_lastKnownNudgeHandPos = r_hand_pos;
             }
 
-            EventMgr.Events.Dispatch(GameEvents.ClickToolDecrease, new Tuple<ToolType, float, int>(firstType, newMap, uniqueStopID));
+            EventMgr.Events.Dispatch(GameEvents.ClickToolDecrease, EvtArgs.Create(new STuple<ToolType, float, int>(firstType, newMap, uniqueStopID)));
 
         }
 
@@ -677,7 +704,7 @@ namespace ThermoVR.Dials
             if (hapticsThresholdCrossed)
             {
                 // Add Haptics
-                EventMgr.Events.Dispatch(GameEvents.DetentHit, inHand);
+                EventMgr.Events.Dispatch(GameEvents.DetentHit, EvtArgs.Create(inHand));
             }
         }
 

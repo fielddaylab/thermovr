@@ -18,6 +18,7 @@ using ThermoVR.Lab;
 using ThermoVR.State;
 using System;
 using ThermoVR.Audio;
+using BeauUtil.Extensions;
 
 public class World : MonoBehaviour
 {
@@ -227,7 +228,7 @@ public class World : MonoBehaviour
 
         ProcessErrors();
 
-        EventMgr.Events.Dispatch(GameEvents.StatePropertiesUpdated, thermo_present.get_properties_bundle());
+        EventMgr.Events.Dispatch(GameEvents.StatePropertiesUpdated, EvtArgs.Box(thermo_present.get_properties_bundle()));
 
         thermo_present.UpdatePropertyReadouts();
         thermo_present.stamp_prev();
@@ -663,7 +664,7 @@ public class World : MonoBehaviour
 
                     Cartridge c = ref_grabbed.GetComponent<Cartridge>();
                     if (c) { // newly grabbed object is a cartridge
-                        EventMgr.Events.Dispatch(GameEvents.ColliderGrabbed, c.GetComponent<Collider>());
+                        EventMgr.Events.Dispatch(GameEvents.ColliderGrabbed, EvtArgs.Ref(c.GetComponent<Collider>()));
                     }
                 }
             }
@@ -722,7 +723,7 @@ public class World : MonoBehaviour
                 if (h != null) h.setHalf(false); //nothing should be halfed while being grabbed
             }
 
-            EventMgr.Events.Dispatch(GameEvents.ObjectGrabbed, ref_grabbed);
+            EventMgr.Events.Dispatch(GameEvents.ObjectGrabbed, EvtArgs.Ref(ref_grabbed));
         }
         //find new pinch grabs
         if (ref_grabbed == null && ((ref_itrigger_delta == 1 && !ref_htrigger)))
@@ -748,7 +749,7 @@ public class World : MonoBehaviour
                 }
             }
 
-            EventMgr.Events.Dispatch(GameEvents.ObjectGrabbed, ref_grabbed);
+            EventMgr.Events.Dispatch(GameEvents.ObjectGrabbed, EvtArgs.Ref(ref_grabbed));
         }
         //find new releases
         else if (ref_grabbed && (ref_htrigger_delta == -1 || ref_itrigger_delta == -1)) //something newly released
@@ -770,10 +771,10 @@ public class World : MonoBehaviour
             Cartridge c = ref_grabbed.GetComponent<Cartridge>();
 
             if (c != null) {
-                EventMgr.Events.Dispatch(GameEvents.ColliderReleased, c.GetComponent<Collider>());
+                EventMgr.Events.Dispatch(GameEvents.ColliderReleased, EvtArgs.Ref(c.GetComponent<Collider>()));
             }
 
-            EventMgr.Events.Dispatch(GameEvents.ObjectReleased, ref_grabbed);
+            EventMgr.Events.Dispatch(GameEvents.ObjectReleased, EvtArgs.Ref(ref_grabbed));
 
             Dial dd = ref_grabbed.GetComponent<Dial>();
 
@@ -864,10 +865,10 @@ public class World : MonoBehaviour
         }
 
         // Stop tracking slider movement data
-        var history = dd.GetTrackedVals();
+        dd.FlushTrackedVals();
 
-        EventMgr.Events.Dispatch(GameEvents.ReleaseToolSlider, new Tuple<ToolType, float, Hand, bool, int, List<double>>(firstType, dd.map, handType, autoRelease, uniqueStopID, history));
-        EventMgr.Events.Dispatch(GameEvents.ObjectReleased, dd.gameObject);
+        EventMgr.Events.Dispatch(GameEvents.ReleaseToolSlider, EvtArgs.Create(new STuple<ToolType, float, Hand, bool, int>(firstType, dd.map, handType, autoRelease, uniqueStopID)));
+        EventMgr.Events.Dispatch(GameEvents.ObjectReleased, EvtArgs.Ref(dd.gameObject));
 
         dd.StopTrackingVal();
     }
@@ -886,7 +887,7 @@ public class World : MonoBehaviour
             }
         }
 
-        EventMgr.Events.Dispatch(GameEvents.GrabToolSlider, new Tuple<ToolType, float, Hand, int>(firstType, dd.map, handType, uniqueStopID));
+        EventMgr.Events.Dispatch(GameEvents.GrabToolSlider, EvtArgs.Create(new STuple<ToolType, float, Hand, int>(firstType, dd.map, handType, uniqueStopID)));
 
         // Start tracking slider movement data
         dd.StartTrackingVal();
@@ -930,8 +931,8 @@ public class World : MonoBehaviour
         }
     }
 
-    public Tuple<double, double> get_stop_vals() {
-        return new Tuple<double, double>(ToolMgr.GetToolVal(ToolType.Stops, 1), ToolMgr.GetToolVal(ToolType.Stops, 2));
+    public STuple<double, double> get_stop_vals() {
+        return new STuple<double, double>(ToolMgr.GetToolVal(ToolType.Stops, 1), ToolMgr.GetToolVal(ToolType.Stops, 2));
     }
 
     #endregion Helpers
@@ -1099,29 +1100,29 @@ public class World : MonoBehaviour
     private void HandleWorkspaceHandleGrabbed(object sender, Hand arg)
     {
         PositionDataFrame currPos = new PositionDataFrame();
-        currPos.pos = new float[] { handle_workspace_touchable.transform.position.x, handle_workspace_touchable.transform.position.y, handle_workspace_touchable.transform.position.z };
-        currPos.rot = new float[] { handle_workspace_touchable.transform.rotation.x, handle_workspace_touchable.transform.rotation.y, handle_workspace_touchable.transform.rotation.z, handle_workspace_touchable.transform.rotation.w };
+        currPos.posVector = handle_workspace_touchable.transform.position;
+        currPos.rotQuat = handle_workspace_touchable.transform.rotation;
 
-        EventMgr.Events?.Dispatch(GameEvents.WorkspaceHandleGrabbed, new Tuple<PositionDataFrame, Hand>(currPos, arg));
+        EventMgr.Events?.Dispatch(GameEvents.WorkspaceHandleGrabbed, EvtArgs.Create(new STuple<PositionDataFrame, Hand>(currPos, arg)));
     }
 
     private void HandleWorkspaceHandleReleased(object sender, Hand arg)
     {
         PositionDataFrame currPos = new PositionDataFrame();
-        currPos.pos = new float[] { handle_workspace_touchable.transform.position.x, handle_workspace_touchable.transform.position.y, handle_workspace_touchable.transform.position.z };
-        currPos.rot = new float[] { handle_workspace_touchable.transform.rotation.x, handle_workspace_touchable.transform.rotation.y, handle_workspace_touchable.transform.rotation.z, handle_workspace_touchable.transform.rotation.w };
+        currPos.posVector = handle_workspace_touchable.transform.position;
+        currPos.rotQuat = handle_workspace_touchable.transform.rotation;
 
-        EventMgr.Events?.Dispatch(GameEvents.WorkspaceHandleReleased, new Tuple<PositionDataFrame, Hand>(currPos, arg));
+        EventMgr.Events?.Dispatch(GameEvents.WorkspaceHandleReleased, EvtArgs.Create(new STuple<PositionDataFrame, Hand>(currPos, arg)));
     }
 
     private void HandleGraphBallGrabbed(object sender, Hand arg)
     {
-        EventMgr.Events?.Dispatch(GameEvents.GraphBallGrabbed, arg);
+        EventMgr.Events?.Dispatch(GameEvents.GraphBallGrabbed, EvtArgs.Create(arg));
     }
 
     private void HandleGraphBallReleased(object sender, Hand arg)
     {
-        EventMgr.Events?.Dispatch(GameEvents.GraphBallReleased, arg);
+        EventMgr.Events?.Dispatch(GameEvents.GraphBallReleased, EvtArgs.Create(arg));
     }
 
     #endregion // Handlers

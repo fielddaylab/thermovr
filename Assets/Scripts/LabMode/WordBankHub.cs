@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using BeauUtil.Extensions;
 using ThermoVR.UI;
 using TMPro;
 using UnityEngine;
@@ -181,16 +182,16 @@ namespace ThermoVR.Lab
             ClosePanel();
 
             List<string> selectedStrs = new List<string> { m_definition.OptionTexts[m_selectedID] };
-            EventMgr.Events.Dispatch(GameEvents.TaskChoiceSelected, selectedStrs);
+            EventMgr.Events.Dispatch(GameEvents.TaskChoiceSelected, EvtArgs.Ref(selectedStrs));
 
             if (deselectOld)
             {
-                EventMgr.Events.Dispatch(GameEvents.ClickDeselectAnswer, new AnswerSelectLogData(prevSelection, IsSingleAnswerCorrect(prevSelection)));
+                EventMgr.Events.Dispatch(GameEvents.ClickDeselectAnswer, EvtArgs.Create(new AnswerSelectLogData(prevSelection, IsSingleAnswerCorrect(prevSelection))));
             }
 
             bool isCorrect = IsSingleAnswerCorrect(args.ID);
             uint index = args.ID;
-            EventMgr.Events.Dispatch(GameEvents.ClickSelectAnswer, new AnswerSelectLogData(index, isCorrect));
+            EventMgr.Events.Dispatch(GameEvents.ClickSelectAnswer, EvtArgs.Create(new AnswerSelectLogData(index, isCorrect)));
         }
 
         private void HandleChoosePressed(object sender, EventArgs args) {
@@ -211,7 +212,7 @@ namespace ThermoVR.Lab
             {
                 displayedWords.Add(m_options[i].GetOptionText());
             }
-            EventMgr.Events.Dispatch(GameEvents.WordBankDisplayed, displayedWords);
+            EventMgr.Events.Dispatch(GameEvents.WordBankDisplayed, EvtArgs.Ref(displayedWords));
         }
 
         private void HandleChoicePanelClosePressed(object sender, EventArgs args) {

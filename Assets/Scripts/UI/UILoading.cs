@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using BeauUtil.Extensions;
 using ThermoVR.Lab;
 using ThermoVR.UI.GraphElements;
 using UnityEngine;
@@ -139,7 +140,7 @@ namespace ThermoVR.UI
             m_musicSelected = !m_musicSelected;
             m_musicFill.enabled = m_musicSelected;
 
-            EventMgr.Events.Dispatch(GameEvents.ClickToggleTitleSetting, new GraphSettingUpdate(GraphElementID.Music, m_fullscreenSelected));
+            EventMgr.Events.Dispatch(GameEvents.ClickToggleTitleSetting, EvtArgs.Create(new GraphSettingUpdate(GraphElementID.Music, m_fullscreenSelected)));
         }
 
         private void HandleFullscreenOptionSelected()
@@ -147,7 +148,7 @@ namespace ThermoVR.UI
             m_fullscreenSelected = !m_fullscreenSelected;
             m_fullscreenFill.enabled = m_fullscreenSelected;
 
-            EventMgr.Events.Dispatch(GameEvents.ClickToggleTitleSetting, new GraphSettingUpdate(GraphElementID.Fullscreen, m_fullscreenSelected));
+            EventMgr.Events.Dispatch(GameEvents.ClickToggleTitleSetting, EvtArgs.Create(new GraphSettingUpdate(GraphElementID.Fullscreen, m_fullscreenSelected)));
         }
 
         private void HandleTitleCreditsClosed()
