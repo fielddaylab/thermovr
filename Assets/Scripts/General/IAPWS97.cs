@@ -8,6 +8,7 @@
 
 using System;
 using System.Collections.Generic;
+using Unity.IL2CPP.CompilerServices;
 using UnityEngine;
 
 public enum IF97parameters
@@ -58,7 +59,8 @@ public struct RegionResidualElement // Structure for the double indexed state eq
   }
 }
 
-public static class IF97
+[Il2CppSetOption(Option.NullChecks, false)]
+public static unsafe class IF97
 {
   // CoolProp-IF97 Version Number
   // Setup Water Constants for Trivial Functions and use in Region Classes
@@ -1729,18 +1731,21 @@ public static class IF97
       public double d = 0.0;
       public double e = 0.0;
       public double f = 0.0;
-      public List<int> I = new List<int>();
-      public List<int> J = new List<int>();
-      public List<double> n = new List<double>();
+      public int[] I;
+      public int[] J;
+      public double[] n;
 
       public Region3BackwardsRegion(RegionResidualElement[] data, int _N)
       {
         N = _N;
+        I = new int[N];
+        J = new int[N];
+        n = new double[N];
         for(int i = 0; i < N; ++i)
         {
-          n.Add(data[i].n);
-          I.Add(data[i].I);
-          J.Add(data[i].J);
+          n[i] = data[i].n;
+          I[i] = data[i].I;
+          J[i] = data[i].J;
         }
       }
       public virtual double v(double T, double p)
@@ -2304,21 +2309,21 @@ public static class IF97
 
   public class Region3
   {
-    List<int> Ir = new List<int>();
-    List<int> Jr = new List<int>();
-    List<double> nr = new List<double>();
+    int[] Ir = new int[Region3residdata.Length];
+    int[] Jr = new int[Region3residdata.Length];
+    double[] nr = new double[Region3residdata.Length];
     /// For Viscosity Calculations
-    List<int> muJ0 = new List<int>();
-    List<double> mun0 = new List<double>();
-    List<int> muIr = new List<int>();
-    List<int> muJr = new List<int>();
-    List<double> munr = new List<double>();
+    int[] muJ0 = new int[Hidealdata.Length];
+    double[] mun0 = new double[Hidealdata.Length];
+    int[] muIr = new int[Hresiddata.Length];
+    int[] muJr = new int[Hresiddata.Length];
+    double[] munr = new double[Hresiddata.Length];
     /// For Thermal Conductivity Calculations
-    List<int> lamJ0 = new List<int>();
-    List<double> lamn0 = new List<double>();
-    List<int> lamIr = new List<int>();
-    List<int> lamJr = new List<int>();
-    List<double> lamnr = new List<double>();
+    int[] lamJ0 = new int[Lidealdata.Length];
+    double[] lamn0 = new double[Lidealdata.Length];
+    int[] lamIr = new int[Lresiddata.Length];
+    int[] lamJr = new int[Lresiddata.Length];
+    double[] lamnr = new double[Lresiddata.Length];
     //double T_star = 0.0; //commented out because unused?
     //double p_star = 0.0; //commented out because unused?
     double R = 0.0;
@@ -2329,31 +2334,31 @@ public static class IF97
 
       for(int i = 0; i < Region3residdata.Length; ++i)
       {
-        nr.Add(Region3residdata[i].n);
-        Ir.Add(Region3residdata[i].I);
-        Jr.Add(Region3residdata[i].J);
+        nr[i] = Region3residdata[i].n;
+        Ir[i] = Region3residdata[i].I;
+        Jr[i] = Region3residdata[i].J;
       }
       for(int i = 0; i < Hresiddata.Length; ++i)
       {
-        munr.Add(Hresiddata[i].n);
-        muIr.Add(Hresiddata[i].I);
-        muJr.Add(Hresiddata[i].J);
+        munr[i] = Hresiddata[i].n;
+        muIr[i] = Hresiddata[i].I;
+        muJr[i] = Hresiddata[i].J;
       }
       for(int i = 0; i < Hidealdata.Length; ++i)
       {
-        mun0.Add(Hidealdata[i].n);
-        muJ0.Add(Hidealdata[i].J);
+        mun0[i] = Hidealdata[i].n;
+        muJ0[i] = Hidealdata[i].J;
       }
       for(int i = 0; i < Lresiddata.Length; ++i)
       {
-        lamnr.Add(Lresiddata[i].n);
-        lamIr.Add(Lresiddata[i].I);
-        lamJr.Add(Lresiddata[i].J);
+        lamnr[i] = Lresiddata[i].n;
+        lamIr[i] = Lresiddata[i].I;
+        lamJr[i] = Lresiddata[i].J;
       }
       for(int i = 0; i < Lidealdata.Length; ++i)
       {
-        lamn0.Add(Lidealdata[i].n);
-        lamJ0.Add(Lidealdata[i].J);
+        lamn0[i] = Lidealdata[i].n;
+        lamJ0[i] = Lidealdata[i].J;
       }
       R = Rgas;
     }
@@ -2455,7 +2460,7 @@ public static class IF97
     {
       double T_bar = T/Tcrit;
       double summer = 0.0;
-      for(int i = 0; i < muJ0.Count; ++i)
+      for(int i = 0; i < muJ0.Length; ++i)
       {
         summer += mun0[i]/Math.Pow(T_bar, muJ0[i]);
       }
@@ -2465,7 +2470,7 @@ public static class IF97
     {
       double rho_bar = rho/Rhocrit;
       double summer = 0.0;
-      for(int i = 0; i < muJr.Count; ++i)
+      for(int i = 0; i < muJr.Length; ++i)
       {
         summer += rho_bar * Math.Pow(Trterm(T),muIr[i]) * munr[i]*Math.Pow(Rhorterm(rho),muJr[i]);
       }
@@ -2475,7 +2480,7 @@ public static class IF97
     {
       double T_bar = T/Tcrit;
       double summer = 0.0;
-      for(int i = 0; i < lamJ0.Count; ++i)
+      for(int i = 0; i < lamJ0.Length; ++i)
       {
         summer += lamn0[i]/Math.Pow(T_bar, lamJ0[i]);
       }
@@ -2485,7 +2490,7 @@ public static class IF97
     {
       double rho_bar = rho/Rhocrit;
       double summer = 0.0;
-      for(int i = 0; i < lamJr.Count; ++i)
+      for(int i = 0; i < lamJr.Length; ++i)
       {
         summer += rho_bar * Math.Pow(Trterm(T),lamIr[i]) * lamnr[i]*Math.Pow(Rhorterm(rho),lamJr[i]);
       }
@@ -2752,7 +2757,7 @@ public static class IF97
   /// This "region" is the saturation curve
   public class Region4
   {
-    List<double> n = new List<double>();
+    double[] n = new double[sat.Length + 1];
     double p_star = 0.0;
     double T_star = 0.0;
 
@@ -2760,10 +2765,10 @@ public static class IF97
     {
       p_star = 1.0*p_fact;
       T_star = 1.0;
-      if(n.Count == 0) n.Add(0.0);
+      n[0] = 0.0;
       for(int i = 0; i < sat.Length; ++i)
       {
-        n.Add(sat[i].n);
+        n[i + 1] = sat[i].n;
       }
     }
     public double p_T(double T)
@@ -2802,8 +2807,7 @@ public static class IF97
       const double G = n[2]*beta2 + n[5]*beta + n[8];
       */
 
-      double[] EFG = new double[3];
-      // double* EFG = stackalloc double[3]; // TODO: reduce temporary allocations
+      double* EFG = stackalloc double[3];
 
       // Each cycle can be vectorized
       EFG[0] = 1.0;
@@ -4078,23 +4082,25 @@ public static class IF97
     }
   }
 
-  static double RegionOutputBackward(double p, double X, IF97parameters inkey)
+    static private readonly Backwards.Region1H B1H = new Backwards.Region1H();
+    static private readonly Backwards.Region1S B1S = new Backwards.Region1S();
+    static private readonly Backwards.Region2aH B2aH = new Backwards.Region2aH();
+    static private readonly Backwards.Region2bH B2bH = new Backwards.Region2bH();
+    static private readonly Backwards.Region2cH B2cH = new Backwards.Region2cH();
+    static private readonly Backwards.Region2aS B2aS = new Backwards.Region2aS();
+    static private readonly Backwards.Region2bS B2bS = new Backwards.Region2bS();
+    static private readonly Backwards.Region2cS B2cS = new Backwards.Region2cS();
+    static private readonly Backwards.Region3aH B3aH = new Backwards.Region3aH();
+    static private readonly Backwards.Region3bH B3bH = new Backwards.Region3bH();
+    static private readonly Backwards.Region3aS B3aS = new Backwards.Region3aS();
+    static private readonly Backwards.Region3bS B3bS = new Backwards.Region3bS();
+
+    static double RegionOutputBackward(double p, double X, IF97parameters inkey)
   {
     // Note that this routine returns only temperature (IF97_T).  All other values should be
     // calculated from this temperature and the known pressure using forward equations.
     // Setup Backward Regions for output
-    Backwards.Region1H B1H = new Backwards.Region1H();
-    Backwards.Region1S B1S = new Backwards.Region1S();
-    Backwards.Region2aH B2aH = new Backwards.Region2aH();
-    Backwards.Region2bH B2bH = new Backwards.Region2bH();
-    Backwards.Region2cH B2cH = new Backwards.Region2cH();
-    Backwards.Region2aS B2aS = new Backwards.Region2aS();
-    Backwards.Region2bS B2bS = new Backwards.Region2bS();
-    Backwards.Region2cS B2cS = new Backwards.Region2cS();
-    Backwards.Region3aH B3aH = new Backwards.Region3aH();
-    Backwards.Region3bH B3bH = new Backwards.Region3bH();
-    Backwards.Region3aS B3aS = new Backwards.Region3aS();
-    Backwards.Region3bS B3bS = new Backwards.Region3bS();
+    
 
     // Make sure input and output keys are valid for Backward formulas
     if((inkey != IF97parameters.IF97_HMASS) && (inkey != IF97parameters.IF97_SMASS))
@@ -4342,20 +4348,20 @@ public static class IF97
     else return IF97BACKREGIONS.BACK_2A; //========== Region 2a fall thru ========================
   } // Region Determination HS
 
-  static double BackwardOutputHS(IF97parameters outkey,double h, double s)
+    static private readonly Backwards.Region1HS B1HS = new Backwards.Region1HS();
+    static private readonly Backwards.Region2aHS B2aHS = new Backwards.Region2aHS();
+    static private readonly Backwards.Region2bHS B2bHS = new Backwards.Region2bHS();
+    static private readonly Backwards.Region2cHS B2cHS = new Backwards.Region2cHS();
+    static private readonly Backwards.Region3aHS B3aHS = new Backwards.Region3aHS();
+    static private readonly Backwards.Region3bHS B3bHS = new Backwards.Region3bHS();
+    static private readonly Backwards.Region4HS B4HS = new Backwards.Region4HS();
+
+    static double BackwardOutputHS(IF97parameters outkey,double h, double s)
   {
     // Note that this routine returns only temperature (IF97_T).  All other values should be
     // calculated from this temperature and the known pressure using forward equations.
     // Setup Backward Regions for output
 
-    //TODO: optimize temporary alloc of classes (heap to stack)
-    Backwards.Region1HS B1HS = new Backwards.Region1HS();
-    Backwards.Region2aHS B2aHS = new Backwards.Region2aHS();
-    Backwards.Region2bHS B2bHS = new Backwards.Region2bHS();
-    Backwards.Region2cHS B2cHS = new Backwards.Region2cHS();
-    Backwards.Region3aHS B3aHS = new Backwards.Region3aHS();
-    Backwards.Region3bHS B3bHS = new Backwards.Region3bHS();
-    Backwards.Region4HS B4HS = new Backwards.Region4HS();
     //
     double Pval = 0.0;
     double Tval = 0.0;

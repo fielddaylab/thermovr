@@ -22,7 +22,8 @@ ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
 IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-public static class IAPWS95
+[Il2CppSetOption(Option.NullChecks, false)]
+public static unsafe class IAPWS95
 {
 
     //public static double IAPWS95_IG_phi(double delta, double tau);
