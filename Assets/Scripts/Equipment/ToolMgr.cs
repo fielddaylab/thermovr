@@ -290,7 +290,7 @@ namespace ThermoVR.Tools
             RemoveStop(source);
         }
 
-        private void AddVStop(double v_stop, Tool source) {
+        private void AddVStop(double v_stop, Tool source, ConstrainType constraint) {
             if (StopExists(source)) {
                 return;
             }
@@ -298,7 +298,7 @@ namespace ThermoVR.Tools
             // constrain stop's values to global bounds
             v_stop = MathUtility.Clampd(v_stop, ThermoMath.v_min, ThermoMath.v_max);
 
-            VolumeStop new_stop = new VolumeStop(v_stop, source);
+            VolumeStop new_stop = new VolumeStop(v_stop, source, constraint);
             VStops.Add(new_stop);
         }
 
@@ -334,6 +334,23 @@ namespace ThermoVR.Tools
             }
         }
 
+        public bool CheckForStopsViolation(double currV)
+        {
+            for (int i = 0; i < VStops.Count; i++)
+            {
+                if (VStops[i].StoppedDir == ConstrainType.Min && currV < VStops[i].Volume)
+                {
+                    return true;
+                }
+                if (VStops[i].StoppedDir == ConstrainType.Max && currV > VStops[i].Volume)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         #endregion // Volume Stops
 
         public void ActivateTool(Tool t, bool auto = true) {
@@ -345,11 +362,11 @@ namespace ThermoVR.Tools
             t.engaged = true;
             int uniqueStopID = 0;
             if (t == tool_stop1) {
-                AddVStop(tool_stop1.GetVal(), t);
+                AddVStop(tool_stop1.GetVal(), t, ConstrainType.Max);
                 uniqueStopID = 1;
             }
             else if (t == tool_stop2) {
-                AddVStop(tool_stop2.GetVal(), t);
+                AddVStop(tool_stop2.GetVal(), t, ConstrainType.Min);
                 uniqueStopID = 2;
             }
 
@@ -426,11 +443,11 @@ namespace ThermoVR.Tools
 
             if (t == tool_stop1)
             {
-                AddVStop(tool_stop1.GetVal(), t);
+                AddVStop(tool_stop1.GetVal(), t, ConstrainType.Max);
             }
             else if (t == tool_stop2)
             {
-                AddVStop(tool_stop2.GetVal(), t);
+                AddVStop(tool_stop2.GetVal(), t, ConstrainType.Min);
             }
         }
 
