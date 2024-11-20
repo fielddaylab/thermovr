@@ -226,6 +226,8 @@ public class World : MonoBehaviour
             UpdateGrabVis();
         }
 
+        EnforceVolumeStops();
+
         ProcessErrors();
 
         EventMgr.Events.Dispatch(GameEvents.StatePropertiesUpdated, EvtArgs.Box(thermo_present.get_properties_bundle()));
@@ -435,6 +437,14 @@ public class World : MonoBehaviour
         TryHand(true, lhandt, lindext, rstickt, lstickt, lhand.transform.position, lhand.vel, ref lhtrigger, ref litrigger, ref lstrigger, ref rstrigger, ref lhtrigger_delta, ref litrigger_delta, ref rstrigger_delta, ref lstrigger_delta, ref lpos, ref lhand.obj, ref lgrabbed, ref rhand.obj, ref rgrabbed, ref lhand_nudge_activate); //left hand
         TryHand(false, rhandt, rindext, rstickt, lstickt, rhand.transform.position, rhand.vel, ref rhtrigger, ref ritrigger, ref lstrigger, ref rstrigger, ref rhtrigger_delta, ref ritrigger_delta, ref rstrigger_delta, ref lstrigger_delta, ref rpos, ref rhand.obj, ref rgrabbed, ref lhand.obj, ref lgrabbed, ref rhand_nudge_activate); //right hand
 
+    }
+
+    private void EnforceVolumeStops()
+    {
+        if (ToolMgr.Instance.CheckForStopsViolation(thermo_present.get_state_var(VarID.Volume)))
+        {
+            ThermoMath.got_error = true;
+        }
     }
 
     private void ProcessErrors() {

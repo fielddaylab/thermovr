@@ -1223,7 +1223,8 @@ namespace ThermoVR.State
                             }
                             else
                             {
-                                return false;
+                                // not blocked by this stop; check next
+                                continue;
                             }
                         }
                         else
@@ -1248,7 +1249,8 @@ namespace ThermoVR.State
                             }
                             else
                             {
-                                return false;
+                                // not blocked by this stop; check next
+                                continue;
                             }
                         }
                         else
