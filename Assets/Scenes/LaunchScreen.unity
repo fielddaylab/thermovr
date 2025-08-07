@@ -38,7 +38,6 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.12731749, g: 0.13414757, b: 0.1210787, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -668,6 +667,36 @@ PrefabInstance:
       propertyPath: m_Name
       value: OGD
       objectReference: {fileID: 0}
+    - target: {fileID: 8367924436574712423, guid: bf301965226c63241ae7dc4777a2b6fc,
+        type: 3}
+      propertyPath: m_Firebase.AppId
+      value: 1:565682302777:web:9b761b119206a69314c2e8
+      objectReference: {fileID: 0}
+    - target: {fileID: 8367924436574712423, guid: bf301965226c63241ae7dc4777a2b6fc,
+        type: 3}
+      propertyPath: m_Firebase.ApiKey
+      value: AIzaSyDCbusD0a6-A3NZZZgX-wkx3JdAhQVes6s
+      objectReference: {fileID: 0}
+    - target: {fileID: 8367924436574712423, guid: bf301965226c63241ae7dc4777a2b6fc,
+        type: 3}
+      propertyPath: m_Firebase.ProjectId
+      value: thermolab-a0133
+      objectReference: {fileID: 0}
+    - target: {fileID: 8367924436574712423, guid: bf301965226c63241ae7dc4777a2b6fc,
+        type: 3}
+      propertyPath: m_Firebase.MeasurementId
+      value: G-0R5G94R05B
+      objectReference: {fileID: 0}
+    - target: {fileID: 8367924436574712423, guid: bf301965226c63241ae7dc4777a2b6fc,
+        type: 3}
+      propertyPath: m_Firebase.StorageBucket
+      value: thermolab-a0133.firebasestorage.app
+      objectReference: {fileID: 0}
+    - target: {fileID: 8367924436574712423, guid: bf301965226c63241ae7dc4777a2b6fc,
+        type: 3}
+      propertyPath: m_Firebase.MessagingSenderId
+      value: 565682302777
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: bf301965226c63241ae7dc4777a2b6fc, type: 3}
 --- !u!1 &1945500960
@@ -736,6 +765,7 @@ MonoBehaviour:
   m_RepeatDelay: 0.5
   m_RepeatRate: 0.1
   m_TrackedDeviceDragThresholdMultiplier: 1.4
+  m_TrackedScrollDeltaMultiplier: 5
   m_ActiveInputMode: 0
   m_MaxTrackedDeviceRaycastDistance: 1000
   m_EnableXRInput: 1
