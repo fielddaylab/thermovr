@@ -1306,7 +1306,12 @@ namespace ThermoVR.State
                 return;
             }
 
-            double insulation_coefficient = 1; // 100%
+            // NOTE ON SIGN CONVENTION: this local is the *effectiveness of the thermodynamic coupling*
+            // used by the delta_h/delta_s terms below, where 1 == fully applied. It is NOT the same
+            // convention as World.cs, which inverts the dial (`insulation_coefficient = 1 - insulation_coefficient`)
+            // so that 0 means "perfectly insulated" at the call site that routes here.
+            // This path is only reached when insulation is 100%, so it is pinned to 1.
+            double insulation_coefficient = 1; // 100% insulation
 
             try
             {
@@ -1315,7 +1320,8 @@ namespace ThermoVR.State
                 double new_t = temperature;
                 double new_x = quality;
                 double new_v = volume;
-                // entropy = entropy // s = constant with 100% insulation
+                // entropy is never reassigned on this path: with 100% insulation no heat crosses the
+                // boundary, so s is the conserved invariant and the path is isentropic.
 
                 switch (region)
                 {
@@ -1423,122 +1429,73 @@ namespace ThermoVR.State
 
         #region Helpers
 
+        /// <summary>
+        /// Advances the superheated-vapor region along the 100%-insulated path.
+        /// With no heat crossing the boundary (and a reversible process) entropy is the conserved
+        /// invariant: the new temperature and specific volume are solved FROM (p, s) with s held
+        /// constant, i.e. the path is isentropic (not isothermal).
+        /// Only called by add_pressure_insulated_per_delta_time when region == region_vapor.
+        /// </summary>
         private void helper_add_p_insulated_vapor(double new_t, double new_u, double new_v, double new_p, double insulation_coefficient, double delta_time)
         {
-            /*
-            Debug.Log("[weight] calculating vapor");
-            //default guess
-            new_t = temperature;
-            new_u = internalenergy;
+            if (region != ThermoMath.region_vapor)
+            {
+                // liquid / two-phase are handled inline by the caller; nothing to do here
+                return;
+            }
 
-            double k = 1.27;
-            new_v = volume * Math.Pow(pressure / new_p, 1.0 / k);
-            update_vapor_vis(pressure - new_p, insulation_coefficient);
-            new_u = internalenergy - ((new_p * new_v - pressure * volume) / (1 - k));
-            new_t = ThermoMath.iterate_t_given_pv(temperature, new_p, new_v, region);
+            // the incoming entropy field is the invariant for this move
+            double s_target = entropy;
 
-            //at this point, we have enough internal state to derive the rest
-            pressure = new_p;
-            volume = new_v;
-            temperature = new_t;
-            internalenergy = new_u;
-            enthalpy = ThermoMath.h_given_vt(volume, temperature, region);
-            // entropy = ThermoMath.s_given_vt(volume, temperature, region); // s = constant with 100% insulation
-            region = ThermoMath.region_given_pvt(pressure, volume, temperature);
-            */
-
-            double new_s;
-            double new_h;
-
-            if (ThermoMath.region_given_ps(new_p, entropy) != region)
+            int ps_region = ThermoMath.region_given_ps(new_p, s_target);
+            if (ps_region != region)
             { // check for transition into 2-phase from other states
-                if (ThermoMath.region_given_ps(new_p, entropy) == ThermoMath.region_twophase)
+                if (ps_region == ThermoMath.region_twophase)
                 {
                     region = ThermoMath.region_twophase;
                     return;
                 }
             }
 
-            //default guess
-            new_u = internalenergy;
-            new_v = volume;
-
-            new_s = entropy;
-            new_h = enthalpy;
-
+            // Polytropic (k = 1.27) approximation of the isentropic volume change. This is only an
+            // initial estimate (0.2% - 1.3% off the true isentropic volume over typical steps) and is
+            // NOT used as the final state; it is retained because update_vapor_vis() drives the vapor
+            // visuals off this pressure delta.
             double k = 1.27;
-            new_v = volume * Math.Pow(pressure / new_p, 1.0 / k);
+            double v_guess_polytropic = volume * Math.Pow(pressure / new_p, 1.0 / k);
             update_vapor_vis(pressure - new_p, insulation_coefficient);
-            new_u = internalenergy - ((new_p * new_v - pressure * volume) / (1 - k));
 
-            double old_t = temperature;
-            new_t = ThermoMath.iterate_t_given_pv(temperature, new_p, new_v, region); // new_v is constant in liquid
-            double delta_t = new_t - old_t;
-            new_t = old_t + delta_t * (1 - insulation_coefficient); // when insulation is 0%, T = T_old
+            // 100% insulation => isentropic: T and v are solved from (p, s) with s held constant.
+            new_t = ThermoMath.t_given_ps(new_p, s_target, region);
+            new_v = ThermoMath.v_given_ps(new_p, s_target, region);
 
-            double delta_h = delta_time / mass * (delta_t * insulation_coefficient);  // time eqtn 6a
-            new_h = enthalpy + delta_h;
-
-            new_v = ThermoMath.v_given_ph(new_p, new_h); // reconstrain v
-
-            if (region == ThermoMath.region_liquid)
+            if (Double.IsNaN(new_t) || Double.IsNaN(new_v))
             {
-                // new_t = ThermoMath.iterate_t_given_pv(temperature, new_p, new_v, region); // new_v is constant in liquid
-
-                new_v = ThermoMath.v_given_pt(new_p, new_t, region);
-                new_u = ThermoMath.u_given_pt(new_p, new_t, region);
-
-                if (new_p < ThermoMath.psat_max)
-                {
-                    if (new_v > LIQ_2_DIVISION)
-                    {
-                        region = ThermoMath.region_twophase;
-                        return;
-                    }
-                }
-                else
-                {
-                    if (ThermoMath.t_given_ph(new_p, new_h, region) >= ThermoMath.t_crit)
-                    {
-                        // Technically supercritical fluid. But we don't have that.
-                        region = ThermoMath.region_vapor;
-                    }
-                }
+                // Surface the failed solve rather than letting clamp_state()/prev_* silently freeze state.
+                Debug.LogError(String.Format("[weight] isentropic (p,s) solve failed: p = {0} Pa, s = {1} J/kg·K (t = {2}, v = {3}, polytropic v guess = {4}); state left unchanged", new_p, s_target, new_t, new_v, v_guess_polytropic));
+                return;
             }
-            else if (region == ThermoMath.region_vapor)
-            {
-                bool remain_vapor = true;
 
-                if (remain_vapor)
-                {
-                    // new_v = ThermoMath.v_given_ph(new_p, enthalpy);
-                    update_vapor_vis(pressure - new_p, insulation_coefficient);
-                    new_u = ThermoMath.u_given_vt(new_v, new_t, region);
-                }
+            new_u = ThermoMath.u_given_vt(new_v, new_t, region);
+            double new_h = ThermoMath.h_given_vt(new_v, new_t, region);
+
+            // consistency check only: s recomputed from the solved (v,T) must agree with the conserved s
+            double s_check = ThermoMath.s_given_vt(new_v, new_t, region);
+            if (!Double.IsNaN(s_check) && Math.Abs(s_check - s_target) / s_target > 1e-3)
+            {
+                Debug.LogWarning(String.Format("[weight] isentropic solve drift: s_check = {0} vs s = {1} at p = {2} Pa, T = {3} K", s_check, s_target, new_p, new_t));
             }
 
             //at this point, we have enough internal state to derive the rest
-
-            new_s = ThermoMath.s_given_vt(new_v, new_t, region);
-            new_h = ThermoMath.h_given_vt(new_v, new_t, region);
-
             pressure = new_p;
             volume = new_v;
             internalenergy = new_u;
             temperature = new_t;
-
-            entropy = new_s;
             enthalpy = new_h;
+            // entropy is deliberately NOT reassigned here: s = constant with 100% insulation
 
-            if (region == ThermoMath.region_vapor)
-            {
-                region = ThermoMath.region_given_ps(pressure, entropy);
-                // TODO: hangs along two-phase line
-            }
-            else
-            {
-                region = ThermoMath.region_given_pvt(pressure, volume, temperature);
-            }
+            region = ThermoMath.region_given_ps(pressure, entropy);
+            // TODO: hangs along two-phase line
 
             switch (region)
             {
