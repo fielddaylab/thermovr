@@ -37,6 +37,10 @@ namespace ThermoVR.UI
         [SerializeField] private Image m_fullscreenFill;
         private bool m_fullscreenSelected;
 
+        // Set once the user presses Start; the loading visuals must stay up from here until
+        // the init chain reports LoadProgress == 1.
+        private bool m_startClicked;
+
         [Header("VR layout")]
         [SerializeField] private Vector3 m_vrLoadPos;
         [SerializeField] private Vector3 m_vrLoadScale;
@@ -94,14 +98,38 @@ namespace ThermoVR.UI
                 m_minTimer -= Time.deltaTime;
             }
 
-            if (ModeMgr.Instance.IsDesktop && m_startButton.interactable)
+            // The load group used to be hidden for good as soon as the Start button became
+            // interactable - i.e. it vanished exactly when the user clicked Start and the
+            // real (multi-second) init began, so there was nothing on screen to animate.
+            // Now it is only hidden while we are idle waiting for the Start click, and it
+            // comes back (spinner included) from the click until init reports completion.
+            bool awaiting_start_click = ModeMgr.Instance.IsDesktop && m_startButton.interactable && !m_startClicked;
+            bool init_finished = ModeMgr.Instance.IsDesktop && m_startClicked && ThermoVR.LoadProgressTracker.IsComplete;
+
+            if (awaiting_start_click || init_finished)
             {
-                m_loadGroup.gameObject.SetActive(false);
+                if (m_loadGroup.gameObject.activeSelf)
+                {
+                    m_loadGroup.gameObject.SetActive(false);
+                }
             }
             else
             {
+                if (!m_loadGroup.gameObject.activeSelf)
+                {
+                    m_loadGroup.gameObject.SetActive(true);
+                }
                 m_loadIcon.transform.Rotate(-m_rotation * Time.deltaTime, Space.Self);
             }
+        }
+
+        /// <summary>
+        /// 0..1 fraction of the initial load that has completed. Part 2 binds a fill bar
+        /// to this.
+        /// </summary>
+        public static float LoadProgress
+        {
+            get { return ThermoVR.LoadProgressTracker.Progress; }
         }
 
         public bool MinLoadTimeCompleted()
@@ -128,6 +156,12 @@ namespace ThermoVR.UI
 
         private void HandleStartGameClicked()
         {
+            m_startClicked = true;
+
+            // Make the loading visuals visible immediately rather than waiting for the next
+            // Update(), since the init chain begins as soon as the scene activates.
+            m_loadGroup.gameObject.SetActive(true);
+
             EventMgr.Events.Dispatch(GameEvents.StartGameClicked);
 
             EventMgr.Events.Dispatch(GameEvents.ClickCloseTitleScreen);

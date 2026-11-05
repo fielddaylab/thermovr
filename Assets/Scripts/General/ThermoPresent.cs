@@ -89,13 +89,53 @@ public class ThermoPresent : MonoBehaviour
             return;
         }
 
+        System.Diagnostics.Stopwatch sw_awake = System.Diagnostics.Stopwatch.StartNew();
         ThermoMath.Init();
+        Debug.Log("[LoadTiming] phase=thermomath.init ms=" + sw_awake.ElapsedMilliseconds);
+        sw_awake.Restart();
         state = this.GetComponent<ThermoState>();
         state.reset();
+        Debug.Log("[LoadTiming] phase=awake.state.reset ms=" + sw_awake.ElapsedMilliseconds);
+        sw_awake.Stop();
+    }
+
+    /// <summary>
+    /// 0..1 fraction of the initial load that has completed. Computed from completed work
+    /// units (phases and loop chunks), never from elapsed time, so it is monotonic
+    /// non-decreasing and reaches exactly 1.0f when init finishes.
+    /// </summary>
+    public static float LoadProgress {
+        get { return LoadProgressTracker.Progress; }
+    }
+
+    /// <summary>
+    /// True once the initial load has fully completed (LoadProgress == 1f).
+    /// </summary>
+    public static bool LoadComplete {
+        get { return LoadProgressTracker.IsComplete; }
+    }
+
+    /// <summary>
+    /// Number of LoadProgressTracker work units InitRoutine() will report:
+    /// findObjects, state.reset, visualize_state (one each) + the genMesh chunks.
+    /// </summary>
+    public int CountInitWorkUnits() {
+        return 3 + CountGenMeshWorkUnits();
     }
 
     // Start is called before the first frame update
     public void Init() {
+        IEnumerator routine = InitRoutine();
+        while (routine.MoveNext()) { }
+    }
+
+    /// <summary>
+    /// Init, split into phases that yield to the main loop between each other, so frames
+    /// render (and the loading spinner animates) during the load.
+    /// </summary>
+    public IEnumerator InitRoutine() {
+        System.Diagnostics.Stopwatch sw_phase = System.Diagnostics.Stopwatch.StartNew();
+
         if (debug_write) debug_file = File.CreateText("debug.txt");
 
         //(these are just used to detect editor deltas on a frame boundary)
@@ -111,9 +151,31 @@ public class ThermoPresent : MonoBehaviour
         quality_range = 1;
 
         findObjects();
-        genMesh();
+
+        Debug.Log("[LoadTiming] phase=findObjects ms=" + sw_phase.ElapsedMilliseconds);
+        LoadProgressTracker.Complete();
+        sw_phase.Stop();
+        yield return null;
+
+        IEnumerator mesh_routine = genMeshRoutine();
+        while (mesh_routine.MoveNext()) {
+            yield return mesh_routine.Current;
+        }
+
+        sw_phase.Reset();
+        sw_phase.Start();
         state.reset();
+        Debug.Log("[LoadTiming] phase=state.reset ms=" + sw_phase.ElapsedMilliseconds);
+        LoadProgressTracker.Complete();
+        sw_phase.Stop();
+        yield return null;
+
+        sw_phase.Reset();
+        sw_phase.Start();
         visualize_state();
+        Debug.Log("[LoadTiming] phase=visualize_state ms=" + sw_phase.ElapsedMilliseconds);
+        LoadProgressTracker.Complete();
+        sw_phase.Stop();
 
         HideError();
     }
@@ -321,7 +383,53 @@ public class ThermoPresent : MonoBehaviour
         return state.BundleStateProperties();
     }
 
+    // Chunking granularity for the two expensive genMesh loops. These values only control
+    // how often genMeshRoutine() yields; they do not change what is computed, nor the
+    // iteration order, nor the contents of mesh_positions / mesh_triangles.
+    private const int SURFACE_ROWS_PER_CHUNK = 50;
+    private const int CULL_TRIS_PER_CHUNK = 40000;
+
+    // genMesh work units reported to LoadProgressTracker: dome, stitch_normals, mesh_upload
+    // (one each), plus one per surface-sweep chunk and one per cull chunk.
+    private const int GENMESH_FIXED_UNITS = 3;
+
+    private int SurfaceChunkBudget() {
+        return (samples + SURFACE_ROWS_PER_CHUNK - 1) / SURFACE_ROWS_PER_CHUNK;
+    }
+
+    private int CullChunkBudget() {
+        // Upper bound: the cull loop examines at most one triangle per iteration, and
+        // mesh_triangles only ever shrinks, so the initial triangle count bounds the work.
+        int initial_tris = (samples - 1) * (samples - 1) * 2;
+        return (initial_tris + CULL_TRIS_PER_CHUNK - 1) / CULL_TRIS_PER_CHUNK;
+    }
+
+    /// <summary>
+    /// Number of LoadProgressTracker work units genMeshRoutine() will report.
+    /// </summary>
+    public int CountGenMeshWorkUnits() {
+        return SurfaceChunkBudget() + CullChunkBudget() + GENMESH_FIXED_UNITS;
+    }
+
+    /// <summary>
+    /// Synchronous genMesh, kept for the editor-parameter-change path in
+    /// UpdatePropertyReadouts(). Drains the chunked routine inside a single frame:
+    /// same work, same order, same output.
+    /// </summary>
     void genMesh() {
+        IEnumerator routine = genMeshRoutine();
+        while (routine.MoveNext()) { }
+    }
+
+    /// <summary>
+    /// genMesh, chunked so that the two expensive loops (the samples-row surface sweep and
+    /// the spanning-triangle cull) yield between bounded slices instead of blocking the
+    /// main thread for the whole loop.
+    /// </summary>
+    IEnumerator genMeshRoutine() {
+        System.Diagnostics.Stopwatch sw_mesh = System.Diagnostics.Stopwatch.StartNew();
+        System.Diagnostics.Stopwatch sw_phase = System.Diagnostics.Stopwatch.StartNew();
+
         GameObject old_gm = GameObject.Find("graph_mesh");
         if (old_gm != null) Destroy(old_gm);
 
@@ -332,6 +440,9 @@ public class ThermoPresent : MonoBehaviour
         //gen positions
         Vector3[] pt_positions;
         pt_positions = new Vector3[n_pts];
+        int surface_chunk_budget = SurfaceChunkBudget();
+        int surface_units_reported = 0;
+        int surface_rows_this_chunk = 0;
         for (int y = 0; y < samples; y++) {
             double pt = ((double)y / (samples - 1));
             for (int z = 0; z < samples; z++) {
@@ -347,7 +458,29 @@ public class ThermoPresent : MonoBehaviour
                 int i = samples * y + z;
                 pt_positions[i] = plot(p, v, t);
             }
+
+            // chunk boundary only; the row above was computed in full, in order
+            surface_rows_this_chunk++;
+            if (surface_rows_this_chunk >= SURFACE_ROWS_PER_CHUNK && y + 1 < samples) {
+                surface_rows_this_chunk = 0;
+                if (surface_units_reported < surface_chunk_budget) {
+                    LoadProgressTracker.Complete();
+                    surface_units_reported++;
+                }
+                sw_phase.Stop();
+                yield return null;
+                sw_phase.Start();
+            }
         }
+        if (surface_units_reported < surface_chunk_budget) {
+            LoadProgressTracker.Complete(surface_chunk_budget - surface_units_reported);
+            surface_units_reported = surface_chunk_budget;
+        }
+        Debug.Log("[LoadTiming] phase=surface_sweep ms=" + sw_phase.ElapsedMilliseconds);
+        sw_phase.Stop();
+        yield return null;
+        sw_phase.Reset();
+        sw_phase.Start();
 
         //MESH
         List<Vector3> mesh_normals;
@@ -369,6 +502,10 @@ public class ThermoPresent : MonoBehaviour
                 mesh_triangles.Add(vi + 1); ni++;
             }
         }
+
+        Debug.Log("[LoadTiming] phase=tri_index ms=" + sw_phase.ElapsedMilliseconds);
+        sw_phase.Reset();
+        sw_phase.Start();
 
         int concentrated_samples = samples * 2;
         position_dome_region = mesh_positions.Count;
@@ -402,6 +539,13 @@ public class ThermoPresent : MonoBehaviour
         }
         highest_y = Mathf.Lerp(highest_y, 1f, 0.01f); //extra nudge up
 
+        Debug.Log("[LoadTiming] phase=dome ms=" + sw_phase.ElapsedMilliseconds);
+        LoadProgressTracker.Complete();
+        sw_phase.Stop();
+        yield return null;
+        sw_phase.Reset();
+        sw_phase.Start();
+
         //kill spanning triangles; gather orphans
         //"ladder"/"rung" terminology a bit arbitrary- attempts to keep track of each side of a "zipper" for each seam ("left" seam, "right" seam, each have own ladder/rung)
         List<int> left_orphans = new List<int>();
@@ -412,7 +556,22 @@ public class ThermoPresent : MonoBehaviour
         int right_ladder_i = left_ladder_i + 1;
         Vector3 right_ladder = mesh_positions[right_ladder_i];
         Vector3 right_rung = mesh_positions[right_ladder_i + 2];
+        int cull_chunk_budget = CullChunkBudget();
+        int cull_units_reported = 0;
+        int cull_tris_this_chunk = 0;
         for (var i = 0; i < mesh_triangles.Count; i += 3) {
+            // chunk boundary only; does not touch i, the ladders, or the orphan lists
+            if (cull_tris_this_chunk >= CULL_TRIS_PER_CHUNK) {
+                cull_tris_this_chunk = 0;
+                if (cull_units_reported < cull_chunk_budget) {
+                    LoadProgressTracker.Complete();
+                    cull_units_reported++;
+                }
+                sw_phase.Stop();
+                yield return null;
+                sw_phase.Start();
+            }
+            cull_tris_this_chunk++;
             int ai = mesh_triangles[i + 0];
             int bi = mesh_triangles[i + 1];
             int ci = mesh_triangles[i + 2];
@@ -469,6 +628,16 @@ public class ThermoPresent : MonoBehaviour
                 }
             }
         }
+
+        if (cull_units_reported < cull_chunk_budget) {
+            LoadProgressTracker.Complete(cull_chunk_budget - cull_units_reported);
+            cull_units_reported = cull_chunk_budget;
+        }
+        Debug.Log("[LoadTiming] phase=cull ms=" + sw_phase.ElapsedMilliseconds);
+        sw_phase.Stop();
+        yield return null;
+        sw_phase.Reset();
+        sw_phase.Start();
 
         //sort orphans
         GRAPHPTCMP cmp = new GRAPHPTCMP(mesh_positions);
@@ -626,6 +795,13 @@ public class ThermoPresent : MonoBehaviour
             mesh_normals[ci] = n;
         }
 
+        Debug.Log("[LoadTiming] phase=stitch_normals ms=" + sw_phase.ElapsedMilliseconds);
+        LoadProgressTracker.Complete();
+        sw_phase.Stop();
+        yield return null;
+        sw_phase.Reset();
+        sw_phase.Start();
+
         Mesh mesh = new Mesh();
         mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
         mesh.vertices = mesh_positions.ToArray();
@@ -646,6 +822,11 @@ public class ThermoPresent : MonoBehaviour
         lightable.lit_mat = graph_material_lit;
 
         pd_interactions.AssignMesh(mesh);
+
+        Debug.Log("[LoadTiming] phase=mesh_upload ms=" + sw_phase.ElapsedMilliseconds);
+        Debug.Log("[LoadTiming] verts=" + mesh_positions.Count + " tris=" + (mesh_triangles.Count / 3));
+        Debug.Log("[LoadTiming] phase=genMesh ms=" + sw_mesh.ElapsedMilliseconds);
+        LoadProgressTracker.Complete();
 
 
         /*
