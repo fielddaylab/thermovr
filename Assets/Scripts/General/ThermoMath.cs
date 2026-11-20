@@ -410,6 +410,37 @@ public static class ThermoMath
         }
     }
 
+    //Backward functions on (p,s). These are the isentropic-path solvers: with perfect insulation
+    //entropy is the conserved invariant, so the new state must be solved FROM (p,s) rather than
+    //having s recomputed from a pinned temperature.
+    //NOTE: unlike most wrappers in this file, these return double.NaN on failure rather than a
+    //"neutral" fallback value, so a failed solve surfaces to the caller instead of silently
+    //freezing/corrupting state.
+    public static double t_given_ps(double p, double s, int fallback_region = 0) {
+        try {
+            return IF97.T_psmass(p / 1000000.0, s / 1000.0); //expects:MPa,kJ/kg·K returns K
+        }
+        catch (Exception ex) {
+            Debug.LogError(String.Format("[t_given_ps] Failed solve for p = {0} Pa, s = {1} J/kg·K: {2}", p, s, ex.Message));
+            return double.NaN;
+        }
+    }
+
+    public static double v_given_ps(double p, double s, int fallback_region = 0) {
+        try {
+            double rho = IF97.rhomass_psmass(p / 1000000.0, s / 1000.0); //expects:MPa,kJ/kg·K returns kg/M³
+            if (rho == 0 || Double.IsNaN(rho)) {
+                Debug.LogError(String.Format("[v_given_ps] Non-physical density {0} for p = {1} Pa, s = {2} J/kg·K", rho, p, s));
+                return double.NaN;
+            }
+            return 1.0 / rho;
+        }
+        catch (Exception ex) {
+            Debug.LogError(String.Format("[v_given_ps] Failed solve for p = {0} Pa, s = {1} J/kg·K: {2}", p, s, ex.Message));
+            return double.NaN;
+        }
+    }
+
     public static double tsat_given_p(double p, int fallback_region = 0, bool customHandle = false) {
         try {
             return IF97.Tsat97(p / 1000000.0);

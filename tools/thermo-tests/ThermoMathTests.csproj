@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <IsPackable>false</IsPackable>
+    <AssemblyName>ThermoMathTests</AssemblyName>
+    <RootNamespace>ThermoVR.Tests</RootNamespace>
+    <!-- IAPWS97.cs declares `public static unsafe class IF97` (ported from C++). -->
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <!-- The Unity sources are pulled in by explicit <Compile> items below. -->
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <NoWarn>$(NoWarn);CS0162;CS0168;CS0219;CS0414;CS0649;CS1717</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Test harness sources -->
+    <Compile Include="UnityShim.cs" />
+    <Compile Include="ThermoMathPsTests.cs" />
+
+    <!-- Production sources under test (compiled straight out of Assets/) -->
+    <Compile Include="../../Assets/Scripts/General/IAPWS97.cs" />
+    <Compile Include="../../Assets/Scripts/General/IAPWS95.cs" />
+    <Compile Include="../../Assets/Scripts/General/ThermoMath.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
+  </ItemGroup>
+
+</Project>
